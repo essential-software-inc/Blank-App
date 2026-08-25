@@ -1,6 +1,6 @@
 workflows:
   android-workflow:
-    name: Note Builder — Android
+    name: Builder — Android
     max_build_duration: 60
     instance_type: mac_mini_m2 # linux_x2 is gated behind a paid plan on
       # the free tier; Mac mini M2 works fine for an Android/Gradle build
@@ -56,7 +56,7 @@ workflows:
       - android/app/build/outputs/**/mapping.txt
 
   ios-workflow:
-    name: Note Builder — iOS
+    name: Builder — iOS
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
