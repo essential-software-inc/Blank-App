@@ -1,0 +1,126 @@
+workflows:
+  android-workflow:
+    name: Note Builder — Android
+    max_build_duration: 60
+    instance_type: mac_mini_m2 # linux_x2 is gated behind a paid plan on
+      # the free tier; Mac mini M2 works fine for an Android/Gradle build
+      # and draws from the same free monthly minutes as the iOS workflow
+    environment:
+      node: latest
+      java: 21 # the Capacitor-generated android/ project's Gradle config
+        # requires JDK 21 to compile; the machine's default JDK is older
+      # Uncomment once you have a release keystore set up in Codemagic's
+      # Android code signing UI (Project settings → Code signing identities),
+      # then reference it here to get a signed, publishable build:
+      # android_signing:
+      #   - my_keystore_reference
+      vars:
+        PACKAGE_NAME: "com.essentialsoftware.notebuilder" # must match capacitor.config.ts appId
+        APP_VERSION: "3.2.9" # user-facing version name; bump manually per release.
+          # PROJECT_BUILD_NUMBER is a built-in Codemagic var (no setup needed)
+          # that auto-increments per build and is used below for versionCode.
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Add Android platform (skips if android/ is already committed)
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Generate app icon from assets/logo.png
+        script: |
+          npx capacitor-assets generate --android
+      - name: Sync Capacitor (copies www/ + plugins into android/)
+        script: |
+          npx cap sync android
+      - name: Set Android app version
+        script: |
+          sed -i.bak -E "s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
+          sed -i.bak -E "s/versionCode [0-9]+/versionCode $PROJECT_BUILD_NUMBER/" android/app/build.gradle
+      - name: Bump minSdkVersion to 26 (required by @capacitor/inappbrowser)
+        script: |
+          sed -i.bak -E "s/minSdkVersion = [0-9]+/minSdkVersion = 26/" android/variables.gradle
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build Android debug APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+          # Swap for `./gradlew bundleRelease` once android_signing is
+          # configured above, to produce a Play Store–ready AAB instead.
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+
+  ios-workflow:
+    name: Note Builder — iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: latest
+      xcode: latest
+      cocoapods: default
+      # Uncomment once you have App Store Connect integration set up in
+      # Codemagic (Teams → Integrations → Apple Developer Portal), then
+      # reference it here for automatic signing:
+      # ios_signing:
+      #   distribution_type: app_store
+      #   bundle_identifier: com.essentialsoftware.notebuilder
+      vars:
+        XCODE_WORKSPACE: "App.xcworkspace" # default Capacitor iOS project naming
+        XCODE_SCHEME: "App"
+        APP_VERSION: "3.2.9" # user-facing version name; bump manually per release.
+          # PROJECT_BUILD_NUMBER is a built-in Codemagic var (no setup needed)
+          # that auto-increments per build and is used below for the build number.
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Add iOS platform (skips if ios/ is already committed)
+        script: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+      - name: Generate app icon from assets/logo.png
+        script: |
+          npx capacitor-assets generate --ios
+      - name: Sync Capacitor (copies www/ + plugins into ios/)
+        script: |
+          npx cap sync ios
+      - name: Set iOS app version
+        script: |
+          cd ios/App
+          sed -i.bak -E "s/MARKETING_VERSION = [^;]+;/MARKETING_VERSION = $APP_VERSION;/g" App.xcodeproj/project.pbxproj
+          sed -i.bak -E "s/CURRENT_PROJECT_VERSION = [^;]+;/CURRENT_PROJECT_VERSION = $PROJECT_BUILD_NUMBER;/g" App.xcodeproj/project.pbxproj
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios/App && pod install
+      # Only needed once ios_signing (above) is configured:
+      # - name: Set up provisioning profiles
+      #   script: xcode-project use-profiles
+      - name: Build unsigned .xcarchive (swap for signed export once
+          ios_signing is configured)
+        script: |
+          xcode-project build-ipa \
+            --workspace "$CM_BUILD_DIR/ios/App/$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
