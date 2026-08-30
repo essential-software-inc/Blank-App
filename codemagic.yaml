@@ -12,7 +12,7 @@ workflows:
       android_signing:
         - notebuilderpro_keystore
       vars:
-        PACKAGE_NAME: "com.essentialsoftware.notebuilderpro" # must match capacitor.config.ts appId
+        PACKAGE_NAME: 'com.essentialsoftware.notebuilderpro' # must match capacitor.config.ts appId
         APP_VERSION: "3.2.9" # user-facing version name; bump manually per release.
           # PROJECT_BUILD_NUMBER is a built-in Codemagic var (no setup needed)
           # that auto-increments per build and is used below for versionCode.
