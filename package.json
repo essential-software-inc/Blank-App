@@ -15,7 +15,8 @@
     "@capacitor/core": "latest",
     "@capacitor/filesystem": "latest",
     "@capacitor/inappbrowser": "latest",
-    "@capacitor/share": "latest"
+    "@capacitor/share": "latest",
+    "@revenuecat/purchases-capacitor": "latest"
   },
   "devDependencies": {
     "@capacitor/assets": "latest",
