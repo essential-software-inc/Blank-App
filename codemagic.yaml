@@ -29,16 +29,16 @@ workflows:
           npm install
       - name: Verify appId matches PACKAGE_NAME
         script: |
-          # capacitor_config.ts's appId is what actually becomes the native
+          # capacitor.config.ts's appId is what actually becomes the native
           # applicationId on `cap add android` — PACKAGE_NAME above is just
           # a reference value with nothing enforcing it, so a silent edit or
-          # revert to capacitor_config.ts would otherwise ship under the
+          # revert to capacitor.config.ts would otherwise ship under the
           # wrong package with no warning (this is exactly what happened
           # once already). Fail loudly instead.
-          CONFIG_APP_ID=$(grep -oE "appId:\s*'[^']+'" capacitor_config.ts | sed -E "s/appId:\s*'([^']+)'/\1/")
+          CONFIG_APP_ID=$(grep -oE "appId:\s*'[^']+'" capacitor.config.ts | sed -E "s/appId:\s*'([^']+)'/\1/")
           if [ "$CONFIG_APP_ID" != "$PACKAGE_NAME" ]; then
-            echo "ERROR: capacitor_config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
-            echo "Fix capacitor_config.ts or the PACKAGE_NAME var above before building."
+            echo "ERROR: capacitor.config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
+            echo "Fix capacitor.config.ts or the PACKAGE_NAME var above before building."
             exit 1
           fi
           echo "appId matches PACKAGE_NAME: $CONFIG_APP_ID"
