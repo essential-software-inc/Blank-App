@@ -4,8 +4,8 @@ import type { CapacitorConfig } from '@capacitor/cli';
 // build — it's baked into the native project on `npx cap add` and is
 // painful to rename later. appName is the label under the home-screen icon.
 const config: CapacitorConfig = {
-  appId: 'com.essentialsoftware.notebuilder',
-  appName: 'Note Builder',
+  appId: 'com.essentialsoftware.notebuilderpro',
+  appName: 'Note Builder Pro',
   webDir: 'www',
   server: {
     androidScheme: 'https'
