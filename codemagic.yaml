@@ -9,13 +9,10 @@ workflows:
       node: lts
       java: 21 # the Capacitor-generated android/ project's Gradle config
         # requires JDK 21 to compile; the machine's default JDK is older
-      # Uncomment once you have a release keystore set up in Codemagic's
-      # Android code signing UI (Project settings → Code signing identities),
-      # then reference it here to get a signed, publishable build:
-      # android_signing:
-      #   - my_keystore_reference
+      android_signing:
+        - notebuilderpro_keystore
       vars:
-        PACKAGE_NAME: "com.essentialsoftware.notebuilder" # must match capacitor.config.ts appId
+        PACKAGE_NAME: "com.essentialsoftware.notebuilderpro" # must match capacitor.config.ts appId
         APP_VERSION: "3.2.9" # user-facing version name; bump manually per release.
           # PROJECT_BUILD_NUMBER is a built-in Codemagic var (no setup needed)
           # that auto-increments per build and is used below for versionCode.
@@ -48,15 +45,63 @@ workflows:
       - name: Bump minSdkVersion to 26 (required by @capacitor/inappbrowser)
         script: |
           sed -i.bak -E "s/minSdkVersion = [0-9]+/minSdkVersion = 26/" android/variables.gradle
+      - name: Add release signing config
+        script: |
+          # android/ isn't committed to the repo (see "Add Android platform"
+          # above) — it's regenerated fresh every build by `cap add android`,
+          # so the signingConfigs block has to be injected here each time
+          # rather than committed as a one-off edit to build.gradle.
+          # android_signing (set above) makes Codemagic inject the keystore
+          # file path and its three credentials as env vars on the build
+          # machine: CM_KEYSTORE_PATH, CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS,
+          # CM_KEY_PASSWORD — this just wires those into Gradle.
+          python3 - <<'PY'
+          import re
+
+          path = "android/app/build.gradle"
+          with open(path) as f:
+              content = f.read()
+
+          # 1. Point the existing (unsigned) release build type at a signing
+          #    config we add next. Must run before step 2 below — the fresh
+          #    Capacitor template has exactly one "release {" block (under
+          #    buildTypes) at this point, so this regex can only match that
+          #    one. Doing step 2 first would add a second "release {" (inside
+          #    signingConfigs) ahead of it in the file and this would match
+          #    the wrong one.
+          content = re.sub(
+              r"(release\s*\{)",
+              r"\1\n            signingConfig signingConfigs.release",
+              content,
+              count=1,
+          )
+
+          # 2. Insert the signingConfigs block right before buildTypes {,
+          #    reading the keystore path/credentials Codemagic injected.
+          signing_configs = '''    signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+
+          '''
+          content = content.replace("    buildTypes {", signing_configs + "    buildTypes {", 1)
+
+          with open(path, "w") as f:
+              f.write(content)
+
+          print("Injected release signingConfig into build.gradle")
+          PY
       - name: Set Android SDK location
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
-      - name: Build Android debug APK
+      - name: Build signed Android App Bundle
         script: |
           cd android
-          ./gradlew assembleDebug
-          # Swap for `./gradlew bundleRelease` once android_signing is
-          # configured above, to produce a Play Store–ready AAB instead.
+          ./gradlew bundleRelease
     artifacts:
       - android/app/build/outputs/**/*.apk
       - android/app/build/outputs/**/*.aab
@@ -75,7 +120,7 @@ workflows:
       # reference it here for automatic signing:
       # ios_signing:
       #   distribution_type: app_store
-      #   bundle_identifier: com.essentialsoftware.notebuilder
+      #   bundle_identifier: com.essentialsoftware.notebuilderpro
       vars:
         XCODE_WORKSPACE: "App.xcworkspace" # default Capacitor iOS project naming
         XCODE_SCHEME: "App"
