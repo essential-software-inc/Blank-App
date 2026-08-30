@@ -466,6 +466,12 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
   cursor: pointer
 }
 
+#paywall-dialog .rdlg-body a {
+  color: #3366cc;
+  text-decoration: underline;
+  cursor: pointer
+}
+
 body.night #terms-dialog .rdlg-body a {
   color: #7799ee
 }
@@ -506,12 +512,6 @@ body.pink #terms-dialog .rdlg-body a {
   font-family: inherit
 }
 
-.rdlg-getpro {
-  background: #2e9e56;
-  color: #fff;
-  box-shadow: 0 4px 8px rgba(46, 158, 86, .30), 0 2px 4px rgba(46, 158, 86, .15)
-}
-
 .rdlg-ok {
   background: #e03050;
   border: none;
@@ -539,6 +539,17 @@ body.pink #terms-dialog .rdlg-body a {
 
 .rdlg-ok--blue:disabled {
   background: #3366cc;
+  opacity: .6
+}
+
+.rdlg-getpro {
+  background: #2e9e56;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(46, 158, 86, .30), 0 2px 4px rgba(46, 158, 86, .15)
+}
+
+.rdlg-getpro:disabled {
+  background: #2e9e56;
   opacity: .6
 }
 
@@ -1506,7 +1517,7 @@ body.markup-reader #reader-infobar-btn {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, .55);
-  z-index: 900;
+  z-index: 950;
   align-items: center;
   justify-content: center
 }
@@ -1519,7 +1530,31 @@ body.markup-reader #reader-infobar-btn {
   background: #fff;
   border-radius: 18px;
   padding: 1.3rem 1.2rem 1.1rem;
-  max-width: 288px;
+  max-width: 300px;
+  width: 90%;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, .12), 0 6px 12px rgba(0, 0, 0, .08);
+  font-family: inherit
+}
+
+#free-referral-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 890;
+  align-items: center;
+  justify-content: center
+}
+
+#free-referral-overlay.open {
+  display: flex
+}
+
+#free-referral-dialog {
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.3rem 1.2rem 1.1rem;
+  max-width: 300px;
   width: 90%;
   box-shadow: 0 16px 32px rgba(0, 0, 0, .12), 0 6px 12px rgba(0, 0, 0, .08);
   font-family: inherit
@@ -1626,6 +1661,14 @@ body.night #terms-dialog .rdlg-body a {
   color: #7799ee
 }
 
+body.night #paywall-dialog, body.night #free-referral-dialog {
+  background: #111111
+}
+
+body.night #paywall-dialog .rdlg-body a {
+  color: #7799ee
+}
+
 body.night #privacy-dialog, body.night #cterms-dialog {
   background: #111111;
   border: 1px solid #282828;
@@ -1659,6 +1702,14 @@ body.pink #terms-dialog {
 }
 
 body.pink #terms-dialog .rdlg-body a {
+  color: #c8365e
+}
+
+body.pink #paywall-dialog, body.pink #free-referral-dialog {
+  background: #fff2f7
+}
+
+body.pink #paywall-dialog .rdlg-body a {
   color: #c8365e
 }
 
@@ -2089,7 +2140,7 @@ body.night .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #paywall-dialog {
+body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog {
   background: #111111;
   border: 1px solid #282828;
   border-radius: 18px;
@@ -2411,7 +2462,7 @@ body.pink .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #paywall-dialog {
+body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog {
   background: #fff2f7;
   border: none;
   border-radius: 18px;
@@ -2595,6 +2646,15 @@ body:not(.night):not(.pink) .rdlg-getpro {
   transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)
 }
 
+body:not(.night):not(.pink) .rdlg-getpro:disabled {
+  background-color: #a8d6b8 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  color: #ffffff !important;
+  cursor: default;
+  opacity: 1 !important
+}
+
 body:not(.night):not(.pink) .ebtn-pri,
 body:not(.night):not(.pink) .bkp-btn-pri,
 body:not(.night):not(.pink) .bkp-btn-sec {
@@ -2723,6 +2783,14 @@ body.night .rdlg-getpro {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4)
 }
 
+body.night .rdlg-getpro:disabled {
+  background-color: #1c3a26 !important;
+  color: #5a8a6a !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important
+}
+
 body.night .ebtn-pri {
   background-color: #c8c8c8 !important;
   background-image: none !important;
@@ -2815,6 +2883,14 @@ body.pink .rdlg-getpro {
   color: #ffffff !important;
   border: none !important;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2)
+}
+
+body.pink .rdlg-getpro:disabled {
+  background-color: #cfe8d9 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important
 }
 
 body.pink .ebtn-pri {
@@ -3326,12 +3402,24 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 
 <div id="paywall-overlay">
   <div id="paywall-dialog">
-    <div class="rdlg-title">Free version</div>
-    <div class="rdlg-body">You're using the free version of the app. Kindly install Note Builder Pro from Play Store for unlimited access.</div>
+    <div class="rdlg-title">Unlock Note Builder Pro</div>
+    <div class="rdlg-body">You're in trial mode &mdash; notes can't be saved until Pro is unlocked. Already bought it? <a onclick="nbRestorePurchases()">Restore purchases</a>. Want to try first instead? <a onclick="nbOpenFreeAppOnPlayStore()">Get the free version</a>.</div>
     <div class="rdlg-btns">
-      <button class="rdlg-cancel rdlg-getpro" onclick="nbOpenProOnPlayStore()">Get Pro</button>
+      <button class="rdlg-cancel rdlg-getpro" id="paywall-buy-btn" onclick="nbPurchasePro()">Buy Pro</button>
       <button class="rdlg-ok rdlg-ok--blue" onclick="closePaywallDialog()">OK</button>
     </div>
+  </div>
+</div>
+
+<div id="free-referral-overlay">
+  <div id="free-referral-dialog">
+    <div class="rdlg-title">Want to try before you buy?</div>
+    <div class="rdlg-body">Note Builder Pro requires a purchase to save notes. If you'd rather try things out first, Note Builder (Free) lets you save a few notes at no cost.</div>
+    <div class="rdlg-btns">
+      <button class="rdlg-cancel rdlg-getpro" onclick="nbOpenFreeAppOnPlayStore()">Get free version</button>
+      <button class="rdlg-ok rdlg-ok--blue" onclick="closeFreeReferralDialog()">Continue with Pro</button>
+    </div>
+
   </div>
 </div>
 
@@ -9634,60 +9722,7 @@ function closeTermsDialog() {
 function acceptTerms() {
   try { localStorage.setItem('termsAccepted', '1'); } catch (e) {}
   closeTermsDialog();
-}
-// Free-tier note cap. Checked at every place a new note could be added —
-// starting a fresh canvas, saving a brand-new note, and restoring notes
-// from a backup file — never at edits to a note that already exists, since
-// those don't grow the count. NB_FREE_NOTE_LIMIT names the same number
-// the paywall dialog's copy assumes; keep both in sync if it ever changes.
-const NB_FREE_NOTE_LIMIT = 5;
-function nbAtFreeNoteLimit() {
-  return nbLoadNotes().length >= NB_FREE_NOTE_LIMIT;
-}
-function openPaywallDialog() {
-  document.getElementById('paywall-overlay').classList.add('open');
-  lockScroll();
-}
-function closePaywallDialog() {
-  document.getElementById('paywall-overlay').classList.remove('open');
-  unlockScroll();
-}
-// PACKAGE_NAME from codemagic.yaml ("com.essentialsoftware.notebuilder")
-// with "pro" appended — must match Pro's actual applicationId/appId once
-// that build exists, or this points at a listing that 404s.
-const NB_PRO_PACKAGE_ID = 'com.essentialsoftware.notebuilderpro';
-function nbOpenProOnPlayStore() {
-  const httpsUrl = 'https://play.google.com/store/apps/details?id=' + NB_PRO_PACKAGE_ID;
-  // Inside the compiled Capacitor app, market:// isn't a scheme the
-  // WebView itself knows how to render, so its default WebViewClient
-  // falls back to handing it off to Android as an ACTION_VIEW intent —
-  // which the Play Store app registers itself as the handler for — and
-  // launches it directly rather than ever trying (and failing) to load
-  // it as a page. That handoff is default WebView/Capacitor behavior,
-  // so no extra plugin or dependency is needed here, unlike the
-  // Filesystem+Share pattern the backup export path uses above.
-  // Outside Capacitor (e.g. testing this file directly in a desktop
-  // browser) market:// has no handler and would just silently no-op,
-  // so open the ordinary web listing in a new tab instead.
-  if (window.Capacitor) {
-    window.location.href = 'market://details?id=' + NB_PRO_PACKAGE_ID;
-  } else {
-    window.open(httpsUrl, '_blank');
-  }
-}
-// Restore is Pro-only outright (see nbImportNotes below for why that's
-// not conditional on NB_FREE_NOTE_LIMIT). Wired to the restore input's
-// own 'click' — not a wrapper button — because .bkp-btn-sec's file
-// input sits transparently over the whole button (see the CSS) and
-// would otherwise reach the OS the instant it's tapped, before any of
-// this code gets a chance to run. preventDefault() on 'click' is what
-// actually stops that native picker from opening; returning false here
-// is redundant with it but kept since this is wired as an inline
-// on-attribute handler.
-function nbGateRestoreBackup(e) {
-  e.preventDefault();
-  openPaywallDialog();
-  return false;
+  nbMaybeShowFreeReferral();
 }
 function openConsumerTerms() {
   document.getElementById('cterms-overlay').classList.add('open');
@@ -9721,7 +9756,9 @@ function hideSplash() {
   // frame in between.
   try {
     if (!localStorage.getItem('termsAccepted')) openTermsDialog();
+    else nbMaybeShowFreeReferral();
   } catch (e) {}
+  nbInitRevenueCat();
   unlockScroll();
   // The boot IIFE's `!important` html/body background-color rule outranks
   // any inline style this function could set, so it — not the plain
@@ -9765,6 +9802,194 @@ function hideSplash() {
   _setSplashBarPct(100);
   setTimeout(hideSplash, 200);
 })();
+
+/* ===================== Pro unlock (RevenueCat) =====================
+   This build is the freemium Pro app: it installs free, but saving a
+   note — or restoring one from a backup file, see nbGateRestoreBackup
+   near nbImportNotes below — is gated behind a purchase. Everything
+   else (drafting on the canvas, browsing, themes) stays open so the
+   editor itself can be tried before buying.
+
+   NB_RC_API_KEY / NB_RC_ENTITLEMENT_ID are placeholders until a
+   RevenueCat project exists for this app — fill them in from the
+   RevenueCat dashboard (Project settings > API keys for the public
+   Android SDK key; the entitlement id from Entitlements) once it's
+   set up. Nothing below needs to change when they are, just the
+   values themselves.
+*/
+const NB_RC_API_KEY = 'REPLACE_WITH_REVENUECAT_PUBLIC_ANDROID_SDK_KEY';
+const NB_RC_ENTITLEMENT_ID = 'pro';
+// Cached locally so the app doesn't need a network round-trip on every
+// save attempt — refreshed at boot (nbInitRevenueCat) and right after
+// a purchase or restore actually completes.
+const NB_PRO_UNLOCKED_KEY = 'nb_proUnlocked';
+function nbIsProUnlocked() {
+  try { return localStorage.getItem(NB_PRO_UNLOCKED_KEY) === '1'; } catch (e) { return false; }
+}
+function _nbSetProUnlocked(unlocked) {
+  try { localStorage.setItem(NB_PRO_UNLOCKED_KEY, unlocked ? '1' : '0'); } catch (e) {}
+}
+// The RevenueCat Capacitor plugin (@revenuecat/purchases-capacitor)
+// registers itself as Capacitor.Plugins.Purchases once installed on the
+// native side — same window.Capacitor.Plugins pattern already used for
+// Filesystem/Share (see _nbExportViaCapacitor) and for the Play Store
+// deep link below, so nothing new to wire up here beyond calling it.
+function _nbRC() {
+  return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+}
+let _nbRCConfigured = false;
+let _nbRCInitPromise = null;
+async function nbInitRevenueCat() {
+  const RC = _nbRC();
+  if (!RC || _nbRCConfigured) return;
+  // Dedupe: boot fires this once, but nbPurchasePro/nbRestorePurchases
+  // also call it defensively in case someone taps Buy/Restore before
+  // the boot-time call has finished — without this, both would race
+  // RC.configure() concurrently.
+  if (_nbRCInitPromise) return _nbRCInitPromise;
+  _nbRCInitPromise = (async () => {
+    try {
+      await RC.configure({ apiKey: NB_RC_API_KEY });
+      _nbRCConfigured = true;
+      await nbRefreshProStatus();
+    } catch (e) {
+      _nbLog('RevenueCat configure failed', e);
+    } finally {
+      _nbRCInitPromise = null;
+    }
+  })();
+  return _nbRCInitPromise;
+}
+async function nbRefreshProStatus() {
+  const RC = _nbRC();
+  if (!RC) return nbIsProUnlocked();
+  try {
+    const { customerInfo } = await RC.getCustomerInfo();
+    const active = !!(customerInfo && customerInfo.entitlements && customerInfo.entitlements.active && customerInfo.entitlements.active[NB_RC_ENTITLEMENT_ID]);
+    _nbSetProUnlocked(active);
+    return active;
+  } catch (e) {
+    _nbLog('RevenueCat getCustomerInfo failed', e);
+    return nbIsProUnlocked();
+  }
+}
+function openPaywallDialog() {
+  document.getElementById('paywall-overlay').classList.add('open');
+  lockScroll();
+}
+function closePaywallDialog() {
+  document.getElementById('paywall-overlay').classList.remove('open');
+  unlockScroll();
+}
+let _nbPurchaseInFlight = false;
+async function nbPurchasePro() {
+  const RC = _nbRC();
+  const btn = document.getElementById('paywall-buy-btn');
+  if (!RC) {
+    // Not running inside the compiled Capacitor app (e.g. this file
+    // opened directly in a desktop browser) — there's no native billing
+    // to drive here.
+    showToast('Purchases only work in the installed app');
+    return;
+  }
+  if (_nbPurchaseInFlight) return; // ignore a double-tap while one's already running
+  _nbPurchaseInFlight = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
+  try {
+    // Defensive: the boot-time call to this is fire-and-forget, so if
+    // someone taps Buy Pro before it's finished, this ensures we're
+    // actually configured before touching the SDK below — otherwise
+    // getOfferings()/purchasePackage() throw a native "not configured"
+    // error that would misleadingly surface as a failed purchase.
+    await nbInitRevenueCat();
+    const offerings = await RC.getOfferings();
+    const pkg = offerings && offerings.current && offerings.current.availablePackages && offerings.current.availablePackages[0];
+    if (!pkg) throw new Error('no RevenueCat package configured for the current offering');
+    const { customerInfo } = await RC.purchasePackage({ packageToPurchase: pkg });
+    const active = !!(customerInfo && customerInfo.entitlements && customerInfo.entitlements.active && customerInfo.entitlements.active[NB_RC_ENTITLEMENT_ID]);
+    _nbSetProUnlocked(active);
+    if (active) {
+      closePaywallDialog();
+      showToast('Pro unlocked — thanks!');
+    } else {
+      showToast('Purchase did not complete');
+    }
+  } catch (e) {
+    if (e && e.userCancelled) {
+      // silent — they backed out of the purchase sheet themselves
+    } else {
+      showToast('Purchase failed. Please try again.');
+      _nbLog('RevenueCat purchase failed', e);
+    }
+  } finally {
+    _nbPurchaseInFlight = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Buy Pro'; }
+  }
+}
+let _nbRestoreInFlight = false;
+async function nbRestorePurchases() {
+  const RC = _nbRC();
+  if (!RC) { showToast('Restore only works in the installed app'); return; }
+  if (_nbRestoreInFlight) return;
+  _nbRestoreInFlight = true;
+  try {
+    await nbInitRevenueCat();
+    const { customerInfo } = await RC.restorePurchases();
+    const active = !!(customerInfo && customerInfo.entitlements && customerInfo.entitlements.active && customerInfo.entitlements.active[NB_RC_ENTITLEMENT_ID]);
+    _nbSetProUnlocked(active);
+    if (active) { closePaywallDialog(); showToast('Pro restored'); }
+    else showToast('No previous purchase found for this account');
+  } catch (e) {
+    showToast('Restore failed. Please try again.');
+    _nbLog('RevenueCat restore failed', e);
+  } finally {
+    _nbRestoreInFlight = false;
+  }
+}
+// PACKAGE_NAME the Free app actually ships under — must match its real
+// applicationId/appId on Play Store or this link 404s.
+const NB_FREE_PACKAGE_ID = 'com.essentialsoftware.notebuilder';
+function nbOpenFreeAppOnPlayStore() {
+  const httpsUrl = 'https://play.google.com/store/apps/details?id=' + NB_FREE_PACKAGE_ID;
+  // Same market:// -> Play Store app handoff used elsewhere for native
+  // deep links (see the Pro listing link this replaces in the old
+  // Free-app build) — falls back to the ordinary web listing outside
+  // Capacitor (e.g. testing this file in a desktop browser).
+  if (window.Capacitor) {
+    window.location.href = 'market://details?id=' + NB_FREE_PACKAGE_ID;
+  } else {
+    window.open(httpsUrl, '_blank');
+  }
+}
+function closeFreeReferralDialog() {
+  document.getElementById('free-referral-overlay').classList.remove('open');
+  unlockScroll();
+}
+// Shown once, ever, on first launch — after Terms (if that hasn't been
+// accepted yet, see hideSplash) so the two dialogs never fight over
+// scroll-lock/focus at the same moment.
+function nbMaybeShowFreeReferral() {
+  let shown;
+  try { shown = localStorage.getItem('nb_freeReferralShown'); } catch (e) { shown = null; }
+  if (shown) return;
+  try { localStorage.setItem('nb_freeReferralShown', '1'); } catch (e) {}
+  document.getElementById('free-referral-overlay').classList.add('open');
+  lockScroll();
+}
+// Restore-from-backup writes notes directly (see nbImportNotes) without
+// ever routing through nbConfirmSave, so it needs its own gate — same
+// shape as the old Free app's note-count gate on this same input, just
+// keyed on purchase status instead of a note-count cap. Wired to the
+// input's own 'click' (see .bkp-btn-sec input[type="file"]: it's the
+// actual clickable element, an invisible opacity:0 layer sitting on
+// top of the visible "Restore from Device" label) so the file picker
+// gets stopped before it opens, not after.
+function nbGateRestoreBackup(e) {
+  if (nbIsProUnlocked()) return true;
+  e.preventDefault();
+  openPaywallDialog();
+  return false;
+}
 
 /* ===================== Notes data layer (stub — filled in on the Notes/Save build stage) ===================== */
 const NB_NOTES_KEY = 'nb_notes_v1';
@@ -9908,16 +10133,6 @@ function _nbDownloadBackupBlob(blob, fileName, reason) {
 }
 function nbImportNotes(e) {
   const file = e.target.files[0]; if (!file) return;
-  // Belt-and-suspenders: the click gate on the input itself (see
-  // nbGateRestoreBackup) is what normally stops the file picker from
-  // ever opening, so this is only reached if something bypasses that —
-  // still outright-blocked, not conditional on NB_FREE_NOTE_LIMIT (see
-  // nbGateRestoreBackup for why). Clearing the input here (as if
-  // nothing was picked) means re-selecting the same file later works
-  // normally if the person upgrades in between.
-  e.target.value = '';
-  openPaywallDialog();
-  return;
   const reader = new FileReader();
   reader.onload = async function (ev) {
     try {
@@ -10929,11 +11144,6 @@ function nbCreateNew() {
   // take you TO the Editor, never reset what's already open there.
   const screen = document.getElementById('screen-create');
   if (screen && screen.classList.contains('active')) return;
-  // Only reached when + is tapped from somewhere other than the Editor
-  // itself (see the early return above), which per the comment above is
-  // always "start a new note" — exactly the case the free-tier cap needs
-  // to block once five notes already exist.
-  if (nbAtFreeNoteLimit()) { openPaywallDialog(); return; }
   if (_nbGetEditingId()) {
     _nbSetEditingId(null);
     nbGoScreen('create');
@@ -11122,6 +11332,21 @@ function nbCloseSaveDialog() {
   unlockScroll();
 }
 function nbConfirmSave() {
+  // Every save routes through here (new note, update, and the
+  // details-only edit flow alike) — gate all of them on the purchase,
+  // not just new notes, since nothing could have gotten onto disk
+  // pre-purchase for an "existing" note to even exist in the first
+  // place (restore-from-backup, the other way a note could appear
+  // without this dialog, has its own gate — see nbGateRestoreBackup).
+  if (!nbIsProUnlocked()) {
+    // Layer the paywall on top of the save dialog rather than closing
+    // it (paywall-overlay's z-index sits above edit-overlay's) — if we
+    // closed it here, buying Pro and tapping Save again would reopen a
+    // blank dialog via nbOpenSaveDialog and silently drop whatever
+    // title/description/tags were already typed.
+    openPaywallDialog();
+    return;
+  }
   const title = document.getElementById('nb-save-title').value.trim() || 'Untitled note';
   const desc = document.getElementById('nb-save-desc').value.trim();
   const category = document.getElementById('nb-save-cat').value.trim();
@@ -11146,15 +11371,6 @@ function nbConfirmSave() {
   }
 
   const { draftId, isExisting, note: existingNote, savedFragment } = _nbCurrentBase();
-  // Free-tier cap only ever blocks growing the notes list — updating a
-  // note that already exists (isExisting) never changes the count, so
-  // it's exempt even once the limit was hit with this exact note already
-  // counted among the five.
-  if (!isExisting && nbAtFreeNoteLimit()) {
-    nbCloseSaveDialog();
-    openPaywallDialog();
-    return;
-  }
   const uiState = _nbLoadDraftUiState(draftId);
   // Save ONLY the canvas content fragment — never the full spliced
   // document (style block, toolbar chrome, FAB buttons). If nothing was
