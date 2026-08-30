@@ -35,7 +35,7 @@ workflows:
           # revert to capacitor.config.ts would otherwise ship under the
           # wrong package with no warning (this is exactly what happened
           # once already). Fail loudly instead.
-          CONFIG_APP_ID=$(grep -oE "appId:\s*'[^']+'" capacitor.config.ts | sed -E "s/appId:\s*'([^']+)'/\1/")
+          CONFIG_APP_ID=$(grep -oE "appId:[[:space:]]*'[^']+'" capacitor.config.ts | sed -E "s/appId:[[:space:]]*'([^']+)'/\1/")
           if [ "$CONFIG_APP_ID" != "$PACKAGE_NAME" ]; then
             echo "ERROR: capacitor.config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
             echo "Fix capacitor.config.ts or the PACKAGE_NAME var above before building."
