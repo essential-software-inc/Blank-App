@@ -43,7 +43,19 @@ html {
      transparent) so the first paint is already dark, not white. */
   background: #1a0f08;
   
-  overflow-anchor: none
+  overflow-anchor: none;
+  /* This is an installed app shell, not a browser tab — a system
+     scrollbar has no business being visible anywhere in it, and is most
+     jarring when it shows up over the splash screen (before lockScroll()
+     has had a chance to run). Note-editor iframes already get this same
+     treatment (see _noScrollbarCss); the outer document just never did. */
+  scrollbar-width: none;
+  -ms-overflow-style: none
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none
 }
 
 body {
