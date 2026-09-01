@@ -1,6 +1,6 @@
 workflows:
-  android-workflow:
-    name: Note Builder — Android
+  android-pro-workflow:
+    name: Note Builder Pro — Android
     max_build_duration: 60
     instance_type: mac_mini_m2 # linux_x2 is gated behind a paid plan on
       # the free tier; Mac mini M2 works fine for an Android/Gradle build
@@ -12,7 +12,7 @@ workflows:
       android_signing:
         - notebuilderpro_keystore
       vars:
-        PACKAGE_NAME: "com.essentialsoftware.notebuilderpro" # must match capacitor.config.ts appId
+        PACKAGE_NAME: "com.essentialsoftware.notebuilderpro" # must match capacitor.config.pro.ts appId
         APP_VERSION: "3.2.9" # user-facing version name; bump manually per release.
           # PROJECT_BUILD_NUMBER is a built-in Codemagic var (no setup needed)
           # that auto-increments per build and is used below for versionCode.
@@ -24,6 +24,17 @@ workflows:
           include: true
           source: true
     scripts:
+      - name: Select Pro app source files
+        script: |
+          # Capacitor only ever reads one file, capacitor.config.ts, at the
+          # repo root — since this repo builds two different apps (Free and
+          # Pro) from two different HTML files, each workflow copies its own
+          # dedicated config + HTML source into place before anything else
+          # runs. Replaces the old manual "rename before pushing" step —
+          # nothing to do by hand anymore, each workflow selects its own.
+          cp capacitor.config.pro.ts capacitor.config.ts
+          mkdir -p www
+          cp note-builder-pro.html www/index.html
       - name: Install npm dependencies
         script: |
           npm install
@@ -32,13 +43,13 @@ workflows:
           # capacitor.config.ts's appId is what actually becomes the native
           # applicationId on `cap add android` — PACKAGE_NAME above is just
           # a reference value with nothing enforcing it, so a silent edit or
-          # revert to capacitor.config.ts would otherwise ship under the
+          # revert to capacitor.config.pro.ts would otherwise ship under the
           # wrong package with no warning (this is exactly what happened
           # once already). Fail loudly instead.
-          CONFIG_APP_ID=$(grep -oE "appId:[[:space:]]*'[^']+'" capacitor.config.ts | sed -E "s/appId:[[:space:]]*'([^']+)'/\1/")
+          CONFIG_APP_ID=$(grep -oE "appId:\s*'[^']+'" capacitor.config.ts | sed -E "s/appId:\s*'([^']+)'/\1/")
           if [ "$CONFIG_APP_ID" != "$PACKAGE_NAME" ]; then
             echo "ERROR: capacitor.config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
-            echo "Fix capacitor.config.ts or the PACKAGE_NAME var above before building."
+            echo "Fix capacitor.config.pro.ts or the PACKAGE_NAME var above before building."
             exit 1
           fi
           echo "appId matches PACKAGE_NAME: $CONFIG_APP_ID"
@@ -122,6 +133,108 @@ workflows:
       - android/app/build/outputs/**/*.aab
       - android/app/build/outputs/**/mapping.txt
 
+  android-free-workflow:
+    name: Note Builder Free — Android
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: lts
+      java: 21
+      android_signing:
+        - notebuilderfree_keystore
+      vars:
+        PACKAGE_NAME: "com.essentialsoftware.notebuilder" # must match capacitor.config.free.ts appId
+        APP_VERSION: "3.2.9" # keep in sync with the Pro workflow's version manually;
+          # the two apps aren't required to share a version number, but doing
+          # so avoids confusion if you ever compare release notes side by side.
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+    scripts:
+      - name: Select Free app source files
+        script: |
+          cp capacitor.config.free.ts capacitor.config.ts
+          mkdir -p www
+          cp note-builder-free.html www/index.html
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Verify appId matches PACKAGE_NAME
+        script: |
+          CONFIG_APP_ID=$(grep -oE "appId:\s*'[^']+'" capacitor.config.ts | sed -E "s/appId:\s*'([^']+)'/\1/")
+          if [ "$CONFIG_APP_ID" != "$PACKAGE_NAME" ]; then
+            echo "ERROR: capacitor.config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
+            echo "Fix capacitor.config.free.ts or the PACKAGE_NAME var above before building."
+            exit 1
+          fi
+          echo "appId matches PACKAGE_NAME: $CONFIG_APP_ID"
+      - name: Add Android platform (skips if android/ is already committed)
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Generate app icon from assets/logo.png
+        script: |
+          npx capacitor-assets generate --android
+      - name: Sync Capacitor (copies www/ + plugins into android/)
+        script: |
+          npx cap sync android
+      - name: Set Android app version
+        script: |
+          sed -i.bak -E "s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
+          sed -i.bak -E "s/versionCode [0-9]+/versionCode $PROJECT_BUILD_NUMBER/" android/app/build.gradle
+      - name: Bump minSdkVersion to 26 (required by @capacitor/inappbrowser)
+        script: |
+          sed -i.bak -E "s/minSdkVersion = [0-9]+/minSdkVersion = 26/" android/variables.gradle
+      - name: Add release signing config
+        script: |
+          python3 - <<'PY'
+          import re
+
+          path = "android/app/build.gradle"
+          with open(path) as f:
+              content = f.read()
+
+          content = re.sub(
+              r"(release\s*\{)",
+              r"\1\n            signingConfig signingConfigs.release",
+              content,
+              count=1,
+          )
+
+          signing_configs = '''    signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+
+          '''
+          content = content.replace("    buildTypes {", signing_configs + "    buildTypes {", 1)
+
+          with open(path, "w") as f:
+              f.write(content)
+
+          print("Injected release signingConfig into build.gradle")
+          PY
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build signed Android App Bundle
+        script: |
+          cd android
+          ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+
   ios-workflow:
     name: Note Builder — iOS
     max_build_duration: 60
@@ -142,6 +255,9 @@ workflows:
         APP_VERSION: "3.2.9" # user-facing version name; bump manually per release.
           # PROJECT_BUILD_NUMBER is a built-in Codemagic var (no setup needed)
           # that auto-increments per build and is used below for the build number.
+        # NOTE: this workflow still only builds the Pro app's HTML/config —
+        # it hasn't been split into Pro/Free variants the way the Android
+        # workflows just were. Say the word if you want that mirrored here.
     triggering:
       events:
         - push
@@ -150,6 +266,11 @@ workflows:
           include: true
           source: true
     scripts:
+      - name: Select Pro app source files
+        script: |
+          cp capacitor.config.pro.ts capacitor.config.ts
+          mkdir -p www
+          cp note-builder-pro.html www/index.html
       - name: Install npm dependencies
         script: |
           npm install
