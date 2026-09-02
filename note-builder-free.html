@@ -2994,13 +2994,13 @@ body.backup-transparent:not(.night):not(.pink) #backup-overlay {
 .nb-screen { display: none; flex: 1; min-height: calc(100dvh - 110px); }
 .nb-screen.active { display: block; }
 
-#screen-notes { padding-bottom: 5.5rem; }
+#screen-notes { padding-bottom: 5.5rem; min-height: 0; }
 
 .nb-empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 3.5rem 1.5rem; color: #8a8f98; gap: .6rem;
+  text-align: center; padding: 1.75rem 1.5rem; color: #8a8f98; gap: .4rem;
 }
-.nb-empty svg { opacity: .35; margin-bottom: .3rem; }
+.nb-empty svg { opacity: .35; margin-bottom: .15rem; }
 .nb-empty-title { font-size: .95rem; font-weight: 600; color: #54595d; }
 .nb-empty-sub { font-size: .82rem; max-width: 260px; line-height: 1.5; }
 body.night .nb-empty-title { color: #ccc; }

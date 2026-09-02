@@ -58,6 +58,47 @@ workflows:
           if [ ! -d "android" ]; then
             npx cap add android
           fi
+      - name: Disable native WebView scrollbar
+        script: |
+          # The scrollbar flash on splash load is Android's own transient
+          # overlay scroll indicator, drawn by the WebView's native View
+          # chrome — it shows on any scrollable-capable WebView the first
+          # time it lays out content, regardless of page CSS. Hiding it
+          # with ::-webkit-scrollbar or overflow:hidden on html/body does
+          # nothing, because it isn't a CSS-rendered scrollbar at all.
+          #
+          # This has to be disabled at the WebView's own construction —
+          # and MainActivity.java is the WRONG file for that: Capacitor
+          # doesn't use a plain android.webkit.WebView, it uses its own
+          # CapacitorWebView subclass, and MainActivity never touches the
+          # WebView until after that subclass's constructor has already
+          # run, so setting it from MainActivity's onCreate() is too late
+          # to have ever worked. CapacitorWebView.java itself isn't part
+          # of the android/ project at all — Gradle pulls it in as a
+          # local project straight out of node_modules
+          # (android/capacitor.settings.gradle points
+          # ':capacitor-android' at ../node_modules/@capacitor/android/capacitor),
+          # so that's the copy that actually needs patching, and it has to
+          # happen after npm install regenerates node_modules each build.
+          WEBVIEW_SRC="node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/CapacitorWebView.java"
+          python3 - "$WEBVIEW_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
+          new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: CapacitorWebView.java didn't match the expected "
+                  "constructor shape - the installed @capacitor/android "
+                  "version may have changed it. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled native WebView scrollbar in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
@@ -177,6 +218,47 @@ workflows:
           if [ ! -d "android" ]; then
             npx cap add android
           fi
+      - name: Disable native WebView scrollbar
+        script: |
+          # The scrollbar flash on splash load is Android's own transient
+          # overlay scroll indicator, drawn by the WebView's native View
+          # chrome — it shows on any scrollable-capable WebView the first
+          # time it lays out content, regardless of page CSS. Hiding it
+          # with ::-webkit-scrollbar or overflow:hidden on html/body does
+          # nothing, because it isn't a CSS-rendered scrollbar at all.
+          #
+          # This has to be disabled at the WebView's own construction —
+          # and MainActivity.java is the WRONG file for that: Capacitor
+          # doesn't use a plain android.webkit.WebView, it uses its own
+          # CapacitorWebView subclass, and MainActivity never touches the
+          # WebView until after that subclass's constructor has already
+          # run, so setting it from MainActivity's onCreate() is too late
+          # to have ever worked. CapacitorWebView.java itself isn't part
+          # of the android/ project at all — Gradle pulls it in as a
+          # local project straight out of node_modules
+          # (android/capacitor.settings.gradle points
+          # ':capacitor-android' at ../node_modules/@capacitor/android/capacitor),
+          # so that's the copy that actually needs patching, and it has to
+          # happen after npm install regenerates node_modules each build.
+          WEBVIEW_SRC="node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/CapacitorWebView.java"
+          python3 - "$WEBVIEW_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
+          new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: CapacitorWebView.java didn't match the expected "
+                  "constructor shape - the installed @capacitor/android "
+                  "version may have changed it. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled native WebView scrollbar in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
