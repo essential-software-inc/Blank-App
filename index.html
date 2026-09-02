@@ -2939,13 +2939,13 @@ body.backup-transparent:not(.night):not(.pink) #backup-overlay {
 .nb-screen { display: none; flex: 1; min-height: calc(100dvh - 110px); }
 .nb-screen.active { display: block; }
 
-#screen-notes { padding-bottom: 5.5rem; }
+#screen-notes { padding-bottom: 5.5rem; min-height: 0; }
 
 .nb-empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 3.5rem 1.5rem; color: #8a8f98; gap: .6rem;
+  text-align: center; padding: 1.75rem 1.5rem; color: #8a8f98; gap: .4rem;
 }
-.nb-empty svg { opacity: .35; margin-bottom: .3rem; }
+.nb-empty svg { opacity: .35; margin-bottom: .15rem; }
 .nb-empty-title { font-size: .95rem; font-weight: 600; color: #54595d; }
 .nb-empty-sub { font-size: .82rem; max-width: 260px; line-height: 1.5; }
 body.night .nb-empty-title { color: #ccc; }
@@ -3036,6 +3036,16 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 </head>
 <body>
 <script>
+// Locks scroll before any layout happens, so the WebView never sees a
+// scrollable page on first paint — this is what was causing the native
+// scrollbar flash. Mirrors lockScroll()'s own bookkeeping (dataset key +
+// overflow:hidden) so that when bootSplash() later calls the real
+// lockScroll(), its guard (dataset.lockScrollY === undefined) sees this
+// already applied and no-ops instead of double-locking, and hideSplash()'s
+// eventual unlockScroll() call restores things correctly either way.
+document.documentElement.style.overflow = 'hidden';
+document.body.dataset.lockScrollY = window.scrollY;
+
 // Blocking and placed before any visible markup (including the splash
 // screen right below) on purpose: this needs to land before first paint,
 // not just "early" in the normal script. The real theme setup
@@ -3288,12 +3298,12 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 22 August 2026</em></p>
+      <p><em>Effective 1 September 2026</em></p>
       <p><strong>Note Builder</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. None of this is transmitted to Essential Software.</p>
       <h3>External images &amp; embeds</h3>
-      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube embeds load directly from YouTube. Essential Software has no involvement with these third-party hosts.</p>
+      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube embeds load directly from YouTube, and Instagram post embeds load directly from Instagram. Essential Software has no involvement with these third-party hosts.</p>
       <h3>Linked pages</h3>
       <p>Tapping a link in a page opens it directly in an in-app viewer, which loads the linked site directly from its own server. Essential Software does not see or store which links you open.</p>
       <h3>Analytics</h3>
