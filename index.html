@@ -10245,6 +10245,8 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
     #nb-report-submit:disabled{opacity:.7;cursor:default;transform:none}
     @keyframes nbReportIn{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes nbReportFade{from{opacity:0}to{opacity:1}}
+    .nb-report-spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:currentColor;border-radius:50%;vertical-align:-2px;margin-right:6px;animation:nbReportSpin .6s linear infinite}
+    @keyframes nbReportSpin{to{transform:rotate(360deg)}}
   </style>
   <script>
   (function(){
@@ -10433,8 +10435,11 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
     // a bubbling listener on the overlay alone.
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closeDialog(); });
     submitBtn.addEventListener('click', function(){
+      // Matches the main app's _pubSetBtnLoading pattern (spinner + label)
+      // rather than just going disabled, which reads as unresponsive.
+      submitBtn.dataset.origLabel = submitBtn.textContent;
+      submitBtn.innerHTML = '<span class="nb-report-spinner"></span>Submitting…';
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting…';
       msgEl.style.color = '#a83232';
       msgEl.textContent = '';
       fetch('/report/${esc(publishSlug)}', {
@@ -10454,7 +10459,8 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
         msgEl.style.color = '#a83232';
         msgEl.textContent = 'Could not send report — please try again.';
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit';
+        submitBtn.textContent = submitBtn.dataset.origLabel || 'Submit';
+        delete submitBtn.dataset.origLabel;
       });
     });
   })();
@@ -11097,8 +11103,7 @@ function nbDeleteNote(id) {
   ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
   confirmBtn.onclick = async () => {
     if (note && note.publishedSlug && _pubOfflineGuard()) return;
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Deleting…';
+    _pubSetBtnLoading(confirmBtn, true, 'Deleting…');
     if (note && note.publishedSlug) {
       try {
         const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
