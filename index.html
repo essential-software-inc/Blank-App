@@ -462,7 +462,7 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8a0bc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E")
 }
 
-#reset-dialog, #delete-dialog, #restore-dialog {
+#reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog {
   background: #fff;
   border-radius: 18px;
   padding: 1.3rem 1.2rem 1.1rem;
@@ -1512,7 +1512,7 @@ body.night #publish-hdr-title { color: #e8e8e8 }
 body.night #publish-close { color: #999999 }
 body.night #publish-body { background: #080808; color: #f0f0f0 }
 body.night .pub-status { color: #9a9a9a }
-body.night .pub-url { background: #1c1c1c; border-color: #383838; color: #8fb4ff }
+body.night .pub-url { background: #1c1c1c; border-color: #383838; color: #7799ee }
 body.night #pub-footer-new,
 body.night #pub-footer-live { background: #080808; border-color: #282828 }
 body.pink #publish-sheet { color: #fff; border-radius: 16px 16px 0 0 }
@@ -2230,7 +2230,7 @@ body.night .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog {
+body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog {
   background: #111111;
   border: 1px solid #282828;
   border-radius: 18px;
@@ -2566,7 +2566,7 @@ body.pink .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog {
+body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog {
   background: #fff2f7;
   border: none;
   border-radius: 18px;
@@ -3591,6 +3591,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <div id="pub-state-live" class="bkp-panel" style="display:none">
         <p class="bkp-help">This note is live.</p>
         <div id="pub-live-url" class="pub-url" onclick="_pubCopyUrl()"></div>
+        <div id="pub-save-status" class="pub-status"></div>
       </div>
     </div>
     <div id="pub-footer-new">
@@ -10452,6 +10453,30 @@ function nbOpenPublishSheet(id) {
     liveState.style.display = '';
     liveFooter.style.display = '';
     document.getElementById('pub-live-url').textContent = _pubUrlFor(note.publishedSlug);
+    // Previously only came out right if you'd happened to open the note in
+    // the editor first — nothing here ever actually compared current
+    // content against what's live, so the button just sat at whatever its
+    // last state happened to be (enabled, by default markup, the rest of
+    // the time). Rebuild the same static HTML a real Save would send and
+    // hash it (_hashStr, same helper the image cache already uses) — cheap
+    // enough to redo on every open, and works whether or not the note was
+    // ever opened in the editor this session, since it reads straight from
+    // the saved note rather than any in-editor state.
+    const saveBtn = document.getElementById('pub-save-btn');
+    const saveStatus = document.getElementById('pub-save-status');
+    try {
+      const currentHtml = nbBuildStaticNoteHtml(note, note.publishedSlug);
+      const unchanged = note.publishedContentHash === _hashStr(currentHtml);
+      saveBtn.disabled = unchanged;
+      saveStatus.textContent = unchanged ? 'No changes to save' : '';
+    } catch (e) {
+      // Can't tell either way if the rebuild itself failed — default to
+      // letting the person try Save Changes rather than silently blocking
+      // it on a check that didn't run.
+      _nbLog('publish save-state check', e);
+      saveBtn.disabled = false;
+      saveStatus.textContent = '';
+    }
   } else {
     liveState.style.display = 'none';
     liveFooter.style.display = 'none';
@@ -10556,7 +10581,8 @@ async function nbPublishNote() {
       publishedSlug: slug,
       publishToken: data.token,
       publishedAt: Date.now(),
-      lastPublishedAt: Date.now()
+      lastPublishedAt: Date.now(),
+      publishedContentHash: _hashStr(html)
     });
     showToast('Note published');
     closePublishSheet();
@@ -10588,7 +10614,7 @@ async function nbUpdatePublishedNote() {
     // learn the page is actually gone and needs a fresh Publish instead.
     if (res.status === 404) {
       _pubSaveNoteFields(_pubNoteId, {
-        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null
+        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null
       });
       showToast('That page is no longer live — publish again to bring it back');
       closePublishSheet();
@@ -10596,7 +10622,7 @@ async function nbUpdatePublishedNote() {
       return;
     }
     if (!res.ok) throw new Error('update failed: ' + res.status);
-    _pubSaveNoteFields(_pubNoteId, { lastPublishedAt: Date.now() });
+    _pubSaveNoteFields(_pubNoteId, { lastPublishedAt: Date.now(), publishedContentHash: _hashStr(html) });
     showToast('Changes saved');
     closePublishSheet();
   } catch (e) {
@@ -10636,7 +10662,7 @@ function nbUnpublishNote() {
       // note looks published locally but 404s for everyone else).
       if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
       _pubSaveNoteFields(_pubNoteId, {
-        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null
+        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null
       });
       ov.classList.remove('open');
       showToast('Note unpublished');
