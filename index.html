@@ -10155,6 +10155,31 @@ function _nbCleanContentForExport(html) {
 
   return container.innerHTML;
 }
+// The report link's text has to stay legible against whatever the note's
+// canvas background happens to be — a light pastel, the "black" preset,
+// or any arbitrary hex the person typed into the custom-color picker — so
+// its color can't be a single hardcoded gray (that reads fine on the
+// light presets but goes nearly invisible on "black" or a dark custom
+// color). Resolve the actual background to a hex string, compute its
+// relative luminance, and hand back a link color with guaranteed
+// contrast: black on light backgrounds, white on dark ones — this
+// deliberately doesn't try to match the note's own hue.
+const _NB_PAGE_BG_HEX = { rose: '#fce7f3', amber: '#fef3c7', green: '#dcfce7', blue: '#dbeafe', purple: '#ede9fe', teal: '#ccfbf1', orange: '#ffedd5', red: '#fee2e2', white: '#ffffff', black: '#1c1c1a' };
+function _nbRelativeLuminance(hex) {
+  let h = (hex || '').trim().replace(/^#/, '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  const chans = [0, 2, 4].map(i => {
+    const c = parseInt(h.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * chans[0] + 0.7152 * chans[1] + 0.0722 * chans[2];
+}
+function _nbReportLinkColor(note) {
+  const effectiveBg = note.pageBg === 'custom' ? note.pageBgCustom : (_NB_PAGE_BG_HEX[note.pageBg] || '#f7f7f5'); // #f7f7f5 is .cv-page's own default background, for an unset pageBg
+  const lum = _nbRelativeLuminance(effectiveBg);
+  return (lum !== null && lum < 0.5) ? '#ffffff' : '#000000';
+}
 function nbBuildStaticNoteHtml(note, publishSlug) {
   const cleanContent = _nbCleanContentForExport(_nbRehydrateImages(note.content || ''));
   // Only a page actually being published gets a report link — a plain
@@ -10165,7 +10190,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
   // content preserved) than everything else (spam/copyright/abuse/other).
   const reportFooter = publishSlug ? `
   <div id="nb-report-footer" style="padding:1rem .7rem 1.3rem;font:11px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-align:center">
-    <a href="#" id="nb-report-link" style="color:#6b6e7a;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px">Report an issue</a>
+    <a href="#" id="nb-report-link" style="color:${_nbReportLinkColor(note)};text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px">Report an issue</a>
   </div>
   <div id="nb-report-overlay" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(20,20,24,.5);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:1rem;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
     <div id="nb-report-box" role="dialog" aria-modal="true" aria-labelledby="nb-report-title" tabindex="-1" style="width:100%;max-width:380px;background:#fff;border-radius:18px;padding:1.4rem;box-shadow:0 20px 50px rgba(20,20,40,.28)">
@@ -10461,6 +10486,14 @@ ${descMeta}
 ${_nbGetPristineCanvasStyle()}
 <style>
   html{margin:0}
+  /* This static export gets its own fresh <head> (see the comment above
+     this return) rather than reusing any wrapper from elsewhere in the
+     app, so the tap-highlight reset those other wrappers already carry
+     (e.g. nbBuildSafeHtml's editor-preview doc) has to be repeated here
+     too — otherwise every tap on the page, including the report link and
+     its dialog's buttons, flashes the browser's default blue/gray
+     highlight since nothing here suppresses it. */
+  *{-webkit-tap-highlight-color:transparent}
   .cv-page{min-height:100vh}
   /* The base stylesheet above ships video/social iframes at
      pointer-events:none, gated back to auto only by the editor's own
