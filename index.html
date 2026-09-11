@@ -479,7 +479,7 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
 }
 
 body.night #terms-dialog .rdlg-body a {
-  color: #7799ee
+  color: #f0f0f0
 }
 
 body.pink #terms-dialog .rdlg-body a {
@@ -1512,7 +1512,7 @@ body.night #publish-hdr-title { color: #e8e8e8 }
 body.night #publish-close { color: #999999 }
 body.night #publish-body { background: #080808; color: #f0f0f0 }
 body.night .pub-status { color: #9a9a9a }
-body.night .pub-url { background: #1c1c1c; border-color: #383838; color: #7799ee }
+body.night .pub-url { background: #1c1c1c; border-color: #383838; color: #f0f0f0 }
 body.night #pub-footer-new,
 body.night #pub-footer-live { background: #080808; border-color: #282828 }
 body.pink #publish-sheet { color: #fff; border-radius: 16px 16px 0 0 }
@@ -1764,7 +1764,7 @@ body.night #terms-dialog {
 }
 
 body.night #terms-dialog .rdlg-body a {
-  color: #7799ee
+  color: #f0f0f0
 }
 
 body.night #privacy-dialog, body.night #cterms-dialog {
@@ -10214,7 +10214,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
             <div class="nb-report-opt is-selected" role="option" aria-selected="true" data-value="spam" tabindex="0" style="padding:.68rem .85rem;font-size:14px;cursor:pointer">Spam</div>
             <div class="nb-report-opt" role="option" aria-selected="false" data-value="copyright" tabindex="-1" style="padding:.68rem .85rem;font-size:14px;cursor:pointer">Copyright</div>
             <div class="nb-report-opt" role="option" aria-selected="false" data-value="abuse" tabindex="-1" style="padding:.68rem .85rem;font-size:14px;cursor:pointer">Abuse</div>
-            <div class="nb-report-opt" role="option" aria-selected="false" data-value="csam" tabindex="-1" style="padding:.68rem .85rem;font-size:14px;cursor:pointer">Child sexual abuse material</div>
+            <div class="nb-report-opt" role="option" aria-selected="false" data-value="csam" tabindex="-1" style="padding:.68rem .85rem;font-size:14px;cursor:pointer">CSAM</div>
             <div class="nb-report-opt" role="option" aria-selected="false" data-value="other" tabindex="-1" style="padding:.68rem .85rem;font-size:14px;cursor:pointer">Other</div>
           </div>
         </div>
@@ -10814,6 +10814,7 @@ async function nbPublishNote() {
       publishedContentHash: _hashStr(html)
     });
     showToast('Note published');
+    _pubSetBtnLoading(btn, false);
     closePublishSheet();
     nbRenderNotesScreen();
   } catch (e) {
@@ -10895,6 +10896,7 @@ function nbUnpublishNote() {
       });
       ov.classList.remove('open');
       showToast('Note unpublished');
+      _pubSetBtnLoading(confirmBtn, false);
       closePublishSheet();
       nbRenderNotesScreen();
     } catch (e) {
