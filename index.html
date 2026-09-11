@@ -548,6 +548,22 @@ body.pink #terms-dialog .rdlg-body a {
   opacity: .6
 }
 
+.com-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(0, 0, 0, .15);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  vertical-align: -2px;
+  margin-right: 6px;
+  animation: com-spin .6s linear infinite
+}
+
+@keyframes com-spin {
+  to { transform: rotate(360deg) }
+}
+
 .ebtn-pri .com-spinner,
 .rdlg-ok .com-spinner {
   border-color: rgba(255, 255, 255, 0.3) !important;
@@ -560,6 +576,10 @@ body.night .ebtn-pri:disabled .com-spinner {
 
 body.night .rdlg-ok:not(.rdlg-ok--blue):disabled .com-spinner {
   border-color: rgba(136, 85, 92, 0.3) !important
+}
+
+body.night .ebtn-sec .com-spinner {
+  border-color: rgba(255, 255, 255, 0.25) !important
 }
 
 #feed-view {
@@ -1585,6 +1605,20 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 }
 
 #delete-overlay.open {
+  display: flex
+}
+
+#unpublish-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 720;
+  align-items: center;
+  justify-content: center
+}
+
+#unpublish-overlay.open {
   display: flex
 }
 
@@ -3372,7 +3406,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <div class="nb-empty" id="notes-empty-state">
         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <div class="nb-empty-title">No notes yet</div>
-        <div class="nb-empty-sub">Notes you save from Create will show up here, organized by the categories above.</div>
+        <div class="nb-empty-sub">Notes you save show up here, organized by category.</div>
       </div>
       <div id="nb-notes-grid" style="display:none"></div>
     </section>
@@ -3415,6 +3449,17 @@ document.body.dataset.lockScrollY = window.scrollY;
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="delete-dialog-cancel">Cancel</button>
       <button class="rdlg-ok" id="delete-dialog-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="unpublish-overlay">
+  <div id="unpublish-dialog" style="z-index:721">
+    <div class="rdlg-title">Unpublish this page?</div>
+    <div class="rdlg-body">The link will stop working. You can publish it again later, possibly at a different address if this one&rsquo;s been taken.</div>
+    <div class="rdlg-btns">
+      <button class="rdlg-cancel" id="unpublish-dialog-cancel">Cancel</button>
+      <button class="rdlg-ok" id="unpublish-dialog-confirm">Unpublish</button>
     </div>
   </div>
 </div>
@@ -10118,30 +10163,83 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
   // because it needs a different response path (NCMEC CyberTipline,
   // content preserved) than everything else (spam/copyright/abuse/other).
   const reportFooter = publishSlug ? `
-  <div id="nb-report-footer" style="position:fixed;left:0;right:0;bottom:0;padding:.4rem .7rem;font:11px -apple-system,sans-serif;text-align:center;background:rgba(255,255,255,.85);backdrop-filter:blur(4px)">
+  <div id="nb-report-footer" style="position:fixed;left:0;right:0;bottom:0;z-index:999999;padding:.4rem .7rem;font:11px -apple-system,sans-serif;text-align:center;background:rgba(255,255,255,.85);backdrop-filter:blur(4px)">
     <a href="#" id="nb-report-link" style="color:#666;text-decoration:underline">Report this page</a>
+  </div>
+  <div id="nb-report-overlay" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(20,20,18,.45);align-items:center;justify-content:center;padding:1rem;font:13px -apple-system,sans-serif">
+    <div id="nb-report-box" style="width:100%;max-width:360px;background:#fff;border-radius:12px;padding:1rem;box-shadow:0 12px 32px rgba(0,0,0,.25)">
+      <div style="font-weight:600;font-size:14px;margin-bottom:.6rem;color:#202122">Report this page</div>
+      <label style="display:block;color:#4a4a46;margin-bottom:.25rem">Reason</label>
+      <select id="nb-report-reason" style="width:100%;padding:.4rem;border:1px solid #ccd4e8;border-radius:8px;font:inherit;margin-bottom:.6rem;background:#fff;color:#202122">
+        <option value="spam">Spam</option>
+        <option value="copyright">Copyright</option>
+        <option value="abuse">Abuse</option>
+        <option value="csam">Child sexual abuse material</option>
+        <option value="other">Other</option>
+      </select>
+      <label style="display:block;color:#4a4a46;margin-bottom:.25rem">Details (optional)</label>
+      <textarea id="nb-report-details" rows="3" style="width:100%;padding:.4rem;border:1px solid #ccd4e8;border-radius:8px;font:inherit;resize:vertical;margin-bottom:.15rem;box-sizing:border-box"></textarea>
+      <div id="nb-report-msg" style="min-height:1.1em;margin:.3rem 0;color:#a83232"></div>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.4rem">
+        <button type="button" id="nb-report-cancel" style="padding:.4rem .8rem;border-radius:8px;border:1px solid #ccd4e8;background:#fff;color:#202122;font:inherit;cursor:pointer">Cancel</button>
+        <button type="button" id="nb-report-submit" style="padding:.4rem .8rem;border-radius:8px;border:none;background:#3366cc;color:#fff;font:inherit;cursor:pointer">Submit</button>
+      </div>
+    </div>
   </div>
   <script>
   (function(){
     var link = document.getElementById('nb-report-link');
-    if (!link) return;
-    link.addEventListener('click', function(e){
-      e.preventDefault();
-      var reason = prompt('Reason (csam / copyright / spam / abuse / other):', 'other');
-      if (!reason) return;
+    var overlay = document.getElementById('nb-report-overlay');
+    var box = document.getElementById('nb-report-box');
+    var reasonEl = document.getElementById('nb-report-reason');
+    var detailsEl = document.getElementById('nb-report-details');
+    var msgEl = document.getElementById('nb-report-msg');
+    var submitBtn = document.getElementById('nb-report-submit');
+    var cancelBtn = document.getElementById('nb-report-cancel');
+    if (!link || !overlay) return;
+    function openDialog() {
+      msgEl.textContent = '';
+      msgEl.style.color = '#a83232';
+      reasonEl.value = 'spam';
+      detailsEl.value = '';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit';
+      overlay.style.display = 'flex';
+    }
+    function closeDialog() { overlay.style.display = 'none'; }
+    link.addEventListener('click', function(e){ e.preventDefault(); openDialog(); });
+    cancelBtn.addEventListener('click', closeDialog);
+    // Clicking the dimmed backdrop closes it too, same as tapping outside
+    // any other sheet/dialog in the app this page came from — but a click
+    // that starts inside the box and only releases over the backdrop (a
+    // common side effect of selecting text in the textarea) must not
+    // close it, so this checks the actual click target rather than using
+    // a bubbling listener on the overlay alone.
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeDialog(); });
+    submitBtn.addEventListener('click', function(){
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+      msgEl.style.color = '#a83232';
+      msgEl.textContent = '';
       fetch('/report/${esc(publishSlug)}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: reason.trim().toLowerCase(), details: '' })
+        body: JSON.stringify({ reason: reasonEl.value, details: detailsEl.value.trim() })
       }).then(function(res){
         // fetch() only rejects on a network failure, not on an HTTP error
         // status — without this check, a failed report (rate-limited,
-        // malformed, server error) still landed on the "Thanks, reported"
-        // branch below, telling the visitor it worked when nothing was
-        // recorded.
+        // malformed, server error) still landed on the "thanks" branch
+        // below, telling the visitor it worked when nothing was recorded.
         if (!res.ok) throw new Error('report failed: ' + res.status);
-        alert('Thanks, this page has been reported.');
-      }).catch(function(){ alert('Could not send report — please try again.'); });
+        msgEl.style.color = '#2a7a3d';
+        msgEl.textContent = 'Thanks, this page has been reported.';
+        submitBtn.textContent = 'Submitted';
+      }).catch(function(){
+        msgEl.style.color = '#a83232';
+        msgEl.textContent = 'Could not send report — please try again.';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      });
     });
   })();
   <\/script>` : '';
@@ -10287,7 +10385,7 @@ function _nbDownloadHtmlBlob(blob, fileName, reason) {
 
 /* ===================== Publish to Web ===================== */
 // TODO: point this at the deployed Worker before shipping.
-const NB_PUBLISH_API = 'https://note-publish.joelisaacumoh.workers.dev';
+const NB_PUBLISH_API = 'https://note-publish.example.workers.dev';
 let _pubNoteId = null;
 let _pubSlugCheckTimer = null;
 let _pubSlugCheckSeq = 0;
@@ -10306,6 +10404,22 @@ function _pubDefaultSlug(note) {
   return (note.title || 'note').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'note';
 }
 function _pubUrlFor(slug) { return NB_PUBLISH_API.replace(/\/$/, '') + '/@' + slug; }
+// Swaps a publish-sheet button between its normal label and a spinner +
+// in-progress label while a publish/update/unpublish request is in flight —
+// otherwise the only visible feedback during that gap is the button going
+// disabled, which reads as unresponsive rather than working. Restores the
+// exact original label on the way back out so callers don't need to repeat
+// it in every catch block.
+function _pubSetBtnLoading(btn, loading, loadingLabel) {
+  if (loading) {
+    btn.dataset.origLabel = btn.textContent;
+    btn.innerHTML = '<span class="com-spinner"></span>' + loadingLabel;
+    btn.disabled = true;
+  } else {
+    btn.textContent = btn.dataset.origLabel || btn.textContent;
+    delete btn.dataset.origLabel;
+  }
+}
 // Pre-flight connectivity check for publish/unpublish/save/delete actions.
 // navigator.onLine only detects a downed network interface (not an actually
 // reachable internet, e.g. a captive portal or a dead Wi-Fi router still
@@ -10413,7 +10527,7 @@ async function nbPublishNote() {
   try { html = nbBuildStaticNoteHtml(note, slug); }
   catch (e) { _nbLog('publish build', e); showToast('Publish failed'); return; }
   const btn = document.getElementById('pub-publish-btn');
-  btn.disabled = true;
+  _pubSetBtnLoading(btn, true, 'Publishing…');
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish', {
       method: 'POST',
@@ -10433,7 +10547,7 @@ async function nbPublishNote() {
         statusEl.className = 'pub-status taken';
       }
       showToast(disabled ? 'That address isn\u2019t available — try another' : 'That address was just taken — try another');
-      btn.disabled = false;
+      _pubSetBtnLoading(btn, false);
       return;
     }
     if (!res.ok) throw new Error('publish failed: ' + res.status);
@@ -10450,7 +10564,7 @@ async function nbPublishNote() {
   } catch (e) {
     _nbLog('publish', e);
     showToast('Publish failed');
-    btn.disabled = false;
+    _pubSetBtnLoading(btn, false);
   }
 }
 async function nbUpdatePublishedNote() {
@@ -10461,7 +10575,7 @@ async function nbUpdatePublishedNote() {
   try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
   catch (e) { _nbLog('publish update build', e); showToast('Update failed'); return; }
   const btn = document.getElementById('pub-save-btn');
-  btn.disabled = true;
+  _pubSetBtnLoading(btn, true, 'Saving…');
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
       method: 'PUT',
@@ -10489,40 +10603,52 @@ async function nbUpdatePublishedNote() {
     _nbLog('publish update', e);
     showToast('Update failed');
   } finally {
-    btn.disabled = false;
+    _pubSetBtnLoading(btn, false);
   }
 }
-async function nbUnpublishNote() {
+function nbUnpublishNote() {
   const note = _pubFindNote(_pubNoteId);
   if (!note || !note.publishedSlug) return;
-  if (_pubOfflineGuard()) return;
-  if (!confirm('Unpublish this page? The link will stop working.')) return;
-  const btn = document.getElementById('pub-unpublish-btn');
-  btn.disabled = true;
-  try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: note.publishToken })
-    });
-    // A 404 here means the remote side already considers this gone (admin
-    // takedown, or the purge job already reclaimed it) — without this,
-    // Unpublish would throw every time, "Unpublish failed" forever, with
-    // no way through the UI to clear the stale local publishedSlug (the
-    // note looks published locally but 404s for everyone else).
-    if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
-    _pubSaveNoteFields(_pubNoteId, {
-      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null
-    });
-    showToast('Note unpublished');
-    closePublishSheet();
-    nbRenderNotesScreen();
-  } catch (e) {
-    _nbLog('unpublish', e);
-    showToast('Unpublish failed');
-  } finally {
-    btn.disabled = false;
-  }
+  // Matches nbDeleteNote's convention (see its own comment): open the
+  // confirm dialog regardless of connectivity, only the actual network
+  // action needs the offline check — someone offline should still be able
+  // to see and cancel out of this, just not complete it.
+  const ov = document.getElementById('unpublish-overlay');
+  const cancelBtn = document.getElementById('unpublish-dialog-cancel');
+  const confirmBtn = document.getElementById('unpublish-dialog-confirm');
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = 'Unpublish';
+  cancelBtn.onclick = () => ov.classList.remove('open');
+  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  confirmBtn.onclick = async () => {
+    if (_pubOfflineGuard()) return;
+    _pubSetBtnLoading(confirmBtn, true, 'Unpublishing…');
+    try {
+      const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: note.publishToken })
+      });
+      // A 404 here means the remote side already considers this gone (admin
+      // takedown, or the purge job already reclaimed it) — without this,
+      // Unpublish would throw every time, "Unpublish failed" forever, with
+      // no way through the UI to clear the stale local publishedSlug (the
+      // note looks published locally but 404s for everyone else).
+      if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
+      _pubSaveNoteFields(_pubNoteId, {
+        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null
+      });
+      ov.classList.remove('open');
+      showToast('Note unpublished');
+      closePublishSheet();
+      nbRenderNotesScreen();
+    } catch (e) {
+      _nbLog('unpublish', e);
+      showToast('Unpublish failed');
+      _pubSetBtnLoading(confirmBtn, false);
+    }
+  };
+  ov.classList.add('open');
 }
 function _pubCopyUrl() {
   const url = document.getElementById('pub-live-url').textContent;
