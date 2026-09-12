@@ -16,13 +16,6 @@ workflows:
         APP_VERSION: "3.2.9" # user-facing version name; bump manually per release.
           # PROJECT_BUILD_NUMBER is a built-in Codemagic var (no setup needed)
           # that auto-increments per build and is used below for versionCode.
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
     scripts:
       - name: Select Pro app source files
         script: |
@@ -170,8 +163,360 @@ workflows:
           cd android
           ./gradlew bundleRelease
     artifacts:
-      - android/app/build/outputs/**/*.apk
       - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+
+  android-pro-apk-workflow:
+    name: Note Builder Pro — Android (APK)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: lts
+      java: 21
+      android_signing:
+        - notebuilderpro_keystore
+      vars:
+        PACKAGE_NAME: "com.essentialsoftware.notebuilderpro" # must match capacitor.config.pro.ts appId
+        APP_VERSION: "3.2.9" # keep in sync with the other Free/Pro workflows manually
+    scripts:
+      - name: Select Pro app source files
+        script: |
+          cp capacitor.config.pro.ts capacitor.config.ts
+          mkdir -p www
+          cp note-builder-pro.html www/index.html
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Verify appId matches PACKAGE_NAME
+        script: |
+          CONFIG_APP_ID=$(grep -oE "appId:[[:space:]]*'[^']+'" capacitor.config.ts | sed -E "s/appId:[[:space:]]*'([^']+)'/\1/")
+          if [ "$CONFIG_APP_ID" != "$PACKAGE_NAME" ]; then
+            echo "ERROR: capacitor.config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
+            echo "Fix capacitor.config.pro.ts or the PACKAGE_NAME var above before building."
+            exit 1
+          fi
+          echo "appId matches PACKAGE_NAME: $CONFIG_APP_ID"
+      - name: Add Android platform (skips if android/ is already committed)
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Disable native WebView scrollbar
+        script: |
+          # See android-pro-workflow's identical step for the full
+          # explanation — this patches CapacitorWebView.java's constructor
+          # in node_modules (not MainActivity.java) since that's the class
+          # Capacitor's WebView actually is.
+          WEBVIEW_SRC="node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/CapacitorWebView.java"
+          python3 - "$WEBVIEW_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
+          new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: CapacitorWebView.java didn't match the expected "
+                  "constructor shape - the installed @capacitor/android "
+                  "version may have changed it. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled native WebView scrollbar in", path)
+          PY
+      - name: Generate app icon from assets/logo.png
+        script: |
+          npx capacitor-assets generate --android
+      - name: Sync Capacitor (copies www/ + plugins into android/)
+        script: |
+          npx cap sync android
+      - name: Set Android app version
+        script: |
+          sed -i.bak -E "s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
+          sed -i.bak -E "s/versionCode [0-9]+/versionCode $PROJECT_BUILD_NUMBER/" android/app/build.gradle
+      - name: Bump minSdkVersion to 26 (required by @capacitor/inappbrowser)
+        script: |
+          sed -i.bak -E "s/minSdkVersion = [0-9]+/minSdkVersion = 26/" android/variables.gradle
+      - name: Add release signing config
+        script: |
+          python3 - <<'PY'
+          import re
+
+          path = "android/app/build.gradle"
+          with open(path) as f:
+              content = f.read()
+
+          content = re.sub(
+              r"(release\s*\{)",
+              r"\1\n            signingConfig signingConfigs.release",
+              content,
+              count=1,
+          )
+
+          signing_configs = '''    signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+
+          '''
+          content = content.replace("    buildTypes {", signing_configs + "    buildTypes {", 1)
+
+          with open(path, "w") as f:
+              f.write(content)
+
+          print("Injected release signingConfig into build.gradle")
+          PY
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build signed APK
+        script: |
+          cd android
+          ./gradlew assembleRelease
+    artifacts:
+      - android/app/build/outputs/apk/release/*.apk
+      - android/app/build/outputs/**/mapping.txt
+
+  android-pro-freemium-workflow:
+    name: Note Builder Pro (Freemium build) — Android
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: lts
+      java: 21
+      android_signing:
+        - notebuilderpro_keystore # same keystore/appId as android-pro-workflow —
+          # this is a content variant of the same app, not a separate app.
+      vars:
+        PACKAGE_NAME: "com.essentialsoftware.notebuilderpro" # must match capacitor.config.pro.ts appId
+        APP_VERSION: "3.2.9" # keep in sync with the other Free/Pro workflows manually
+    scripts:
+      - name: Select Pro (freemium) app source files
+        script: |
+          # Same app identity as android-pro-workflow (same appId, same
+          # keystore) — the only difference is which HTML ships: this one
+          # builds note-builder-freemium.html (note-cap + RevenueCat
+          # paywall) instead of the ungated note-builder-pro.html, so you
+          # can test either variant without maintaining two app listings.
+          cp capacitor.config.pro.ts capacitor.config.ts
+          mkdir -p www
+          cp note-builder-freemium.html www/index.html
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Verify appId matches PACKAGE_NAME
+        script: |
+          CONFIG_APP_ID=$(grep -oE "appId:[[:space:]]*'[^']+'" capacitor.config.ts | sed -E "s/appId:[[:space:]]*'([^']+)'/\1/")
+          if [ "$CONFIG_APP_ID" != "$PACKAGE_NAME" ]; then
+            echo "ERROR: capacitor.config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
+            echo "Fix capacitor.config.pro.ts or the PACKAGE_NAME var above before building."
+            exit 1
+          fi
+          echo "appId matches PACKAGE_NAME: $CONFIG_APP_ID"
+      - name: Add Android platform (skips if android/ is already committed)
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Disable native WebView scrollbar
+        script: |
+          # See android-pro-workflow's identical step for the full
+          # explanation — this patches CapacitorWebView.java's constructor
+          # in node_modules (not MainActivity.java) since that's the class
+          # Capacitor's WebView actually is.
+          WEBVIEW_SRC="node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/CapacitorWebView.java"
+          python3 - "$WEBVIEW_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
+          new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: CapacitorWebView.java didn't match the expected "
+                  "constructor shape - the installed @capacitor/android "
+                  "version may have changed it. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled native WebView scrollbar in", path)
+          PY
+      - name: Generate app icon from assets/logo.png
+        script: |
+          npx capacitor-assets generate --android
+      - name: Sync Capacitor (copies www/ + plugins into android/)
+        script: |
+          npx cap sync android
+      - name: Set Android app version
+        script: |
+          sed -i.bak -E "s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
+          sed -i.bak -E "s/versionCode [0-9]+/versionCode $PROJECT_BUILD_NUMBER/" android/app/build.gradle
+      - name: Bump minSdkVersion to 26 (required by @capacitor/inappbrowser)
+        script: |
+          sed -i.bak -E "s/minSdkVersion = [0-9]+/minSdkVersion = 26/" android/variables.gradle
+      - name: Add release signing config
+        script: |
+          python3 - <<'PY'
+          import re
+
+          path = "android/app/build.gradle"
+          with open(path) as f:
+              content = f.read()
+
+          content = re.sub(
+              r"(release\s*\{)",
+              r"\1\n            signingConfig signingConfigs.release",
+              content,
+              count=1,
+          )
+
+          signing_configs = '''    signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+
+          '''
+          content = content.replace("    buildTypes {", signing_configs + "    buildTypes {", 1)
+
+          with open(path, "w") as f:
+              f.write(content)
+
+          print("Injected release signingConfig into build.gradle")
+          PY
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build signed Android App Bundle
+        script: |
+          cd android
+          ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+
+  android-pro-freemium-apk-workflow:
+    name: Note Builder Pro (Freemium build) — Android (APK)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: lts
+      java: 21
+      android_signing:
+        - notebuilderpro_keystore
+      vars:
+        PACKAGE_NAME: "com.essentialsoftware.notebuilderpro"
+        APP_VERSION: "3.2.9"
+    scripts:
+      - name: Select Pro (freemium) app source files
+        script: |
+          cp capacitor.config.pro.ts capacitor.config.ts
+          mkdir -p www
+          cp note-builder-freemium.html www/index.html
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Verify appId matches PACKAGE_NAME
+        script: |
+          CONFIG_APP_ID=$(grep -oE "appId:[[:space:]]*'[^']+'" capacitor.config.ts | sed -E "s/appId:[[:space:]]*'([^']+)'/\1/")
+          if [ "$CONFIG_APP_ID" != "$PACKAGE_NAME" ]; then
+            echo "ERROR: capacitor.config.ts appId ('$CONFIG_APP_ID') does not match PACKAGE_NAME ('$PACKAGE_NAME')."
+            echo "Fix capacitor.config.pro.ts or the PACKAGE_NAME var above before building."
+            exit 1
+          fi
+          echo "appId matches PACKAGE_NAME: $CONFIG_APP_ID"
+      - name: Add Android platform (skips if android/ is already committed)
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Disable native WebView scrollbar
+        script: |
+          WEBVIEW_SRC="node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/CapacitorWebView.java"
+          python3 - "$WEBVIEW_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
+          new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: CapacitorWebView.java didn't match the expected "
+                  "constructor shape - the installed @capacitor/android "
+                  "version may have changed it. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled native WebView scrollbar in", path)
+          PY
+      - name: Generate app icon from assets/logo.png
+        script: |
+          npx capacitor-assets generate --android
+      - name: Sync Capacitor (copies www/ + plugins into android/)
+        script: |
+          npx cap sync android
+      - name: Set Android app version
+        script: |
+          sed -i.bak -E "s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
+          sed -i.bak -E "s/versionCode [0-9]+/versionCode $PROJECT_BUILD_NUMBER/" android/app/build.gradle
+      - name: Bump minSdkVersion to 26 (required by @capacitor/inappbrowser)
+        script: |
+          sed -i.bak -E "s/minSdkVersion = [0-9]+/minSdkVersion = 26/" android/variables.gradle
+      - name: Add release signing config
+        script: |
+          python3 - <<'PY'
+          import re
+
+          path = "android/app/build.gradle"
+          with open(path) as f:
+              content = f.read()
+
+          content = re.sub(
+              r"(release\s*\{)",
+              r"\1\n            signingConfig signingConfigs.release",
+              content,
+              count=1,
+          )
+
+          signing_configs = '''    signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+
+          '''
+          content = content.replace("    buildTypes {", signing_configs + "    buildTypes {", 1)
+
+          with open(path, "w") as f:
+              f.write(content)
+
+          print("Injected release signingConfig into build.gradle")
+          PY
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build signed APK
+        script: |
+          cd android
+          ./gradlew assembleRelease
+    artifacts:
+      - android/app/build/outputs/apk/release/*.apk
       - android/app/build/outputs/**/mapping.txt
 
   android-free-workflow:
@@ -188,13 +533,6 @@ workflows:
         APP_VERSION: "3.2.9" # keep in sync with the Pro workflow's version manually;
           # the two apps aren't required to share a version number, but doing
           # so avoids confusion if you ever compare release notes side by side.
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
     scripts:
       - name: Select Free app source files
         script: |
@@ -313,7 +651,6 @@ workflows:
           cd android
           ./gradlew bundleRelease
     artifacts:
-      - android/app/build/outputs/**/*.apk
       - android/app/build/outputs/**/*.aab
       - android/app/build/outputs/**/mapping.txt
 
@@ -329,13 +666,6 @@ workflows:
       vars:
         PACKAGE_NAME: "com.essentialsoftware.notebuilder" # must match capacitor.config.free.ts appId
         APP_VERSION: "3.2.9" # keep in sync with the other Free/Pro workflows manually
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
     scripts:
       - name: Select Free app source files
         script: |
@@ -464,13 +794,6 @@ workflows:
         # NOTE: this workflow still only builds the Pro app's HTML/config —
         # it hasn't been split into Pro/Free variants the way the Android
         # workflows just were. Say the word if you want that mirrored here.
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
     scripts:
       - name: Select Pro app source files
         script: |
