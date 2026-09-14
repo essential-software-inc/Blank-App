@@ -4084,7 +4084,7 @@ body{margin:0}
 .cv-fmt-btn:hover,.cv-fmt-btn:active{border-color:#5b5bd6;color:#5b5bd6}
 .cv-fmt-btn-active{background:#eceafd;border-color:#5b5bd6;color:#5b5bd6}
 .cv-fmt-btn svg{width:15px;height:15px}
-.cv-fmt-highlight{background:#fff1a8;border-radius:2px;padding:0 .05em}
+.cv-fmt-highlight{background:#fff1a8;border-radius:2px;padding:0 .05em;color:inherit}
 .cv-fmt-link{color:#3366cc;text-decoration:underline;text-underline-offset:2px}
 /* Stand-in for the native text selection while it's intentionally cleared
    during the color picker flow (see the 'color' toolbar case below) — so
@@ -10338,7 +10338,7 @@ function nbOpenFreeAppOnPlayStore() {
 //   not the Android client) and by the Google Identity Services fallback
 //   below. The worker's GOOGLE_CLIENT_IDS secret must include this same
 //   value or every /auth/google call will fail verification.
-const NB_GOOGLE_WEB_CLIENT_ID = 'REPLACE_WITH_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com';
+const NB_GOOGLE_WEB_CLIENT_ID = '41762787149-mkbeh1mus5e5v2gbkvnfh1fgblmkkfvj.apps.googleusercontent.com';
 const NB_SESSION_KEY = 'nbSessionToken';
 const NB_ACCOUNT_KEY = 'nbAccount'; // JSON: { sub, email }
 // Same cap the worker enforces on PUT /sync/notes (see note-publish's
