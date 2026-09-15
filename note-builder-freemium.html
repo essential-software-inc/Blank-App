@@ -3788,11 +3788,12 @@ document.body.dataset.lockScrollY = window.scrollY;
 
 <div id="account-overlay" onclick="if(event.target===this)closeLogoutConfirm()">
   <div id="account-dialog">
-    <div class="rdlg-title">Log out?</div>
-    <div class="rdlg-body">You&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b>. Notes already saved on this device aren&rsquo;t affected.</div>
+    <div class="rdlg-title">Your account</div>
+    <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected. Deleting your account instead removes your synced notes and published pages from Essential Software&rsquo;s servers for good.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="logout-dialog-cancel" onclick="closeLogoutConfirm()">Cancel</button>
-      <button class="rdlg-ok" id="logout-dialog-confirm" onclick="confirmLogout()">Log out</button>
+      <button class="rdlg-cancel" id="delete-account-btn" onclick="confirmDeleteAccount()">Delete account</button>
+      <button class="rdlg-ok" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
     </div>
   </div>
 </div>
@@ -3804,10 +3805,12 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 7 September 2026</em></p>
+      <p><em>Effective 14 September 2026</em></p>
       <p><strong>Note Builder</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
-      <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device unless you choose to publish a page (see below). Nothing else is transmitted to Essential Software.</p>
+      <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
+      <h3>Google sign-in &amp; sync</h3>
+      <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with a session token so you stay signed in. While signed in, your notes (including embedded images) are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) is linked to your account so it carries over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again. You can permanently delete your account and everything stored with it (synced notes, published pages, session) from the account screen at any time.</p>
       <h3>Publishing a page</h3>
       <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted.</p>
       <h3>Reporting a published page</h3>
@@ -3829,12 +3832,14 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 7 September 2026</em></p>
+      <p><em>Effective 14 September 2026</em></p>
       <p>Using <strong>Note Builder</strong> means you agree to these terms.</p>
       <h3>Responsible Use</h3>
       <p>You agree to use Note Builder for lawful purposes only. You may not use the app to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish — see below.</p>
       <h3>Your Content</h3>
-      <p>Pages you build are stored only on your device unless you choose to publish them. You are responsible for keeping your own backups — Essential Software has no copy of your unpublished content and cannot recover it if it's lost.</p>
+      <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to Essential Software's servers so you can restore them on another device. You are responsible for keeping your own backups if you don't sign in — without an account, Essential Software has no copy of your content and cannot recover it if it's lost.</p>
+      <h3>Your Account</h3>
+      <p>Signing in is optional and handled by Google. Keep your Google account secure — anyone with access to it can access your synced notes and Pro entitlement through this app.</p>
       <h3>Published Content</h3>
       <p>A published page is stored on Essential Software's servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. Essential Software may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. Unpublish it yourself and its address frees up right away for reuse. If Essential Software removes it instead, for a takedown or abuse report, the address stays down for good and can't be reclaimed or republished.</p>
       <h3>Third-Party Content</h3>
@@ -10338,7 +10343,7 @@ function nbOpenFreeAppOnPlayStore() {
 //   not the Android client) and by the Google Identity Services fallback
 //   below. The worker's GOOGLE_CLIENT_IDS secret must include this same
 //   value or every /auth/google call will fail verification.
-const NB_GOOGLE_WEB_CLIENT_ID = '41762787149-mkbeh1mus5e5v2gbkvnfh1fgblmkkfvj.apps.googleusercontent.com';
+const NB_GOOGLE_WEB_CLIENT_ID = 'REPLACE_WITH_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com';
 const NB_SESSION_KEY = 'nbSessionToken';
 const NB_ACCOUNT_KEY = 'nbAccount'; // JSON: { sub, email }
 // Same cap the worker enforces on PUT /sync/notes (see note-publish's
@@ -10471,6 +10476,31 @@ async function _nbCompleteGoogleSignIn(idToken) {
   // user-initiated restore).
   await nbSyncPull(false);
   await nbSyncPush(false);
+}
+// Deletes the account server-side (synced notes, published pages, session)
+// then clears local sign-in state the same way nbSignOut() does. Notes
+// already saved on this device are untouched either way.
+async function nbDeleteAccount() {
+  const Purchases = _nbRcPlugin();
+  if (Purchases) { try { await Purchases.logOut(); } catch (e) { _nbLog('RevenueCat logOut', e); } }
+  const GAuth = _nbGoogleAuthPlugin();
+  if (GAuth) { try { await GAuth.signOut(); } catch (e) {} }
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok && res.status !== 401) throw new Error('account deletion failed: ' + res.status);
+  } catch (e) {
+    _nbLog('delete account', e);
+    showToast('Couldn\u2019t reach the server \u2014 try again');
+    return false;
+  }
+  _nbClearAccountLocal();
+  await nbRefreshProStatus();
+  showToast('Account deleted');
+  nbRenderAccountDialog();
+  return true;
 }
 async function nbSignOut() {
   const Purchases = _nbRcPlugin();
@@ -10647,12 +10677,28 @@ function closeLogoutConfirm() {
 // form rather than the (now stale) signed-in state.
 async function confirmLogout() {
   const btn = document.getElementById('logout-dialog-confirm');
-  if (btn) _pubSetBtnLoading(btn, true, 'Logging out\u2026');
+  if (btn) _pubSetBtnLoading(btn, true, 'Signing out\u2026');
   try {
-    await nbSignOut();
+    // nbSignOut() is local-only (no network round trip), so it resolves
+    // before the spinner frame even paints — pin it to a floor so the
+    // loading state is actually visible, same idea as minSplashPromise.
+    await Promise.all([nbSignOut(), new Promise(r => setTimeout(r, 400))]);
   } finally {
     if (btn) _pubSetBtnLoading(btn, false);
   }
+  closeLogoutConfirm();
+  openAccountScreen();
+}
+async function confirmDeleteAccount() {
+  const btn = document.getElementById('delete-account-btn');
+  if (btn) _pubSetBtnLoading(btn, true, 'Deleting\u2026');
+  let ok;
+  try {
+    ok = await nbDeleteAccount();
+  } finally {
+    if (btn) _pubSetBtnLoading(btn, false);
+  }
+  if (!ok) return; // leave the dialog open so they can retry
   closeLogoutConfirm();
   openAccountScreen();
 }
@@ -11479,6 +11525,7 @@ function _pubSetBtnLoading(btn, loading, loadingLabel) {
   } else {
     btn.textContent = btn.dataset.origLabel || btn.textContent;
     delete btn.dataset.origLabel;
+    btn.disabled = false;
   }
 }
 // Pre-flight connectivity check for publish/unpublish/save/delete actions.
