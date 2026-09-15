@@ -16,6 +16,7 @@
     "@capacitor/filesystem": "latest",
     "@capacitor/inappbrowser": "latest",
     "@capacitor/share": "latest",
+    "@codetrix-studio/capacitor-google-auth": "latest",
     "@revenuecat/purchases-capacitor": "latest"
   },
   "devDependencies": {
