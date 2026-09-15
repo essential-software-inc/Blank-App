@@ -10494,6 +10494,18 @@ function _nbWithTimeout(promise, ms, message) {
   });
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
 }
+// Fetches a known-reliable, CORS-friendly endpoint to tell "device has
+// no real connectivity right now" apart from "specifically can't reach
+// note-publish" — used only to disambiguate a generic "Failed to fetch"
+// in nbSignInWithGoogle's catch block below.
+async function _nbProbeConnectivity() {
+  try {
+    await fetch('https://www.gstatic.com/generate_204', { method: 'GET', cache: 'no-store' });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 async function nbSignInWithGoogle() {
   console.log('[nb] signin tapped, onLine=', navigator.onLine, 'GAuth=', !!_nbGoogleAuthPlugin());
   if (_pubOfflineGuard()) { console.log('[nb] blocked by offline guard'); return; }
@@ -10517,11 +10529,32 @@ async function nbSignInWithGoogle() {
     // toast or a log entry.
     if (!(e && e.userCancelled)) {
       _nbLog('google sign-in', e);
+      // If the native/GIS sign-in itself succeeded and it was only our
+      // own backend call (_nbCompleteGoogleSignIn) that failed, the
+      // Google client is left signed in even though the app never
+      // completed the flow. Left alone, the next attempt sees a cached
+      // session and silently re-confirms instead of showing the full
+      // picker — which reads as the prompt "flashing and closing"
+      // rather than a real retry. Signing out here resets that.
+      const GAuthCleanup = _nbGoogleAuthPlugin();
+      if (GAuthCleanup) { try { await GAuthCleanup.signOut(); } catch (e2) {} }
       // The pre-flight _pubOfflineGuard() above only catches "offline at
       // the moment the button was tapped" — this covers the connection
       // dropping mid-flow (the Google exchange or the /auth/google call).
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
         showToast('No internet connection \u2014 try again once you\u2019re back online');
+      } else if (e instanceof TypeError && /fetch/i.test((e && e.message) || '')) {
+        // "Failed to fetch" is a deliberately generic browser/WebView
+        // message — same text whether the cause is DNS, TLS, a captive
+        // portal, or something specifically blocking note-publish, and
+        // it carries no further detail to inspect. Probing a
+        // known-reachable host tells the two apart right in the toast,
+        // which matters here since this app is tested phone-only with
+        // no devtools/console access to read a more detailed error.
+        const reachedControl = await _nbProbeConnectivity();
+        showToast(reachedControl
+          ? 'Couldn\u2019t reach the sign-in server, but your connection is otherwise fine \u2014 try again shortly'
+          : 'No internet connection right now \u2014 try again once you\u2019re back online');
       } else {
         showToast('Sign-in failed: ' + ((e && e.message) || 'unknown error'));
       }
