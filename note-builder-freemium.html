@@ -10442,13 +10442,18 @@ async function _nbGoogleSignInWeb() {
     // nbSignInWithGoogle()'s await never returns, so the button hangs on
     // "Signing in…" with no error, no toast, no log. This turns that into
     // a real rejection so it surfaces through the normal error handling.
+    // 90s (not a short "did it render" window) because this same timer
+    // also has to cover the time a real person takes to notice the
+    // picker, tap it, and choose an account — a short deadline here was
+    // firing on legitimate slow-but-working sign-ins, not just genuinely
+    // blocked prompts.
     const timeoutId = setTimeout(() => {
       if (_nbGisPending) {
         const pending = _nbGisPending;
         _nbGisPending = null;
-        pending.reject(new Error('Google sign-in prompt did not appear'));
+        pending.reject(new Error('Google sign-in timed out'));
       }
-    }, 8000);
+    }, 90000);
     _nbGisPending = { resolve, reject, timeoutId };
     try {
       window.google.accounts.id.prompt((notification) => {
