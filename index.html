@@ -10401,8 +10401,31 @@ function _nbLoadGis() {
 // Resolves with the ID token from Google's One Tap prompt, or rejects if
 // it's dismissed/skipped (no prompt shown, already-declined this session,
 // etc.) — callers treat any rejection the same as a cancelled sign-in.
+// Registered once; resolves/rejects whichever sign-in attempt is
+// currently pending (see _nbGoogleSignInWeb below).
+let _nbGisInited = false;
+let _nbGisPending = null;
+function _nbGisCredentialCallback(resp) {
+  if (!_nbGisPending) return;
+  const { resolve, reject } = _nbGisPending;
+  _nbGisPending = null;
+  if (resp && resp.credential) resolve(resp.credential);
+  else reject(Object.assign(new Error('no credential'), { userCancelled: true }));
+}
 async function _nbGoogleSignInWeb() {
   await _nbLoadGis();
+  if (!_nbGisInited) {
+    // initialize() should only run once per page load — calling it again
+    // on every sign-in attempt is what produced the "initialize() is
+    // called multiple times" console warning, and use_fedcm_for_prompt
+    // opts into the browser-native FedCM picker Google is moving to.
+    window.google.accounts.id.initialize({
+      client_id: NB_GOOGLE_WEB_CLIENT_ID,
+      use_fedcm_for_prompt: true,
+      callback: _nbGisCredentialCallback
+    });
+    _nbGisInited = true;
+  }
   // Clears any request a previous call left outstanding — e.g. tapping
   // back on the account chooser instead of completing it. Without this,
   // Google's One Tap/FedCM flow rejects every subsequent prompt() with
@@ -10410,23 +10433,29 @@ async function _nbGoogleSignInWeb() {
   // picker UI still appears and looks selectable.
   try { window.google.accounts.id.cancel(); } catch (e) {}
   return new Promise((resolve, reject) => {
+    _nbGisPending = { resolve, reject };
     try {
-      window.google.accounts.id.initialize({
-        client_id: NB_GOOGLE_WEB_CLIENT_ID,
-        callback: (resp) => {
-          if (resp && resp.credential) resolve(resp.credential);
-          else reject(Object.assign(new Error('no credential'), { userCancelled: true }));
-        }
-      });
       window.google.accounts.id.prompt((notification) => {
-        if (notification && (notification.isNotDisplayed() || notification.isSkippedMoment())) {
-          // Dismissed/not shown — same as backing out of the native
-          // picker, not a real failure. Flagged userCancelled so the
-          // caller skips the "Sign-in failed" toast for it.
-          reject(Object.assign(new Error('one tap not shown'), { userCancelled: true }));
+        // isNotDisplayed()/getNotDisplayedReason() are deprecated under
+        // FedCM — Google stops reporting a display moment at all once
+        // it's enabled, so calling isNotDisplayed() here is unreliable
+        // (can report a false dismissal even when the picker is working)
+        // as well as the source of the other console warning. Only
+        // isSkippedMoment() and isDismissedMoment() remain meaningful;
+        // isDismissedMoment() is FedCM's equivalent of backing out of
+        // the picker without choosing an account.
+        if (notification && (notification.isSkippedMoment() || notification.isDismissedMoment())) {
+          if (_nbGisPending) {
+            const pending = _nbGisPending;
+            _nbGisPending = null;
+            pending.reject(Object.assign(new Error('sign-in dismissed'), { userCancelled: true }));
+          }
         }
       });
-    } catch (e) { reject(e); }
+    } catch (e) {
+      _nbGisPending = null;
+      reject(e);
+    }
   });
 }
 async function nbSignInWithGoogle() {
@@ -10451,7 +10480,14 @@ async function nbSignInWithGoogle() {
     // toast or a log entry.
     if (!(e && e.userCancelled)) {
       _nbLog('google sign-in', e);
-      showToast('Sign-in failed');
+      // The pre-flight _pubOfflineGuard() above only catches "offline at
+      // the moment the button was tapped" — this covers the connection
+      // dropping mid-flow (the Google exchange or the /auth/google call).
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        showToast('No internet connection \u2014 try again once you\u2019re back online');
+      } else {
+        showToast('Sign-in failed');
+      }
     }
   } finally {
     if (btn) _pubSetBtnLoading(btn, false);
