@@ -10401,8 +10401,32 @@ function _nbLoadGis() {
 // Resolves with the ID token from Google's One Tap prompt, or rejects if
 // it's dismissed/skipped (no prompt shown, already-declined this session,
 // etc.) — callers treat any rejection the same as a cancelled sign-in.
+// Registered once; resolves/rejects whichever sign-in attempt is
+// currently pending (see _nbGoogleSignInWeb below).
+let _nbGisInited = false;
+let _nbGisPending = null;
+function _nbGisCredentialCallback(resp) {
+  if (!_nbGisPending) return;
+  const { resolve, reject, timeoutId } = _nbGisPending;
+  clearTimeout(timeoutId);
+  _nbGisPending = null;
+  if (resp && resp.credential) resolve(resp.credential);
+  else reject(Object.assign(new Error('no credential'), { userCancelled: true }));
+}
 async function _nbGoogleSignInWeb() {
   await _nbLoadGis();
+  if (!_nbGisInited) {
+    // initialize() should only run once per page load — calling it again
+    // on every sign-in attempt is what produced the "initialize() is
+    // called multiple times" console warning, and use_fedcm_for_prompt
+    // opts into the browser-native FedCM picker Google is moving to.
+    window.google.accounts.id.initialize({
+      client_id: NB_GOOGLE_WEB_CLIENT_ID,
+      use_fedcm_for_prompt: true,
+      callback: _nbGisCredentialCallback
+    });
+    _nbGisInited = true;
+  }
   // Clears any request a previous call left outstanding — e.g. tapping
   // back on the account chooser instead of completing it. Without this,
   // Google's One Tap/FedCM flow rejects every subsequent prompt() with
@@ -10410,27 +10434,64 @@ async function _nbGoogleSignInWeb() {
   // picker UI still appears and looks selectable.
   try { window.google.accounts.id.cancel(); } catch (e) {}
   return new Promise((resolve, reject) => {
+    // Backstop for isNotDisplayed(): the one moment that fires neither
+    // isSkippedMoment() nor isDismissedMoment() below, and exactly what
+    // happens when FedCM can't show the picker at all (embedded WebView,
+    // no Google session, browser cooldown, etc). Without this, a prompt
+    // that's silently blocked leaves _nbGisPending pending forever —
+    // nbSignInWithGoogle()'s await never returns, so the button hangs on
+    // "Signing in…" with no error, no toast, no log. This turns that into
+    // a real rejection so it surfaces through the normal error handling.
+    const timeoutId = setTimeout(() => {
+      if (_nbGisPending) {
+        const pending = _nbGisPending;
+        _nbGisPending = null;
+        pending.reject(new Error('Google sign-in prompt did not appear'));
+      }
+    }, 8000);
+    _nbGisPending = { resolve, reject, timeoutId };
     try {
-      window.google.accounts.id.initialize({
-        client_id: NB_GOOGLE_WEB_CLIENT_ID,
-        callback: (resp) => {
-          if (resp && resp.credential) resolve(resp.credential);
-          else reject(Object.assign(new Error('no credential'), { userCancelled: true }));
-        }
-      });
       window.google.accounts.id.prompt((notification) => {
-        if (notification && (notification.isNotDisplayed() || notification.isSkippedMoment())) {
-          // Dismissed/not shown — same as backing out of the native
-          // picker, not a real failure. Flagged userCancelled so the
-          // caller skips the "Sign-in failed" toast for it.
-          reject(Object.assign(new Error('one tap not shown'), { userCancelled: true }));
+        // isNotDisplayed()/getNotDisplayedReason() are deprecated under
+        // FedCM — Google stops reporting a display moment at all once
+        // it's enabled, so calling isNotDisplayed() here is unreliable
+        // (can report a false dismissal even when the picker is working)
+        // as well as the source of the other console warning. Only
+        // isSkippedMoment() and isDismissedMoment() remain meaningful;
+        // isDismissedMoment() is FedCM's equivalent of backing out of
+        // the picker without choosing an account.
+        if (notification && (notification.isSkippedMoment() || notification.isDismissedMoment())) {
+          if (_nbGisPending) {
+            clearTimeout(_nbGisPending.timeoutId);
+            const pending = _nbGisPending;
+            _nbGisPending = null;
+            pending.reject(Object.assign(new Error('sign-in dismissed'), { userCancelled: true }));
+          }
         }
       });
-    } catch (e) { reject(e); }
+    } catch (e) {
+      clearTimeout(timeoutId);
+      _nbGisPending = null;
+      reject(e);
+    }
   });
 }
+// Races a promise against a timeout so a native/plugin call that never
+// settles (resolves or rejects) can't hang the caller forever — the loser
+// of the race is just ignored if it settles later. Used for GAuth.signIn()
+// below, which has no documented guarantee it always settles; the GIS web
+// fallback (_nbGoogleSignInWeb) has its own inline version of this same
+// guard for the same reason.
+function _nbWithTimeout(promise, ms, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
 async function nbSignInWithGoogle() {
-  if (_pubOfflineGuard()) return;
+  console.log('[nb] signin tapped, onLine=', navigator.onLine, 'GAuth=', !!_nbGoogleAuthPlugin());
+  if (_pubOfflineGuard()) { console.log('[nb] blocked by offline guard'); return; }
   const btn = document.getElementById('account-signin-btn');
   if (btn) _pubSetBtnLoading(btn, true, 'Signing in\u2026');
   try {
@@ -10438,7 +10499,7 @@ async function nbSignInWithGoogle() {
     const GAuth = _nbGoogleAuthPlugin();
     if (GAuth) {
       await nbInitGoogleAuth();
-      const result = await GAuth.signIn();
+      const result = await _nbWithTimeout(GAuth.signIn(), 15000, 'Google sign-in did not respond');
       idToken = result && result.authentication && result.authentication.idToken;
     } else {
       idToken = await _nbGoogleSignInWeb();
@@ -10451,7 +10512,14 @@ async function nbSignInWithGoogle() {
     // toast or a log entry.
     if (!(e && e.userCancelled)) {
       _nbLog('google sign-in', e);
-      showToast('Sign-in failed');
+      // The pre-flight _pubOfflineGuard() above only catches "offline at
+      // the moment the button was tapped" — this covers the connection
+      // dropping mid-flow (the Google exchange or the /auth/google call).
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        showToast('No internet connection \u2014 try again once you\u2019re back online');
+      } else {
+        showToast('Sign-in failed: ' + ((e && e.message) || 'unknown error'));
+      }
     }
   } finally {
     if (btn) _pubSetBtnLoading(btn, false);
@@ -12554,6 +12622,7 @@ function _nbLog(ctx, err) {
     const msg = err && (err.message || err.name) ? (err.message || err.name) : (err ? String(err) : '');
     _nbDebugLog.push({ t: Date.now(), ctx, msg });
     if (_nbDebugLog.length > 50) _nbDebugLog.shift();
+    console.error('[nb]', ctx, err);
   } catch (e) {}
 }
 
