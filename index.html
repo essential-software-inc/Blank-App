@@ -10544,12 +10544,12 @@ async function nbSignInWithGoogle() {
       // rather than a real retry. Signing out here resets that.
       const GAuthCleanup = _nbGoogleAuthPlugin();
       if (GAuthCleanup) { try { await GAuthCleanup.signOut(); } catch (e2) {} }
-      // The pre-flight _pubOfflineGuard() above only catches "offline at
-      // the moment the button was tapped" — this covers the connection
-      // dropping mid-flow (the Google exchange or the /auth/google call).
-      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        showToast('No internet connection \u2014 try again once you\u2019re back online');
-      } else if (e instanceof TypeError && /fetch/i.test((e && e.message) || '')) {
+      // navigator.onLine only reflects whether a network interface is
+      // associated, not whether it actually reaches the internet — it's
+      // known to misreport (right after backgrounding, on a captive
+      // portal, etc.), so it's dropped in favor of always probing real
+      // reachability below on a fetch-type failure.
+      if (e instanceof TypeError && /fetch/i.test((e && e.message) || '')) {
         // "Failed to fetch" is a deliberately generic browser/WebView
         // message — same text whether the cause is DNS, TLS, a captive
         // portal, or something specifically blocking note-publish, and
