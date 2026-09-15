@@ -10500,7 +10500,13 @@ function _nbWithTimeout(promise, ms, message) {
 // in nbSignInWithGoogle's catch block below.
 async function _nbProbeConnectivity() {
   try {
-    await fetch('https://www.gstatic.com/generate_204', { method: 'GET', cache: 'no-store' });
+    // no-cors: generate_204 doesn't send Access-Control-Allow-Origin, so
+    // a default (cors-mode) fetch always throws here regardless of real
+    // connectivity — the browser blocks reading the response before the
+    // network even matters. no-cors still makes the real request and
+    // only rejects on a genuine network failure; we don't need to read
+    // the (opaque) response, just whether the promise resolved at all.
+    await fetch('https://www.gstatic.com/generate_204', { method: 'GET', mode: 'no-cors', cache: 'no-store' });
     return true;
   } catch (e) {
     return false;
