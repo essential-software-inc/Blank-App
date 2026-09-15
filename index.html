@@ -10407,7 +10407,8 @@ let _nbGisInited = false;
 let _nbGisPending = null;
 function _nbGisCredentialCallback(resp) {
   if (!_nbGisPending) return;
-  const { resolve, reject } = _nbGisPending;
+  const { resolve, reject, timeoutId } = _nbGisPending;
+  clearTimeout(timeoutId);
   _nbGisPending = null;
   if (resp && resp.credential) resolve(resp.credential);
   else reject(Object.assign(new Error('no credential'), { userCancelled: true }));
@@ -10433,7 +10434,22 @@ async function _nbGoogleSignInWeb() {
   // picker UI still appears and looks selectable.
   try { window.google.accounts.id.cancel(); } catch (e) {}
   return new Promise((resolve, reject) => {
-    _nbGisPending = { resolve, reject };
+    // Backstop for isNotDisplayed(): the one moment that fires neither
+    // isSkippedMoment() nor isDismissedMoment() below, and exactly what
+    // happens when FedCM can't show the picker at all (embedded WebView,
+    // no Google session, browser cooldown, etc). Without this, a prompt
+    // that's silently blocked leaves _nbGisPending pending forever —
+    // nbSignInWithGoogle()'s await never returns, so the button hangs on
+    // "Signing in…" with no error, no toast, no log. This turns that into
+    // a real rejection so it surfaces through the normal error handling.
+    const timeoutId = setTimeout(() => {
+      if (_nbGisPending) {
+        const pending = _nbGisPending;
+        _nbGisPending = null;
+        pending.reject(new Error('Google sign-in prompt did not appear'));
+      }
+    }, 8000);
+    _nbGisPending = { resolve, reject, timeoutId };
     try {
       window.google.accounts.id.prompt((notification) => {
         // isNotDisplayed()/getNotDisplayedReason() are deprecated under
@@ -10446,6 +10462,7 @@ async function _nbGoogleSignInWeb() {
         // the picker without choosing an account.
         if (notification && (notification.isSkippedMoment() || notification.isDismissedMoment())) {
           if (_nbGisPending) {
+            clearTimeout(_nbGisPending.timeoutId);
             const pending = _nbGisPending;
             _nbGisPending = null;
             pending.reject(Object.assign(new Error('sign-in dismissed'), { userCancelled: true }));
@@ -10453,13 +10470,28 @@ async function _nbGoogleSignInWeb() {
         }
       });
     } catch (e) {
+      clearTimeout(timeoutId);
       _nbGisPending = null;
       reject(e);
     }
   });
 }
+// Races a promise against a timeout so a native/plugin call that never
+// settles (resolves or rejects) can't hang the caller forever — the loser
+// of the race is just ignored if it settles later. Used for GAuth.signIn()
+// below, which has no documented guarantee it always settles; the GIS web
+// fallback (_nbGoogleSignInWeb) has its own inline version of this same
+// guard for the same reason.
+function _nbWithTimeout(promise, ms, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
 async function nbSignInWithGoogle() {
-  if (_pubOfflineGuard()) return;
+  console.log('[nb] signin tapped, onLine=', navigator.onLine, 'GAuth=', !!_nbGoogleAuthPlugin());
+  if (_pubOfflineGuard()) { console.log('[nb] blocked by offline guard'); return; }
   const btn = document.getElementById('account-signin-btn');
   if (btn) _pubSetBtnLoading(btn, true, 'Signing in\u2026');
   try {
@@ -10467,7 +10499,7 @@ async function nbSignInWithGoogle() {
     const GAuth = _nbGoogleAuthPlugin();
     if (GAuth) {
       await nbInitGoogleAuth();
-      const result = await GAuth.signIn();
+      const result = await _nbWithTimeout(GAuth.signIn(), 15000, 'Google sign-in did not respond');
       idToken = result && result.authentication && result.authentication.idToken;
     } else {
       idToken = await _nbGoogleSignInWeb();
@@ -10486,7 +10518,7 @@ async function nbSignInWithGoogle() {
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
         showToast('No internet connection \u2014 try again once you\u2019re back online');
       } else {
-        showToast('Sign-in failed');
+        showToast('Sign-in failed: ' + ((e && e.message) || 'unknown error'));
       }
     }
   } finally {
@@ -12590,6 +12622,7 @@ function _nbLog(ctx, err) {
     const msg = err && (err.message || err.name) ? (err.message || err.name) : (err ? String(err) : '');
     _nbDebugLog.push({ t: Date.now(), ctx, msg });
     if (_nbDebugLog.length > 50) _nbDebugLog.shift();
+    console.error('[nb]', ctx, err);
   } catch (e) {}
 }
 
