@@ -10343,7 +10343,7 @@ function nbOpenFreeAppOnPlayStore() {
 //   not the Android client) and by the Google Identity Services fallback
 //   below. The worker's GOOGLE_CLIENT_IDS secret must include this same
 //   value or every /auth/google call will fail verification.
-const NB_GOOGLE_WEB_CLIENT_ID = 'REPLACE_WITH_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com';
+const NB_GOOGLE_WEB_CLIENT_ID = '41762787149-mkbeh1mus5e5v2gbkvnfh1fgblmkkfvj.apps.googleusercontent.com';
 const NB_SESSION_KEY = 'nbSessionToken';
 const NB_ACCOUNT_KEY = 'nbAccount'; // JSON: { sub, email }
 // Same cap the worker enforces on PUT /sync/notes (see note-publish's
@@ -10403,15 +10403,27 @@ function _nbLoadGis() {
 // etc.) — callers treat any rejection the same as a cancelled sign-in.
 async function _nbGoogleSignInWeb() {
   await _nbLoadGis();
+  // Clears any request a previous call left outstanding — e.g. tapping
+  // back on the account chooser instead of completing it. Without this,
+  // Google's One Tap/FedCM flow rejects every subsequent prompt() with
+  // "only one request may be outstanding at a time," even though the
+  // picker UI still appears and looks selectable.
+  try { window.google.accounts.id.cancel(); } catch (e) {}
   return new Promise((resolve, reject) => {
     try {
       window.google.accounts.id.initialize({
         client_id: NB_GOOGLE_WEB_CLIENT_ID,
-        callback: (resp) => { if (resp && resp.credential) resolve(resp.credential); else reject(new Error('no credential')); }
+        callback: (resp) => {
+          if (resp && resp.credential) resolve(resp.credential);
+          else reject(Object.assign(new Error('no credential'), { userCancelled: true }));
+        }
       });
       window.google.accounts.id.prompt((notification) => {
         if (notification && (notification.isNotDisplayed() || notification.isSkippedMoment())) {
-          reject(new Error('one tap not shown'));
+          // Dismissed/not shown — same as backing out of the native
+          // picker, not a real failure. Flagged userCancelled so the
+          // caller skips the "Sign-in failed" toast for it.
+          reject(Object.assign(new Error('one tap not shown'), { userCancelled: true }));
         }
       });
     } catch (e) { reject(e); }
