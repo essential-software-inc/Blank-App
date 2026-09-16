@@ -10754,9 +10754,16 @@ async function _nbCompleteGoogleSignIn(idToken) {
   // in locally, then push so the account's copy reflects the union of
   // both — mirrors nbImportNotes' additive-by-id merge, just without the
   // page reload (this runs silently right after sign-in, not as a
-  // user-initiated restore).
-  await nbSyncPull(false);
-  await nbSyncPush(false);
+  // user-initiated restore). Only push if the pull's outcome is known to
+  // be safe: either it actually merged (ok) or it definitively found no
+  // backup (not-found, a real first-time sync). Any other outcome means
+  // we don't know what's on the server — pushing anyway would overwrite
+  // a real backup with this device's local set (empty, for a device that
+  // never had it) purely because of a transient network/session failure.
+  const pullResult = await nbSyncPull(false);
+  if (pullResult.ok || pullResult.reason === 'not-found') {
+    await nbSyncPush(false);
+  }
 }
 // Schedules the account for deletion server-side (30-day grace period —
 // signing back in with the same Google account before then cancels it,
@@ -10844,7 +10851,7 @@ function _nbGatherNotesAndImages() {
   return { notes, images };
 }
 async function nbSyncPush(showFeedback) {
-  if (!nbIsSignedIn()) return;
+  if (!nbIsSignedIn()) return { ok: false, reason: 'not-signed-in' };
   const acct = nbAccount();
   const { notes, images } = _nbGatherNotesAndImages();
   const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
@@ -10860,7 +10867,7 @@ async function nbSyncPush(showFeedback) {
   const payload = JSON.stringify({ app: 'Note Builder', version: 1, notes, images, deletedIds });
   if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) {
     if (showFeedback) showToast('Too much to sync \u2014 try removing large images first');
-    return;
+    return { ok: false, reason: 'too-large' };
   }
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/sync/notes', {
@@ -10868,7 +10875,7 @@ async function nbSyncPush(showFeedback) {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
       body: payload
     });
-    if (res.status === 401) { _nbHandleSessionExpired(); return; }
+    if (res.status === 401) { _nbHandleSessionExpired(); return { ok: false, reason: 'session-expired' }; }
     if (!res.ok) throw new Error('sync push failed: ' + res.status);
     // Tag every note that was just backed up with this account's sub, so
     // it can be correctly hidden from the notes screen if the user signs
@@ -10887,9 +10894,11 @@ async function nbSyncPush(showFeedback) {
     });
     if (changed) nbSaveNotesArr(all);
     if (showFeedback) showToast('Synced to your account');
+    return { ok: true };
   } catch (e) {
     _nbLog('sync push', e);
     if (showFeedback) showToast('Sync failed');
+    return { ok: false, reason: 'error' };
   }
 }
 // A brand-new incoming note (id not seen locally yet) is always added,
@@ -10907,13 +10916,13 @@ async function nbSyncPush(showFeedback) {
 // and to remove a locally-held copy of one — unless this device edited it
 // after that deletion, in which case the local copy wins and survives.
 async function nbSyncPull(showFeedback) {
-  if (!nbIsSignedIn()) return;
+  if (!nbIsSignedIn()) return { ok: false, reason: 'not-signed-in' };
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/sync/notes', {
       headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
     });
-    if (res.status === 401) { _nbHandleSessionExpired(); return; }
-    if (res.status === 404) { if (showFeedback) showToast('Nothing backed up yet'); return; }
+    if (res.status === 401) { _nbHandleSessionExpired(); return { ok: false, reason: 'session-expired' }; }
+    if (res.status === 404) { if (showFeedback) showToast('Nothing backed up yet'); return { ok: false, reason: 'not-found' }; }
     if (!res.ok) throw new Error('sync pull failed: ' + res.status);
     const data = await res.json();
     const incoming = data && Array.isArray(data.notes) ? data.notes : [];
@@ -10979,28 +10988,72 @@ async function nbSyncPull(showFeedback) {
       if (removedCount) parts.push(removedCount === 1 ? '1 note removed' : removedCount + ' notes removed');
       showToast(parts.length ? parts.join(', ') : 'Already up to date');
     }
+    return { ok: true, restored: count, updated: updatedCount, removed: removedCount };
   } catch (e) {
     _nbLog('sync pull', e);
     if (showFeedback) showToast('Sync failed');
+    return { ok: false, reason: 'error' };
   }
 }
+// Unlike every other sync caller, this button is the one place a person
+// can deliberately ask "did that actually work?" — so unlike them it
+// reads nbSyncPull/nbSyncPush's return values and writes a real, specific
+// outcome into the persistent status line (not a toast: pull's and
+// push's toasts would just overwrite each other back-to-back, see
+// showToast, which only ever shows one message at a time). A session
+// expiry mid-sync already swaps this whole dialog to its signed-out state
+// (see _nbHandleSessionExpired), so there's no status line left to write
+// into at that point — just stop.
 function nbSyncNow() {
   const btn = document.getElementById('account-sync-btn');
   const status = document.getElementById('account-sync-status');
   if (btn) _pubSetBtnLoading(btn, true, 'Syncing\u2026');
   if (status) status.textContent = '';
   (async () => {
-    await nbSyncPull(false);
-    await nbSyncPush(false);
-    if (status) status.textContent = 'Last synced just now';
+    const pull = await nbSyncPull(false);
+    if (pull && pull.reason === 'session-expired') { if (btn) _pubSetBtnLoading(btn, false); return; }
+    const push = await nbSyncPush(false);
+    if (push && push.reason === 'session-expired') { if (btn) _pubSetBtnLoading(btn, false); return; }
+    if (status) {
+      const parts = [];
+      if (pull && pull.ok) {
+        if (pull.restored) parts.push(pull.restored === 1 ? '1 note restored' : pull.restored + ' notes restored');
+        if (pull.updated) parts.push(pull.updated === 1 ? '1 note updated' : pull.updated + ' notes updated');
+        if (pull.removed) parts.push(pull.removed === 1 ? '1 note removed' : pull.removed + ' notes removed');
+      } else if (pull && pull.reason === 'not-found') {
+        parts.push('nothing backed up yet');
+      } else {
+        parts.push('pull failed');
+      }
+      if (!push || !push.ok) parts.push('push failed');
+      status.textContent = 'Last synced just now \u2014 ' + (parts.length ? parts.join(', ') : 'already up to date');
+    }
     if (btn) _pubSetBtnLoading(btn, false);
   })();
 }
 // A session token the worker no longer recognizes (expired, or its KV
-// entry was cleared) — sign out locally rather than leaving every
-// subsequent sync/publish-as-owner call failing the same way forever.
+// entry was cleared — including the case where an account was actually
+// deleted server-side after its 30-day grace period). Mirrors the
+// untagging nbDeleteAccount() does for the device that requests the
+// deletion: without it, a device that only *learns* about the deletion
+// via a 401 here would sign out locally but leave its notes tagged to a
+// sub that can never sign in again, hiding them from nbVisibleNotes()
+// forever with no recovery path. Read the account before clearing it —
+// _nbClearAccountLocal() wipes the only copy of the sub we need to match
+// against.
 function _nbHandleSessionExpired() {
+  const acct = nbAccount();
   _nbClearAccountLocal();
+  if (acct) {
+    const all = nbLoadNotes();
+    let changed = false;
+    all.forEach(n => { if (n.acct === acct.sub) { delete n.acct; changed = true; } });
+    if (changed) {
+      nbSaveNotesArr(all);
+      buildCatBar();
+      nbRenderNotesScreen();
+    }
+  }
   showToast('Signed out \u2014 please sign in again');
   nbRenderAccountDialog();
 }
