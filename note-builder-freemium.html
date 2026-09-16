@@ -10309,7 +10309,10 @@ function nbIsPro() {
 }
 function nbAtFreeNoteLimit() {
   if (nbIsPro()) return false;
-  return nbLoadNotes().length >= NB_FREE_NOTE_LIMIT;
+  // nbVisibleNotes(), not nbLoadNotes() — a note hidden because it
+  // belongs to a different (or no) signed-in account shouldn't count
+  // against a limit the person has no way to see or manage right now.
+  return nbVisibleNotes().length >= NB_FREE_NOTE_LIMIT;
 }
 function openPaywallDialog() {
   document.getElementById('paywall-overlay').classList.add('open');
@@ -10432,11 +10435,16 @@ function _nbSaveDeletedIds(arr) {
   try { localStorage.setItem(NB_DELETED_IDS_KEY, JSON.stringify(arr)); } catch (e) {}
 }
 // Called at the moment a note is deleted locally. Re-recording an id
-// bumps its deletedAt rather than duplicating it.
+// bumps its deletedAt rather than duplicating it. Tagged with the
+// currently signed-in account (if any) the same way notes are — see
+// nbSyncPush, which only ever forwards a tombstone into the backup of
+// the account it's tagged to (or an untagged one, recorded while signed
+// out, which can only refer to a local-only note anyway).
 function _nbRecordDeletedId(id) {
   const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
+  const acct = nbAccount();
   const list = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff && t.id !== id);
-  list.push({ id, deletedAt: Date.now() });
+  list.push({ id, deletedAt: Date.now(), acct: acct ? acct.sub : undefined });
   _nbSaveDeletedIds(list);
 }
 
@@ -10735,6 +10743,13 @@ async function _nbCompleteGoogleSignIn(idToken) {
     : 'Signed in as ' + data.email);
   nbRenderAccountDialog();
   closeAccountScreen();
+  // Refresh the notes screen against the now-signed-in account right
+  // away — nbVisibleNotes() depends on nbAccount(), so this newly-signed
+  // -in account's own previously-synced notes (or another account's,
+  // if switching accounts on this device) need to show/hide immediately,
+  // not just whenever nbSyncPull below happens to add or remove a note.
+  buildCatBar();
+  nbRenderNotesScreen();
   // Pull first so anything already backed up from another device merges
   // in locally, then push so the account's copy reflects the union of
   // both — mirrors nbImportNotes' additive-by-id merge, just without the
@@ -10746,13 +10761,20 @@ async function _nbCompleteGoogleSignIn(idToken) {
 // Schedules the account for deletion server-side (30-day grace period —
 // signing back in with the same Google account before then cancels it,
 // see _nbCompleteGoogleSignIn) then clears local sign-in state the same
-// way nbSignOut() does. Notes already saved on this device are untouched
-// either way.
+// way nbSignOut() does. Notes already saved on this device aren't
+// deleted, but any of them tagged to this account (see nbSyncPush) are
+// untagged here — deleting the account should sever their cloud tie,
+// not strand them hidden behind an account the person just chose to
+// delete and may never sign back into. If they do cancel the deletion
+// by signing back in later, the next post-sign-in push (already
+// unconditional on nbVisibleNotes(), which these untagged notes are
+// part of) re-tags them to the account again automatically.
 async function nbDeleteAccount() {
   const Purchases = _nbRcPlugin();
   if (Purchases) { try { await Purchases.logOut(); } catch (e) { _nbLog('RevenueCat logOut', e); } }
   const GAuth = _nbGoogleAuthPlugin();
   if (GAuth) { try { await GAuth.signOut(); } catch (e) {} }
+  const deletedAcct = nbAccount();
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account', {
       method: 'DELETE',
@@ -10765,9 +10787,19 @@ async function nbDeleteAccount() {
     return false;
   }
   _nbClearAccountLocal();
+  if (deletedAcct) {
+    const all = nbLoadNotes();
+    let changed = false;
+    all.forEach(n => { if (n.acct === deletedAcct.sub) { delete n.acct; changed = true; } });
+    if (changed) nbSaveNotesArr(all);
+  }
   await nbRefreshProStatus();
   showToast('Account will be deleted in 30 days \u2014 sign back in to cancel');
   nbRenderAccountDialog();
+  // See the matching comment in nbSignOut() — the notes screen needs an
+  // explicit refresh now that nbAccount() has gone back to null.
+  buildCatBar();
+  nbRenderNotesScreen();
   return true;
 }
 async function nbSignOut() {
@@ -10779,13 +10811,25 @@ async function nbSignOut() {
   await nbRefreshProStatus();
   showToast('Signed out');
   nbRenderAccountDialog();
+  // nbVisibleNotes() reads nbAccount(), which just went back to null —
+  // without this, any account-tagged notes stay on screen (still
+  // deletable-as-if-local) until something else happens to trigger a
+  // re-render, which is exactly how this bug showed up in the first place.
+  buildCatBar();
+  nbRenderNotesScreen();
 }
 // Same {notes, images} shape nbExportNotes() writes to a backup file —
 // kept as its own small function rather than refactoring nbExportNotes
 // to call it, so this doesn't risk touching that function's existing
-// (already-shipped) file/share behavior.
+// (already-shipped) file/share behavior. Uses nbVisibleNotes() (not
+// nbLoadNotes()) so a push only ever uploads notes that belong here —
+// untagged local-only notes, or ones already tagged to the account
+// that's currently signed in. Without this scoping, signing into a
+// different Google account on the same device would silently upload a
+// previous account's leftover local notes into the new account's cloud
+// backup on the very next sync.
 function _nbGatherNotesAndImages() {
-  const notes = nbLoadNotes();
+  const notes = nbVisibleNotes();
   const images = {};
   notes.forEach(n => {
     const content = n.content || '';
@@ -10801,9 +10845,18 @@ function _nbGatherNotesAndImages() {
 }
 async function nbSyncPush(showFeedback) {
   if (!nbIsSignedIn()) return;
+  const acct = nbAccount();
   const { notes, images } = _nbGatherNotesAndImages();
   const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
-  const deletedIds = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff);
+  // Only ever send tombstones for deletes that could plausibly belong to
+  // this account's backup: untagged ones (recorded while signed out, so
+  // they can only refer to a local-only note that was never on any
+  // account's server) or ones already tagged to this same account.
+  // Otherwise a delete made under a previous account on this device
+  // could ride along into a different account's backup and, in the
+  // astronomically unlikely event of an id collision, wipe a note there
+  // that was never actually deleted.
+  const deletedIds = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff && (!t.acct || t.acct === acct.sub));
   const payload = JSON.stringify({ app: 'Note Builder', version: 1, notes, images, deletedIds });
   if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) {
     if (showFeedback) showToast('Too much to sync \u2014 try removing large images first');
@@ -10820,15 +10873,19 @@ async function nbSyncPush(showFeedback) {
     // Tag every note that was just backed up with this account's sub, so
     // it can be correctly hidden from the notes screen if the user signs
     // out (see nbVisibleNotes()) instead of staying visible and
-    // deletable-as-if-local. Once pushed, it genuinely belongs to the
-    // account, not just to this device — safe to tag unconditionally
-    // since `notes` here is exactly what the server now has.
-    const acct = nbAccount();
-    if (acct) {
-      let changed = false;
-      notes.forEach(n => { if (n.acct !== acct.sub) { n.acct = acct.sub; changed = true; } });
-      if (changed) nbSaveNotesArr(notes);
-    }
+    // deletable-as-if-local. Only touch the ids that were actually part
+    // of this push (never a different account's notes still sitting in
+    // local storage — those keep their own tag) and write the change
+    // back into the FULL local array, not the filtered `notes` list —
+    // overwriting the store with just `notes` would silently delete
+    // any other account's notes from this device.
+    const pushedIds = new Set(notes.map(n => n.id));
+    const all = nbLoadNotes();
+    let changed = false;
+    all.forEach(n => {
+      if (pushedIds.has(n.id) && n.acct !== acct.sub) { n.acct = acct.sub; changed = true; }
+    });
+    if (changed) nbSaveNotesArr(all);
     if (showFeedback) showToast('Synced to your account');
   } catch (e) {
     _nbLog('sync push', e);
@@ -10862,8 +10919,15 @@ async function nbSyncPull(showFeedback) {
       ));
     }
     const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
+    const acct = nbAccount();
+    // Every tombstone in this response came from this account's own
+    // backup (the GET above is authenticated as this account), so tag
+    // each one with its sub — same reasoning as tagging incoming notes
+    // below, and what lets nbSyncPush later avoid forwarding a delete
+    // into a different account's backup.
+    const taggedIncomingDeleted = acct ? incomingDeleted.map(t => t && Object.assign({}, t, { acct: acct.sub })) : incomingDeleted;
     const tombstones = new Map();
-    _nbLoadDeletedIds().concat(incomingDeleted).forEach(t => {
+    _nbLoadDeletedIds().concat(taggedIncomingDeleted).forEach(t => {
       if (!t || !t.id || typeof t.deletedAt !== 'number' || t.deletedAt < cutoff) return;
       const prev = tombstones.get(t.id);
       if (!prev || t.deletedAt > prev.deletedAt) tombstones.set(t.id, t);
@@ -10871,7 +10935,6 @@ async function nbSyncPull(showFeedback) {
     _nbSaveDeletedIds([...tombstones.values()]);
     let existing = nbLoadNotes();
     const ids = new Set(existing.map(n => n.id));
-    const acct = nbAccount();
     let count = 0;
     incoming.forEach(n => {
       if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
