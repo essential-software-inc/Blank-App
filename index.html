@@ -462,7 +462,7 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8a0bc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E")
 }
 
-#reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog, #delete-account-dialog {
+#reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog, #delete-account-dialog, #sync-conflict-dialog {
   background: #fff;
   border-radius: 18px;
   padding: 1.3rem 1.2rem 1.1rem;
@@ -1638,6 +1638,20 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
   display: flex
 }
 
+#sync-conflict-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 500;
+  align-items: center;
+  justify-content: center
+}
+
+#sync-conflict-overlay.open {
+  display: flex
+}
+
 #delete-overlay {
   display: none;
   position: fixed;
@@ -2486,11 +2500,16 @@ body.night .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #account-dialog, body.night #delete-account-dialog {
+body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #account-dialog, body.night #delete-account-dialog, body.night #sync-conflict-dialog {
   background: #111111;
   border: 1px solid #282828;
   border-radius: 18px;
   box-shadow: 0 16px 32px rgba(0, 0, 0, .4), 0 6px 12px rgba(0, 0, 0, .3)
+}
+
+body.night .acct-sync-btn {
+  background: #1c1c1c;
+  color: #999999
 }
 
 body.night .rdlg-title {
@@ -2822,11 +2841,16 @@ body.pink .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #account-dialog, body.pink #delete-account-dialog {
+body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #account-dialog, body.pink #delete-account-dialog, body.pink #sync-conflict-dialog {
   background: #fff2f7;
   border: none;
   border-radius: 18px;
   box-shadow: 0 16px 32px rgba(200, 54, 94, .12), 0 6px 12px rgba(0, 0, 0, .08)
+}
+
+body.pink .acct-sync-btn {
+  background: #f6d9e4;
+  color: #875068
 }
 
 body.pink .rdlg-title {
@@ -3807,6 +3831,17 @@ document.body.dataset.lockScrollY = window.scrollY;
   </div>
 </div>
 
+<div id="sync-conflict-overlay">
+  <div id="sync-conflict-dialog" style="z-index:501">
+    <div class="rdlg-title">Newer version available</div>
+    <div class="rdlg-body">This note was updated on another device, but you have unsaved edits here. Loading the newer version will discard your unsaved edits &mdash; this can&rsquo;t be undone.</div>
+    <div class="rdlg-btns">
+      <button class="rdlg-cancel" id="sync-conflict-keep">Keep editing</button>
+      <button class="rdlg-ok" id="sync-conflict-load">Load newer</button>
+    </div>
+  </div>
+</div>
+
 <div id="delete-overlay">
   <div id="delete-dialog" style="z-index:501">
     <div class="rdlg-title">Delete page?</div>
@@ -3864,7 +3899,7 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="paywall-overlay">
   <div id="paywall-dialog">
     <div class="rdlg-title">Free version</div>
-    <div class="rdlg-body">You're using the free version of the app &mdash; upgrade to Pro for unlimited notes. Already purchased? <a onclick="nbRestorePurchases()">Restore purchases</a>, or if you'd rather try things out first, <a onclick="nbOpenFreeAppOnPlayStore()">get the free app</a>.</div>
+    <div class="rdlg-body">You're using the free version of the app &mdash; upgrade to Pro for unlimited notes. Already purchased? <a onclick="nbRestorePurchases()">Restore purchases</a>.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel rdlg-getpro" onclick="nbPurchasePro()">Get Pro</button>
       <button class="rdlg-ok rdlg-ok--blue" onclick="closePaywallDialog()">OK</button>
@@ -10461,6 +10496,13 @@ const NB_SYNC_MAX_BYTES = 8 * 1024 * 1024;
 const NB_DELETED_IDS_KEY = 'nbDeletedNoteIds';
 const NB_TOMBSTONE_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
 const NB_SYNC_POLL_MS = 60 * 1000;
+// Every pull adds whatever it merged in here, whether it ran silently
+// (boot, poll, foreground) or from the Sync now tap itself. nbSyncNow
+// reports this total, not just its own pull's diff, then zeroes it —
+// otherwise a change the background poll already picked up moments
+// before someone taps Sync now would report as "already up to date",
+// indistinguishable from nothing ever having changed.
+let _nbSyncChangesSinceCheck = { restored: 0, updated: 0, removed: 0 };
 function _nbLoadDeletedIds() {
   try { return JSON.parse(localStorage.getItem(NB_DELETED_IDS_KEY) || '[]'); } catch (e) { return []; }
 }
@@ -10490,6 +10532,7 @@ function nbAccount() {
 function nbIsSignedIn() { return !!(nbSessionToken() && nbAccount()); }
 function _nbClearAccountLocal() {
   try { localStorage.removeItem(NB_SESSION_KEY); localStorage.removeItem(NB_ACCOUNT_KEY); } catch (e) {}
+  _nbSyncChangesSinceCheck = { restored: 0, updated: 0, removed: 0 };
 }
 // Same window.Capacitor.Plugins bridge _nbRcPlugin() already uses —
 // requires @codetrix-studio/capacitor-google-auth installed and `cap
@@ -10999,6 +11042,7 @@ async function nbSyncPull(showFeedback) {
     const editorScreenOpen = document.getElementById('screen-create').classList.contains('active');
     const editingId = _nbGetEditingId();
     let editorTouchedNote = null;
+    let editorLocalSavedFragment = null;
     incoming.forEach(n => {
       if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
       // Came from the account's backup, so it belongs to this account —
@@ -11022,7 +11066,14 @@ async function nbSyncPull(showFeedback) {
             pubSheetTouched = true;
           }
         }
-        if (editorScreenOpen && editingId && n.id === editingId) editorTouchedNote = n;
+        if (editorScreenOpen && editingId && n.id === editingId) {
+          editorTouchedNote = n;
+          // Snapshot the fragment this device last saved, before it's
+          // overwritten below — needed to tell whether the in-session
+          // draft (if any) actually diverges from it, or is just the
+          // unchanged carry-over uiState.full set in nbRenderCanvas.
+          editorLocalSavedFragment = _nbExtractCanvasFragment(existing[idx].content);
+        }
         existing[idx] = n;
         updatedCount++;
       }
@@ -11040,6 +11091,9 @@ async function nbSyncPull(showFeedback) {
       removedCount++;
       return false;
     });
+    _nbSyncChangesSinceCheck.restored += count;
+    _nbSyncChangesSinceCheck.updated += updatedCount;
+    _nbSyncChangesSinceCheck.removed += removedCount;
     if (count || updatedCount || removedCount) {
       // New notes just got push()'d onto the end above (see the merge
       // loop) regardless of when they were actually created — the list's
@@ -11060,12 +11114,23 @@ async function nbSyncPull(showFeedback) {
       if (pubSheetTouched) nbOpenPublishSheet(_pubNoteId);
       // Discard the stale in-session draft and let nbRenderCanvas fall
       // back to the freshly-pulled savedFragment — same effect as Reset
-      // to original, minus the confirm dialog, since the person didn't
-      // ask for this; sync just found a newer copy of the open note.
+      // to original, minus the confirm dialog — UNLESS there's an
+      // unsaved draft that actually diverges from what this device last
+      // saved. In that case silently swapping content would destroy
+      // in-progress typing (see _nbShowSyncConflictPrompt), so warn and
+      // let the person choose instead of discarding for them.
       if (editorTouchedNote) {
-        _nbClearDraftUiState('note_' + editingId, _nbExtractCanvasFragment(editorTouchedNote.content));
-        nbRenderCanvas();
-        showToast('This note was updated from another device');
+        const remoteFragment = _nbExtractCanvasFragment(editorTouchedNote.content);
+        const draft = _nbLoadDraftUiState('note_' + editingId);
+        const hasDivergingDraft = draft && typeof draft.full === 'string' &&
+          editorLocalSavedFragment !== null && draft.full !== editorLocalSavedFragment;
+        if (hasDivergingDraft) {
+          _nbShowSyncConflictPrompt(editingId, remoteFragment);
+        } else {
+          _nbClearDraftUiState('note_' + editingId, remoteFragment);
+          nbRenderCanvas();
+          showToast('This note was updated from another device');
+        }
       }
     }
     if (showFeedback) {
@@ -11127,9 +11192,11 @@ function nbSyncNow() {
     }
     const parts = [];
     if (pullOk) {
-      if (pull.restored) parts.push(pull.restored === 1 ? '1 note restored' : pull.restored + ' notes restored');
-      if (pull.updated) parts.push(pull.updated === 1 ? '1 note updated' : pull.updated + ' notes updated');
-      if (pull.removed) parts.push(pull.removed === 1 ? '1 note removed' : pull.removed + ' notes removed');
+      const c = _nbSyncChangesSinceCheck;
+      if (c.restored) parts.push(c.restored === 1 ? '1 note restored' : c.restored + ' notes restored');
+      if (c.updated) parts.push(c.updated === 1 ? '1 note updated' : c.updated + ' notes updated');
+      if (c.removed) parts.push(c.removed === 1 ? '1 note removed' : c.removed + ' notes removed');
+      _nbSyncChangesSinceCheck = { restored: 0, updated: 0, removed: 0 };
     } else if (pullNotFound) {
       parts.push('nothing backed up yet');
     } else {
@@ -13800,6 +13867,56 @@ window.addEventListener('message', function (e) {
 // new note it's the blank pristine template; for a reopened existing
 // note it's that note's own last-saved content (discarding in-session
 // edits, not the note itself).
+// Shown from nbSyncPull when the open note got a newer copy from
+// another device AND this session has an unsaved draft that actually
+// diverges from what was last saved here — i.e. discarding it now
+// would lose real in-progress edits, not just an untouched carry-over
+// of the old saved content. Re-checks editingId before applying either
+// choice, since the polling pull that triggered this can land well
+// after the person has since navigated away or started editing again.
+function _nbShowSyncConflictPrompt(editingId, remoteFragment) {
+  const ov = document.getElementById('sync-conflict-overlay');
+  if (ov.classList.contains('open')) {
+    // Already showing a prompt for this same note (editorTouchedNote in
+    // nbSyncPull only fires for the currently-open note, so a second call
+    // while one is up is always a newer update to that same note landing
+    // mid-prompt — e.g. two poll ticks in a row before the person
+    // responds). The note record in storage has already moved on to this
+    // newer copy by the time we get here; without this, the "Load newer
+    // version" button stays bound to the *first* prompt's remoteFragment
+    // and would silently hand back an out-of-date version even though a
+    // newer one has since arrived. Refresh the pending data in place
+    // instead of dropping it.
+    ov._nbPendingEditingId = editingId;
+    ov._nbPendingRemoteFragment = remoteFragment;
+    return; // one visible prompt at a time
+  }
+  ov._nbPendingEditingId = editingId;
+  ov._nbPendingRemoteFragment = remoteFragment;
+  ov.classList.add('open');
+  const close = () => ov.classList.remove('open');
+  document.getElementById('sync-conflict-keep').onclick = () => {
+    close();
+    // Leaves the local unsaved draft exactly as-is; the newer remote
+    // copy is already in storage (existing[idx] was updated above), so
+    // an explicit save from here will overwrite it, same as any other
+    // last-write-wins conflict.
+  };
+  ov.onclick = (e) => { if (e.target === ov) close(); };
+  document.getElementById('sync-conflict-load').onclick = () => {
+    close();
+    // Read whatever's currently pending rather than the editingId/
+    // remoteFragment this handler closed over — a later call while the
+    // prompt was open (see above) may have refreshed both to a newer
+    // update for the same note.
+    const pendingId = ov._nbPendingEditingId;
+    const pendingFragment = ov._nbPendingRemoteFragment;
+    if (_nbGetEditingId() !== pendingId) return; // moved on since the prompt was raised
+    _nbClearDraftUiState('note_' + pendingId, pendingFragment);
+    nbRenderCanvas();
+    showToast('Loaded the newer version');
+  };
+}
 function resetEditToOriginal() {
   const ov = document.getElementById('edit-reset-overlay');
   ov.classList.add('open');
