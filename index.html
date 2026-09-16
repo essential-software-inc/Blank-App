@@ -10392,7 +10392,7 @@ async function nbPurchasePro() {
     // dismiss, not a failure worth logging or showing a toast for.
     if (!(e && e.userCancelled)) {
       _nbLog('RevenueCat purchase failed', e);
-      showToast((e && e.message) || 'Purchase failed');
+      showToast('Purchase failed');
     }
   } finally {
     if (btn) _pubSetBtnLoading(btn, false);
@@ -10742,15 +10742,13 @@ async function nbSignInWithGoogle() {
         // message — same text whether the cause is DNS, TLS, a captive
         // portal, or something specifically blocking note-publish, and
         // it carries no further detail to inspect. Probing a
-        // known-reachable host tells the two apart right in the toast,
-        // which matters here since this app is tested phone-only with
-        // no devtools/console access to read a more detailed error.
+        // known-reachable host tells the two apart right in the toast.
         const reachedControl = await _nbProbeConnectivity();
         showToast(reachedControl
           ? 'Couldn\u2019t reach the sign-in server, but your connection is otherwise fine \u2014 try again shortly'
           : 'No internet connection right now \u2014 try again once you\u2019re back online');
       } else {
-        showToast('Sign-in failed: ' + ((e && e.message) || 'unknown error'));
+        showToast('Sign-in failed \u2014 try again');
       }
     }
   } finally {
@@ -11118,18 +11116,28 @@ function nbSyncNow() {
     const push = await nbSyncPush(false);
     if (btn) { btn.classList.remove('syncing'); btn.disabled = false; }
     if (push && push.reason === 'session-expired') return;
+    const pullOk = pull && pull.ok;
+    const pullNotFound = pull && pull.reason === 'not-found';
+    const pushOk = push && push.ok;
+    if (!pullOk && !pullNotFound && !pushOk) {
+      // Both legs failed — almost always the same underlying problem
+      // (offline, server down), not two separate ones, so say it once.
+      showToast('Sync failed \u2014 check your connection and try again');
+      return;
+    }
     const parts = [];
-    if (pull && pull.ok) {
+    if (pullOk) {
       if (pull.restored) parts.push(pull.restored === 1 ? '1 note restored' : pull.restored + ' notes restored');
       if (pull.updated) parts.push(pull.updated === 1 ? '1 note updated' : pull.updated + ' notes updated');
       if (pull.removed) parts.push(pull.removed === 1 ? '1 note removed' : pull.removed + ' notes removed');
-    } else if (pull && pull.reason === 'not-found') {
+    } else if (pullNotFound) {
       parts.push('nothing backed up yet');
     } else {
-      parts.push('pull failed');
+      parts.push('couldn\u2019t check for updates');
     }
-    if (!push || !push.ok) parts.push('push failed');
-    showToast(parts.length ? parts.join(', ') : 'Already up to date');
+    if (!pushOk) parts.push('backup failed');
+    const msg = parts.length ? parts.join(', ') : 'Already up to date';
+    showToast(msg.charAt(0).toUpperCase() + msg.slice(1));
   })();
 }
 // A session token the worker no longer recognizes (expired, or its KV
