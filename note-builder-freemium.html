@@ -10418,8 +10418,8 @@ const NB_ACCOUNT_KEY = 'nbAccount'; // JSON: { sub, email }
 // with a clear toast instead of a generic network error after the upload.
 const NB_SYNC_MAX_BYTES = 8 * 1024 * 1024;
 // Tombstones for cross-device delete propagation (see nbSyncPush/nbSyncPull
-// below). The additive-only note merge can't tell "created on another
-// device" apart from "deleted on this one" without this: a plain list of
+// below). nbSyncPull's merge can't tell "created on another device" apart
+// from "deleted on this one" without this: a plain list of
 // {id, deletedAt} kept alongside the notes array, pushed and pulled like
 // the notes are, and consulted on pull to both skip re-adding a note
 // that's been deleted elsewhere and to remove a locally-held copy of one.
@@ -10892,15 +10892,20 @@ async function nbSyncPush(showFeedback) {
     if (showFeedback) showToast('Sync failed');
   }
 }
-// Additive merge for new notes, same rule nbImportNotes uses for a file
-// restore: an incoming note only gets added if its id isn't already
-// present locally — never overwrites an edit made on this device. Deletes
-// are handled separately via the tombstone list (see NB_DELETED_IDS_KEY
-// above): merged with whatever the server sent, then used both to skip
-// re-adding a note deleted elsewhere and to remove a locally-held copy of
-// one — unless this device edited it after that deletion, in which case
-// the local copy wins and survives. That makes push-then-pull order safe
-// to call from either direction without a real conflict resolution step.
+// A brand-new incoming note (id not seen locally yet) is always added,
+// same rule nbImportNotes uses for a file restore. For an id that exists
+// on both sides, this is last-write-wins by updatedAt: the incoming copy
+// only replaces the local one if it's strictly newer, so an edit made on
+// this device after the last push isn't clobbered by an older server
+// copy, but a genuinely newer edit from another device does come down.
+// This is not real conflict resolution — two devices editing the same
+// note while both offline still just have the newer timestamp win, with
+// no merge and no warning — but it's a big step up from never pulling
+// edits to a known note at all. Deletes are handled separately via the
+// tombstone list (see NB_DELETED_IDS_KEY above): merged with whatever the
+// server sent, then used both to skip re-adding a note deleted elsewhere
+// and to remove a locally-held copy of one — unless this device edited it
+// after that deletion, in which case the local copy wins and survives.
 async function nbSyncPull(showFeedback) {
   if (!nbIsSignedIn()) return;
   try {
@@ -10934,17 +10939,23 @@ async function nbSyncPull(showFeedback) {
     });
     _nbSaveDeletedIds([...tombstones.values()]);
     let existing = nbLoadNotes();
-    const ids = new Set(existing.map(n => n.id));
+    const indexById = new Map(existing.map((n, i) => [n.id, i]));
     let count = 0;
+    let updatedCount = 0;
     incoming.forEach(n => {
       if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
-      if (!ids.has(n.id)) {
-        // Came from the account's backup, so it belongs to this account —
-        // tag it the same way a push does, so nbVisibleNotes() hides it
-        // again if the user later signs out. See nbSyncPush for the tag.
-        if (acct) n.acct = acct.sub;
+      // Came from the account's backup, so it belongs to this account —
+      // tag it the same way a push does, so nbVisibleNotes() hides it
+      // again if the user later signs out. See nbSyncPush for the tag.
+      if (acct) n.acct = acct.sub;
+      const idx = indexById.get(n.id);
+      if (idx === undefined) {
         existing.push(n);
+        indexById.set(n.id, existing.length - 1);
         count++;
+      } else if ((n.updatedAt || 0) > (existing[idx].updatedAt || 0)) {
+        existing[idx] = n;
+        updatedCount++;
       }
     });
     let removedCount = 0;
@@ -10956,7 +10967,7 @@ async function nbSyncPull(showFeedback) {
       removedCount++;
       return false;
     });
-    if (count || removedCount) {
+    if (count || updatedCount || removedCount) {
       nbSaveNotesArr(existing);
       buildCatBar();
       nbRenderNotesScreen();
@@ -10964,6 +10975,7 @@ async function nbSyncPull(showFeedback) {
     if (showFeedback) {
       const parts = [];
       if (count) parts.push(count === 1 ? '1 note restored' : count + ' notes restored');
+      if (updatedCount) parts.push(updatedCount === 1 ? '1 note updated' : updatedCount + ' notes updated');
       if (removedCount) parts.push(removedCount === 1 ? '1 note removed' : removedCount + ' notes removed');
       showToast(parts.length ? parts.join(', ') : 'Already up to date');
     }
