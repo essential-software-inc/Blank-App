@@ -10428,6 +10428,7 @@ const NB_SYNC_MAX_BYTES = 8 * 1024 * 1024;
 // syncing, not be permanent.
 const NB_DELETED_IDS_KEY = 'nbDeletedNoteIds';
 const NB_TOMBSTONE_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+const NB_SYNC_POLL_MS = 60 * 1000;
 function _nbLoadDeletedIds() {
   try { return JSON.parse(localStorage.getItem(NB_DELETED_IDS_KEY) || '[]'); } catch (e) { return []; }
 }
@@ -10496,6 +10497,10 @@ function _nbNudgeWebViewRepaint() {
 // Activity the same way can leave the same stuck-dim WebView behind, and
 // this catches the app coming back to foreground regardless of which one
 // caused it. Registered once; a no-op if @capacitor/app isn't installed.
+// Also the natural point to sync immediately: the poll loop only covers
+// staleness while the app is open and foregrounded, so a background gap
+// (the whole reason isActive fires here) would otherwise sit unsynced
+// until the next poll tick.
 let _nbAppResumeListenerBound = false;
 function _nbBindAppResumeListener() {
   if (_nbAppResumeListenerBound) return;
@@ -10504,7 +10509,10 @@ function _nbBindAppResumeListener() {
   _nbAppResumeListenerBound = true;
   try {
     AppPlugin.addListener('appStateChange', (state) => {
-      if (state && state.isActive) _nbNudgeWebViewRepaint();
+      if (state && state.isActive) {
+        _nbNudgeWebViewRepaint();
+        nbSyncPullThenPush();
+      }
     });
   } catch (e) {}
 }
@@ -10754,16 +10762,9 @@ async function _nbCompleteGoogleSignIn(idToken) {
   // in locally, then push so the account's copy reflects the union of
   // both — mirrors nbImportNotes' additive-by-id merge, just without the
   // page reload (this runs silently right after sign-in, not as a
-  // user-initiated restore). Only push if the pull's outcome is known to
-  // be safe: either it actually merged (ok) or it definitively found no
-  // backup (not-found, a real first-time sync). Any other outcome means
-  // we don't know what's on the server — pushing anyway would overwrite
-  // a real backup with this device's local set (empty, for a device that
-  // never had it) purely because of a transient network/session failure.
-  const pullResult = await nbSyncPull(false);
-  if (pullResult.ok || pullResult.reason === 'not-found') {
-    await nbSyncPush(false);
-  }
+  // user-initiated restore). See nbSyncPullThenPush for why the push is
+  // conditional on the pull's outcome.
+  await nbSyncPullThenPush();
 }
 // Schedules the account for deletion server-side (30-day grace period —
 // signing back in with the same Google account before then cancels it,
@@ -10994,6 +10995,21 @@ async function nbSyncPull(showFeedback) {
     if (showFeedback) showToast('Sync failed');
     return { ok: false, reason: 'error' };
   }
+}
+// Every silent/automatic sync (sign-in completion, app boot, the poll
+// loop below) pulls first, then only pushes if the pull's outcome is
+// known to be safe: either it actually merged (ok) or it definitively
+// found no backup (not-found, a real first-time sync). Any other
+// outcome (error, session-expired) means we don't know what's on the
+// server — pushing anyway would overwrite a real backup with this
+// device's local set purely because of a transient failure. The manual
+// "Sync now" button doesn't use this: it wants both results separately
+// to report on, and staying signed in un-syncable until the next retry
+// isn't a risk worth caring about there since the user's watching.
+async function nbSyncPullThenPush() {
+  const pull = await nbSyncPull(false);
+  if (pull.ok || pull.reason === 'not-found') await nbSyncPush(false);
+  return pull;
 }
 // Unlike every other sync caller, this button is the one place a person
 // can deliberately ask "did that actually work?" — so unlike them it
@@ -12014,10 +12030,13 @@ function _pubSaveNoteFields(id, fields) {
   Object.assign(arr[idx], fields);
   nbSaveNotesArr(arr);
   // Every caller here is a publish/update/unpublish action from outside
-  // the editor (so the leavingEditor auto-sync never fires) — without
-  // this, published/unpublished state only exists on this device until
-  // something else happens to sync.
-  nbSyncPush(false);
+  // the editor, none of which land on nbGoScreen's two sync triggers —
+  // sync explicitly, pull-then-push, or (a) this published/unpublished
+  // state only exists on this device until something else happens to
+  // sync, and (b) pushing without pulling first would blindly overwrite
+  // the server with whatever this device last saw, silently dropping
+  // any change made on another device since.
+  nbSyncPullThenPush();
   return arr[idx];
 }
 function _pubDefaultSlug(note) {
@@ -12639,13 +12658,19 @@ function nbDeleteNote(id) {
         const notes = nbLoadNotes().filter(n => n.id !== id);
         nbSaveNotesArr(notes);
         _nbRecordDeletedId(id);
-        // Deletion is invisible to nbSyncPull's additive-only merge — a
-        // deleted note is indistinguishable from one created elsewhere,
-        // so pulling again just adds it right back. Pushing the
-        // post-delete snapshot immediately (rather than waiting for the
-        // editor-exit push, which this list-screen action never reaches)
-        // is what keeps a sign-out/sign-in cycle from resurrecting it.
-        nbSyncPush(false);
+        // The just-recorded tombstone already blocks this note from being
+        // resurrected by the pull below (nbSyncPull skips any incoming
+        // note with a matching local tombstone, regardless of whether
+        // that tombstone's been pushed yet) — so pulling first is safe,
+        // and it's what keeps this push from blindly overwriting the
+        // server with a stale local snapshot if this device hasn't seen
+        // another device's changes since its last sync. The push itself
+        // is still what actually propagates the deletion to the server —
+        // pulling alone never would, since a delete is otherwise
+        // indistinguishable from a note that just doesn't exist yet
+        // elsewhere. Immediate rather than waiting for the editor-exit
+        // trigger, which this list-screen action never reaches.
+        nbSyncPullThenPush();
         buildCatBar();
         nbRenderNotesScreen();
         showToast('Note deleted, but its page may still be live — try unpublishing again later');
@@ -12657,7 +12682,7 @@ function nbDeleteNote(id) {
     nbSaveNotesArr(notes);
     _nbRecordDeletedId(id);
     // See the comment on the unpublish-failure branch above.
-    nbSyncPush(false);
+    nbSyncPullThenPush();
     buildCatBar();
     nbRenderNotesScreen();
     showToast('Note deleted');
@@ -12666,6 +12691,26 @@ function nbDeleteNote(id) {
 }
 buildCatBar();
 nbRenderNotesScreen();
+// A reload/reopen with an already-signed-in session (token already in
+// localStorage) never goes through _nbCompleteGoogleSignIn again, and
+// that's the only other place that pulled automatically before this —
+// so without a poll, a device that's already signed in stays frozen at
+// whatever it last synced, invisible to changes made elsewhere for the
+// entire time it's open, until someone happens to hit "Sync now". One
+// immediate sync on boot, then a recurring one for as long as the tab
+// stays open. `_nbSyncPollBusy` skips a tick already in flight rather
+// than letting two overlap if a pull is unusually slow; `document.hidden`
+// skips ticks while backgrounded (a Capacitor WebView keeps running JS
+// in the background, and a browser tab throttles but doesn't always stop
+// timers) so a signed-in device left backgrounded isn't polling a server
+// nobody's about to look at.
+if (nbIsSignedIn()) nbSyncPullThenPush();
+let _nbSyncPollBusy = false;
+setInterval(() => {
+  if (!nbIsSignedIn() || document.hidden || _nbSyncPollBusy) return;
+  _nbSyncPollBusy = true;
+  nbSyncPullThenPush().finally(() => { _nbSyncPollBusy = false; });
+}, NB_SYNC_POLL_MS);
 
 /* ===================== Generic key/value store (IndexedDB) =====================
    Used by the note image cache (_nbInitImageCache and friends) to persist
@@ -12908,15 +12953,20 @@ function nbGoScreen(name) {
   document.getElementById('bn-create').setAttribute('aria-label', name === 'create' ? 'Editor' : 'New note');
   document.getElementById('hdr-title-text').textContent = (name === 'create') ? 'Editor' : 'My Library';
   window.scrollTo(0, 0);
-  // Auto-sync on exit rather than on every keystroke/save inside the
-  // editor — cheap-ish (one PUT with the full notes+images payload) but
-  // not free, and nothing inside the editor needs the cloud copy to be
-  // current mid-session. Silent (no toast) since this is a background
-  // convenience, not a user-initiated action; nbSyncPush already no-ops
-  // if signed out. Fire-and-forget: a failure here (offline, expired
-  // session) isn't worth interrupting the screen switch over, and the
-  // manual "Sync now" button remains for anyone who wants to confirm it.
-  if (leavingEditor) nbSyncPush(false);
+  // Auto-sync on leaving the Editor, or on landing on the Notes screen
+  // from anywhere else — the two moments a person is either about to
+  // look at their notes or just finished changing one, so it's worth
+  // catching up with the server right then rather than waiting up to
+  // NB_SYNC_POLL_MS for the poll loop to get to it. Pull-then-push (see
+  // nbSyncPullThenPush) rather than the push-only call this used to be:
+  // leaving the editor should also pick up anything backed up from
+  // another device, not just push this device's own edit. Silent (no
+  // toast) since this is a background convenience, not a user-initiated
+  // action; nbSyncPullThenPush already no-ops if signed out. Fire-and-
+  // forget: a failure here (offline, expired session) isn't worth
+  // interrupting the screen switch over, and the manual "Sync now"
+  // button remains for anyone who wants to confirm it.
+  if (leavingEditor || name === 'notes') nbSyncPullThenPush();
 }
 // Enforce the landing state explicitly (Create screen + search bar hidden)
 // rather than relying on the HTML's default classes matching this JS.
@@ -13718,11 +13768,12 @@ function nbConfirmSave() {
     if (idx !== -1) {
       notes[idx] = Object.assign({}, notes[idx], { title, desc, category, tags, updatedAt: Date.now() });
       nbSaveNotesArr(notes);
-      // This quick-edit dialog never goes through the editor, so the
-      // leavingEditor auto-sync in nbGoScreen never fires for it — push
-      // explicitly or the edit only exists locally until something else
-      // happens to sync.
-      nbSyncPush(false);
+      // This quick-edit dialog never goes through the editor or leaves
+      // the Notes screen, so neither of nbGoScreen's two sync triggers
+      // fires for it — sync explicitly here, same pull-then-push as
+      // everywhere else, or the edit only exists locally until something
+      // else happens to sync.
+      nbSyncPullThenPush();
     }
     nbCloseSaveDialog();
     showToast('Note updated');
