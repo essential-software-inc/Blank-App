@@ -10817,6 +10817,18 @@ async function nbSyncPush(showFeedback) {
     });
     if (res.status === 401) { _nbHandleSessionExpired(); return; }
     if (!res.ok) throw new Error('sync push failed: ' + res.status);
+    // Tag every note that was just backed up with this account's sub, so
+    // it can be correctly hidden from the notes screen if the user signs
+    // out (see nbVisibleNotes()) instead of staying visible and
+    // deletable-as-if-local. Once pushed, it genuinely belongs to the
+    // account, not just to this device — safe to tag unconditionally
+    // since `notes` here is exactly what the server now has.
+    const acct = nbAccount();
+    if (acct) {
+      let changed = false;
+      notes.forEach(n => { if (n.acct !== acct.sub) { n.acct = acct.sub; changed = true; } });
+      if (changed) nbSaveNotesArr(notes);
+    }
     if (showFeedback) showToast('Synced to your account');
   } catch (e) {
     _nbLog('sync push', e);
@@ -10859,10 +10871,18 @@ async function nbSyncPull(showFeedback) {
     _nbSaveDeletedIds([...tombstones.values()]);
     let existing = nbLoadNotes();
     const ids = new Set(existing.map(n => n.id));
+    const acct = nbAccount();
     let count = 0;
     incoming.forEach(n => {
       if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
-      if (!ids.has(n.id)) { existing.push(n); count++; }
+      if (!ids.has(n.id)) {
+        // Came from the account's backup, so it belongs to this account —
+        // tag it the same way a push does, so nbVisibleNotes() hides it
+        // again if the user later signs out. See nbSyncPush for the tag.
+        if (acct) n.acct = acct.sub;
+        existing.push(n);
+        count++;
+      }
     });
     let removedCount = 0;
     existing = existing.filter(n => {
@@ -11144,6 +11164,23 @@ function nbLoadNotes() {
 }
 function nbSaveNotesArr(arr) {
   try { localStorage.setItem(NB_NOTES_KEY, JSON.stringify(arr)); } catch (e) { _nbLog('notes save', e); }
+}
+// Notes tagged with the account they've been synced to (see the `acct`
+// field set in nbSyncPush/nbSyncPull) shouldn't appear on the notes
+// screen unless that same account is currently signed in — otherwise a
+// synced note stays visible while signed out, and deleting it there
+// records a tombstone that later wipes it from the account on next
+// sign-in (the account-mismatch case is a smaller version of the same
+// problem: a different Google account signed into this device
+// shouldn't see another account's notes either). Untagged notes have
+// never been synced, so they're always local and always visible. Use
+// this instead of nbLoadNotes() anywhere the UI lists/searches/counts
+// notes for display; keep nbLoadNotes() (the full, untagged-included
+// set) for sync push/pull and id-based lookups, which need to operate
+// on everything actually stored on the device.
+function nbVisibleNotes() {
+  const acct = nbAccount();
+  return nbLoadNotes().filter(n => !n.acct || (acct && n.acct === acct.sub));
 }
 function nbExportNotes() {
   const notes = nbLoadNotes();
@@ -12243,7 +12280,7 @@ let _nbSearchQ = '';
 function buildCatBar() {
   const bar = document.getElementById('feed-cats');
   if (!bar) return;
-  const notes = nbLoadNotes();
+  const notes = nbVisibleNotes();
   const customCats = new Map();
   notes.forEach(n => {
     const raw = (n.category || '').trim();
@@ -12348,7 +12385,7 @@ function nbStartCarouselAutoplay() {
   _nbCarouselTimer = setInterval(() => nbGoToCarouselSlide(_nbCarouselIdx + 1, false), 4500);
 }
 function nbRenderNotesScreen() {
-  const all = nbLoadNotes();
+  const all = nbVisibleNotes();
   const empty = document.getElementById('notes-empty-state');
   const grid = document.getElementById('nb-notes-grid');
   const carousel = document.getElementById('nb-onboard-carousel');
