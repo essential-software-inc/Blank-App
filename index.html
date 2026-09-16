@@ -486,6 +486,39 @@ body.pink #terms-dialog .rdlg-body a {
   color: #c8365e
 }
 
+.rdlg-more-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a8d99;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding-top: .5rem;
+  margin-bottom: 1rem;
+  border-top: 1px solid #eceef2
+}
+
+.rdlg-more-toggle svg {
+  flex: none;
+  color: #8a8d99;
+  transition: transform .18s
+}
+
+.rdlg-more-toggle.is-open svg {
+  transform: rotate(180deg)
+}
+
+body.night .rdlg-more-toggle {
+  border-top-color: #282828
+}
+
+body.pink .rdlg-more-toggle {
+  border-top-color: #f0d9e4
+}
+
 .rdlg-title {
   font-size: .95rem;
   font-weight: bold;
@@ -1630,6 +1663,20 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 }
 
 #unpublish-overlay.open {
+  display: flex
+}
+
+#delete-account-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 910;
+  align-items: center;
+  justify-content: center
+}
+
+#delete-account-overlay.open {
   display: flex
 }
 
@@ -3755,6 +3802,18 @@ document.body.dataset.lockScrollY = window.scrollY;
   </div>
 </div>
 
+<div id="delete-account-overlay">
+  <div id="delete-account-dialog" style="z-index:911">
+    <div class="rdlg-title">Delete account?</div>
+    <div class="rdlg-body">This signs you out and schedules your synced notes and published pages for permanent removal from Essential Software&rsquo;s servers in 30 days. Notes already saved on this device aren&rsquo;t affected. Sign back in with the same Google account within 30 days to cancel &mdash; after that, it can&rsquo;t be undone.</div>
+    <div class="rdlg-btns">
+      <button class="rdlg-cancel" id="delete-account-dialog-cancel">Cancel</button>
+      <button class="rdlg-ok" id="delete-account-dialog-confirm">Delete account</button>
+    </div>
+  </div>
+</div>
+
+
 <div id="restore-overlay">
   <div id="restore-dialog" style="z-index:501">
     <div class="rdlg-title" id="restore-dialog-title">Reloading&hellip;</div>
@@ -3789,10 +3848,15 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="account-overlay" onclick="if(event.target===this)closeLogoutConfirm()">
   <div id="account-dialog">
     <div class="rdlg-title">Your account</div>
-    <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected. Deleting your account instead removes your synced notes and published pages from Essential Software&rsquo;s servers for good.</div>
+    <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
+    <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account instead schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in and cancel it &mdash; after that, they&rsquo;re gone for good.</div>
+    <a class="rdlg-more-toggle" id="logout-more-toggle" onclick="toggleLogoutMore()">
+      <span id="logout-more-label">Show more</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </a>
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="logout-dialog-cancel" onclick="closeLogoutConfirm()">Cancel</button>
-      <button class="rdlg-cancel" id="delete-account-btn" onclick="confirmDeleteAccount()">Delete account</button>
+      <button class="rdlg-cancel" id="delete-account-btn" onclick="openDeleteAccountConfirm()" style="display:none">Delete account</button>
       <button class="rdlg-ok" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
     </div>
   </div>
@@ -3805,12 +3869,12 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 14 September 2026</em></p>
+      <p><em>Effective 16 September 2026</em></p>
       <p><strong>Note Builder</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
       <h3>Google sign-in &amp; sync</h3>
-      <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with a session token so you stay signed in. While signed in, your notes (including embedded images) are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) is linked to your account so it carries over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again. You can permanently delete your account and everything stored with it (synced notes, published pages, session) from the account screen at any time.</p>
+      <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with a session token so you stay signed in. While signed in, your notes (including embedded images) are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) is linked to your account so it carries over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again. You can delete your account at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs you out and schedules everything stored with it (synced notes, published pages) for permanent removal after 30 days. Signing back in with the same Google account during that window cancels the deletion and restores full access.</p>
       <h3>Publishing a page</h3>
       <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted.</p>
       <h3>Reporting a published page</h3>
@@ -10350,6 +10414,31 @@ const NB_ACCOUNT_KEY = 'nbAccount'; // JSON: { sub, email }
 // MAX_SYNC_BYTES) — checked here too so a too-large backup fails fast
 // with a clear toast instead of a generic network error after the upload.
 const NB_SYNC_MAX_BYTES = 8 * 1024 * 1024;
+// Tombstones for cross-device delete propagation (see nbSyncPush/nbSyncPull
+// below). The additive-only note merge can't tell "created on another
+// device" apart from "deleted on this one" without this: a plain list of
+// {id, deletedAt} kept alongside the notes array, pushed and pulled like
+// the notes are, and consulted on pull to both skip re-adding a note
+// that's been deleted elsewhere and to remove a locally-held copy of one.
+// Pruned to NB_TOMBSTONE_MAX_AGE_MS so it doesn't grow forever — that
+// window just needs to outlast the longest gap between two devices
+// syncing, not be permanent.
+const NB_DELETED_IDS_KEY = 'nbDeletedNoteIds';
+const NB_TOMBSTONE_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+function _nbLoadDeletedIds() {
+  try { return JSON.parse(localStorage.getItem(NB_DELETED_IDS_KEY) || '[]'); } catch (e) { return []; }
+}
+function _nbSaveDeletedIds(arr) {
+  try { localStorage.setItem(NB_DELETED_IDS_KEY, JSON.stringify(arr)); } catch (e) {}
+}
+// Called at the moment a note is deleted locally. Re-recording an id
+// bumps its deletedAt rather than duplicating it.
+function _nbRecordDeletedId(id) {
+  const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
+  const list = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff && t.id !== id);
+  list.push({ id, deletedAt: Date.now() });
+  _nbSaveDeletedIds(list);
+}
 
 function nbSessionToken() {
   try { return localStorage.getItem(NB_SESSION_KEY) || null; } catch (e) { return null; }
@@ -10373,6 +10462,44 @@ function _nbGoogleAuthPlugin() {
   const cap = window.Capacitor && window.Capacitor.Plugins;
   return (cap && cap.GoogleAuth) || null;
 }
+// @capacitor/app's bridge, same window.Capacitor.Plugins pattern as
+// _nbRcPlugin()/_nbGoogleAuthPlugin() above. Used below only to catch the
+// app regaining foreground after the native account picker closes.
+function _nbAppPlugin() {
+  const cap = window.Capacitor && window.Capacitor.Plugins;
+  return (cap && cap.App) || null;
+}
+// The native GoogleAuth plugin's system account picker is its own Android
+// Activity stacked on top of this one — closing it (especially on a
+// failed/cancelled sign-in) can leave the WebView's Activity visually
+// dimmed and unresponsive to touch until its lifecycle cycles again
+// (what tapping the hardware Back button used to force). Toggling
+// display off and back on forces the WebView to fully repaint and
+// re-establish input handling without needing that manual nudge.
+function _nbNudgeWebViewRepaint() {
+  try {
+    document.body.style.display = 'none';
+    void document.body.offsetHeight; // synchronous reflow
+    document.body.style.display = '';
+  } catch (e) {}
+}
+// Safety net beyond the direct call in nbSignInWithGoogle's catch block
+// below: any native picker (purchase flow, share sheet) that stacks an
+// Activity the same way can leave the same stuck-dim WebView behind, and
+// this catches the app coming back to foreground regardless of which one
+// caused it. Registered once; a no-op if @capacitor/app isn't installed.
+let _nbAppResumeListenerBound = false;
+function _nbBindAppResumeListener() {
+  if (_nbAppResumeListenerBound) return;
+  const AppPlugin = _nbAppPlugin();
+  if (!AppPlugin) return;
+  _nbAppResumeListenerBound = true;
+  try {
+    AppPlugin.addListener('appStateChange', (state) => {
+      if (state && state.isActive) _nbNudgeWebViewRepaint();
+    });
+  } catch (e) {}
+}
 let _nbGoogleAuthInited = false;
 async function nbInitGoogleAuth() {
   const GAuth = _nbGoogleAuthPlugin();
@@ -10385,6 +10512,13 @@ async function nbInitGoogleAuth() {
 // Loads the Google Identity Services script on first use only — never
 // needed at all inside the compiled app, where the native plugin above
 // covers it, so this stays lazy rather than added to every page load.
+// No load timeout here on purpose (unlike the prompt() backstop below) —
+// a slow connection should keep waiting for the script rather than give
+// up on it; only a genuine load failure (s.onerror) short-circuits. On
+// failure the cached promise is cleared so the next sign-in attempt
+// re-tries the load instead of being stuck replaying the same rejection
+// forever — a transient blip on a bad connection shouldn't need a page
+// reload to recover from.
 let _nbGisLoadPromise = null;
 function _nbLoadGis() {
   if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve();
@@ -10393,7 +10527,7 @@ function _nbLoadGis() {
     const s = document.createElement('script');
     s.src = 'https://accounts.google.com/gsi/client';
     s.onload = resolve;
-    s.onerror = () => reject(new Error('failed to load Google Identity Services'));
+    s.onerror = () => { _nbGisLoadPromise = null; reject(new Error('failed to load Google Identity Services')); };
     document.head.appendChild(s);
   });
   return _nbGisLoadPromise;
@@ -10522,7 +10656,7 @@ async function nbSignInWithGoogle() {
     const GAuth = _nbGoogleAuthPlugin();
     if (GAuth) {
       await nbInitGoogleAuth();
-      const result = await _nbWithTimeout(GAuth.signIn(), 15000, 'Google sign-in did not respond');
+      const result = await _nbWithTimeout(GAuth.signIn(), 90000, 'Google sign-in did not respond');
       idToken = result && result.authentication && result.authentication.idToken;
     } else {
       idToken = await _nbGoogleSignInWeb();
@@ -10543,7 +10677,13 @@ async function nbSignInWithGoogle() {
       // picker — which reads as the prompt "flashing and closing"
       // rather than a real retry. Signing out here resets that.
       const GAuthCleanup = _nbGoogleAuthPlugin();
-      if (GAuthCleanup) { try { await GAuthCleanup.signOut(); } catch (e2) {} }
+      if (GAuthCleanup) {
+        try { await GAuthCleanup.signOut(); } catch (e2) {}
+        // The picker that just failed/was cancelled is exactly the
+        // stuck-dim trigger described above — nudge immediately rather
+        // than waiting on the appStateChange safety net.
+        _nbNudgeWebViewRepaint();
+      }
       // navigator.onLine only reflects whether a network interface is
       // associated, not whether it actually reaches the internet — it's
       // known to misreport (right after backgrounding, on a captive
@@ -10590,7 +10730,9 @@ async function _nbCompleteGoogleSignIn(idToken) {
     try { await Purchases.logIn({ appUserID: data.sub }); await nbRefreshProStatus(); }
     catch (e) { _nbLog('RevenueCat logIn', e); }
   }
-  showToast('Signed in as ' + data.email);
+  showToast(data.deletionCancelled
+    ? 'Signed in as ' + data.email + ' \u2014 account deletion cancelled'
+    : 'Signed in as ' + data.email);
   nbRenderAccountDialog();
   closeAccountScreen();
   // Pull first so anything already backed up from another device merges
@@ -10601,9 +10743,11 @@ async function _nbCompleteGoogleSignIn(idToken) {
   await nbSyncPull(false);
   await nbSyncPush(false);
 }
-// Deletes the account server-side (synced notes, published pages, session)
-// then clears local sign-in state the same way nbSignOut() does. Notes
-// already saved on this device are untouched either way.
+// Schedules the account for deletion server-side (30-day grace period —
+// signing back in with the same Google account before then cancels it,
+// see _nbCompleteGoogleSignIn) then clears local sign-in state the same
+// way nbSignOut() does. Notes already saved on this device are untouched
+// either way.
 async function nbDeleteAccount() {
   const Purchases = _nbRcPlugin();
   if (Purchases) { try { await Purchases.logOut(); } catch (e) { _nbLog('RevenueCat logOut', e); } }
@@ -10622,7 +10766,7 @@ async function nbDeleteAccount() {
   }
   _nbClearAccountLocal();
   await nbRefreshProStatus();
-  showToast('Account deleted');
+  showToast('Account will be deleted in 30 days \u2014 sign back in to cancel');
   nbRenderAccountDialog();
   return true;
 }
@@ -10658,7 +10802,9 @@ function _nbGatherNotesAndImages() {
 async function nbSyncPush(showFeedback) {
   if (!nbIsSignedIn()) return;
   const { notes, images } = _nbGatherNotesAndImages();
-  const payload = JSON.stringify({ app: 'Note Builder', version: 1, notes, images });
+  const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
+  const deletedIds = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff);
+  const payload = JSON.stringify({ app: 'Note Builder', version: 1, notes, images, deletedIds });
   if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) {
     if (showFeedback) showToast('Too much to sync \u2014 try removing large images first');
     return;
@@ -10677,11 +10823,15 @@ async function nbSyncPush(showFeedback) {
     if (showFeedback) showToast('Sync failed');
   }
 }
-// Additive merge, same rule nbImportNotes uses for a file restore: an
-// incoming note is only added if its id isn't already present locally —
-// never overwrites an edit made on this device. That makes push-then-pull
-// order safe to call from either direction without a real conflict
-// resolution step.
+// Additive merge for new notes, same rule nbImportNotes uses for a file
+// restore: an incoming note only gets added if its id isn't already
+// present locally — never overwrites an edit made on this device. Deletes
+// are handled separately via the tombstone list (see NB_DELETED_IDS_KEY
+// above): merged with whatever the server sent, then used both to skip
+// re-adding a note deleted elsewhere and to remove a locally-held copy of
+// one — unless this device edited it after that deletion, in which case
+// the local copy wins and survives. That makes push-then-pull order safe
+// to call from either direction without a real conflict resolution step.
 async function nbSyncPull(showFeedback) {
   if (!nbIsSignedIn()) return;
   try {
@@ -10693,21 +10843,47 @@ async function nbSyncPull(showFeedback) {
     if (!res.ok) throw new Error('sync pull failed: ' + res.status);
     const data = await res.json();
     const incoming = data && Array.isArray(data.notes) ? data.notes : [];
+    const incomingDeleted = data && Array.isArray(data.deletedIds) ? data.deletedIds : [];
     if (data && data.images && typeof data.images === 'object') {
       await Promise.all(Object.keys(data.images).map(id =>
         _nbSetImage(id, data.images[id]).catch(e => {})
       ));
     }
-    const existing = nbLoadNotes();
+    const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
+    const tombstones = new Map();
+    _nbLoadDeletedIds().concat(incomingDeleted).forEach(t => {
+      if (!t || !t.id || typeof t.deletedAt !== 'number' || t.deletedAt < cutoff) return;
+      const prev = tombstones.get(t.id);
+      if (!prev || t.deletedAt > prev.deletedAt) tombstones.set(t.id, t);
+    });
+    _nbSaveDeletedIds([...tombstones.values()]);
+    let existing = nbLoadNotes();
     const ids = new Set(existing.map(n => n.id));
     let count = 0;
-    incoming.forEach(n => { if (!ids.has(n.id)) { existing.push(n); count++; } });
-    if (count) {
+    incoming.forEach(n => {
+      if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
+      if (!ids.has(n.id)) { existing.push(n); count++; }
+    });
+    let removedCount = 0;
+    existing = existing.filter(n => {
+      const tomb = tombstones.get(n.id);
+      if (!tomb) return true;
+      const localTs = n.updatedAt || n.createdAt || 0;
+      if (localTs > tomb.deletedAt) return true; // edited here after the remote delete — keep it
+      removedCount++;
+      return false;
+    });
+    if (count || removedCount) {
       nbSaveNotesArr(existing);
       buildCatBar();
       nbRenderNotesScreen();
     }
-    if (showFeedback) showToast(count ? (count === 1 ? '1 note restored' : count + ' notes restored') : 'Already up to date');
+    if (showFeedback) {
+      const parts = [];
+      if (count) parts.push(count === 1 ? '1 note restored' : count + ' notes restored');
+      if (removedCount) parts.push(removedCount === 1 ? '1 note removed' : removedCount + ' notes removed');
+      showToast(parts.length ? parts.join(', ') : 'Already up to date');
+    }
   } catch (e) {
     _nbLog('sync pull', e);
     if (showFeedback) showToast('Sync failed');
@@ -10783,12 +10959,30 @@ function closeAccountScreen() {
   unlockScroll();
   _nbStopAcctSplash3D();
 }
+// Delete account is collapsed behind "Show more" by default (see
+// toggleLogoutMore) so it isn't the first thing tapped by mistake —
+// always reset to that collapsed state on open, since the dialog node
+// persists across opens/closes.
 function openLogoutConfirm() {
   const acct = nbAccount();
   const emailEl = document.getElementById('logout-email');
   if (emailEl) emailEl.textContent = (acct && acct.email) || 'your account';
+  document.getElementById('logout-more-body').style.display = 'none';
+  document.getElementById('delete-account-btn').style.display = 'none';
+  document.getElementById('logout-more-label').textContent = 'Show more';
+  document.getElementById('logout-more-toggle').classList.remove('is-open');
   document.getElementById('account-overlay').classList.add('open');
   lockScroll();
+}
+function toggleLogoutMore() {
+  const body = document.getElementById('logout-more-body');
+  const btn = document.getElementById('delete-account-btn');
+  const toggle = document.getElementById('logout-more-toggle');
+  const show = body.style.display === 'none';
+  body.style.display = show ? '' : 'none';
+  btn.style.display = show ? '' : 'none';
+  toggle.classList.toggle('is-open', show);
+  document.getElementById('logout-more-label').textContent = show ? 'Show less' : 'Show more';
 }
 function closeLogoutConfirm() {
   document.getElementById('account-overlay').classList.remove('open');
@@ -10813,18 +11007,36 @@ async function confirmLogout() {
   closeLogoutConfirm();
   openAccountScreen();
 }
-async function confirmDeleteAccount() {
-  const btn = document.getElementById('delete-account-btn');
-  if (btn) _pubSetBtnLoading(btn, true, 'Deleting\u2026');
-  let ok;
-  try {
-    ok = await nbDeleteAccount();
-  } finally {
-    if (btn) _pubSetBtnLoading(btn, false);
-  }
-  if (!ok) return; // leave the dialog open so they can retry
-  closeLogoutConfirm();
-  openAccountScreen();
+// Opens a dedicated "Delete account?" confirm dialog on top of the
+// account screen's own dialog (hence the higher z-index — see
+// #delete-account-overlay) rather than deleting straight from the
+// "Delete account" button's first tap, the same one-more-step-for-
+// something-irreversible pattern nbDeleteNote and nbUnpublish already
+// use. Wired dynamically (cancel/confirm onclick set fresh each open)
+// for the same reason those two are: no per-open state to reset here
+// beyond the button's own loading label.
+function openDeleteAccountConfirm() {
+  const ov = document.getElementById('delete-account-overlay');
+  const cancelBtn = document.getElementById('delete-account-dialog-cancel');
+  const confirmBtn = document.getElementById('delete-account-dialog-confirm');
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = 'Delete account';
+  cancelBtn.onclick = () => ov.classList.remove('open');
+  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  confirmBtn.onclick = async () => {
+    _pubSetBtnLoading(confirmBtn, true, 'Deleting\u2026');
+    let ok;
+    try {
+      ok = await nbDeleteAccount();
+    } finally {
+      _pubSetBtnLoading(confirmBtn, false);
+    }
+    if (!ok) return; // leave this dialog open so they can retry
+    ov.classList.remove('open');
+    closeLogoutConfirm();
+    openAccountScreen();
+  };
+  ov.classList.add('open');
 }
 
 // Restore is Pro-only outright (see nbImportNotes below for why that's
@@ -10880,6 +11092,7 @@ function hideSplash() {
   // without making first paint wait on a network round-trip.
   nbInitPurchases();
   nbInitGoogleAuth();
+  _nbBindAppResumeListener();
   unlockScroll();
   // The boot IIFE's `!important` html/body background-color rule outranks
   // any inline style this function could set, so it — not the plain
@@ -11629,6 +11842,11 @@ function _pubSaveNoteFields(id, fields) {
   if (idx === -1) return null;
   Object.assign(arr[idx], fields);
   nbSaveNotesArr(arr);
+  // Every caller here is a publish/update/unpublish action from outside
+  // the editor (so the leavingEditor auto-sync never fires) — without
+  // this, published/unpublished state only exists on this device until
+  // something else happens to sync.
+  nbSyncPush(false);
   return arr[idx];
 }
 function _pubDefaultSlug(note) {
@@ -12249,6 +12467,14 @@ function nbDeleteNote(id) {
         ov.classList.remove('open');
         const notes = nbLoadNotes().filter(n => n.id !== id);
         nbSaveNotesArr(notes);
+        _nbRecordDeletedId(id);
+        // Deletion is invisible to nbSyncPull's additive-only merge — a
+        // deleted note is indistinguishable from one created elsewhere,
+        // so pulling again just adds it right back. Pushing the
+        // post-delete snapshot immediately (rather than waiting for the
+        // editor-exit push, which this list-screen action never reaches)
+        // is what keeps a sign-out/sign-in cycle from resurrecting it.
+        nbSyncPush(false);
         buildCatBar();
         nbRenderNotesScreen();
         showToast('Note deleted, but its page may still be live — try unpublishing again later');
@@ -12258,6 +12484,9 @@ function nbDeleteNote(id) {
     ov.classList.remove('open');
     const notes = nbLoadNotes().filter(n => n.id !== id);
     nbSaveNotesArr(notes);
+    _nbRecordDeletedId(id);
+    // See the comment on the unpublish-failure branch above.
+    nbSyncPush(false);
     buildCatBar();
     nbRenderNotesScreen();
     showToast('Note deleted');
@@ -13318,6 +13547,11 @@ function nbConfirmSave() {
     if (idx !== -1) {
       notes[idx] = Object.assign({}, notes[idx], { title, desc, category, tags, updatedAt: Date.now() });
       nbSaveNotesArr(notes);
+      // This quick-edit dialog never goes through the editor, so the
+      // leavingEditor auto-sync in nbGoScreen never fires for it — push
+      // explicitly or the edit only exists locally until something else
+      // happens to sync.
+      nbSyncPush(false);
     }
     nbCloseSaveDialog();
     showToast('Note updated');
