@@ -10952,6 +10952,14 @@ async function nbSyncPull(showFeedback) {
     const indexById = new Map(existing.map((n, i) => [n.id, i]));
     let count = 0;
     let updatedCount = 0;
+    // Tracks whether the currently-open Publish sheet's own note is one
+    // of the ones this pull just changed, so its displayed state (live
+    // vs new, the live URL, the Save-Changes disabled check) can be
+    // refreshed once the merge below lands — otherwise a publish/
+    // unpublish/edit that happened on another device wouldn't show up
+    // there until the sheet was closed and reopened.
+    let pubSheetTouched = false;
+    const pubOverlayOpen = document.getElementById('publish-overlay').classList.contains('open');
     incoming.forEach(n => {
       if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
       // Came from the account's backup, so it belongs to this account —
@@ -10964,6 +10972,17 @@ async function nbSyncPull(showFeedback) {
         indexById.set(n.id, existing.length - 1);
         count++;
       } else if ((n.updatedAt || 0) > (existing[idx].updatedAt || 0)) {
+        // Only the publish-relevant fields matter for the live-refresh
+        // check — an incoming edit to title/content shouldn't yank the
+        // sheet out from under someone mid-typing a slug for a note
+        // that isn't actually going live or changing live state.
+        if (pubOverlayOpen && n.id === _pubNoteId) {
+          const prev = existing[idx];
+          if (prev.publishedSlug !== n.publishedSlug || prev.publishToken !== n.publishToken ||
+              prev.publishedContentHash !== n.publishedContentHash) {
+            pubSheetTouched = true;
+          }
+        }
         existing[idx] = n;
         updatedCount++;
       }
@@ -10974,13 +10993,31 @@ async function nbSyncPull(showFeedback) {
       if (!tomb) return true;
       const localTs = n.updatedAt || n.createdAt || 0;
       if (localTs > tomb.deletedAt) return true; // edited here after the remote delete — keep it
+      // The open sheet's own note just got deleted out from under it by
+      // another device — closing it beats leaving Publish/Unpublish
+      // buttons wired to a note that's no longer there to act on.
+      if (pubOverlayOpen && n.id === _pubNoteId) closePublishSheet();
       removedCount++;
       return false;
     });
     if (count || updatedCount || removedCount) {
+      // New notes just got push()'d onto the end above (see the merge
+      // loop) regardless of when they were actually created — the list's
+      // only real ordering rule is "new local notes go to index 0 and
+      // never move again" (see the unshift in nbConfirmSave), so an
+      // appended note from another device shows up at the bottom no
+      // matter how new it is. Re-sort by createdAt descending here so
+      // pulled-in notes land where they belong instead of wherever the
+      // merge happened to leave them; existing on-device notes that
+      // didn't change keep their relative order since sort is stable.
+      if (count) existing.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       nbSaveNotesArr(existing);
       buildCatBar();
       nbRenderNotesScreen();
+      // Re-run the same state-setting logic the sheet opens with —
+      // _pubFindNote re-reads from storage, so this picks up exactly
+      // what was just merged above, same as closing and reopening it.
+      if (pubSheetTouched) nbOpenPublishSheet(_pubNoteId);
     }
     if (showFeedback) {
       const parts = [];
@@ -12027,7 +12064,15 @@ function _pubSaveNoteFields(id, fields) {
   const arr = nbLoadNotes();
   const idx = arr.findIndex(n => n.id === id);
   if (idx === -1) return null;
-  Object.assign(arr[idx], fields);
+  // updatedAt has to move too, not just the publish fields themselves —
+  // nbSyncPull's merge is strict last-write-wins by updatedAt, so without
+  // this a publish/unpublish/update done here can lose to whatever
+  // updatedAt another device's copy of this note already had, and that
+  // device's next pull would keep its own stale (unpublished) copy
+  // instead of taking this one — showing the default Publish dialog for
+  // a note that's actually already live. Same reasoning nbConfirmSave's
+  // quick-edit branch already follows for title/desc/tag changes.
+  Object.assign(arr[idx], fields, { updatedAt: Date.now() });
   nbSaveNotesArr(arr);
   // Every caller here is a publish/update/unpublish action from outside
   // the editor, none of which land on nbGoScreen's two sync triggers —
@@ -12256,7 +12301,22 @@ async function nbPublishNote() {
 }
 async function nbUpdatePublishedNote() {
   const note = _pubFindNote(_pubNoteId);
-  if (!note || !note.publishedSlug) return;
+  // Live-refresh (see nbSyncPull) already catches most of this while the
+  // sheet's open, but there's still a window between a remote change
+  // landing and the next render — silently doing nothing here would
+  // leave someone tapping Save Changes with no idea why it's not working.
+  if (!note) {
+    showToast('This note was deleted on another device');
+    closePublishSheet();
+    nbRenderNotesScreen();
+    return;
+  }
+  if (!note.publishedSlug) {
+    showToast('This note was unpublished on another device');
+    closePublishSheet();
+    nbRenderNotesScreen();
+    return;
+  }
   if (_pubOfflineGuard()) return;
   let html;
   try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
@@ -12295,9 +12355,40 @@ async function nbUpdatePublishedNote() {
     _pubSetBtnLoading(btn, false);
   }
 }
+// Shared by nbUnpublishNote's own confirm flow and nbDeleteNote's
+// unpublish-then-offer-to-delete flow — one place that actually talks to
+// the server for this instead of two copies of the same fetch drifting
+// apart. Throws on a real failure (anything but 404, which just means
+// the remote side already considers it gone); doesn't touch any dialog
+// or overlay state, that's each caller's own concern.
+async function _pubUnpublish(note) {
+  const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: note.publishToken })
+  });
+  if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
+  _pubSaveNoteFields(note.id, {
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null
+  });
+}
 function nbUnpublishNote() {
   const note = _pubFindNote(_pubNoteId);
-  if (!note || !note.publishedSlug) return;
+  // Same reasoning as nbUpdatePublishedNote's guard above — this can be
+  // tapped in the gap before a remote delete/unpublish's live-refresh
+  // lands, so silence here would just look broken.
+  if (!note) {
+    showToast('This note was deleted on another device');
+    closePublishSheet();
+    nbRenderNotesScreen();
+    return;
+  }
+  if (!note.publishedSlug) {
+    showToast('This note was unpublished on another device');
+    closePublishSheet();
+    nbRenderNotesScreen();
+    return;
+  }
   // Matches nbDeleteNote's convention (see its own comment): open the
   // confirm dialog regardless of connectivity, only the actual network
   // action needs the offline check — someone offline should still be able
@@ -12313,20 +12404,7 @@ function nbUnpublishNote() {
     if (_pubOfflineGuard()) return;
     _pubSetBtnLoading(confirmBtn, true, 'Unpublishing…');
     try {
-      const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: note.publishToken })
-      });
-      // A 404 here means the remote side already considers this gone (admin
-      // takedown, or the purge job already reclaimed it) — without this,
-      // Unpublish would throw every time, "Unpublish failed" forever, with
-      // no way through the UI to clear the stale local publishedSlug (the
-      // note looks published locally but 404s for everyone else).
-      if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
-      _pubSaveNoteFields(_pubNoteId, {
-        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null
-      });
+      await _pubUnpublish(note);
       ov.classList.remove('open');
       showToast('Note unpublished');
       _pubSetBtnLoading(confirmBtn, false);
@@ -12378,6 +12456,10 @@ function nbImportNotes(e) {
       const ids = new Set(existing.map(n => n.id));
       let count = 0;
       incoming.forEach(n => { if (!ids.has(n.id)) { existing.push(n); count++; } });
+      // Same appended-to-the-bottom problem nbSyncPull has (see its own
+      // comment) — a restored note lands wherever push() left it instead
+      // of where its createdAt actually puts it in the newest-first list.
+      if (count) existing.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       nbSaveNotesArr(existing);
       // Stashed for the OTHER side of the reload — see the pending-restore
       // check near nbGoScreen('create') at boot — rather than shown here
@@ -12612,6 +12694,16 @@ function nbRenderNotesScreen() {
 function nbDeleteNote(id) {
   _nbCloseOpenDropdowns();
   const note = _pubFindNote(id);
+  if (note && note.publishedSlug) {
+    _nbShowUnpublishThenDeleteDialog(id, note);
+  } else {
+    _nbShowDeleteConfirmDialog(id);
+  }
+}
+// The actual "delete this note" step — same dialog whether it's reached
+// directly (an unpublished note) or as the second half of the published
+// flow below, once that's actually cleared publishedSlug.
+function _nbShowDeleteConfirmDialog(id) {
   const ov = document.getElementById('delete-overlay');
   // Rewrites this dialog's title/body/confirm-button text and state
   // every time it's opened, since it used to be shared with the gallery
@@ -12623,69 +12715,70 @@ function nbDeleteNote(id) {
   const bodyEl = document.querySelector('#delete-dialog .rdlg-body');
   const cancelBtn = document.getElementById('delete-dialog-cancel');
   const confirmBtn = document.getElementById('delete-dialog-confirm');
-  if (titleEl) titleEl.textContent = 'Delete note?';
-  // A published note's live page has no other owner once the local note
-  // (and its publishToken) is gone — deleting without unpublishing first
-  // would strand that page online with no way to take it down short of
-  // the ADMIN_TOKEN. Say so up front rather than silently orphaning it.
-  if (bodyEl) {
-    bodyEl.textContent = (note && note.publishedSlug)
-      ? 'This note will be permanently removed and its published page will be taken down. This can\u2019t be undone.'
-      : 'This note will be permanently removed. This can\u2019t be undone.';
-  }
+  titleEl.textContent = 'Delete note?';
+  bodyEl.textContent = 'This note will be permanently removed. This can\u2019t be undone.';
   confirmBtn.textContent = 'Delete';
   confirmBtn.disabled = false;
   cancelBtn.onclick = () => ov.classList.remove('open');
   ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
-  confirmBtn.onclick = async () => {
-    if (note && note.publishedSlug && _pubOfflineGuard()) return;
-    _pubSetBtnLoading(confirmBtn, true, 'Deleting…');
-    if (note && note.publishedSlug) {
-      try {
-        const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: note.publishToken })
-        });
-        // 404 means it's already gone (e.g. previously admin-unpublished)
-        // — fine to proceed. Any other failure still proceeds with the
-        // local delete (a stuck local note helps no one), but the toast
-        // below tells the person their page may still be live.
-        if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
-      } catch (e) {
-        _nbLog('delete-note unpublish', e);
-        ov.classList.remove('open');
-        const notes = nbLoadNotes().filter(n => n.id !== id);
-        nbSaveNotesArr(notes);
-        _nbRecordDeletedId(id);
-        // The just-recorded tombstone already blocks this note from being
-        // resurrected by the pull below (nbSyncPull skips any incoming
-        // note with a matching local tombstone, regardless of whether
-        // that tombstone's been pushed yet) — so pulling first is safe,
-        // and it's what keeps this push from blindly overwriting the
-        // server with a stale local snapshot if this device hasn't seen
-        // another device's changes since its last sync. The push itself
-        // is still what actually propagates the deletion to the server —
-        // pulling alone never would, since a delete is otherwise
-        // indistinguishable from a note that just doesn't exist yet
-        // elsewhere. Immediate rather than waiting for the editor-exit
-        // trigger, which this list-screen action never reaches.
-        nbSyncPullThenPush();
-        buildCatBar();
-        nbRenderNotesScreen();
-        showToast('Note deleted, but its page may still be live — try unpublishing again later');
-        return;
-      }
-    }
+  confirmBtn.onclick = () => {
     ov.classList.remove('open');
     const notes = nbLoadNotes().filter(n => n.id !== id);
     nbSaveNotesArr(notes);
     _nbRecordDeletedId(id);
-    // See the comment on the unpublish-failure branch above.
+    // Pulling first is safe (the just-recorded tombstone already blocks
+    // this note from being resurrected by nbSyncPull) and is what keeps
+    // the push from blindly overwriting the server with a stale local
+    // snapshot if this device hasn't seen another device's changes since
+    // its last sync. The push itself is what actually propagates the
+    // deletion to the server. Immediate rather than waiting for the
+    // editor-exit trigger, which this list-screen action never reaches.
     nbSyncPullThenPush();
     buildCatBar();
     nbRenderNotesScreen();
     showToast('Note deleted');
+  };
+  ov.classList.add('open');
+}
+// A published note can't skip straight to delete — Unpublish here does
+// the real network unpublish (via the shared _pubUnpublish, same call
+// the publish sheet's own Unpublish button makes), and only on success
+// re-opens this same dialog as the actual delete confirmation. One tap
+// per action (unpublish, then delete), not one dialog silently doing
+// both, but also not sending the person off to the publish sheet to
+// press an unrelated second Unpublish button for something they already
+// said yes to here.
+function _nbShowUnpublishThenDeleteDialog(id, note) {
+  const ov = document.getElementById('delete-overlay');
+  const titleEl = document.querySelector('#delete-dialog .rdlg-title');
+  const bodyEl = document.querySelector('#delete-dialog .rdlg-body');
+  const cancelBtn = document.getElementById('delete-dialog-cancel');
+  const confirmBtn = document.getElementById('delete-dialog-confirm');
+  titleEl.textContent = 'Unpublish and delete?';
+  bodyEl.textContent = 'This note is published. Unpublish it, then confirm you still want to delete it.';
+  confirmBtn.textContent = 'Unpublish';
+  confirmBtn.disabled = false;
+  cancelBtn.onclick = () => ov.classList.remove('open');
+  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  confirmBtn.onclick = async () => {
+    if (_pubOfflineGuard()) return;
+    _pubSetBtnLoading(confirmBtn, true, 'Unpublishing…');
+    try {
+      await _pubUnpublish(note);
+    } catch (e) {
+      // Note stays published, so the delete step never gets offered —
+      // if it stayed as-is right into a delete confirmation, the person
+      // could end up deleting the local note anyway while the live page
+      // is still up with no local record left to take it down with.
+      _nbLog('delete-note unpublish', e);
+      showToast('Unpublish failed \u2014 note not deleted');
+      _pubSetBtnLoading(confirmBtn, false);
+      return;
+    }
+    _pubSetBtnLoading(confirmBtn, false);
+    showToast('Note unpublished');
+    nbRenderNotesScreen();
+    _nbShowDeleteConfirmDialog(id);
   };
   ov.classList.add('open');
 }
@@ -13774,9 +13867,16 @@ function nbConfirmSave() {
       // everywhere else, or the edit only exists locally until something
       // else happens to sync.
       nbSyncPullThenPush();
+      nbCloseSaveDialog();
+      showToast('Note updated');
+    } else {
+      // Deleted on another device sometime between this dialog opening
+      // and Save being tapped — there's nothing left to write the edit
+      // onto. Say so rather than claiming success on an edit that just
+      // silently went nowhere.
+      nbCloseSaveDialog();
+      showToast('This note was deleted on another device \u2014 your changes weren\u2019t saved');
     }
-    nbCloseSaveDialog();
-    showToast('Note updated');
     buildCatBar();
     nbRenderNotesScreen();
     return;
@@ -13817,10 +13917,17 @@ function nbConfirmSave() {
   const desktopView = (uiState && uiState.desktopView !== undefined) ? uiState.desktopView : (isExisting ? existingNote.desktopView : undefined);
 
   const notes = nbLoadNotes();
+  // Tracks whether an existing note's own record vanished (deleted on
+  // another device) sometime between the editor opening and Save being
+  // tapped, so the toast below can tell the truth instead of claiming
+  // "Note updated" over an edit that never got written anywhere.
+  let deletedElsewhere = false;
   if (isExisting) {
     const idx = notes.findIndex(n => n.id === existingNote.id);
     if (idx !== -1) {
       notes[idx] = Object.assign({}, notes[idx], { title, desc, category, tags, content, pageBg, pageBgCustom, desktopView, updatedAt: Date.now() });
+    } else {
+      deletedElsewhere = true;
     }
   } else {
     notes.unshift({
@@ -13832,7 +13939,9 @@ function nbConfirmSave() {
   nbSaveNotesArr(notes);
 
   nbCloseSaveDialog();
-  showToast(isExisting ? 'Note updated' : 'Note saved');
+  showToast(deletedElsewhere
+    ? 'This note was deleted on another device \u2014 your changes weren\u2019t saved'
+    : (isExisting ? 'Note updated' : 'Note saved'));
 
   // Either way, leave the editing context clean: clear this draft's
   // scratch state and drop back to "new note" mode for next time Create
