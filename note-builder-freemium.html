@@ -1772,10 +1772,39 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
   font-family: inherit
 }
 
-#account-sync-status {
-  margin-top: .5rem;
-  font-size: .8rem;
-  opacity: .7
+.acct-sync-btn {
+  background: #f0f5ff;
+  border: none;
+  cursor: pointer;
+  color: #54595d;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0
+}
+
+.acct-sync-btn svg {
+  width: 15px;
+  height: 15px
+}
+
+.acct-sync-btn:disabled {
+  opacity: .6;
+  cursor: default
+}
+
+.acct-sync-btn.syncing svg {
+  animation: acct-sync-spin .8s linear infinite
+}
+
+@keyframes acct-sync-spin {
+  from { transform: rotate(0deg) }
+  to { transform: rotate(360deg) }
 }
 
 #privacy-overlay, #cterms-overlay {
@@ -3622,14 +3651,12 @@ document.body.dataset.lockScrollY = window.scrollY;
       </div>
       <div class="rdlg-body" id="account-signedin-body" style="display:none">
         Signed in as <b id="account-email"></b>. Notes are backed up to your account.
-        <div id="account-sync-status"></div>
       </div>
       <div id="account-signedout-btns">
         <button class="rdlg-ok rdlg-ok--blue" id="account-signin-btn" onclick="nbSignInWithGoogle()" style="width:100%">Sign in with Google</button>
       </div>
       <div id="account-signedin-btns" style="display:none">
         <button class="rdlg-cancel" id="account-signout-btn" onclick="nbSignOut()">Sign out</button>
-        <button class="rdlg-ok rdlg-ok--blue" id="account-sync-btn" onclick="nbSyncNow()">Sync now</button>
       </div>
     </div>
   </div>
@@ -3847,7 +3874,12 @@ document.body.dataset.lockScrollY = window.scrollY;
 
 <div id="account-overlay" onclick="if(event.target===this)closeLogoutConfirm()">
   <div id="account-dialog">
-    <div class="rdlg-title">Your account</div>
+    <div class="rdlg-title" style="display:flex;align-items:center;gap:.5rem">
+      <span style="flex:1">Your account</span>
+      <button class="acct-sync-btn" id="account-sync-btn" onclick="nbSyncNow()" aria-label="Sync now" title="Sync now">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/><polyline points="23 4 23 10 17 10"/></svg>
+      </button>
+    </div>
     <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
     <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
     <a class="rdlg-more-toggle" id="logout-more-toggle" onclick="toggleLogoutMore()">
@@ -10960,6 +10992,15 @@ async function nbSyncPull(showFeedback) {
     // there until the sheet was closed and reopened.
     let pubSheetTouched = false;
     const pubOverlayOpen = document.getElementById('publish-overlay').classList.contains('open');
+    // Same reasoning as pubSheetTouched above, but for the Editor screen:
+    // if the note currently open for editing gets a newer copy pulled in
+    // from another device, the open canvas would otherwise keep showing
+    // the stale in-session draft indefinitely (nbRenderCanvas prefers the
+    // draft over the note's saved content — see _nbCurrentBase). Only
+    // relevant while the Editor screen is actually the active one.
+    const editorScreenOpen = document.getElementById('screen-create').classList.contains('active');
+    const editingId = _nbGetEditingId();
+    let editorTouchedNote = null;
     incoming.forEach(n => {
       if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
       // Came from the account's backup, so it belongs to this account —
@@ -10983,6 +11024,7 @@ async function nbSyncPull(showFeedback) {
             pubSheetTouched = true;
           }
         }
+        if (editorScreenOpen && editingId && n.id === editingId) editorTouchedNote = n;
         existing[idx] = n;
         updatedCount++;
       }
@@ -11018,6 +11060,15 @@ async function nbSyncPull(showFeedback) {
       // _pubFindNote re-reads from storage, so this picks up exactly
       // what was just merged above, same as closing and reopening it.
       if (pubSheetTouched) nbOpenPublishSheet(_pubNoteId);
+      // Discard the stale in-session draft and let nbRenderCanvas fall
+      // back to the freshly-pulled savedFragment — same effect as Reset
+      // to original, minus the confirm dialog, since the person didn't
+      // ask for this; sync just found a newer copy of the open note.
+      if (editorTouchedNote) {
+        _nbClearDraftUiState('note_' + editingId, _nbExtractCanvasFragment(editorTouchedNote.content));
+        nbRenderCanvas();
+        showToast('This note was updated from another device');
+      }
     }
     if (showFeedback) {
       const parts = [];
@@ -11048,40 +11099,37 @@ async function nbSyncPullThenPush() {
   if (pull.ok || pull.reason === 'not-found') await nbSyncPush(false);
   return pull;
 }
-// Unlike every other sync caller, this button is the one place a person
-// can deliberately ask "did that actually work?" — so unlike them it
-// reads nbSyncPull/nbSyncPush's return values and writes a real, specific
-// outcome into the persistent status line (not a toast: pull's and
-// push's toasts would just overwrite each other back-to-back, see
-// showToast, which only ever shows one message at a time). A session
-// expiry mid-sync already swaps this whole dialog to its signed-out state
-// (see _nbHandleSessionExpired), so there's no status line left to write
-// into at that point — just stop.
+// The one place a person can deliberately ask "did that actually work?"
+// — everywhere else sync is silent. Feedback is a single toast summarizing
+// both pull and push together (not two separate toasts, which would just
+// overwrite each other — see showToast). The button itself is icon-only,
+// so loading state is a CSS spin on the icon (.syncing) rather than
+// _pubSetBtnLoading's spinner+label swap, which assumes a text button and
+// would wipe the SVG out via btn.textContent on restore. A session expiry
+// mid-sync already swaps this whole dialog to its signed-out state (see
+// _nbHandleSessionExpired), so there's nothing left here to report into —
+// just stop.
 function nbSyncNow() {
   const btn = document.getElementById('account-sync-btn');
-  const status = document.getElementById('account-sync-status');
-  if (btn) _pubSetBtnLoading(btn, true, 'Syncing\u2026');
-  if (status) status.textContent = '';
+  if (btn) { btn.classList.add('syncing'); btn.disabled = true; }
   (async () => {
     const pull = await nbSyncPull(false);
-    if (pull && pull.reason === 'session-expired') { if (btn) _pubSetBtnLoading(btn, false); return; }
+    if (pull && pull.reason === 'session-expired') { if (btn) { btn.classList.remove('syncing'); btn.disabled = false; } return; }
     const push = await nbSyncPush(false);
-    if (push && push.reason === 'session-expired') { if (btn) _pubSetBtnLoading(btn, false); return; }
-    if (status) {
-      const parts = [];
-      if (pull && pull.ok) {
-        if (pull.restored) parts.push(pull.restored === 1 ? '1 note restored' : pull.restored + ' notes restored');
-        if (pull.updated) parts.push(pull.updated === 1 ? '1 note updated' : pull.updated + ' notes updated');
-        if (pull.removed) parts.push(pull.removed === 1 ? '1 note removed' : pull.removed + ' notes removed');
-      } else if (pull && pull.reason === 'not-found') {
-        parts.push('nothing backed up yet');
-      } else {
-        parts.push('pull failed');
-      }
-      if (!push || !push.ok) parts.push('push failed');
-      status.textContent = 'Last synced just now \u2014 ' + (parts.length ? parts.join(', ') : 'already up to date');
+    if (btn) { btn.classList.remove('syncing'); btn.disabled = false; }
+    if (push && push.reason === 'session-expired') return;
+    const parts = [];
+    if (pull && pull.ok) {
+      if (pull.restored) parts.push(pull.restored === 1 ? '1 note restored' : pull.restored + ' notes restored');
+      if (pull.updated) parts.push(pull.updated === 1 ? '1 note updated' : pull.updated + ' notes updated');
+      if (pull.removed) parts.push(pull.removed === 1 ? '1 note removed' : pull.removed + ' notes removed');
+    } else if (pull && pull.reason === 'not-found') {
+      parts.push('nothing backed up yet');
+    } else {
+      parts.push('pull failed');
     }
-    if (btn) _pubSetBtnLoading(btn, false);
+    if (!push || !push.ok) parts.push('push failed');
+    showToast(parts.length ? parts.join(', ') : 'Already up to date');
   })();
 }
 // A session token the worker no longer recognizes (expired, or its KV
