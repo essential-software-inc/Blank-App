@@ -462,7 +462,7 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8a0bc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E")
 }
 
-#reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog {
+#reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog, #delete-account-dialog {
   background: #fff;
   border-radius: 18px;
   padding: 1.3rem 1.2rem 1.1rem;
@@ -2457,7 +2457,7 @@ body.night .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #account-dialog {
+body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #account-dialog, body.night #delete-account-dialog {
   background: #111111;
   border: 1px solid #282828;
   border-radius: 18px;
@@ -2793,7 +2793,7 @@ body.pink .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #account-dialog {
+body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #account-dialog, body.pink #delete-account-dialog {
   background: #fff2f7;
   border: none;
   border-radius: 18px;
@@ -11100,12 +11100,18 @@ async function confirmLogout() {
 // beyond the button's own loading label.
 function openDeleteAccountConfirm() {
   const ov = document.getElementById('delete-account-overlay');
+  const acctOv = document.getElementById('account-overlay');
   const cancelBtn = document.getElementById('delete-account-dialog-cancel');
   const confirmBtn = document.getElementById('delete-account-dialog-confirm');
   confirmBtn.disabled = false;
   confirmBtn.textContent = 'Delete account';
-  cancelBtn.onclick = () => ov.classList.remove('open');
-  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  // The "Log out?" dialog stays open underneath this one (see the
+  // z-index comment above) so we just need to hide it visually while
+  // this dialog is up, then bring it back if the user backs out
+  // without deleting.
+  acctOv.classList.remove('open');
+  cancelBtn.onclick = () => { ov.classList.remove('open'); acctOv.classList.add('open'); };
+  ov.onclick = (e) => { if (e.target === ov) { ov.classList.remove('open'); acctOv.classList.add('open'); } };
   confirmBtn.onclick = async () => {
     _pubSetBtnLoading(confirmBtn, true, 'Deleting\u2026');
     let ok;
