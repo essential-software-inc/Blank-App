@@ -3759,8 +3759,8 @@ document.body.dataset.lockScrollY = window.scrollY;
     <section class="nb-screen" id="screen-notes">
       <div class="nb-empty" id="notes-empty-state">
         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <div class="nb-empty-title">Welcome to Note Builder</div>
-        <div class="nb-empty-sub">Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one — it'll show up here, sorted by category.</div>
+        <div class="nb-empty-title" id="notes-empty-title">Welcome to Note Builder</div>
+        <div class="nb-empty-sub" id="notes-empty-sub">Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one — it'll show up here, sorted by category.</div>
       </div>
       <div class="nb-carousel" id="nb-onboard-carousel">
           <div class="nb-carousel-viewport">
@@ -12667,12 +12667,31 @@ function nbStartCarouselAutoplay() {
   clearInterval(_nbCarouselTimer);
   _nbCarouselTimer = setInterval(() => nbGoToCarouselSlide(_nbCarouselIdx + 1, false), 4500);
 }
+function _nbFilteredEmptyMessage() {
+  const lead = 'Mix text, photos, checklists, and more into scrapbook-style notes. ';
+  const q = (document.getElementById('feed-search-input') || {}).value || '';
+  if (q) {
+    return { title: 'No matches', sub: lead + 'No notes match \u201c' + q + '\u201d \u2014 try a different search term instead.' };
+  }
+  if (_nbActiveCat === 'Favorites') {
+    return { title: 'No favorites yet', sub: lead + 'Tap the heart on any note to add it here \u2014 it\u2019ll show up in this category.' };
+  }
+  if (_nbActiveCat === 'Uncategorized') {
+    return { title: 'Nothing uncategorized', sub: lead + 'Every note you\u2019ve made so far has already been sorted into a category.' };
+  }
+  return { title: 'No notes here yet', sub: lead + 'Notes you add to \u201c' + _nbActiveCat + '\u201d will show up here as you create them.' };
+}
 function nbRenderNotesScreen() {
   const all = nbVisibleNotes();
   const empty = document.getElementById('notes-empty-state');
+  const emptyTitle = document.getElementById('notes-empty-title');
+  const emptySub = document.getElementById('notes-empty-sub');
   const grid = document.getElementById('nb-notes-grid');
   const carousel = document.getElementById('nb-onboard-carousel');
   if (!all.length) {
+    // True first-run: no notes anywhere yet, regardless of filter/search.
+    emptyTitle.textContent = 'Welcome to Note Builder';
+    emptySub.textContent = 'Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one \u2014 it\u2019ll show up here, sorted by category.';
     empty.style.display = '';
     if (carousel) carousel.style.display = '';
     grid.style.display = 'none';
@@ -12696,6 +12715,13 @@ function nbRenderNotesScreen() {
     );
   }
   if (!filtered.length) {
+    // Notes exist, this view just has none — swap in the reason this
+    // particular list (category/Favorites/Uncategorized/search) is
+    // empty, but keep the carousel: it's general app orientation, not
+    // tied to whether notes exist yet.
+    const msg = _nbFilteredEmptyMessage();
+    emptyTitle.textContent = msg.title;
+    emptySub.textContent = msg.sub;
     empty.style.display = '';
     if (carousel) carousel.style.display = '';
     grid.style.display = 'none';
