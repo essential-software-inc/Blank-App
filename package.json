@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@capacitor/core": "latest",
+    "@capacitor/app": "latest",
     "@capacitor/filesystem": "latest",
     "@capacitor/inappbrowser": "latest",
     "@capacitor/share": "latest",
