@@ -4553,6 +4553,7 @@ body{margin:0}
 .ccw-canvas{width:220px;height:220px;border-radius:50%;display:block;touch-action:none;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.1)}
 .ccw-marker{position:absolute;left:0;top:0;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.25);pointer-events:none}
 .ccw-light-row{display:flex;align-items:center;gap:.6rem;margin:1rem 0 .8rem}
+.ccw-hint{font-size:.72rem;color:#8f8f89;text-align:left;line-height:1.4;margin:-.3rem 0 .9rem}
 .ccw-light-label{font-size:.75rem;color:#8f8f89;flex-shrink:0}
 .ccw-light-slider{flex:1;accent-color:#5b5bd6}
 .ccw-preview-row{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
@@ -8304,6 +8305,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
         '<div class="ccw-wheel-wrap"><canvas class="ccw-canvas" width="220" height="220"></canvas><div class="ccw-marker"></div></div>' +
         '<div class="ccw-light-row"><span class="ccw-light-label">Lightness</span><input type="range" class="ccw-light-slider" min="5" max="95" value="' + light + '"></div>' +
         '<div class="ccw-preview-row"><div class="ccw-preview"></div><input type="text" class="ccw-hex-input" maxlength="7" spellcheck="false" autocapitalize="off" autocorrect="off"></div>' +
+        '<div class="ccw-hint">Tip: search &quot;[color] hex code&quot; on Google (e.g. &quot;Coca-Cola red hex code&quot;), then paste it above.</div>' +
         '<button type="button" class="blk-variant-confirm ccw-confirm">Use Color</button>' +
         '<button type="button" class="img-pick-cancel">Cancel</button>' +
       '</div>';
@@ -11330,6 +11332,13 @@ function openLogoutConfirm() {
   document.getElementById('delete-account-btn').style.display = 'none';
   document.getElementById('logout-more-label').textContent = 'Show more';
   document.getElementById('logout-more-toggle').classList.remove('is-open');
+  // Defensive reset, same reasoning as _nbShowDeleteConfirmDialog's own
+  // comment: nothing else resets this dialog between opens, so a stale
+  // "Signing out…" spinner surviving from an interrupted previous attempt
+  // would otherwise still be showing (and the button still disabled) the
+  // next time this opens.
+  const confirmBtn = document.getElementById('logout-dialog-confirm');
+  if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Sign out'; delete confirmBtn.dataset.origLabel; }
   document.getElementById('account-overlay').classList.add('open');
   lockScroll();
 }
@@ -11343,7 +11352,17 @@ function toggleLogoutMore() {
   toggle.classList.toggle('is-open', show);
   document.getElementById('logout-more-label').textContent = show ? 'Show less' : 'Show more';
 }
+// Ignores taps that land while Sign out is still in flight. confirmLogout
+// disables logout-dialog-confirm for the duration but never taught this
+// button (or the overlay's own background-click-to-close, which calls
+// this same function) to check that — so Cancel used to just hide the
+// dialog while nbSignOut() kept running underneath, then confirmLogout's
+// own closeLogoutConfirm()/openAccountScreen() calls would fire once it
+// resolved, silently signing the person out and swapping the screen right
+// after what looked like a successful Cancel.
 function closeLogoutConfirm() {
+  const confirmBtn = document.getElementById('logout-dialog-confirm');
+  if (confirmBtn && confirmBtn.disabled) return;
   document.getElementById('account-overlay').classList.remove('open');
   unlockScroll();
 }
@@ -11386,8 +11405,13 @@ function openDeleteAccountConfirm() {
   // this dialog is up, then bring it back if the user backs out
   // without deleting.
   acctOv.classList.remove('open');
-  cancelBtn.onclick = () => { ov.classList.remove('open'); acctOv.classList.add('open'); };
-  ov.onclick = (e) => { if (e.target === ov) { ov.classList.remove('open'); acctOv.classList.add('open'); } };
+  // Same reasoning as closeLogoutConfirm's own guard: ignore Cancel/
+  // background-click while the delete request is actually in flight, so
+  // it can't be dismissed out from under itself only to have the account
+  // still get deleted (and the screen change) once the request resolves.
+  const back = () => { if (confirmBtn.disabled) return; ov.classList.remove('open'); acctOv.classList.add('open'); };
+  cancelBtn.onclick = back;
+  ov.onclick = (e) => { if (e.target === ov) back(); };
   confirmBtn.onclick = async () => {
     _pubSetBtnLoading(confirmBtn, true, 'Deleting\u2026');
     let ok;
@@ -12556,8 +12580,12 @@ function nbUnpublishNote() {
   const confirmBtn = document.getElementById('unpublish-dialog-confirm');
   confirmBtn.disabled = false;
   confirmBtn.textContent = 'Unpublish';
-  cancelBtn.onclick = () => ov.classList.remove('open');
-  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  // Same guard as the logout/delete-account dialogs: without it, Cancel
+  // just hid the dialog while the unpublish request kept running, then
+  // silently completed (and re-rendered the notes screen) once it
+  // resolved — undoing what looked like a successful Cancel.
+  cancelBtn.onclick = () => { if (!confirmBtn.disabled) ov.classList.remove('open'); };
+  ov.onclick = (e) => { if (e.target === ov && !confirmBtn.disabled) ov.classList.remove('open'); };
   confirmBtn.onclick = async () => {
     if (_pubOfflineGuard()) return;
     _pubSetBtnLoading(confirmBtn, true, 'Unpublishing…');
@@ -12942,8 +12970,13 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
   bodyEl.textContent = 'This note is published. Unpublish it, then confirm you still want to delete it.';
   confirmBtn.textContent = 'Unpublish';
   confirmBtn.disabled = false;
-  cancelBtn.onclick = () => ov.classList.remove('open');
-  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  // Same guard as nbUnpublishNote/the account dialogs: this step actually
+  // talks to the server, and without the guard Cancel just hid the
+  // dialog while it kept running — which then went on to reopen this
+  // very dialog as a delete confirmation once it resolved, popping back
+  // up right after the person thought they'd backed out.
+  cancelBtn.onclick = () => { if (!confirmBtn.disabled) ov.classList.remove('open'); };
+  ov.onclick = (e) => { if (e.target === ov && !confirmBtn.disabled) ov.classList.remove('open'); };
   confirmBtn.onclick = async () => {
     if (_pubOfflineGuard()) return;
     _pubSetBtnLoading(confirmBtn, true, 'Unpublishing…');
