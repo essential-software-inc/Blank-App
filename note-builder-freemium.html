@@ -4187,8 +4187,33 @@ const _NB_NOTE_UI_STATE_SCRIPT = `<script data-noteinfra="1">(function(){
   }
   document.addEventListener('change',function(){report(false);},true);
   document.addEventListener('input',function(){report(false);},true);
-  document.addEventListener('click',function(){report(false);},true);
-  new MutationObserver(function(){report(false);}).observe(document.documentElement,{attributes:true,attributeFilter:['class','aria-pressed','aria-expanded','aria-checked','aria-selected','open'],subtree:true,childList:true,characterData:true});
+  // Previewing has no real edit surface besides the checklist toggle (its
+  // own class change already reaches the MutationObserver below), so a
+  // bare click there — tapping a link, the preview/eye fab, blank canvas
+  // space — was marking the note dirty for nothing. Gate the click signal
+  // to edit mode only; nothing legitimate is lost since every actual
+  // click-driven edit (block delete, drag-swap, checklist toggle, format
+  // buttons) also mutates the DOM and gets picked up by the observer.
+  document.addEventListener('click',function(){
+    var pg = document.querySelector('.cv-page');
+    if (pg && pg.classList.contains('cv-preview')) return;
+    report(false);
+  },true);
+  // The idle-fade FABs (#cv-fab / #cv-bg-fab) toggle their own
+  // .cv-fab-hidden class on every scroll/swipe (see revealFabs) — that's
+  // pure chrome, not note content, but it's still a 'class' attribute
+  // change under document.documentElement, so it was tripping this same
+  // observer and marking the note dirty just from scrolling. Skip a
+  // mutation batch that's made up entirely of changes inside those two
+  // buttons; report as usual the moment anything else changes too.
+  new MutationObserver(function(muts){
+    for (var i = 0; i < muts.length; i++) {
+      var t = muts[i].target;
+      if (t && t.closest && t.closest('#cv-fab,#cv-bg-fab')) continue;
+      report(false);
+      return;
+    }
+  }).observe(document.documentElement,{attributes:true,attributeFilter:['class','aria-pressed','aria-expanded','aria-checked','aria-selected','open'],subtree:true,childList:true,characterData:true});
   window.addEventListener('pagehide',function(){report(true);});
 })();<\/script>`;
 
@@ -13955,16 +13980,19 @@ function resetEditToOriginal() {
 // instead of what was just edited. Commit the draft onto its existing
 // note here too, so navigating away is actually equivalent to the
 // toast's claim.
+// Returns true when it actually wrote a change to the note, false when
+// there was nothing to commit — callers use this to decide whether an
+// autosave toast is honest or just noise.
 function _nbCommitDraftToNote() {
   const editingId = _nbGetEditingId();
-  if (!editingId) return; // new, unsaved note — nothing to commit yet
+  if (!editingId) return false; // new, unsaved note — nothing to commit yet
   const { draftId, note: existingNote, savedFragment } = _nbCurrentBase();
-  if (!existingNote) return;
+  if (!existingNote) return false;
   const uiState = _nbLoadDraftUiState(draftId);
-  if (!uiState) return; // nothing edited this session
+  if (!uiState) return false; // nothing edited this session
   const notes = nbLoadNotes();
   const idx = notes.findIndex(n => n.id === existingNote.id);
-  if (idx === -1) return;
+  if (idx === -1) return false;
   const content = (typeof uiState.full === 'string') ? uiState.full : savedFragment;
   const pageBg = uiState.pageBg || existingNote.pageBg;
   const pageBgCustom = (uiState.pageBg === 'custom' && uiState.pageBgCustom) ? uiState.pageBgCustom : existingNote.pageBgCustom;
@@ -13976,14 +14004,14 @@ function _nbCommitDraftToNote() {
   const desktopView = (uiState.desktopView !== undefined) ? uiState.desktopView : existingNote.desktopView;
   notes[idx] = Object.assign({}, notes[idx], { content, pageBg, pageBgCustom, desktopView, updatedAt: Date.now() });
   nbSaveNotesArr(notes);
+  return true;
 }
 
 /* ===================== Bottom-nav "Notes" ===================== */
 function nbNotesNavClick() {
   const onEditor = document.getElementById('screen-create').classList.contains('active');
   if (onEditor) {
-    _nbCommitDraftToNote();
-    showToast('Changes saved automatically');
+    if (_nbCommitDraftToNote()) showToast('Changes saved automatically');
   }
   nbGoScreen('notes');
   // Same refresh search filtering and saving a new note already trigger —
@@ -14005,7 +14033,13 @@ function nbNewFromEditor() {
   // Only worth reassuring the person about autosave if there was a
   // previously saved note open — an unsaved canvas was never "saved" in
   // any sense they'd recognize, so the toast would just be noise there.
-  if (_nbGetEditingId()) showToast('Changes saved automatically');
+  // _nbCommitDraftToNote actually writes the outgoing note's in-session
+  // edits into the notes array (same as leaving via the Notes nav) —
+  // without it, tapping "+" mid-edit reset editingId and quietly dropped
+  // whatever was just changed while still claiming it was saved.
+  if (_nbGetEditingId()) {
+    if (_nbCommitDraftToNote()) showToast('Changes saved automatically');
+  }
   else showToast('New canvas');
   _nbSetEditingId(null);
   const newId = _nbNewDraftId();
