@@ -3909,7 +3909,7 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="paywall-overlay">
   <div id="paywall-dialog">
     <div class="rdlg-title">Free version</div>
-    <div class="rdlg-body">You're using the free version of the app &mdash; upgrade to Pro for unlimited notes. Already purchased? <a onclick="nbRestorePurchases()">Restore purchases</a>.</div>
+    <div class="rdlg-body">You're using the free version of the app &mdash; upgrade to Pro for unlimited notes. Already purchased? <a id="paywall-restore-link" onclick="nbRestorePurchases()">Restore purchases</a>.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel rdlg-getpro" onclick="nbPurchasePro()">Get Pro</button>
       <button class="rdlg-ok rdlg-ok--blue" onclick="closePaywallDialog()">OK</button>
@@ -10474,12 +10474,22 @@ async function nbPurchasePro() {
 // switches devices) — re-links whatever RevenueCat already has on file
 // for this person without going through Billing again.
 async function nbRestorePurchases() {
+  const link = document.getElementById('paywall-restore-link');
+  // Unlike the buttons this shares _pubSetBtnLoading with, this is a
+  // plain <a> — disabled doesn't exist on anchors, so there was nothing
+  // here before stopping a double-tap from firing a second concurrent
+  // restorePurchases() call. pointer-events:none (set below, once this
+  // call is past this guard) is what actually blocks the second tap;
+  // this check just makes that explicit rather than relying on it
+  // silently.
+  if (link && link.style.pointerEvents === 'none') return;
   const Purchases = _nbRcPlugin();
   if (!Purchases) {
     showToast('Restoring purchases requires the installed app');
     return;
   }
   if (_pubOfflineGuard()) return;
+  if (link) _pubSetBtnLoading(link, true, 'Restoring\u2026');
   try {
     const { customerInfo } = await Purchases.restorePurchases();
     const active = _nbEntitlementActive(customerInfo);
@@ -10489,6 +10499,8 @@ async function nbRestorePurchases() {
   } catch (e) {
     _nbLog('RevenueCat restore failed', e);
     showToast('Restore failed \u2014 try again later');
+  } finally {
+    if (link) _pubSetBtnLoading(link, false);
   }
 }
 // PACKAGE_NAME the Free app actually ships under — must match its real
@@ -10625,6 +10637,35 @@ function _nbBindAppResumeListener() {
         _nbNudgeWebViewRepaint();
         nbSyncPullThenPush();
       }
+    });
+  } catch (e) {}
+}
+// System/gesture back button (Android). Registering a 'backButton'
+// listener at all takes over from Capacitor's native default (WebView
+// history back, else exit the app) — nothing else in this file did that
+// before, so without the canGoBack fallback below, adding this listener
+// would silently break back-to-exit everywhere it wasn't already broken.
+// The one behavior change: while any _pubSetBtnLoading-tracked action is
+// in flight (Google sign-in, sign-out, delete account, purchase, restore
+// purchases, publish/update/unpublish), swallow it instead of exiting
+// mid-flow — every one of those has a native call, a stacked native
+// Activity (billing sheet, account picker), or a network request that'd
+// be orphaned under an app that's already gone, same failure mode
+// originally described here for sign-in alone. _nbBusyBtnCount is the
+// single shared counter (see _pubSetBtnLoading) so this doesn't need its
+// own per-action list — anything that already shows a spinner is already
+// covered.
+let _nbBackButtonListenerBound = false;
+function _nbBindBackButtonListener() {
+  if (_nbBackButtonListenerBound) return;
+  const AppPlugin = _nbAppPlugin();
+  if (!AppPlugin) return;
+  _nbBackButtonListenerBound = true;
+  try {
+    AppPlugin.addListener('backButton', (data) => {
+      if (_nbBusyBtnCount > 0) return;
+      if (data && data.canGoBack) window.history.back();
+      else AppPlugin.exitApp();
     });
   } catch (e) {}
 }
@@ -11315,7 +11356,18 @@ function openAccountScreen() {
   lockScroll();
   _nbStartAcctSplash3D();
 }
+// Ignores taps that land while Google sign-in is still in flight —
+// nbSignInWithGoogle() disables account-signin-btn for the duration (see
+// _pubSetBtnLoading), so this checks the same flag rather than adding a
+// separate one. Same reasoning as closeLogoutConfirm() below: without this,
+// backing out mid-flow just hides the screen while the sign-in promise
+// keeps running underneath, and _nbCompleteGoogleSignIn's success path
+// still fires (toast, sync, re-render) once it resolves, landing the
+// person back on whatever screen they navigated to as if they'd tapped
+// nothing.
 function closeAccountScreen() {
+  const signinBtn = document.getElementById('account-signin-btn');
+  if (signinBtn && signinBtn.disabled) return;
   document.getElementById('account-screen').classList.remove('open');
   unlockScroll();
   _nbStopAcctSplash3D();
@@ -11482,6 +11534,7 @@ function hideSplash() {
   nbInitPurchases();
   nbInitGoogleAuth();
   _nbBindAppResumeListener();
+  _nbBindBackButtonListener();
   unlockScroll();
   // The boot IIFE's `!important` html/body background-color rule outranks
   // any inline style this function could set, so it — not the plain
@@ -12270,21 +12323,34 @@ function _pubDefaultSlug(note) {
   return (note.title || 'note').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'note';
 }
 function _pubUrlFor(slug) { return NB_PUBLISH_API.replace(/\/$/, '') + '/@' + slug; }
-// Swaps a publish-sheet button between its normal label and a spinner +
-// in-progress label while a publish/update/unpublish request is in flight —
-// otherwise the only visible feedback during that gap is the button going
-// disabled, which reads as unresponsive rather than working. Restores the
-// exact original label on the way back out so callers don't need to repeat
-// it in every catch block.
+// Swaps a button (or link) between its normal label and a spinner +
+// in-progress label while any of this file's async actions — sign-in,
+// sign-out, delete account, purchase, restore, publish/update/unpublish —
+// is in flight. This is the one place all of them funnel through, so it
+// doubles as the busy tracker _nbBindBackButtonListener() reads: every
+// caller here is exactly the set of "don't let the hardware back button
+// exit out from under this" cases, and a new async action only needs to
+// call this (as they all already do for the spinner) to be covered by
+// that guard too — no separate list to remember to update.
+// disabled only exists on real form controls; <a> ignores it and keeps
+// firing onclick, so non-buttons get pointer-events:none instead (the
+// Restore purchases link is the one caller that needs this branch).
+let _nbBusyBtnCount = 0;
 function _pubSetBtnLoading(btn, loading, loadingLabel) {
+  if (!btn) return;
+  const isFormControl = 'disabled' in btn;
   if (loading) {
     btn.dataset.origLabel = btn.textContent;
     btn.innerHTML = '<span class="com-spinner"></span>' + loadingLabel;
-    btn.disabled = true;
+    if (isFormControl) btn.disabled = true;
+    else { btn.style.pointerEvents = 'none'; btn.setAttribute('aria-disabled', 'true'); }
+    _nbBusyBtnCount++;
   } else {
     btn.textContent = btn.dataset.origLabel || btn.textContent;
     delete btn.dataset.origLabel;
-    btn.disabled = false;
+    if (isFormControl) btn.disabled = false;
+    else { btn.style.pointerEvents = ''; btn.removeAttribute('aria-disabled'); }
+    _nbBusyBtnCount = Math.max(0, _nbBusyBtnCount - 1);
   }
 }
 // Pre-flight connectivity check for publish/unpublish/save/delete actions.
