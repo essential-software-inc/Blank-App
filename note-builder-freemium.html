@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Note Builder</title>
 <style>
 @font-face{
@@ -12919,7 +12919,7 @@ async function _pubRefreshAdTab() {
   const elig = nbAdCheckEligibility(html);
   const eligEl = document.getElementById('pub-ad-elig');
   if (elig.ok) {
-    eligEl.innerHTML = '<p class="bkp-help" style="color:#2f8f4e">\u2713 Eligible to run as an ad.</p>';
+    eligEl.innerHTML = '<p class="bkp-help" style="color:#2f8f4e">Eligible to run as an ad.</p>';
   } else {
     eligEl.innerHTML = '<p class="bkp-help" style="color:#a83232">' + (AD_ELIGIBILITY_MESSAGES[elig.reason] || elig.reason) + '</p>'
       + (elig.reason === 'missing-attribution' ? '<button class="ebtn-sec" onclick="nbAdCopyAttribution()">Copy required attribution text</button>' : '');
