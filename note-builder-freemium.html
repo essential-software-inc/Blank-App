@@ -1565,7 +1565,7 @@ body:not(.night):not(.pink) #publish-body .bkp-help { color: rgba(32,33,34,.65) 
   gap: .4rem;
   margin-left: auto
 }
-body.night #publish-sheet { border: 1px solid #282828; color: #fff }
+body.night #publish-sheet { background: #111111; border: 1px solid #282828; color: #fff }
 body.night #publish-hdr { background: #111111; border-color: #282828 }
 body.night #publish-hdr-title { color: #e8e8e8 }
 body.night #publish-close { color: #999999 }
@@ -1576,7 +1576,7 @@ body.night #pub-footer-new,
 body.night #pub-footer-live,
 body.night #pub-footer-ad-new,
 body.night #pub-footer-ad-live { background: #080808; border-color: #282828 }
-body.pink #publish-sheet { color: #fff; border-radius: 16px 16px 0 0 }
+body.pink #publish-sheet { background: #fff8fb; color: #fff; border-radius: 16px 16px 0 0 }
 body.pink #publish-hdr { background: #c8365e; border-bottom: none }
 body.pink #publish-hdr-title { color: #fff }
 body.pink #publish-close { color: rgba(255,255,255,.8) }
@@ -1587,6 +1587,13 @@ body.pink #pub-footer-new,
 body.pink #pub-footer-live,
 body.pink #pub-footer-ad-new,
 body.pink #pub-footer-ad-live { background: #fff8fb; border-color: #f5c5d8 }
+
+.pub-tab-btn { color: #8a8d99; border-bottom-color: transparent }
+.pub-tab-btn.is-active { color: #3366cc; border-bottom-color: #3366cc }
+body.night .pub-tab-btn { color: #888888 }
+body.night .pub-tab-btn.is-active { color: #e0e0e0; border-bottom-color: #e0e0e0 }
+body.pink .pub-tab-btn { color: #b06080 }
+body.pink .pub-tab-btn.is-active { color: #bd2856; border-bottom-color: #bd2856 }
 
 .com-field {
   width: 100%;
@@ -3958,22 +3965,26 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 16 September 2026</em></p>
+      <p><em>Effective 18 September 2026</em></p>
       <p><strong>Note Builder</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
       <h3>Google sign-in &amp; sync</h3>
-      <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with a session token so you stay signed in. While signed in, your notes (including embedded images) are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) is linked to your account so it carries over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again. You can delete your account at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs you out and schedules everything stored with it (synced notes, published pages) for permanent removal after 30 days. Signing back in with the same Google account during that window cancels the deletion and restores full access.</p>
+      <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with a session token so you stay signed in. While signed in, your notes (including embedded images) are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance are linked to your account so they carry over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again. You can delete your account at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs you out and schedules everything stored with it (synced notes, published pages, running ads, and any unspent ad view-credit balance) for permanent removal after 30 days. Signing back in with the same Google account during that window cancels the deletion and restores full access.</p>
       <h3>Publishing a page</h3>
       <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted.</p>
+      <h3>Publishing as an ad</h3>
+      <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create — not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views uses Google Play Billing; Essential Software receives the purchased product and confirmation of the purchase (not your payment details, which Google handles directly) and credits the corresponding number of views to your account. Essential Software also stores how many views an ad has used and its current status (running, used up, or taken down). Unpublishing an ad removes it from Create immediately and forfeits any views it had left — that balance is not restored to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images inside an ad are fetched — ads are additionally restricted to images from Wikipedia or Wikimedia Commons.</p>
       <h3>Reporting a published page</h3>
       <p>Anyone can report a published page from its public link. Reporting checks the reporter's IP address for about a minute, just to stop spam, then discards it — it's never stored as part of the report itself. Essential Software keeps only the reason and details submitted. Essential Software keeps every report on file so it can be reviewed. Reports of child sexual abuse material are specifically preserved, not deleted, because that material must be kept and passed to the proper authority.</p>
       <h3>External images &amp; embeds</h3>
-      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube embeds load directly from YouTube, and Instagram post embeds load directly from Instagram. Essential Software has no involvement with these third-party hosts.</p>
+      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube embeds load directly from YouTube, and Instagram post embeds load directly from Instagram. Essential Software has no involvement with these third-party hosts. A page published as an ad is additionally restricted to images hotlinked from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device — this is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
       <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently: it's a plain web page viewed in a browser, so links inside it are ordinary clickable links that open like any other link on the web.</p>
       <h3>Analytics</h3>
       <p>Essential Software does not collect analytics, telemetry, or crash reports from this app.</p>
+      <h3>Contact</h3>
+      <p>Questions about this policy can be sent to <a href="mailto:contactrhudio@gmail.com">contactrhudio@gmail.com</a>.</p>
     </div>
   </div>
 </div>
@@ -3985,20 +3996,28 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 14 September 2026</em></p>
+      <p><em>Effective 18 September 2026</em></p>
       <p>Using <strong>Note Builder</strong> means you agree to these terms.</p>
       <h3>Responsible Use</h3>
       <p>You agree to use Note Builder for lawful purposes only. You may not use the app to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish — see below.</p>
       <h3>Your Content</h3>
       <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to Essential Software's servers so you can restore them on another device. You are responsible for keeping your own backups if you don't sign in — without an account, Essential Software has no copy of your content and cannot recover it if it's lost.</p>
       <h3>Your Account</h3>
-      <p>Signing in is optional and handled by Google. Keep your Google account secure — anyone with access to it can access your synced notes and Pro entitlement through this app.</p>
+      <p>Signing in is optional and handled by Google. Keep your Google account secure — anyone with access to it can access your synced notes, Pro entitlement, and ad view credits through this app.</p>
       <h3>Published Content</h3>
       <p>A published page is stored on Essential Software's servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. Essential Software may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. Unpublish it yourself and its address frees up right away for reuse. If Essential Software removes it instead, for a takedown or abuse report, the address stays down for good and can't be reclaimed or republished.</p>
+      <h3>Advertising (Publish as Ad)</h3>
+      <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing. To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons — no images uploaded from your device. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. Essential Software checks eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms.</p>
+      <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. Essential Software does not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
+      <p>Purchased views are a consumable purchase through Google Play — refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:contactrhudio@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
+      <h3>Purchases &amp; Eligibility</h3>
+      <p>Buying view packages is handled entirely through Google Play Billing, and any age or account requirements for making a purchase are set and enforced by Google Play, not by Essential Software. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
       <h3>Third-Party Content</h3>
-      <p>Images and video you embed by URL are loaded directly from the source you provide. You are responsible for having the right to use any content you embed.</p>
+      <p>Images and video you embed by URL are loaded directly from the source you provide. You are responsible for having the right to use any content you embed. Images used in an ad are restricted as described above, and the required attribution notice exists specifically because third-party trademarks, logos, and brand names may appear in an ad's content or images — you're still responsible for having the right to use whatever you include, and that notice does not grant any rights of its own.</p>
       <h3>Changes to These Terms</h3>
       <p>Essential Software may update these terms from time to time. Continued use of the app after changes are posted constitutes acceptance of the revised terms.</p>
+      <h3>Contact</h3>
+      <p>Questions about these terms can be sent to <a href="mailto:contactrhudio@gmail.com">contactrhudio@gmail.com</a>.</p>
     </div>
   </div>
 </div>
@@ -4086,8 +4105,8 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="publish-close" onclick="closePublishSheet()" aria-label="Close">✕</button>
     </div>
     <div id="pub-tabs" style="display:flex;gap:.4rem;padding:.6rem .9rem 0">
-      <button id="pub-tab-web" class="pub-tab-btn is-active" onclick="_pubShowTab('web')" style="flex:1;padding:.5rem 0;border:none;background:none;border-bottom:2px solid #3366cc;color:#3366cc;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish to Web</button>
-      <button id="pub-tab-ad" class="pub-tab-btn" onclick="_pubShowTab('ad')" style="flex:1;padding:.5rem 0;border:none;background:none;border-bottom:2px solid transparent;color:#8a8d99;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish as Ad</button>
+      <button id="pub-tab-web" class="pub-tab-btn is-active" onclick="_pubShowTab('web')" style="flex:1;padding:.5rem 0;border:none;border-width:0 0 2px 0;border-style:solid;background:none;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish to Web</button>
+      <button id="pub-tab-ad" class="pub-tab-btn" onclick="_pubShowTab('ad')" style="flex:1;padding:.5rem 0;border:none;border-width:0 0 2px 0;border-style:solid;background:none;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish as Ad</button>
     </div>
     <div id="publish-body">
       <div id="pub-web-tab">
@@ -12876,10 +12895,8 @@ function _pubShowTab(tab) {
   const adBtn = document.getElementById('pub-tab-ad');
   document.getElementById('pub-web-tab').style.display = tab === 'web' ? '' : 'none';
   document.getElementById('pub-ad-tab').style.display = tab === 'ad' ? '' : 'none';
-  webBtn.style.borderBottomColor = tab === 'web' ? '#3366cc' : 'transparent';
-  webBtn.style.color = tab === 'web' ? '#3366cc' : '#8a8d99';
-  adBtn.style.borderBottomColor = tab === 'ad' ? '#3366cc' : 'transparent';
-  adBtn.style.color = tab === 'ad' ? '#3366cc' : '#8a8d99';
+  webBtn.classList.toggle('is-active', tab === 'web');
+  adBtn.classList.toggle('is-active', tab === 'ad');
   const note = _pubFindNote(_pubNoteId);
   if (tab === 'web') {
     document.getElementById('pub-footer-new').style.display = (note && note.publishedSlug) ? 'none' : '';
