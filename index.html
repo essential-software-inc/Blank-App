@@ -10977,7 +10977,10 @@ async function nbSignInWithGoogle() {
       }
     }
   } finally {
-    if (btn) _pubSetBtnLoading(btn, false);
+    // On success this was already cleared above (right after auth, before
+    // the trailing sync) so the back button isn't stuck waiting on it —
+    // only clear it here if that didn't happen, i.e. the flow failed.
+    if (btn && btn.disabled) _pubSetBtnLoading(btn, false);
   }
 }
 async function _nbCompleteGoogleSignIn(idToken) {
@@ -11004,6 +11007,14 @@ async function _nbCompleteGoogleSignIn(idToken) {
   showToast(data.deletionCancelled
     ? 'Signed in as ' + data.email + ' \u2014 account deletion cancelled'
     : 'Signed in as ' + data.email);
+  // Sign-in itself has now succeeded — release the button here rather
+  // than waiting for nbSignInWithGoogle's finally block, which only runs
+  // after the trailing sync below finishes. closeAccountScreen() (and any
+  // manual tap on the back button) bails out early while this button is
+  // still disabled, so leaving it disabled through the sync made the back
+  // button look unresponsive right after a successful sign-in.
+  const signinBtn = document.getElementById('account-signin-btn');
+  if (signinBtn) _pubSetBtnLoading(signinBtn, false);
   nbRenderAccountDialog();
   closeAccountScreen();
   // Refresh the notes screen against the now-signed-in account right
