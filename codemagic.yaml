@@ -92,6 +92,41 @@ workflows:
               f.write(content)
           print("Disabled native WebView scrollbar in", path)
           PY
+      - name: Disable pinch-zoom (Android)
+        script: |
+          # MainActivity.java is regenerated fresh by `npx cap add android`
+          # every build (android/ isn't committed - see that step above), so
+          # like the scrollbar patch, this has to be re-applied here every
+          # build rather than committed as a one-off edit. Located by name
+          # instead of a hardcoded path since Free and Pro ship under
+          # different appIds/package folders.
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          python3 - "$MAINACTIVITY_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "public class MainActivity extends BridgeActivity {}"
+          new = """public class MainActivity extends BridgeActivity {
+              @Override
+              public void onStart() {
+                  super.onStart();
+                  getBridge().getWebView().getSettings().setSupportZoom(false);
+                  getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
+                  getBridge().getWebView().getSettings().setDisplayZoomControls(false);
+              }
+          }"""
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: MainActivity.java didn't match the expected empty "
+                  "class body - the installed @capacitor/android version may "
+                  "have changed the template. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled pinch-zoom in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
@@ -226,6 +261,41 @@ workflows:
               f.write(content)
           print("Disabled native WebView scrollbar in", path)
           PY
+      - name: Disable pinch-zoom (Android)
+        script: |
+          # MainActivity.java is regenerated fresh by `npx cap add android`
+          # every build (android/ isn't committed - see that step above), so
+          # like the scrollbar patch, this has to be re-applied here every
+          # build rather than committed as a one-off edit. Located by name
+          # instead of a hardcoded path since Free and Pro ship under
+          # different appIds/package folders.
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          python3 - "$MAINACTIVITY_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "public class MainActivity extends BridgeActivity {}"
+          new = """public class MainActivity extends BridgeActivity {
+              @Override
+              public void onStart() {
+                  super.onStart();
+                  getBridge().getWebView().getSettings().setSupportZoom(false);
+                  getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
+                  getBridge().getWebView().getSettings().setDisplayZoomControls(false);
+              }
+          }"""
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: MainActivity.java didn't match the expected empty "
+                  "class body - the installed @capacitor/android version may "
+                  "have changed the template. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled pinch-zoom in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
@@ -349,6 +419,41 @@ workflows:
               f.write(content)
           print("Disabled native WebView scrollbar in", path)
           PY
+      - name: Disable pinch-zoom (Android)
+        script: |
+          # MainActivity.java is regenerated fresh by `npx cap add android`
+          # every build (android/ isn't committed - see that step above), so
+          # like the scrollbar patch, this has to be re-applied here every
+          # build rather than committed as a one-off edit. Located by name
+          # instead of a hardcoded path since Free and Pro ship under
+          # different appIds/package folders.
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          python3 - "$MAINACTIVITY_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "public class MainActivity extends BridgeActivity {}"
+          new = """public class MainActivity extends BridgeActivity {
+              @Override
+              public void onStart() {
+                  super.onStart();
+                  getBridge().getWebView().getSettings().setSupportZoom(false);
+                  getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
+                  getBridge().getWebView().getSettings().setDisplayZoomControls(false);
+              }
+          }"""
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: MainActivity.java didn't match the expected empty "
+                  "class body - the installed @capacitor/android version may "
+                  "have changed the template. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled pinch-zoom in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
@@ -461,6 +566,41 @@ workflows:
           with open(path, "w") as f:
               f.write(content)
           print("Disabled native WebView scrollbar in", path)
+          PY
+      - name: Disable pinch-zoom (Android)
+        script: |
+          # MainActivity.java is regenerated fresh by `npx cap add android`
+          # every build (android/ isn't committed - see that step above), so
+          # like the scrollbar patch, this has to be re-applied here every
+          # build rather than committed as a one-off edit. Located by name
+          # instead of a hardcoded path since Free and Pro ship under
+          # different appIds/package folders.
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          python3 - "$MAINACTIVITY_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "public class MainActivity extends BridgeActivity {}"
+          new = """public class MainActivity extends BridgeActivity {
+              @Override
+              public void onStart() {
+                  super.onStart();
+                  getBridge().getWebView().getSettings().setSupportZoom(false);
+                  getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
+                  getBridge().getWebView().getSettings().setDisplayZoomControls(false);
+              }
+          }"""
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: MainActivity.java didn't match the expected empty "
+                  "class body - the installed @capacitor/android version may "
+                  "have changed the template. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled pinch-zoom in", path)
           PY
       - name: Generate app icon from assets/logo.png
         script: |
@@ -597,6 +737,41 @@ workflows:
               f.write(content)
           print("Disabled native WebView scrollbar in", path)
           PY
+      - name: Disable pinch-zoom (Android)
+        script: |
+          # MainActivity.java is regenerated fresh by `npx cap add android`
+          # every build (android/ isn't committed - see that step above), so
+          # like the scrollbar patch, this has to be re-applied here every
+          # build rather than committed as a one-off edit. Located by name
+          # instead of a hardcoded path since Free and Pro ship under
+          # different appIds/package folders.
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          python3 - "$MAINACTIVITY_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "public class MainActivity extends BridgeActivity {}"
+          new = """public class MainActivity extends BridgeActivity {
+              @Override
+              public void onStart() {
+                  super.onStart();
+                  getBridge().getWebView().getSettings().setSupportZoom(false);
+                  getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
+                  getBridge().getWebView().getSettings().setDisplayZoomControls(false);
+              }
+          }"""
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: MainActivity.java didn't match the expected empty "
+                  "class body - the installed @capacitor/android version may "
+                  "have changed the template. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled pinch-zoom in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
@@ -714,6 +889,41 @@ workflows:
               f.write(content)
           print("Disabled native WebView scrollbar in", path)
           PY
+      - name: Disable pinch-zoom (Android)
+        script: |
+          # MainActivity.java is regenerated fresh by `npx cap add android`
+          # every build (android/ isn't committed - see that step above), so
+          # like the scrollbar patch, this has to be re-applied here every
+          # build rather than committed as a one-off edit. Located by name
+          # instead of a hardcoded path since Free and Pro ship under
+          # different appIds/package folders.
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          python3 - "$MAINACTIVITY_SRC" <<'PY'
+          import sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          old = "public class MainActivity extends BridgeActivity {}"
+          new = """public class MainActivity extends BridgeActivity {
+              @Override
+              public void onStart() {
+                  super.onStart();
+                  getBridge().getWebView().getSettings().setSupportZoom(false);
+                  getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
+                  getBridge().getWebView().getSettings().setDisplayZoomControls(false);
+              }
+          }"""
+          if old not in content:
+              raise SystemExit(
+                  "ERROR: MainActivity.java didn't match the expected empty "
+                  "class body - the installed @capacitor/android version may "
+                  "have changed the template. Update this patch step to match."
+              )
+          content = content.replace(old, new, 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled pinch-zoom in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
@@ -808,6 +1018,42 @@ workflows:
           if [ ! -d "ios" ]; then
             npx cap add ios
           fi
+      - name: Disable pinch-zoom (iOS)
+        script: |
+          # AppDelegate.swift is regenerated fresh by `npx cap add ios`
+          # every build (ios/ isn't committed either), so this has to be
+          # re-applied here each build too, same reasoning as the Android
+          # patch. Targets applicationDidBecomeActive's signature rather
+          # than its full body/comments so a template reformat is less
+          # likely to break the match - but if `cap add ios`'s generated
+          # AppDelegate.swift has changed shape entirely, this fails loudly
+          # instead of silently doing nothing.
+          APPDELEGATE_SRC="ios/App/App/AppDelegate.swift"
+          python3 - "$APPDELEGATE_SRC" <<'PY'
+          import re, sys
+          path = sys.argv[1]
+          with open(path) as f:
+              content = f.read()
+          if "import Capacitor" not in content:
+              content = content.replace("import UIKit", "import UIKit\nimport Capacitor", 1)
+          pattern = r"(func applicationDidBecomeActive\(_ application: UIApplication\) \{)"
+          if not re.search(pattern, content):
+              raise SystemExit(
+                  "ERROR: AppDelegate.swift didn't contain the expected "
+                  "applicationDidBecomeActive signature - the installed "
+                  "@capacitor/ios template may have changed. Update this "
+                  "patch step to match."
+              )
+          injected = (
+              "\n        if let webView = (self.window?.rootViewController as? CAPBridgeViewController)?.webView {\n"
+              "            webView.scrollView.pinchGestureRecognizer?.isEnabled = false\n"
+              "        }"
+          )
+          content = re.sub(pattern, r"\1" + injected, content, count=1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Disabled pinch-zoom in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --ios
