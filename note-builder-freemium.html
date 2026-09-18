@@ -606,7 +606,7 @@ body.pink .rdlg-more-toggle svg {
   display: inline-block;
   width: 13px;
   height: 13px;
-  border: 2px solid rgba(0, 0, 0, .15);
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
   border-top-color: currentColor;
   border-radius: 50%;
   vertical-align: -2px;
@@ -616,24 +616,6 @@ body.pink .rdlg-more-toggle svg {
 
 @keyframes com-spin {
   to { transform: rotate(360deg) }
-}
-
-.ebtn-pri .com-spinner,
-.rdlg-ok .com-spinner {
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  border-top-color: currentColor !important
-}
-
-body.night .ebtn-pri:disabled .com-spinner {
-  border-color: rgba(136, 136, 136, 0.3) !important
-}
-
-body.night .rdlg-ok:not(.rdlg-ok--blue):disabled .com-spinner {
-  border-color: rgba(136, 85, 92, 0.3) !important
-}
-
-body.night .ebtn-sec .com-spinner {
-  border-color: rgba(255, 255, 255, 0.25) !important
 }
 
 #feed-view {
@@ -1510,12 +1492,25 @@ body.markup-reader #reader-infobar-btn {
   background: #fff;
   border-radius: 16px 16px 0 0;
   width: min(720px, 100vw);
-  max-height: 80vh;
+  /* Fixed height (not max-height), sized to each state's DEFAULT tab —
+     the Web tab, which is what opens automatically (see _pubShowTab('web')
+     in nbOpenPublishSheet) and is the primary flow. The Ad tab is
+     secondary/opt-in, so it's the one that scrolls if it needs more room
+     — never the tab someone sees first. Measured content (header 46 +
+     tabs 49 + body padding 32 + content + footer) plus an ~8px buffer:
+     Unpublished's Web tab (slug form, 328px) is already the tallest tab
+     in that state, so nothing scrolls there at all. Published's Web tab
+     (live URL, 282px) is shorter than the Ad tab's package-selection view
+     (395px) — that view scrolls here rather than growing the box, since
+     buying ad credits is a deeper, less common action than checking on a
+     published note. See .is-live below for the Published value. */
+  height: min(336px, 80vh);
   display: flex;
   flex-direction: column;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
   overflow: hidden
 }
+#publish-sheet.is-live { height: min(290px, 80vh) }
 #publish-hdr {
   display: flex;
   align-items: center;
@@ -1529,6 +1524,12 @@ body.markup-reader #reader-infobar-btn {
   padding: .2rem .4rem; border-radius: 4px; font-size: 1.1rem; line-height: 1
 }
 #publish-body {
+  /* #publish-sheet has a fixed height per state (see .is-live) — this
+     just fills whatever space is left between the header/tabs and the
+     footer. Content stays top-aligned: a panel taller than the space
+     available scrolls inside here (nothing gets clipped or centered out
+     of view), a shorter panel just leaves plain space below it. The
+     sheet itself never resizes to fit content. */
   flex: 1; overflow-y: auto; padding: 1rem;
   display: flex; flex-direction: column; gap: .6rem; background: #fafcff
 }
@@ -1543,7 +1544,9 @@ body.markup-reader #reader-infobar-btn {
 body:not(.night):not(.pink) #publish-body .bkp-help { color: rgba(32,33,34,.65) }
 #publish-body .bkp-help { margin-bottom: 0 }
 #pub-footer-new,
-#pub-footer-live {
+#pub-footer-live,
+#pub-footer-ad-new,
+#pub-footer-ad-live {
   background: #fafcff;
   border-top: 1px solid #f0f5ff;
   padding: .45rem .75rem;
@@ -1553,7 +1556,9 @@ body:not(.night):not(.pink) #publish-body .bkp-help { color: rgba(32,33,34,.65) 
   flex-shrink: 0
 }
 #pub-footer-new-r,
-#pub-footer-live-r {
+#pub-footer-live-r,
+#pub-footer-ad-new-r,
+#pub-footer-ad-live-r {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -1568,7 +1573,9 @@ body.night #publish-body { background: #080808; color: #f0f0f0 }
 body.night .pub-status { color: #9a9a9a }
 body.night .pub-url { background: #1c1c1c; border-color: #383838; color: #f0f0f0 }
 body.night #pub-footer-new,
-body.night #pub-footer-live { background: #080808; border-color: #282828 }
+body.night #pub-footer-live,
+body.night #pub-footer-ad-new,
+body.night #pub-footer-ad-live { background: #080808; border-color: #282828 }
 body.pink #publish-sheet { color: #fff; border-radius: 16px 16px 0 0 }
 body.pink #publish-hdr { background: #c8365e; border-bottom: none }
 body.pink #publish-hdr-title { color: #fff }
@@ -1577,7 +1584,9 @@ body.pink #publish-body { background: #fff8fb; color: #1a0a12 }
 body.pink .pub-status { color: #875068 }
 body.pink .pub-url { background: #fff; border-color: #f5c5d8; color: #bd2856 }
 body.pink #pub-footer-new,
-body.pink #pub-footer-live { background: #fff8fb; border-color: #f5c5d8 }
+body.pink #pub-footer-live,
+body.pink #pub-footer-ad-new,
+body.pink #pub-footer-ad-live { background: #fff8fb; border-color: #f5c5d8 }
 
 .com-field {
   width: 100%;
@@ -3690,7 +3699,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         <button class="rdlg-ok rdlg-ok--blue" id="account-signin-btn" onclick="nbSignInWithGoogle()" style="width:100%">Sign in with Google</button>
       </div>
       <div id="account-signedin-btns" style="display:none">
-        <button class="rdlg-cancel" id="account-signout-btn" onclick="nbSignOut()">Sign out</button>
+        <button class="rdlg-cancel" id="account-signout-btn" onclick="nbSignOutFromAccountScreen()">Sign out</button>
       </div>
     </div>
   </div>
@@ -4073,20 +4082,52 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="publish-overlay" onclick="if(event.target===this)closePublishSheet()">
   <div id="publish-sheet">
     <div id="publish-hdr">
-      <span id="publish-hdr-title">Publish to Web</span>
+      <span id="publish-hdr-title">Online Publishing</span>
       <button id="publish-close" onclick="closePublishSheet()" aria-label="Close">✕</button>
     </div>
+    <div id="pub-tabs" style="display:flex;gap:.4rem;padding:.6rem .9rem 0">
+      <button id="pub-tab-web" class="pub-tab-btn is-active" onclick="_pubShowTab('web')" style="flex:1;padding:.5rem 0;border:none;background:none;border-bottom:2px solid #3366cc;color:#3366cc;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish to Web</button>
+      <button id="pub-tab-ad" class="pub-tab-btn" onclick="_pubShowTab('ad')" style="flex:1;padding:.5rem 0;border:none;background:none;border-bottom:2px solid transparent;color:#8a8d99;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish as Ad</button>
+    </div>
     <div id="publish-body">
-      <div id="pub-state-new" class="bkp-panel">
-        <p class="bkp-help">Publish this note as a live page anyone can open with a link. Choose an address below using letters, numbers, and dashes.</p>
-        <p id="pub-slug-example" class="bkp-help">E.g. example.com/@untitled-note</p>
-        <div id="pub-slug-wrap" class="com-field"><span id="pub-slug-prefix">/@</span><input id="pub-slug-input" placeholder="your-page-name" maxlength="48" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="_pubOnSlugInput(this.value)"></div>
-        <div id="pub-slug-status" class="pub-status"></div>
+      <div id="pub-web-tab">
+        <div id="pub-state-new" class="bkp-panel">
+          <p class="bkp-help">Publish this note as a live page anyone can open with a link. Choose an address below using letters, numbers, and dashes.</p>
+          <p id="pub-slug-example" class="bkp-help">E.g. example.com/@untitled-note</p>
+          <div id="pub-slug-wrap" class="com-field"><span id="pub-slug-prefix">/@</span><input id="pub-slug-input" placeholder="your-page-name" maxlength="48" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="_pubOnSlugInput(this.value)"></div>
+          <div id="pub-slug-status" class="pub-status"></div>
+        </div>
+        <div id="pub-state-live" class="bkp-panel" style="display:none">
+          <p class="bkp-help">This note is live.</p>
+          <div id="pub-live-url" class="pub-url" onclick="_pubCopyUrl()"></div>
+          <div id="pub-save-status" class="pub-status"></div>
+        </div>
       </div>
-      <div id="pub-state-live" class="bkp-panel" style="display:none">
-        <p class="bkp-help">This note is live.</p>
-        <div id="pub-live-url" class="pub-url" onclick="_pubCopyUrl()"></div>
-        <div id="pub-save-status" class="pub-status"></div>
+      <div id="pub-ad-tab" style="display:none">
+        <div id="pub-ad-need-web" class="bkp-panel" style="display:none">
+          <p class="bkp-help">Publish this note to the web first.</p>
+          <p class="bkp-help">Once it's live, buy a view package and publish it as an ad here. It'll then be shown automatically as a starting template when someone clicks + to create a new note — each time that happens, one view counts against the package until it runs out.</p>
+          <p class="bkp-help">A typical eligible ad is simple: up to two images linked from Wikipedia or Wikimedia Commons, an embedded Instagram post, an embedded YouTube video, plus one short disclaimer.</p>
+        </div>
+        <div id="pub-ad-need-signin" class="bkp-panel" style="display:none">
+          <p class="bkp-help">Sign in to publish or manage ads — ad view credits are tied to your account.</p>
+        </div>
+        <div id="pub-ad-main" style="display:none">
+          <div id="pub-ad-elig" class="bkp-panel"></div>
+          <div id="pub-ad-state-new" class="bkp-panel" style="display:none">
+            <p class="bkp-help">Buy a view package, then publish this note as an ad. It'll show as a starting template on other people's Create screen until the views run out.</p>
+            <div id="pub-ad-pkgs" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0"></div>
+            <div id="pub-ad-balance" class="bkp-help"></div>
+            <div id="pub-ad-status" class="pub-status"></div>
+          </div>
+          <div id="pub-ad-state-live" class="bkp-panel" style="display:none">
+            <p id="pub-ad-live-summary" class="bkp-help"></p>
+            <div id="pub-ad-status-live" class="pub-status"></div>
+          </div>
+          <div id="pub-ad-state-blocked" class="bkp-panel" style="display:none">
+            <p id="pub-ad-blocked-summary" class="bkp-help"></p>
+          </div>
+        </div>
       </div>
     </div>
     <div id="pub-footer-new">
@@ -4099,6 +4140,18 @@ document.body.dataset.lockScrollY = window.scrollY;
       <div id="pub-footer-live-r">
         <button id="pub-unpublish-btn" class="ebtn-sec" onclick="nbUnpublishNote()">Unpublish</button>
         <button id="pub-save-btn" class="ebtn-pri" onclick="nbUpdatePublishedNote()">Save Changes</button>
+      </div>
+    </div>
+    <div id="pub-footer-ad-new" style="display:none">
+      <div id="pub-footer-ad-new-r">
+        <button class="ebtn-sec" onclick="closePublishSheet()">Cancel</button>
+        <button id="pub-ad-publish-btn" class="ebtn-pri" disabled onclick="nbAdPublish()">Publish as Ad</button>
+      </div>
+    </div>
+    <div id="pub-footer-ad-live" style="display:none">
+      <div id="pub-footer-ad-live-r">
+        <button id="pub-ad-unpublish-btn" class="ebtn-sec" onclick="nbAdUnpublish()">Unpublish Ad</button>
+        <button id="pub-ad-save-btn" class="ebtn-pri" onclick="nbAdSaveChanges()">Save Changes</button>
       </div>
     </div>
   </div>
@@ -10994,6 +11047,26 @@ async function nbDeleteAccount() {
   nbRenderNotesScreen();
   return true;
 }
+// Guards account-signout-btn the same way nbSignInWithGoogle() guards its
+// own button. nbSignOut() is async (RevenueCat + native Google sign-out
+// calls), and without this the button stayed live and tappable the whole
+// time. Since account-signin-btn sits in the exact same spot once
+// nbRenderAccountDialog() flips which button group is visible, a second
+// tap landing right as sign-out finished hit "Sign in with Google"
+// instead — popping the sign-in spinner where sign-out was just tapped.
+// confirmLogout()'s own "Log out?" dialog already had this same
+// protection on its button; this just brings the direct Sign out button
+// on the account screen up to the same standard.
+async function nbSignOutFromAccountScreen() {
+  const btn = document.getElementById('account-signout-btn');
+  if (btn && btn.disabled) return;
+  if (btn) _pubSetBtnLoading(btn, true, 'Signing out\u2026');
+  try {
+    await nbSignOut();
+  } finally {
+    if (btn) _pubSetBtnLoading(btn, false);
+  }
+}
 async function nbSignOut() {
   const Purchases = _nbRcPlugin();
   if (Purchases) { try { await Purchases.logOut(); } catch (e) { _nbLog('RevenueCat logOut', e); } }
@@ -12408,10 +12481,21 @@ function nbOpenPublishSheet(id) {
   if (!note) { showToast('Note not found'); return; }
   _pubNoteId = id;
   _pubSlugAvailable = false;
+  _pubAdRecord = null;
+  _pubAdSelectedViews = null;
+  _pubShowTab('web');
   const newState = document.getElementById('pub-state-new');
   const liveState = document.getElementById('pub-state-live');
   const newFooter = document.getElementById('pub-footer-new');
   const liveFooter = document.getElementById('pub-footer-live');
+  // Drives the sheet's two fixed heights (see #publish-sheet / .is-live in
+  // the stylesheet) — published and unpublished get their own height
+  // rather than sharing one, since the live view's content is naturally
+  // shorter than the new/unpublished form. Re-run whenever this function
+  // re-runs too (see nbSyncPull's pubSheetTouched case), so a publish/
+  // unpublish that lands from another device while the sheet is open
+  // resizes it to match, same as closing and reopening would.
+  document.getElementById('publish-sheet').classList.toggle('is-live', !!note.publishedSlug);
   if (note.publishedSlug) {
     newState.style.display = 'none';
     newFooter.style.display = 'none';
@@ -12706,6 +12790,400 @@ function nbUnpublishNote() {
 function _pubCopyUrl() {
   const url = document.getElementById('pub-live-url').textContent;
   if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => showToast('Link copied')).catch(() => {});
+}
+
+/* ===================== Publish as Ad ===================== */
+// Mirrors the worker's validateAdEligibility (see note-publish-worker's
+// index.js) as closely as a browser DOMParser allows, so the tab can block
+// submission with a specific reason instead of round-tripping to the
+// server just to find out something's wrong. The server re-checks this on
+// every publish/update regardless — this copy is a UX convenience only,
+// never the actual gate, so the two are deliberately kept logically
+// identical rather than "close enough".
+const AD_ATTRIBUTION_TEXT = "All third-party trademarks, service marks, logos, and brand names appearing in advertisements or on this platform are the property of their respective owners.";
+const AD_MAX_IMAGES = 2;
+const AD_ALLOWED_IMAGE_HOST_SUFFIXES = ['.wikimedia.org', '.wikipedia.org'];
+const AD_ALLOWED_IMAGE_HOST_EXACT = new Set(['wikimedia.org', 'wikipedia.org']);
+function _adAllowedImageHost(host) {
+  if (AD_ALLOWED_IMAGE_HOST_EXACT.has(host)) return true;
+  return AD_ALLOWED_IMAGE_HOST_SUFFIXES.some(suffix => host.endsWith(suffix));
+}
+function nbAdCheckEligibility(html) {
+  let doc;
+  try { doc = new DOMParser().parseFromString(html, 'text/html'); }
+  catch (e) { return { ok: false, reason: 'parse-failed' }; }
+  const nonBlankBlocks = Array.from(doc.querySelectorAll('.blk[data-type="text"]'))
+    .map(el => (el.textContent || '').replace(/\s+/g, ' ').trim())
+    .filter(t => t.length > 0);
+  const attributionOccurrences = nonBlankBlocks.filter(t => t === AD_ATTRIBUTION_TEXT).length;
+  const strayText = nonBlankBlocks.filter(t => t !== AD_ATTRIBUTION_TEXT);
+  if (attributionOccurrences === 0) return { ok: false, reason: 'missing-attribution' };
+  if (attributionOccurrences > 1) return { ok: false, reason: 'duplicate-attribution' };
+  if (strayText.length > 0) return { ok: false, reason: 'added-text' };
+  // Same best-effort hidden/shrunk check the worker does on the raw markup
+  // (no computed-style engine available server-side, so this stays
+  // pattern-based here too rather than trying to be smarter).
+  const attrBlockMatch = html.match(/<[^>]*data-type="text"[^>]*>(?:(?!<\/div>)[\s\S])*?All third-party trademarks[\s\S]*?<\/div>/);
+  if (attrBlockMatch) {
+    const hiddenPattern = /(display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0*)?\s*[;"']|font-size\s*:\s*[0-9](?:px)?\s*[;"'])/i;
+    if (hiddenPattern.test(attrBlockMatch[0])) return { ok: false, reason: 'attribution-hidden-or-shrunk' };
+  }
+  const imageSrcs = Array.from(doc.querySelectorAll('.blk-img img')).map(img => img.getAttribute('src') || '');
+  if (imageSrcs.length > AD_MAX_IMAGES) return { ok: false, reason: 'too-many-images' };
+  for (const src of imageSrcs) {
+    if (!src) continue;
+    if (/^data:/i.test(src)) return { ok: false, reason: 'device-image' };
+    let host;
+    try { host = new URL(src).hostname.toLowerCase(); } catch (e) { return { ok: false, reason: 'invalid-image-src' }; }
+    if (!_adAllowedImageHost(host)) return { ok: false, reason: 'non-wikimedia-image' };
+  }
+  return { ok: true };
+}
+const AD_ELIGIBILITY_MESSAGES = {
+  'missing-attribution': 'Add a Text block with the trademark-attribution sentence (tap "Copy required attribution text" below, then paste it in), unedited.',
+  'duplicate-attribution': 'The attribution line appears more than once — keep exactly one.',
+  'added-text': 'Remove any other text blocks — only the attribution line is allowed.',
+  'attribution-hidden-or-shrunk': 'The attribution block can\u2019t be hidden or shrunk.',
+  'too-many-images': `Only up to ${AD_MAX_IMAGES} images are allowed.`,
+  'device-image': 'Remove any device-uploaded photo — only hotlinked Wikipedia/Wikimedia images are allowed.',
+  'non-wikimedia-image': 'Images must be hotlinked from Wikipedia or Wikimedia Commons.',
+  'invalid-image-src': 'One of the images has an invalid source.',
+  'parse-failed': 'Could not check this note\u2019s content.'
+};
+function nbAdCopyAttribution() {
+  if (navigator.clipboard) navigator.clipboard.writeText(AD_ATTRIBUTION_TEXT)
+    .then(() => showToast('Attribution text copied — paste it into a new Text block'))
+    .catch(() => {});
+}
+
+// RevenueCat offering/packages for view credits — see setup guide §5c.
+// Views-per-package is display-only here; the server (AD_VIEW_PACKAGES in
+// the worker) is the actual source of truth for what a given product ID
+// grants, keyed off the RevenueCat webhook's product_id, not this map.
+const AD_PACKAGE_IDENTIFIERS = [
+  { id: 'views_1000', views: 1000 },
+  { id: 'views_5000', views: 5000 },
+  { id: 'views_20000', views: 20000 },
+  { id: 'views_100000', views: 100000 },
+  { id: 'views_1000000', views: 1000000 },
+];
+const AD_OFFERING_ID = 'ad_views';
+
+let _pubAdSelectedViews = null;
+let _pubAdRecord = null; // the matching row from GET /ads/mine, if any
+
+function _pubShowTab(tab) {
+  const webBtn = document.getElementById('pub-tab-web');
+  const adBtn = document.getElementById('pub-tab-ad');
+  document.getElementById('pub-web-tab').style.display = tab === 'web' ? '' : 'none';
+  document.getElementById('pub-ad-tab').style.display = tab === 'ad' ? '' : 'none';
+  webBtn.style.borderBottomColor = tab === 'web' ? '#3366cc' : 'transparent';
+  webBtn.style.color = tab === 'web' ? '#3366cc' : '#8a8d99';
+  adBtn.style.borderBottomColor = tab === 'ad' ? '#3366cc' : 'transparent';
+  adBtn.style.color = tab === 'ad' ? '#3366cc' : '#8a8d99';
+  const note = _pubFindNote(_pubNoteId);
+  if (tab === 'web') {
+    document.getElementById('pub-footer-new').style.display = (note && note.publishedSlug) ? 'none' : '';
+    document.getElementById('pub-footer-live').style.display = (note && note.publishedSlug) ? '' : 'none';
+    document.getElementById('pub-footer-ad-new').style.display = 'none';
+    document.getElementById('pub-footer-ad-live').style.display = 'none';
+  } else {
+    document.getElementById('pub-footer-new').style.display = 'none';
+    document.getElementById('pub-footer-live').style.display = 'none';
+    _pubRefreshAdTab();
+  }
+}
+
+// Renders the Publish as Ad tab from scratch every time it's opened —
+// cheap (one eligibility check + one fetch), and avoids the tab showing
+// stale state after an edit or after another device changed something.
+async function _pubRefreshAdTab() {
+  const note = _pubFindNote(_pubNoteId);
+  const needWeb = document.getElementById('pub-ad-need-web');
+  const needSignin = document.getElementById('pub-ad-need-signin');
+  const main = document.getElementById('pub-ad-main');
+  document.getElementById('pub-footer-ad-new').style.display = 'none';
+  document.getElementById('pub-footer-ad-live').style.display = 'none';
+  if (!note || !note.publishedSlug) {
+    needWeb.style.display = ''; needSignin.style.display = 'none'; main.style.display = 'none';
+    return;
+  }
+  if (!nbIsSignedIn()) {
+    needWeb.style.display = 'none'; needSignin.style.display = ''; main.style.display = 'none';
+    return;
+  }
+  needWeb.style.display = 'none'; needSignin.style.display = 'none'; main.style.display = '';
+
+  let html;
+  try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
+  catch (e) { _nbLog('ad elig build', e); html = ''; }
+  const elig = nbAdCheckEligibility(html);
+  const eligEl = document.getElementById('pub-ad-elig');
+  if (elig.ok) {
+    eligEl.innerHTML = '<p class="bkp-help" style="color:#2f8f4e">\u2713 Eligible to run as an ad.</p>';
+  } else {
+    eligEl.innerHTML = '<p class="bkp-help" style="color:#a83232">' + (AD_ELIGIBILITY_MESSAGES[elig.reason] || elig.reason) + '</p>'
+      + (elig.reason === 'missing-attribution' ? '<button class="ebtn-sec" onclick="nbAdCopyAttribution()">Copy required attribution text</button>' : '');
+  }
+
+  if (_pubOfflineGuard()) return;
+  let data;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/mine', {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) throw new Error('ads/mine failed: ' + res.status);
+    data = await res.json();
+  } catch (e) {
+    _nbLog('ads/mine', e);
+    showToast('Could not load ad status');
+    return;
+  }
+  _pubAdRecord = (data.ads || []).find(a => a.slug === note.publishedSlug) || null;
+  const newState = document.getElementById('pub-ad-state-new');
+  const liveState = document.getElementById('pub-ad-state-live');
+  const blockedState = document.getElementById('pub-ad-state-blocked');
+  if (!_pubAdRecord) {
+    newState.style.display = ''; liveState.style.display = 'none'; blockedState.style.display = 'none';
+    document.getElementById('pub-ad-balance').textContent = 'View credit balance: ' + data.creditBalance;
+    _pubAdSelectedViews = null;
+    document.getElementById('pub-ad-status').textContent = '';
+    await _pubRenderAdPackages(elig.ok);
+    document.getElementById('pub-footer-ad-new').style.display = '';
+  } else if (_pubAdRecord.status === 'active') {
+    newState.style.display = 'none'; liveState.style.display = ''; blockedState.style.display = 'none';
+    document.getElementById('pub-ad-live-summary').textContent =
+      _pubAdRecord.views_used + ' / ' + _pubAdRecord.views_total + ' views used \u2014 running';
+    document.getElementById('pub-ad-status-live').textContent = '';
+    document.getElementById('pub-footer-ad-live').style.display = '';
+    document.getElementById('pub-ad-save-btn').disabled = !elig.ok;
+  } else {
+    // exhausted or unpublished — the worker has no re-publish path for a
+    // slug already registered in the ads table (POST /ads/publish 409s),
+    // so there's genuinely nothing actionable to offer here beyond status.
+    newState.style.display = 'none'; liveState.style.display = 'none'; blockedState.style.display = '';
+    document.getElementById('pub-ad-blocked-summary').textContent =
+      _pubAdRecord.status === 'exhausted'
+        ? ('This ad used all ' + _pubAdRecord.views_total + ' of its views and has stopped running. Publishing this exact page as a new ad isn\u2019t supported yet \u2014 publish a copy under a different address instead.')
+        : 'This ad was unpublished and can\u2019t be resumed on this address \u2014 publish a copy under a different address to run it again.';
+  }
+}
+
+async function _pubRenderAdPackages(eligible) {
+  const wrap = document.getElementById('pub-ad-pkgs');
+  wrap.innerHTML = '';
+  const Purchases = _nbRcPlugin();
+  let packages = null;
+  if (Purchases) {
+    try {
+      const offerings = await Purchases.getOfferings();
+      const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
+      packages = offering && offering.availablePackages;
+    } catch (e) { _nbLog('ad offerings', e); }
+  }
+  AD_PACKAGE_IDENTIFIERS.forEach(def => {
+    const pkg = packages && packages.find(p => p.identifier === def.id);
+    const price = pkg && pkg.product && pkg.product.priceString;
+    const btn = document.createElement('button');
+    btn.className = 'pub-pkg-btn';
+    btn.style.cssText = 'flex:1 1 28%;padding:.6rem .4rem;border-radius:11px;border:1.5px solid #e2e5ee;background:#f8f9fc;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:center';
+    btn.innerHTML = def.views.toLocaleString() + ' views<br><span style="font-weight:400;color:#8a8d99">' + (price || (Purchases ? '\u2014' : 'app only')) + '</span>';
+    btn.disabled = !eligible || !Purchases;
+    btn.onclick = () => nbAdSelectPackage(def, pkg, btn);
+    wrap.appendChild(btn);
+  });
+}
+function nbAdSelectPackage(def, pkg, btn) {
+  _pubAdSelectedViews = { def, pkg };
+  Array.from(document.getElementById('pub-ad-pkgs').children).forEach(b => {
+    b.style.borderColor = '#e2e5ee'; b.style.background = '#f8f9fc';
+  });
+  btn.style.borderColor = '#3366cc'; btn.style.background = '#eef2fc';
+  document.getElementById('pub-ad-publish-btn').disabled = false;
+}
+
+// Purchases the selected view package, then registers this note as an ad
+// for that many views. The webhook that credits the balance is async
+// (RevenueCat -> worker), so this polls GET /ads/mine briefly for the
+// balance to catch up before calling /ads/publish, instead of racing it
+// with the allocation call and surfacing a confusing 402.
+async function nbAdPublish() {
+  const note = _pubFindNote(_pubNoteId);
+  if (!note || !note.publishedSlug) { showToast('Note not found'); return; }
+  if (!_pubAdSelectedViews) return;
+  const Purchases = _nbRcPlugin();
+  if (!Purchases) { showToast('Buying ad views requires the installed app from Google Play'); return; }
+  if (_pubOfflineGuard()) return;
+  const btn = document.getElementById('pub-ad-publish-btn');
+  const statusEl = document.getElementById('pub-ad-status');
+  const { def, pkg } = _pubAdSelectedViews;
+  _pubSetBtnLoading(btn, true, 'Processing\u2026');
+  try {
+    if (!pkg) { showToast('That package isn\u2019t available right now \u2014 try again later'); return; }
+    try {
+      await Purchases.purchasePackage({ aPackage: pkg });
+    } catch (e) {
+      if (e && e.userCancelled) return;
+      throw e;
+    }
+    statusEl.textContent = 'Confirming purchase\u2026';
+    let balance = -1;
+    for (let i = 0; i < 6; i++) {
+      await new Promise(r => setTimeout(r, 2000));
+      try {
+        const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/mine', {
+          headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+        });
+        if (res.ok) { const d = await res.json(); balance = d.creditBalance; if (balance >= def.views) break; }
+      } catch (e) { _nbLog('ads/mine poll', e); }
+    }
+    if (balance < def.views) {
+      showToast('Purchase is still confirming \u2014 try Publish as Ad again in a minute');
+      return;
+    }
+    statusEl.textContent = 'Publishing\u2026';
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      body: JSON.stringify({ slug: note.publishedSlug, token: note.publishToken, views: def.views })
+    });
+    if (!res.ok) {
+      const msg = await res.text().catch(() => '');
+      if (res.status === 422) showToast('Not eligible to run as an ad \u2014 check the requirements above');
+      else if (res.status === 409) showToast('This page is already registered as an ad');
+      else if (res.status === 402) showToast('Not enough view credits yet \u2014 try again shortly');
+      else { _nbLog('ads/publish', msg); showToast('Publish as ad failed'); }
+      return;
+    }
+    showToast('Ad published \u2014 it\u2019ll start showing on Create screens');
+    statusEl.textContent = '';
+    await _pubRefreshAdTab();
+  } catch (e) {
+    _nbLog('ad publish', e);
+    showToast('Publish as ad failed');
+  } finally {
+    _pubSetBtnLoading(btn, false);
+  }
+}
+
+async function nbAdSaveChanges() {
+  const note = _pubFindNote(_pubNoteId);
+  if (!note || !note.publishedSlug) { showToast('Note not found'); return; }
+  if (_pubOfflineGuard()) return;
+  let html;
+  try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
+  catch (e) { _nbLog('ad save build', e); showToast('Save failed'); return; }
+  const elig = nbAdCheckEligibility(html);
+  if (!elig.ok) { showToast(AD_ELIGIBILITY_MESSAGES[elig.reason] || 'Not eligible'); return; }
+  const btn = document.getElementById('pub-ad-save-btn');
+  _pubSetBtnLoading(btn, true, 'Saving\u2026');
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(note.publishedSlug), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html, token: note.publishToken })
+    });
+    if (!res.ok) {
+      if (res.status === 422) showToast('Not eligible to run as an ad \u2014 check the requirements above');
+      else if (res.status === 404) showToast('This ad is no longer registered');
+      else throw new Error('ad update failed: ' + res.status);
+      return;
+    }
+    // Same page content as the regular published page — keep the Publish
+    // to Web tab's own change-tracking hash in sync too, or its Save
+    // Changes button would think there's still an unsaved change.
+    _pubSaveNoteFields(_pubNoteId, { lastPublishedAt: Date.now(), publishedContentHash: _hashStr(html) });
+    showToast('Ad changes saved');
+    closePublishSheet();
+  } catch (e) {
+    _nbLog('ad save', e);
+    showToast('Save failed');
+  } finally {
+    _pubSetBtnLoading(btn, false);
+  }
+}
+
+function nbAdUnpublish() {
+  const note = _pubFindNote(_pubNoteId);
+  if (!note || !_pubAdRecord) return;
+  const ov = document.getElementById('unpublish-overlay');
+  const titleEl = ov.querySelector('.rdlg-title');
+  const bodyEl = ov.querySelector('.rdlg-body');
+  const cancelBtn = document.getElementById('unpublish-dialog-cancel');
+  const confirmBtn = document.getElementById('unpublish-dialog-confirm');
+  const origTitle = titleEl.textContent, origBody = bodyEl.textContent;
+  titleEl.textContent = 'Unpublish this ad?';
+  bodyEl.textContent = 'It will stop showing on Create screens. The web page itself stays live \u2014 unpublish it separately from the Publish to Web tab if you want that gone too. This can\u2019t be resumed on this address.';
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = 'Unpublish Ad';
+  const restore = () => { titleEl.textContent = origTitle; bodyEl.textContent = origBody; };
+  cancelBtn.onclick = () => { if (!confirmBtn.disabled) { ov.classList.remove('open'); restore(); } };
+  ov.onclick = (e) => { if (e.target === ov && !confirmBtn.disabled) { ov.classList.remove('open'); restore(); } };
+  confirmBtn.onclick = async () => {
+    if (_pubOfflineGuard()) return;
+    _pubSetBtnLoading(confirmBtn, true, 'Unpublishing\u2026');
+    try {
+      const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(note.publishedSlug), {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+      });
+      if (!res.ok && res.status !== 404) throw new Error('ad unpublish failed: ' + res.status);
+      ov.classList.remove('open');
+      restore();
+      showToast('Ad unpublished');
+      _pubSetBtnLoading(confirmBtn, false);
+      await _pubRefreshAdTab();
+    } catch (e) {
+      _nbLog('ad unpublish', e);
+      showToast('Unpublish failed');
+      _pubSetBtnLoading(confirmBtn, false);
+    }
+  };
+  ov.classList.add('open');
+}
+
+// ---- Create screen: hand out an ad template instead of the pristine one
+// ---- when one's active, and count the edit-time view once they actually
+// ---- start editing it (see _nbCurrentBase/nbRenderCanvas below for how
+// ---- this plugs in).
+let _nbPendingAdSlug = null; // slug of the ad template currently loaded into a fresh draft, if any
+// The extracted #cv-canvas fragment from that ad's published page — NOT
+// the ad's raw published html. GET /ads/next returns the same fully
+// standalone reader page nbBuildStaticNoteHtml produces (its own chrome,
+// no editing engine at all), which can't stand in for NB_PRISTINE_TEMPLATE
+// as a base — the editable canvas's drag/toolbar/format JS only exists in
+// the template itself. So this is threaded through exactly the way an
+// existing note's own saved content already is (see _nbCurrentBase's
+// editingId branch, savedFragment + base always NB_PRISTINE_TEMPLATE) —
+// _nbExtractCanvasFragment does the same extraction either way.
+let _nbPendingAdFragment = null;
+let _nbAdViewCounted = false; // guards the one-time POST /ads/:slug/view per draft session
+
+async function _nbFetchNextAd() {
+  // Short client-side timeout: a slow/unreachable network here should
+  // never delay opening a fresh note, just silently fall back to the
+  // pristine template exactly as if nothing were active.
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), 3000) : null;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/next', controller ? { signal: controller.signal } : {});
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data && data.ad) || null;
+  } catch (e) {
+    return null;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+// Fires once, the moment a person actually starts editing an ad-sourced
+// draft — not merely on it loading into Create. Wired from the canvas
+// iframe's own input/mutation activity in nbRenderCanvas.
+function _nbMaybeCountAdView() {
+  if (_nbAdViewCounted || !_nbPendingAdSlug) return;
+  _nbAdViewCounted = true;
+  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(_nbPendingAdSlug) + '/view', { method: 'POST' })
+    .catch(e => _nbLog('ad view count', e));
 }
 
 function nbImportNotes(e) {
@@ -13834,7 +14312,12 @@ function _nbCurrentBase() {
     // The note vanished (deleted elsewhere) — fall back to a new draft.
     _nbSetEditingId(null);
   }
-  return { base: NB_PRISTINE_TEMPLATE, draftId: _nbGetDraftId(), isExisting: false, note: null, savedFragment: null };
+  // _nbPendingAdFragment (see nbCreateNew) stands in for a fresh draft's
+  // usual blank start, the same way an existing note's own savedFragment
+  // does above — cleared the moment this draft actually gets its own
+  // in-session ui-state (first edit), same guard nbCreateNew used to
+  // decide whether to fetch it in the first place.
+  return { base: NB_PRISTINE_TEMPLATE, draftId: _nbGetDraftId(), isExisting: false, note: null, savedFragment: _nbPendingAdFragment || null };
 }
 
 // Trickle-style progress for the loadmask bar: the real finish time is
@@ -13983,6 +14466,31 @@ function nbCreateNew() {
     nbRenderCanvas();
   } else {
     nbGoScreen('create');
+    // Genuinely fresh draft — no in-session ui-state yet, and nothing
+    // already fetched for this draft — is the only case that checks for
+    // an active ad before falling back to the blank pristine template.
+    // A draft that's already in progress (ui-state exists, or an ad was
+    // already resolved for it) always renders immediately, unchanged from
+    // before, so resuming work never waits on a network round-trip.
+    const freshDraft = !_nbLoadDraftUiState(_nbGetDraftId()) && !_nbPendingAdSlug;
+    if (freshDraft) {
+      // Keep the loadmask visibly progressing during the wait rather than
+      // showing nothing — nbRenderCanvas() below picks the same bar right
+      // back up once it starts its own render.
+      const mask = document.getElementById('markup-iframe-loadmask');
+      if (mask) mask.classList.remove('out');
+      _nbLoadbarStart();
+      _nbFetchNextAd().then(ad => {
+        if (ad && ad.slug && ad.html) {
+          _nbPendingAdSlug = ad.slug;
+          _nbAdViewCounted = false;
+          try { _nbPendingAdFragment = _nbExtractCanvasFragment(ad.html); }
+          catch (e) { _nbLog('ad fragment extract', e); _nbPendingAdFragment = null; _nbPendingAdSlug = null; }
+        }
+        nbRenderCanvas();
+      });
+      return;
+    }
     // Rebuild the iframe the same way reopening a saved note does, rather
     // than just switching screens onto whatever's still sitting there.
     // nbRenderCanvas() reloads from the draft's own saved ui-state (see
@@ -14029,6 +14537,11 @@ window.addEventListener('message', function (e) {
     const prev = _nbLoadDraftUiState(draftId) || {};
     const next = Object.assign({}, prev, e.data.state || {});
     _nbSaveDraftUiState(draftId, next);
+    // This message is the canvas reporting a real content change (it's
+    // debounced/triggered on edits, not on mere load) — the first one for
+    // an ad-sourced draft is exactly "the person actually started editing
+    // it", which is the edit-time view-count moment, not selection-time.
+    if (draftId === _nbGetDraftId() && !_nbGetEditingId()) _nbMaybeCountAdView();
   }
 });
 
@@ -14099,6 +14612,7 @@ function resetEditToOriginal() {
     if (!isExisting) {
       const newId = _nbNewDraftId();
       try { localStorage.setItem(NB_DRAFT_ID_KEY, newId); } catch (e) {}
+      _nbPendingAdSlug = null; _nbPendingAdFragment = null; _nbAdViewCounted = false;
     }
     nbRenderCanvas();
     showToast('Reset to original');
@@ -14179,6 +14693,7 @@ function nbNewFromEditor() {
   _nbSetEditingId(null);
   const newId = _nbNewDraftId();
   try { localStorage.setItem(NB_DRAFT_ID_KEY, newId); } catch (e) {}
+  _nbPendingAdSlug = null; _nbPendingAdFragment = null; _nbAdViewCounted = false;
   nbRenderCanvas();
 }
 
@@ -14331,6 +14846,7 @@ function nbConfirmSave() {
   _nbSetEditingId(null);
   const newId = _nbNewDraftId();
   try { localStorage.setItem(NB_DRAFT_ID_KEY, newId); } catch (e) {}
+  _nbPendingAdSlug = null; _nbPendingAdFragment = null; _nbAdViewCounted = false;
   nbRenderCanvas();
 
   buildCatBar();
