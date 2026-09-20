@@ -9388,31 +9388,51 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     // the default. Scoped to these free-form text types only — checklist
     // items, table cells and captions are single-purpose fields where
     // Enter isn't expected to mean "new line" the same way.
-    canvas.addEventListener('keydown', function(e) {
-      if (e.key !== 'Enter') return;
+    // beforeinput instead of keydown: the browser tells us its actual
+    // intent via inputType rather than us inferring it from key state.
+    // Enter alone fires insertParagraph, Shift+Enter fires insertLineBreak —
+    // both get treated the same way here (a soft <br>, not a new paragraph
+    // element), matching this handler's previous behavior regardless of
+    // modifier. An IME composition being committed by Enter fires a
+    // different inputType entirely (insertCompositionText/insertText), so
+    // it never reaches this branch — no separate isComposing/keyCode check
+    // needed, the event itself already excludes that case structurally.
+    canvas.addEventListener('beforeinput', function(e) {
+      if (e.inputType !== 'insertParagraph' && e.inputType !== 'insertLineBreak') return;
       var field = e.target && e.target.closest ? e.target.closest('[contenteditable="true"]') : null;
       if (!field || !field.matches('.blk-heading, .blk-subheading, .blk-text, .blk-quote, .blk-code code')) return;
-      var sel = window.getSelection();
-      if (!sel || !sel.rangeCount) return;
       e.preventDefault();
-      var range = sel.getRangeAt(0);
-      range.deleteContents();
-      var br = document.createElement('br');
-      range.insertNode(br);
-      // A lone trailing <br> with nothing after it doesn't reliably get its
-      // own line box until something follows it — the same reason this
-      // codebase's own empty-state placeholders (e.g. the caption
-      // template) use a double <br><br> rather than a single one.
-      var caretAfter = br;
-      if (!br.nextSibling) {
-        var br2 = document.createElement('br');
-        br.parentNode.insertBefore(br2, br.nextSibling);
+      // Prefer the browser's own insertion command over hand-rolled Range
+      // surgery: execCommand runs the same native code path normal typing
+      // uses, so it places the caret correctly in one shot instead of us
+      // reconstructing insertNode/nextSibling/setStartAfter bookkeeping by
+      // hand — which is exactly the kind of thing that looks right on paper
+      // but is fragile across WebView versions. Only fall back to manual
+      // <br> insertion if execCommand is unsupported or reports failure.
+      var inserted = false;
+      try { inserted = document.execCommand('insertLineBreak'); } catch (err) {}
+      if (!inserted) {
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        var range = sel.getRangeAt(0);
+        range.deleteContents();
+        var br = document.createElement('br');
+        range.insertNode(br);
+        // A lone trailing <br> with nothing after it doesn't reliably get its
+        // own line box until something follows it — the same reason this
+        // codebase's own empty-state placeholders (e.g. the caption
+        // template) use a double <br><br> rather than a single one.
+        var caretAfter = br;
+        if (!br.nextSibling) {
+          var br2 = document.createElement('br');
+          br.parentNode.insertBefore(br2, br.nextSibling);
+        }
+        var range2 = document.createRange();
+        range2.setStartAfter(caretAfter);
+        range2.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range2);
       }
-      var range2 = document.createRange();
-      range2.setStartAfter(caretAfter);
-      range2.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range2);
       // Native Enter handling fires 'input' on its own; dispatch it
       // ourselves so pruneEmptyFormatMarks and the undo-history capture
       // wired to canvas's 'input' listener above still run the same as
