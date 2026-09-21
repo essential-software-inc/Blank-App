@@ -561,6 +561,12 @@ body.pink .rdlg-more-toggle svg {
   font-family: inherit
 }
 
+.rdlg-cancel:disabled,
+.ebtn-sec:disabled {
+  opacity: .6;
+  cursor: default
+}
+
 .rdlg-getpro {
   background: #2e9e56;
   color: #fff;
@@ -12825,9 +12831,29 @@ function _pubUrlFor(slug) { return NB_PUBLISH_API.replace(/\/$/, '') + '/@' + sl
 // firing onclick, so non-buttons get pointer-events:none instead (the
 // Restore purchases link is the one caller that needs this branch).
 let _nbBusyBtnCount = 0;
+// While one button in a row is busy, its secondary siblings (Cancel,
+// Keep editing, Unpublish, the dialog's own Delete account link, ...) can't
+// do anything useful — the dialogs' own guards already ignore their taps —
+// but they still looked fully tappable. Disable them for real so they look
+// (and behave) disabled too. Only ones we disabled here get re-enabled, so a
+// button that was already disabled for another reason stays that way.
+function _pubLockSiblingSecondaries(btn, lock) {
+  const row = btn.parentElement;
+  if (!row) return;
+  row.querySelectorAll(':scope > .rdlg-cancel, :scope > .ebtn-sec').forEach(sib => {
+    if (sib === btn) return;
+    if (lock) {
+      if (!sib.disabled) { sib.disabled = true; sib.dataset.busyLocked = '1'; }
+    } else if (sib.dataset.busyLocked) {
+      sib.disabled = false;
+      delete sib.dataset.busyLocked;
+    }
+  });
+}
 function _pubSetBtnLoading(btn, loading, loadingLabel) {
   if (!btn) return;
   const isFormControl = 'disabled' in btn;
+  _pubLockSiblingSecondaries(btn, loading);
   if (loading) {
     btn.dataset.origLabel = btn.textContent;
     btn.innerHTML = '<span class="com-spinner"></span>' + loadingLabel;
@@ -13362,6 +13388,11 @@ async function _pubRefreshAdTab() {
   } else {
     eligEl.innerHTML = '<p class="bkp-help" style="color:#a83232">' + (AD_ELIGIBILITY_MESSAGES[elig.reason] || elig.reason) + '</p>'
       + (elig.reason === 'missing-attribution' ? '<button class="ebtn-sec" onclick="nbAdCopyAttribution()">Copy required attribution text</button>' : '');
+    // Ineligible: the "Buy a view package" panel has nothing actionable to
+    // offer, so hide it right away rather than leaving a stale copy from a
+    // previous open sitting under the reason (and through the offline/fetch
+    // early-returns below, which never reach the branches that set it).
+    document.getElementById('pub-ad-state-new').style.display = 'none';
   }
 
   if (_pubOfflineGuard()) { _pubAdOfflinePending = true; return; }
@@ -13385,12 +13416,16 @@ async function _pubRefreshAdTab() {
   const liveState = document.getElementById('pub-ad-state-live');
   const blockedState = document.getElementById('pub-ad-state-blocked');
   if (!_pubAdRecord) {
-    newState.style.display = ''; liveState.style.display = 'none'; blockedState.style.display = 'none';
-    document.getElementById('pub-ad-balance').textContent = 'View credit balance: ' + data.creditBalance;
+    // Ineligible and no ad yet: show only the reason above, not the
+    // "Buy a view package" UI (Publish as Ad stays disabled in the footer).
+    newState.style.display = elig.ok ? '' : 'none'; liveState.style.display = 'none'; blockedState.style.display = 'none';
     _pubAdSelectedViews = null;
     document.getElementById('pub-ad-publish-btn').disabled = true;
-    document.getElementById('pub-ad-status').textContent = '';
-    await _pubRenderAdPackages(elig.ok);
+    if (elig.ok) {
+      document.getElementById('pub-ad-balance').textContent = 'View credit balance: ' + data.creditBalance;
+      document.getElementById('pub-ad-status').textContent = '';
+      await _pubRenderAdPackages(elig.ok);
+    }
     document.getElementById('pub-footer-ad-new').style.display = '';
   } else if (_pubAdRecord.status === 'active') {
     newState.style.display = 'none'; liveState.style.display = ''; blockedState.style.display = 'none';
