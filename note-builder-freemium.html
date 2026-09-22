@@ -2958,6 +2958,28 @@ body.pink #splash-bar-fill {
   gap: 1.1rem
 }
 
+.pub-pkg-btn {
+  flex: 1 1 28%;
+  padding: .6rem .4rem;
+  border-radius: 11px;
+  border: 1.5px solid #e2e5ee;
+  background: #f8f9fc;
+  color: #202122;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center
+}
+.pub-pkg-btn .pub-pkg-price { font-weight: 400; color: #8a8d99 }
+.pub-pkg-btn.selected { border-color: #3366cc; background: #eef2fc }
+body.night .pub-pkg-btn { border-color: #333537; background: #1c1c1e; color: #e8e8e8 }
+body.night .pub-pkg-btn .pub-pkg-price { color: #9a9a9e }
+body.night .pub-pkg-btn.selected { border-color: #6f9bff; background: #17233d }
+body.pink .pub-pkg-btn { border-color: #f5c5d8; background: #fff0f6; color: #1a0a12 }
+body.pink .pub-pkg-btn .pub-pkg-price { color: #a5788e }
+body.pink .pub-pkg-btn.selected { border-color: #c8365e; background: #ffe0ec }
+
 body.pink #edit-dhdr {
   background: #c8365e;
   color: #fff;
@@ -3971,7 +3993,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 20 September 2026</em></p>
+      <p><em>Effective 22 September 2026</em></p>
       <p><strong>Note Builder</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
@@ -3980,7 +4002,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Publishing a page</h3>
       <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted.</p>
       <h3>Publishing as an ad</h3>
-      <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create — not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views uses Google Play Billing; Essential Software receives the purchased product and confirmation of the purchase (not your payment details, which Google handles directly) and credits the corresponding number of views to your account. Essential Software also stores how many views an ad has used and its current status (running, used up, or taken down). Unpublishing an ad removes it from Create immediately and forfeits any views it had left — that balance is not restored to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched — ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
+      <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create — not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views uses Google Play Billing; Essential Software receives the purchased product and confirmation of the purchase (not your payment details, which Google handles directly) and credits the corresponding number of views to your account. Essential Software also stores how many views an ad has used and its current status (running, used up, or taken down). To also report how many unique viewers an ad has reached, alongside its total view count, Essential Software stores an anonymous identifier generated and kept on each device — sent whenever a view is counted, whether or not the viewer is signed in. It isn’t linked to a Google account, email address, or any other identifying information, and exists only to tell whether a repeat view of a given ad came from a device already counted toward that ad; see “Analytics” below. Unpublishing an ad removes it from Create immediately and forfeits any views it had left — that balance is not restored to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched — ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
       <h3>Reporting a published page</h3>
       <p>Anyone can report a published page from its public link. Reporting checks the reporter's IP address for about a minute, just to stop spam, then discards it — it's never stored as part of the report itself. Essential Software keeps only the reason and details submitted. Essential Software keeps every report on file so it can be reviewed. Reports of child sexual abuse material are specifically preserved, not deleted, because that material must be kept and passed to the proper authority.</p>
       <p>This applies the same way to pages currently running as ads — an ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
@@ -3990,7 +4012,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Linked pages</h3>
       <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently: it's a plain web page viewed in a browser, so links inside it are ordinary clickable links that open like any other link on the web.</p>
       <h3>Analytics</h3>
-      <p>Essential Software does not collect analytics, telemetry, or crash reports from this app.</p>
+      <p>Essential Software does not collect analytics, telemetry, or crash reports from this app. The one exception is the anonymous per-device identifier described under “Publishing as an ad” above: it exists only to count an ad’s unique viewers, isn’t used to track app usage generally, and doesn’t apply anywhere outside that feature.</p>
       <h3>Contact</h3>
       <p>Questions about this policy can be sent to <a href="mailto:contactrhudio@gmail.com">contactrhudio@gmail.com</a>.</p>
     </div>
@@ -4004,7 +4026,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 20 September 2026</em></p>
+      <p><em>Effective 22 September 2026</em></p>
       <p>Using <strong>Note Builder</strong> means you agree to these terms.</p>
       <h3>Responsible Use</h3>
       <p>You agree to use Note Builder for lawful purposes only. You may not use the app to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish — see below.</p>
@@ -4017,6 +4039,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Advertising (Publish as Ad)</h3>
       <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing. To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons — no images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own Add media and Add post tools — YouTube, Instagram, and Spotify are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. Essential Software checks eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. Essential Software does not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
+      <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it’s shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance — views are not limited to first-time viewers. Note Builder also shows a separate <strong>unique viewers</strong> figure alongside your ad’s view count, for information only. It’s derived from an anonymous identifier generated and stored on each device, used solely to tell whether a device has already been counted once for a given ad; it isn’t tied to a Google account or any other identity, and is sent whether or not you’re signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
       <p>Purchased views are a consumable purchase through Google Play — refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:contactrhudio@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
       <h3>Purchases &amp; Eligibility</h3>
       <p>Buying view packages is handled entirely through Google Play Billing, and any age or account requirements for making a purchase are set and enforced by Google Play, not by Essential Software. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
@@ -11035,6 +11058,25 @@ function _nbRecordDeletedId(id) {
 function nbSessionToken() {
   try { return localStorage.getItem(NB_SESSION_KEY) || null; } catch (e) { return null; }
 }
+// A random ID persisted on this device, used only so the worker can tell
+// "same device viewed this ad twice" from "two different people viewed
+// it" for the unique-viewer count shown in the Publish as Ad tab. It's a
+// reporting signal, not an identity: unrelated to sign-in, sent whether or
+// not the person is signed in, and it resets on reinstall/cleared storage
+// or differs across a person's own devices — so unique-viewer counts are
+// a reasonable estimate, not an exact head-count. Never sent anywhere
+// except this one call.
+function _nbDeviceId() {
+  try {
+    let id = localStorage.getItem('nb_device_id');
+    if (!id) {
+      id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID()
+        : 'd-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem('nb_device_id', id);
+    }
+    return id;
+  } catch (e) { return null; }
+}
 function nbAccount() {
   try { return JSON.parse(localStorage.getItem(NB_ACCOUNT_KEY) || 'null'); } catch (e) { return null; }
 }
@@ -13430,7 +13472,11 @@ async function _pubRefreshAdTab() {
   } else if (_pubAdRecord.status === 'active') {
     newState.style.display = 'none'; liveState.style.display = ''; blockedState.style.display = 'none';
     document.getElementById('pub-ad-live-summary').textContent =
-      _pubAdRecord.views_used + ' / ' + _pubAdRecord.views_total + ' views used \u2014 running';
+      _pubAdRecord.views_used + ' / ' + _pubAdRecord.views_total + ' views used \u2014 running'
+      // unique_viewers is only present once the worker has the matching
+      // migration deployed; degrade to just the views line without it
+      // rather than showing "undefined" or a stale/wrong number.
+      + (_pubAdRecord.unique_viewers != null ? ' (' + _pubAdRecord.unique_viewers + ' unique viewers)' : '');
     document.getElementById('pub-ad-status-live').textContent = '';
     document.getElementById('pub-footer-ad-new').style.display = 'none';
     document.getElementById('pub-footer-ad-live').style.display = '';
@@ -13443,7 +13489,9 @@ async function _pubRefreshAdTab() {
     document.getElementById('pub-footer-ad-new').style.display = 'none';
     document.getElementById('pub-ad-blocked-summary').textContent =
       _pubAdRecord.status === 'exhausted'
-        ? ('This ad used all ' + _pubAdRecord.views_total + ' of its views and has stopped running. Publishing this exact page as a new ad isn\u2019t supported yet \u2014 publish a copy under a different address instead.')
+        ? ('This ad used all ' + _pubAdRecord.views_total + ' of its views'
+           + (_pubAdRecord.unique_viewers != null ? ' (' + _pubAdRecord.unique_viewers + ' unique viewers)' : '')
+           + ' and has stopped running. Publishing this exact page as a new ad isn\u2019t supported yet \u2014 publish a copy under a different address instead.')
         : 'This ad was unpublished and can\u2019t be resumed on this address \u2014 publish a copy under a different address to run it again.';
   }
 }
@@ -13476,8 +13524,7 @@ async function _pubRenderAdPackages(eligible) {
     const price = pkg && pkg.product && pkg.product.priceString;
     const btn = document.createElement('button');
     btn.className = 'pub-pkg-btn';
-    btn.style.cssText = 'flex:1 1 28%;padding:.6rem .4rem;border-radius:11px;border:1.5px solid #e2e5ee;background:#f8f9fc;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:center';
-    btn.innerHTML = def.views.toLocaleString() + ' views<br><span style="font-weight:400;color:#8a8d99">' + (price || (Purchases ? '\u2014' : 'app only')) + '</span>';
+    btn.innerHTML = def.views.toLocaleString() + ' views<br><span class="pub-pkg-price">' + (price || (Purchases ? '\u2014' : 'app only')) + '</span>';
     btn.disabled = !eligible || !Purchases;
     btn.onclick = () => nbAdSelectPackage(def, pkg, btn);
     wrap.appendChild(btn);
@@ -13486,9 +13533,9 @@ async function _pubRenderAdPackages(eligible) {
 function nbAdSelectPackage(def, pkg, btn) {
   _pubAdSelectedViews = { def, pkg };
   Array.from(document.getElementById('pub-ad-pkgs').children).forEach(b => {
-    b.style.borderColor = '#e2e5ee'; b.style.background = '#f8f9fc';
+    b.classList.remove('selected');
   });
-  btn.style.borderColor = '#3366cc'; btn.style.background = '#eef2fc';
+  btn.classList.add('selected');
   document.getElementById('pub-ad-publish-btn').disabled = false;
 }
 
@@ -13693,8 +13740,11 @@ async function _nbFetchNextAd() {
 function _nbMaybeCountAdView() {
   if (_nbAdViewCounted || !_nbPendingAdSlug) return;
   _nbAdViewCounted = true;
-  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(_nbPendingAdSlug) + '/view', { method: 'POST' })
-    .catch(e => _nbLog('ad view count', e));
+  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(_nbPendingAdSlug) + '/view', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ viewerId: _nbDeviceId() })
+  }).catch(e => _nbLog('ad view count', e));
 }
 
 function nbImportNotes(e) {
