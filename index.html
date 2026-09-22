@@ -58,6 +58,19 @@ body::-webkit-scrollbar {
   display: none
 }
 
+/* Mirrors body.night/body.pink: html itself needs its own themed
+   background too, not just body's, because _nbNudgeWebViewRepaint()
+   (used on app resume) briefly hides body to force a WebView repaint —
+   during that one frame html's background shows through. Without these,
+   that gap always showed the base navy above regardless of theme. */
+html.night {
+  background: #111111
+}
+
+html.pink {
+  background: #c8365e
+}
+
 body {
   font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #202122;
@@ -1982,6 +1995,10 @@ body.night #privacy-body h3, body.night #cterms-body h3, body.night #einfo-body 
   color: #aaaaaa
 }
 
+body.night #privacy-body a, body.night #cterms-body a, body.night #einfo-body a {
+  color: #f0f0f0
+}
+
 body.pink #terms-dialog {
   background: #fff2f7
 }
@@ -2014,6 +2031,10 @@ body.pink #privacy-body, body.pink #cterms-body, body.pink #einfo-body {
 
 body.pink #privacy-body h3, body.pink #cterms-body h3, body.pink #einfo-body h3 {
   color: #875068
+}
+
+body.pink #privacy-body a, body.pink #cterms-body a, body.pink #einfo-body a {
+  color: #c8365e
 }
 
 #splash, #account-screen {
@@ -2500,7 +2521,7 @@ body.night .markup-meta-fields input {
 }
 
 body.night .markup-meta-fields input:focus {
-  border-color: #5588cc
+  border-color: #7a7a7e
 }
 
 body.night #edit-dfooter {
@@ -2975,7 +2996,7 @@ body.pink #splash-bar-fill {
 .pub-pkg-btn.selected { border-color: #3366cc; background: #eef2fc }
 body.night .pub-pkg-btn { border-color: #333537; background: #1c1c1e; color: #e8e8e8 }
 body.night .pub-pkg-btn .pub-pkg-price { color: #9a9a9e }
-body.night .pub-pkg-btn.selected { border-color: #6f9bff; background: #17233d }
+body.night .pub-pkg-btn.selected { border-color: #9a9a9e; background: #2a2a2c }
 body.pink .pub-pkg-btn { border-color: #f5c5d8; background: #fff0f6; color: #1a0a12 }
 body.pink .pub-pkg-btn .pub-pkg-price { color: #a5788e }
 body.pink .pub-pkg-btn.selected { border-color: #c8365e; background: #ffe0ec }
@@ -3645,6 +3666,8 @@ document.body.dataset.lockScrollY = window.scrollY;
     var m = localStorage.getItem('nb_theme_v1') || 'light';
     document.body.classList.toggle('night', m === 'dark');
     document.body.classList.toggle('pink', m === 'pink');
+    document.documentElement.classList.toggle('night', m === 'dark');
+    document.documentElement.classList.toggle('pink', m === 'pink');
 
     var splashColor = '#0a1f44';
     if (m === 'dark') splashColor = '#111111';
@@ -10717,6 +10740,8 @@ const DK = 'nb_theme_v1';
 function applyTheme(mode) {
   document.body.classList.toggle('night', mode === 'dark');
   document.body.classList.toggle('pink', mode === 'pink');
+  document.documentElement.classList.toggle('night', mode === 'dark');
+  document.documentElement.classList.toggle('pink', mode === 'pink');
   const moon = document.getElementById('icon-moon');
   const sun = document.getElementById('icon-sun');
   const blos = document.getElementById('icon-blossom');
@@ -14006,7 +14031,10 @@ function nbRenderNotesScreen() {
     return;
   }
   empty.style.display = 'none';
-  if (carousel) carousel.style.display = 'none';
+  // Carousel stays up through the first note too — only more than one
+  // note (all.length, not filtered.length: it's general app orientation,
+  // not tied to the current category/search view) retires it.
+  if (carousel) carousel.style.display = all.length > 1 ? 'none' : '';
   grid.style.display = '';
   grid.innerHTML = filtered.map(n => {
     const isFav = _nbFavorites.has(n.id);
