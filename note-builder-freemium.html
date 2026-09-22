@@ -14141,6 +14141,7 @@ function nbRenderNotesScreen() {
     const imgsHtml = _buildImgsHtml(imgUrls);
     const nid = n.id.replace(/'/g, "\\'");
     const playSvg = _noteHasVideoEmbed(n.content || '') ? `<svg class="gc-play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>` : '';
+    nbInitOnboardCarousel();
     return `
     <div class="guide-card" data-note-id="${esc(n.id)}" onclick="nbOpenNoteForEdit('${nid}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenNoteForEdit('${nid}')">
       <div class="gc-title">${esc(n.title || 'Untitled note')}</div>
