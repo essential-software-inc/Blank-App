@@ -3673,6 +3673,28 @@ document.body.dataset.lockScrollY = window.scrollY;
     if (m === 'dark') splashColor = '#111111';
     else if (m === 'pink') splashColor = '#c8365e';
 
+    // Was Android likely just recreating this Activity after the person
+    // backgrounded it (home/recents), rather than a genuine fresh
+    // launch? We can't distinguish those two cases directly — from this
+    // script's perspective both are "process starts cold, run
+    // everything from scratch" — so this timestamp (set right before
+    // going to background, see _nbBindAppResumeListener) is the only
+    // signal available. Within the window, treat it as a resume: use
+    // each theme's normal resting background instead of its splash
+    // tone, so what should read as "the app is still here" doesn't
+    // flash brown/dark/pink like a fresh boot. Past the window, a
+    // missing or stale timestamp means either a true first launch or
+    // enough real time passed that replaying the splash is expected
+    // again.
+    var NB_RESUME_WINDOW_MS = 30 * 60 * 1000;
+    var nbIsLikelyResume = false;
+    try {
+      var nbLastBg = parseInt(localStorage.getItem('nb_last_bg_ts_v1') || '0', 10);
+      if (nbLastBg && (Date.now() - nbLastBg) < NB_RESUME_WINDOW_MS) nbIsLikelyResume = true;
+    } catch (e) {}
+    window.__nbIsLikelyResume = nbIsLikelyResume;
+    if (nbIsLikelyResume) splashColor = (m === 'dark') ? '#0e0e10' : '#fff';
+
     var meta = document.createElement('meta');
     meta.name = 'theme-color';
     meta.content = splashColor;
@@ -11178,6 +11200,18 @@ function _nbBindAppResumeListener() {
         // for restarting that timer, so this is safe even when the
         // carousel isn't currently on screen.
         nbInitOnboardCarousel();
+      } else if (state) {
+        // Went to background. If Android later kills this process and
+        // recreates the Activity from scratch (common after sitting in
+        // the background a while, even via a plain home/recents exit —
+        // no force-close needed), the whole page reloads and the boot
+        // theme IIFE near the top of <head> runs again from nothing. It
+        // has no way to tell that apart from an actual fresh launch
+        // except by checking this timestamp — see NB_LAST_BG_TS_KEY use
+        // there. Recorded on backgrounding rather than on some other
+        // event because it's the one moment we know for certain the
+        // in-memory JS state is about to become unreliable.
+        try { localStorage.setItem('nb_last_bg_ts_v1', String(Date.now())); } catch (e) {}
       }
     });
   } catch (e) {}
@@ -12152,8 +12186,16 @@ async function hideSplash() {
   // render don't stay stuck missing until something unrelated (opening
   // a note, searching, switching category) happens to re-render it.
   _nbImgCacheInitPromise.then(() => { try { nbRenderNotesScreen(); } catch (e) {} });
-  const minSplashPromise = new Promise(resolve => setTimeout(resolve, 3200));
+  // Skip the full multi-second splash treatment — its 3200ms floor and
+  // the name/tagline/copyright it's there to let someone read — when
+  // this boot is probably Android recreating the Activity after the
+  // app was merely backgrounded (see window.__nbIsLikelyResume, set by
+  // the theme IIFE above from the timestamp _nbBindAppResumeListener
+  // records). A real fresh launch still gets the full sequence.
+  const isResume = !!window.__nbIsLikelyResume;
+  const minSplashPromise = new Promise(resolve => setTimeout(resolve, isResume ? 0 : 3200));
   const bootWorkPromise = (async () => {
+    if (isResume) { _setSplashBarPct(92); return; }
     // Placeholder for real boot work (notes/category load); currently
     // near-instant, so this mostly yields to let the bar animate smoothly.
     let pct = 8;
@@ -12166,7 +12208,7 @@ async function hideSplash() {
   await Promise.race([bootWorkPromise, minSplashPromise]);
   await minSplashPromise;
   _setSplashBarPct(100);
-  setTimeout(hideSplash, 200);
+  setTimeout(hideSplash, isResume ? 0 : 200);
 })();
 
 /* ===================== Notes data layer (stub — filled in on the Notes/Save build stage) ===================== */
@@ -13555,7 +13597,18 @@ function _pubShowTab(tab) {
 // Renders the Publish as Ad tab from scratch every time it's opened —
 // cheap (one eligibility check + one fetch), and avoids the tab showing
 // stale state after an edit or after another device changed something.
+//
+// Render token: this function awaits a network round-trip, and by the
+// time it resolves the person may have already switched to the Web
+// tab (or closed the sheet, or re-opened it for a different note). The
+// footer elements it writes to (#pub-footer-ad-new/-live) live outside
+// the per-tab panel that gets hidden on tab switch, so without this
+// guard a stale response re-shows the ad footer's Cancel/Publish
+// buttons stacked underneath whichever footer the current tab is
+// actually showing (e.g. Unpublish/Save Changes on the Web tab).
+let _pubAdRefreshToken = 0;
 async function _pubRefreshAdTab() {
+  const _pubAdRefreshCallToken = ++_pubAdRefreshToken;
   _pubAdOfflinePending = false;
   const note = _pubFindNote(_pubNoteId);
   const needWeb = document.getElementById('pub-ad-need-web');
@@ -13614,6 +13667,11 @@ async function _pubRefreshAdTab() {
     showToast('Could not load ad status');
     return;
   }
+  // Stale: another refresh started (tab re-opened, 'online' retry, a
+  // publish/save completing) or the tab was switched away since this
+  // call began. Bail before touching the footer or state panels so a
+  // late response can't re-show ad-tab buttons over another tab.
+  if (_pubAdRefreshCallToken !== _pubAdRefreshToken) return;
   _pubAdRecord = (data.ads || []).find(a => a.slug === note.publishedSlug) || null;
   const newState = document.getElementById('pub-ad-state-new');
   const liveState = document.getElementById('pub-ad-state-live');
