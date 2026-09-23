@@ -12237,11 +12237,31 @@ function _nbDefaultNotes() {
 function nbLoadNotes() {
   try {
     const raw = localStorage.getItem(NB_NOTES_KEY);
-    const arr = raw === null ? [] : JSON.parse(raw);
+    let arr = raw === null ? [] : JSON.parse(raw);
     let seededIds;
     try { seededIds = JSON.parse(localStorage.getItem(NB_SEEDED_IDS_KEY) || '[]'); }
     catch (e) { seededIds = []; }
     let changed = false;
+    // One-time cleanup for devices that already picked up a duplicate
+    // demo note before the seeded-id guard below existed (e.g. two
+    // 'n_demo_snowleopard' entries from an earlier update). Collapse
+    // any repeated id down to its first occurrence — deleting a note
+    // then only ever removes the one entry the user sees, not a hidden
+    // twin — and make sure its id is recorded as seeded so it's never
+    // re-added.
+    const seenIds = new Set();
+    const deduped = [];
+    for (const n of arr) {
+      if (n && n.id != null) {
+        if (seenIds.has(n.id)) { changed = true; continue; }
+        seenIds.add(n.id);
+      }
+      deduped.push(n);
+    }
+    arr = deduped;
+    for (const id of seenIds) {
+      if (!seededIds.includes(id)) { seededIds.push(id); changed = true; }
+    }
     for (const demo of _nbDefaultNotes()) {
       if (!seededIds.includes(demo.id)) {
         arr.push(demo);
@@ -14237,7 +14257,16 @@ function _nbShowDeleteConfirmDialog(id) {
   ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
   confirmBtn.onclick = () => {
     ov.classList.remove('open');
-    const notes = nbLoadNotes().filter(n => n.id !== id);
+    // Remove only the first matching entry, not every note with this
+    // id. In the ordinary case nbLoadNotes() has already deduped ids
+    // to unique, so this is equivalent to filter(). But it's a cheap
+    // extra guard against ever wiping out a whole set of same-id notes
+    // in one tap if duplicates somehow exist at delete time (e.g. mid
+    // sync) — the person tapped delete on one note, not "delete every
+    // note that happens to share this id".
+    const notes = nbLoadNotes();
+    const dupIdx = notes.findIndex(n => n.id === id);
+    if (dupIdx !== -1) notes.splice(dupIdx, 1);
     nbSaveNotesArr(notes);
     _nbRecordDeletedId(id);
     // Pulling first is safe (the just-recorded tombstone already blocks
