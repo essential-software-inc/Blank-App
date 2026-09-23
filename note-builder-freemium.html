@@ -11666,6 +11666,12 @@ async function nbSyncPush(showFeedback) {
 // only replaces the local one if it's strictly newer, so an edit made on
 // this device after the last push isn't clobbered by an older server
 // copy, but a genuinely newer edit from another device does come down.
+// One exception: a local copy still marked seedProvisional (a demo note
+// reseeded after reinstall, not yet checked against the server — see
+// _nbDefaultNotes) always loses to an incoming copy of the same id
+// regardless of timestamp, since its "now" updatedAt would otherwise
+// beat a genuinely older real edit purely because time moved forward
+// across the reinstall.
 // This is not real conflict resolution — two devices editing the same
 // note while both offline still just have the newer timestamp win, with
 // no merge and no warning — but it's a big step up from never pulling
@@ -11739,7 +11745,7 @@ async function nbSyncPull(showFeedback) {
         existing.push(n);
         indexById.set(n.id, existing.length - 1);
         count++;
-      } else if ((n.updatedAt || 0) > (existing[idx].updatedAt || 0)) {
+      } else if (existing[idx].seedProvisional || (n.updatedAt || 0) > (existing[idx].updatedAt || 0)) {
         // Only the publish-relevant fields matter for the live-refresh
         // check — an incoming edit to title/content shouldn't yank the
         // sheet out from under someone mid-typing a slug for a note
@@ -11763,6 +11769,15 @@ async function nbSyncPull(showFeedback) {
         updatedCount++;
       }
     });
+    // Any local note still marked seedProvisional here wasn't replaced
+    // above, meaning this pull — which did reach the server — found
+    // nothing for its id. That's a real confirmation there's no better
+    // remote copy, so it's now safe to treat this local copy as
+    // authoritative under the normal timestamp rule from here on.
+    let provisionalCleared = false;
+    existing.forEach(n => {
+      if (n && n.seedProvisional) { n.seedProvisional = false; provisionalCleared = true; }
+    });
     let removedCount = 0;
     existing = existing.filter(n => {
       const tomb = tombstones.get(n.id);
@@ -11779,7 +11794,7 @@ async function nbSyncPull(showFeedback) {
     _nbSyncChangesSinceCheck.restored += count;
     _nbSyncChangesSinceCheck.updated += updatedCount;
     _nbSyncChangesSinceCheck.removed += removedCount;
-    if (count || updatedCount || removedCount) {
+    if (count || updatedCount || removedCount || provisionalCleared) {
       // New notes just got push()'d onto the end above (see the merge
       // loop) regardless of when they were actually created — the list's
       // only real ordering rule is "new local notes go to index 0 and
@@ -12273,7 +12288,26 @@ function _nbDefaultNotes() {
     pageBgCustom: '#EAF0F4',
     desktopView: false,
     createdAt: Date.now(),
-    favorite: false
+    favorite: false,
+    // Reinstalling reuses this same hardcoded id, so a freshly reseeded
+    // copy can exist locally under an id that already has real, synced
+    // history on the account (e.g. it was published before the
+    // uninstall). Its updatedAt is deliberately left unset (0) so any
+    // real incoming copy beats it on the very next pull — but the
+    // instant something local touches this note (even the quick-edit
+    // dialog), it gets a real updatedAt of "now", which is always newer
+    // than an older real edit and would win the last-write-wins merge,
+    // silently overwriting the account's actual data both locally and
+    // (via the next push) on the server. This flag makes an untouched
+    // reseed lose to ANY incoming copy of the same id regardless of
+    // timestamp, even if it's been locally edited in the meantime — see
+    // nbSyncPull's merge condition. Deliberately NOT cleared by local
+    // edits/publishes themselves, only by nbSyncPull's post-merge sweep
+    // once a pull has actually reached the server and confirmed there's
+    // nothing else under this id — that's the only thing that can
+    // actually resolve the ambiguity; a local edit alone can't know
+    // whether it's colliding with real account history.
+    seedProvisional: true
   }];
 }
 function nbLoadNotes() {
