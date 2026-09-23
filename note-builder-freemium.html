@@ -12235,7 +12235,7 @@ function _nbDefaultNotes() {
     id: 'n_demo_snowleopard',
     title: 'The snow leopard',
     desc: 'Field notes on the snow leopard — habitat, hunting, and conservation status.',
-    category: '',
+    category: 'Demo',
     tags: ['wildlife', 'bigcats', 'himalaya', 'conservation'],
     content: `<div class="blk" data-type="subheading"><div class="blk-ctrl"><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-subheading" contenteditable="true">Field notes — high Asia</div></div>
 <div class="blk" data-type="heading" data-style="large"><div class="blk-ctrl"><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-heading" contenteditable="true">The snow leopard</div></div>
@@ -12306,7 +12306,12 @@ function nbLoadNotes() {
     }
     for (const demo of _nbDefaultNotes()) {
       if (!seededIds.includes(demo.id)) {
-        arr.push(demo);
+        // Match how every user-created note is added (see the unshift
+        // in nbConfirmSave): the list has no sort-on-render step, so
+        // array position IS display position. Appending here put the
+        // demo behind any note that already existed, no matter how
+        // recent the demo's own createdAt was.
+        arr.unshift(demo);
         seededIds.push(demo.id);
         changed = true;
       }
