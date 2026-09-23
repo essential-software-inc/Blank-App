@@ -12155,13 +12155,22 @@ function hideSplash() {
 /* ===================== Notes data layer (stub — filled in on the Notes/Save build stage) ===================== */
 const NB_NOTES_KEY = 'nb_notes_v1';
 // One built-in note ships with a brand-new install so the Notes screen
-// isn't empty on first open. Seeded exactly once, the first time
-// nbLoadNotes() runs against a device with no nb_notes_v1 key at all
-// (i.e. truly first launch — not just an empty notes array, which a
-// person can reach on purpose by deleting everything). A separate flag
-// tracks that the seed already ran, so deleting the demo note doesn't
-// bring it back on the next load.
-const NB_SEEDED_FLAG = 'nb_seeded_v1';
+// isn't empty on first open. Originally gated on a single boolean flag
+// (seed once ever, the first time nbLoadNotes() ran against a device
+// with no nb_notes_v1 key at all) — but that meant the flag, once set,
+// blocked EVERY future demo note from ever appearing again, including
+// on devices that already had that flag set from testing an earlier
+// build (or, for real installs, anyone who already had the app open —
+// and therefore already had a nb_notes_v1 key of their own — before
+// this particular demo note was added). That's exactly the "only shows
+// up after clearing storage" bug: clearing storage was the only way to
+// unset a flag that should never have blocked THIS note in the first
+// place. Fixed by tracking which demo note ids have been offered
+// before, not whether seeding has ever happened at all — a demo note
+// not yet in that list gets added once, even to a device with existing
+// notes; one already in the list is never re-added, so deleting it still
+// works exactly as before.
+const NB_SEEDED_IDS_KEY = 'nb_seeded_ids_v1';
 function _nbDefaultNotes() {
   return [{
     id: 'n_demo_snowleopard',
@@ -12211,15 +12220,25 @@ function _nbDefaultNotes() {
 function nbLoadNotes() {
   try {
     const raw = localStorage.getItem(NB_NOTES_KEY);
-    if (raw === null && !localStorage.getItem(NB_SEEDED_FLAG)) {
-      const seeded = _nbDefaultNotes();
-      try {
-        localStorage.setItem(NB_NOTES_KEY, JSON.stringify(seeded));
-        localStorage.setItem(NB_SEEDED_FLAG, '1');
-      } catch (e) {}
-      return seeded;
+    const arr = raw === null ? [] : JSON.parse(raw);
+    let seededIds;
+    try { seededIds = JSON.parse(localStorage.getItem(NB_SEEDED_IDS_KEY) || '[]'); }
+    catch (e) { seededIds = []; }
+    let changed = false;
+    for (const demo of _nbDefaultNotes()) {
+      if (!seededIds.includes(demo.id)) {
+        arr.push(demo);
+        seededIds.push(demo.id);
+        changed = true;
+      }
     }
-    return JSON.parse(raw || '[]');
+    if (changed) {
+      try {
+        localStorage.setItem(NB_NOTES_KEY, JSON.stringify(arr));
+        localStorage.setItem(NB_SEEDED_IDS_KEY, JSON.stringify(seededIds));
+      } catch (e) {}
+    }
+    return arr;
   } catch (e) { return []; }
 }
 function nbSaveNotesArr(arr) {
