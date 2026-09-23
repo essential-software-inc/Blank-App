@@ -12076,19 +12076,29 @@ function closeConsumerTerms() {
   document.getElementById('cterms-overlay').classList.remove('open');
   unlockScroll();
 }
-function hideSplash() {
+// Set at boot when _nbInitImageCache() is kicked off (see bootSplash IIFE
+// below) — declared up here, not inside that IIFE, so hideSplash (which
+// runs as a separate top-level function, not nested inside it) can await
+// the same promise instead of just guessing it's done by now.
+let _nbImgCacheInitPromise = null;
+async function hideSplash() {
   const s = document.getElementById('splash');
   if (!s) return;
   // The Notes grid was already built back at boot (see the top-level
   // buildCatBar()/nbRenderNotesScreen() calls, and the nbGoScreen('notes')
   // landing right after), but that happened immediately at script parse
   // time — _nbInitImageCache() was only just kicked off then, not
-  // awaited, and is very unlikely to have finished. Any base64 note image
-  // rendered into that first pass came up empty. By now, behind the
-  // splash's own 3200ms+ floor, the image cache is effectively certain to
-  // be ready, so rebuild the grid the same way search filtering
-  // (nbFilterNotes) and saving a new note do — this is the one moment the
-  // person actually sees that first render, so it needs to be current.
+  // awaited, and images referencing it came up empty. The splash's own
+  // 3200ms+ floor makes the cache being ready by now the common case,
+  // but not a guarantee (a slow/cold IndexedDB open, more likely right
+  // after a real app restart, can still be running) — so actually wait
+  // on it, bounded so a hung IndexedDB open (it has no timeout of its
+  // own) can't hold the splash open indefinitely. If it does still time
+  // out, the .then() attached where the cache load was kicked off
+  // covers that by rebuilding again once it eventually finishes.
+  if (!_nbImgCacheReady && _nbImgCacheInitPromise) {
+    await Promise.race([_nbImgCacheInitPromise, new Promise(r => setTimeout(r, 1500))]);
+  }
   buildCatBar();
   nbRenderNotesScreen();
   s.classList.add('out');
@@ -12134,7 +12144,14 @@ function hideSplash() {
   // can hang indefinitely on some devices (no onblocked handler, no
   // timeout in _idbOpen), and an await on that from here previously
   // froze the splash bar right after its first tick.
-  _nbInitImageCache();
+  _nbImgCacheInitPromise = _nbInitImageCache();
+  // Fallback for the case the bounded wait in hideSplash() below still
+  // times out on an unusually slow/cold IndexedDB open: once the cache
+  // actually does finish loading (however late), rebuild the grid one
+  // more time so preview images that came up empty on the splash-exit
+  // render don't stay stuck missing until something unrelated (opening
+  // a note, searching, switching category) happens to re-render it.
+  _nbImgCacheInitPromise.then(() => { try { nbRenderNotesScreen(); } catch (e) {} });
   const minSplashPromise = new Promise(resolve => setTimeout(resolve, 3200));
   const bootWorkPromise = (async () => {
     // Placeholder for real boot work (notes/category load); currently
