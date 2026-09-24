@@ -41,7 +41,7 @@ html {
      this happens at the viewport level underneath it. Matching splash's
      base tone here stops that propagation (html is no longer
      transparent) so the first paint is already dark, not white. */
-  background: #4d2d20;
+  background: #000000;
   
   overflow-anchor: none;
   /* This is an installed app shell, not a browser tab — a system
@@ -3669,7 +3669,7 @@ document.body.dataset.lockScrollY = window.scrollY;
     document.documentElement.classList.toggle('night', m === 'dark');
     document.documentElement.classList.toggle('pink', m === 'pink');
 
-    var splashColor = '#4d2d20';
+    var splashColor = '#000000';
     if (m === 'dark') splashColor = '#111111';
     else if (m === 'pink') splashColor = '#c8365e';
 
@@ -3682,7 +3682,7 @@ document.body.dataset.lockScrollY = window.scrollY;
     // signal available. Within the window, treat it as a resume: use
     // each theme's normal resting background instead of its splash
     // tone, so what should read as "the app is still here" doesn't
-    // flash brown/dark/pink like a fresh boot. Past the window, a
+    // flash black/dark/pink like a fresh boot. Past the window, a
     // missing or stale timestamp means either a true first launch or
     // enough real time passed that replaying the splash is expected
     // again.
