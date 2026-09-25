@@ -2688,21 +2688,61 @@ body.pink #pub-slug-input::placeholder {
   -webkit-backdrop-filter: saturate(180%) blur(20px)
 }
 
+body:not(.night):not(.pink) #site-header::before {
+  display: none
+}
+
 body:not(.night):not(.pink) #site-header,
 body:not(.night):not(.pink) #backup-sheet {
-  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 18%, #3366cc 38%, #3366cc 62%, #0284c7 80%, #06b6d4 100%) !important
+  background: #ffffff !important
+}
+
+body:not(.night):not(.pink) #header-title,
+body:not(.night):not(.pink) #header-title .hdr-title-inner {
+  color: #3366cc !important
+}
+
+body:not(.night):not(.pink) #back-btn svg {
+  stroke: #3366cc !important
+}
+
+body:not(.night):not(.pink) .hdr-btn,
+body:not(.night):not(.pink) #back-btn {
+  color: #3366cc !important
+}
+
+body:not(.night):not(.pink) #edit-dhdr {
+  background: #fff !important;
+  color: #3366cc !important
+}
+
+body:not(.night):not(.pink) #edit-dhdr-title {
+  color: #3366cc !important
+}
+
+body:not(.night):not(.pink) #publish-hdr {
+  background: #fff !important;
+  color: #3366cc !important
+}
+
+body:not(.night):not(.pink) #publish-hdr-title {
+  color: #3366cc !important
+}
+
+body:not(.night):not(.pink) #publish-close {
+  color: #3366cc !important
 }
 
 body:not(.night):not(.pink) #backup-sheet,
 body:not(.night):not(.pink) #edit-dhdr,
 body:not(.night):not(.pink) #publish-hdr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 8px rgba(20, 30, 80, 0.22), 0 8px 24px rgba(20, 30, 80, 0.14) !important
+  border-bottom: 1px solid #e8ecf4 !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .10) !important
 }
 
 body:not(.night):not(.pink):not(.reader-mode) #site-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 8px rgba(20, 30, 80, 0.22), 0 8px 24px rgba(20, 30, 80, 0.14) !important
+  border-bottom: 1px solid #e8ecf4 !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .10) !important
 }
 
 body:not(.night):not(.pink) #feed-search-wrap {
@@ -3254,7 +3294,7 @@ body.pink #markup-iframe-loadmask-bar-fill {
 
 /* Simplified single-panel backup sheet (Notes export/import only) */
 #backup-hdr-title::after { content: ""; }
-.bkp-help { font-size: .78rem; color: rgba(255,255,255,.65); line-height: 1.5; margin: 0 0 .9rem; }
+.bkp-help { font-size: .78rem; color: #ffffff; line-height: 1.5; margin: 0 0 .9rem; }
 body.night .bkp-help { color: #787878; }
 body.pink .bkp-help { color: #875068; }
 /* .step-chk/.chk-svg — real classes from the original app (used for
@@ -10421,7 +10461,7 @@ function applyTheme(mode) {
   if (moon) moon.style.display = mode === 'light' ? '' : 'none';
   if (sun) sun.style.display = mode === 'pink' ? '' : 'none';
   if (blos) blos.style.display = mode === 'dark' ? '' : 'none';
-  const themeColor = mode === 'dark' ? '#111111' : mode === 'pink' ? '#c8365e' : '#3366cc';
+  const themeColor = mode === 'dark' ? '#111111' : mode === 'pink' ? '#c8365e' : '#ffffff';
   let tc = document.querySelector('meta[name="theme-color"]');
   if (!tc) { tc = document.createElement('meta'); tc.name = 'theme-color'; document.head.appendChild(tc); }
   tc.content = themeColor;
