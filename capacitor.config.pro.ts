@@ -11,10 +11,15 @@ const config: CapacitorConfig = {
     androidScheme: 'https'
   },
   plugins: {
-    // See capacitor.config.free.ts for what serverClientId needs to be
-    // and why — same value here, plus this build's own Android OAuth
-    // client registered separately in Google Cloud Console (different
-    // package name/SHA-1 than the free app).
+    // serverClientId must be the OAuth *Web application* client ID (same
+    // value as NB_GOOGLE_WEB_CLIENT_ID in the app and GOOGLE_CLIENT_IDS
+    // on the note-publish worker) — not this app's own Android client ID.
+    // That's what makes the idToken the plugin returns audienced to the
+    // client the worker actually verifies against. Also add this build's
+    // own Android OAuth client (SHA-1 + package name registered in
+    // Google Cloud Console, different from the free app's) or native
+    // sign-in will fail with DEVELOPER_ERROR/10, even though it never
+    // appears in this config.
     GoogleAuth: {
       scopes: ['email', 'profile'],
       serverClientId: '41762787149-mkbeh1mus5e5v2gbkvnfh1fgblmkkfvj.apps.googleusercontent.com',
