@@ -5,7 +5,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 // painful to rename later. appName is the label under the home-screen icon.
 const config: CapacitorConfig = {
   appId: 'com.essentialsoftware.notebuilderpro',
-  appName: 'Builder Pro',
+  appName: 'Bluebook',
   webDir: 'www',
   server: {
     androidScheme: 'https'
