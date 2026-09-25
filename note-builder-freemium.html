@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Note Builder</title>
+<title>Bluebook</title>
 <style>
 @font-face{
   font-family:"Inter Variable";
@@ -1879,12 +1879,15 @@ body.pink #privacy-body a, body.pink #cterms-body a, body.pink #einfo-body a {
 
 #splash-name, #account-screen-name {
   font-family: inherit;
-  font-size: 2.6rem;
   font-weight: 800;
   letter-spacing: -.02em;
   color: #fff;
   opacity: 0;
   animation: sp-name-pop .55s cubic-bezier(.22, .81, .3, 1.1) .55s forwards;
+}
+
+#splash-name {
+  font-size: 2rem;
 }
 
 #splash-bar-wrap {
@@ -3175,7 +3178,7 @@ body.backup-transparent:not(.night):not(.pink) #backup-overlay {
     clip-path: inset(0% 0 0 0);
   }
 }
-/* ---- Note Builder standalone shell additions ---- */
+/* ---- Bluebook standalone shell additions ---- */
 #nb-app { min-height: 100dvh; display: flex; flex-direction: column; }
 
 #site-header #hdr-title-text { white-space: nowrap; }
@@ -3240,7 +3243,7 @@ body.pink .nb-carousel-dot.active { background: #c8365e; }
    true viewport edge on nearly every open instead of only near it. */
 #nb-notes-grid { max-width: 760px; margin: 0 auto; padding: .6rem .9rem 5.5rem; display: grid; gap: .6rem; }
 
-/* Note Builder canvas (Create screen) */
+/* Bluebook canvas (Create screen) */
 #screen-create { padding: 0; }
 /* display intentionally omitted — the reader's own #markup-iframe-wrap /
    .show rule above already governs visibility (display:none by default,
@@ -3424,7 +3427,7 @@ document.body.dataset.lockScrollY = window.scrollY;
     </svg>
     <canvas id="splash-icon-3d" aria-hidden="true"></canvas>
     </div>
-    <div id="splash-name">Builder</div>
+    <div id="splash-name">Bluebook</div>
     <div id="splash-bar-wrap"><div id="splash-bar-fill"></div><div id="splash-bar-glow"></div></div>
     <div id="splash-tagline">A Notepad</div>
   </div>
@@ -3457,7 +3460,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       </svg>
       <canvas id="acct-icon-3d" aria-hidden="true"></canvas>
     </div>
-    <div id="account-screen-name">Builder</div>
+    <div id="account-screen-name">Bluebook</div>
     <div id="account-screen-card">
       <div class="rdlg-body" id="account-signedout-body" style="text-align:center">
         Sign in to back up your notes online and manage your published pages from anywhere.
@@ -3565,7 +3568,7 @@ document.body.dataset.lockScrollY = window.scrollY;
   <main id="nb-screens">
     <section class="nb-screen active" id="screen-create">
       <div id="markup-iframe-wrap">
-        <iframe id="markup-iframe" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" title="Note Builder canvas"></iframe>
+        <iframe id="markup-iframe" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" title="Bluebook canvas"></iframe>
         <div id="markup-iframe-loadmask" aria-hidden="true">
           <div id="markup-iframe-loadmask-bar-wrap"><div id="markup-iframe-loadmask-bar-fill"></div><div id="markup-iframe-loadmask-bar-glow"></div></div>
         </div>
@@ -3575,7 +3578,7 @@ document.body.dataset.lockScrollY = window.scrollY;
     <section class="nb-screen" id="screen-notes">
       <div class="nb-empty" id="notes-empty-state">
         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <div class="nb-empty-title" id="notes-empty-title">Welcome to Note Builder</div>
+        <div class="nb-empty-title" id="notes-empty-title">Welcome to Bluebook</div>
         <div class="nb-empty-sub" id="notes-empty-sub">Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one — it'll show up here, sorted by category.</div>
       </div>
       <div class="nb-carousel" id="nb-onboard-carousel">
@@ -3615,7 +3618,7 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="edit-reset-overlay">
   <div id="reset-dialog" style="z-index:501">
     <div class="rdlg-title">Reset to original?</div>
-    <div class="rdlg-body">This will discard any edits and restore the blank Note Builder canvas. This can&rsquo;t be undone.</div>
+    <div class="rdlg-body">This will discard any edits and restore the blank Bluebook canvas. This can&rsquo;t be undone.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="edit-reset-cancel">Cancel</button>
       <button class="rdlg-ok" id="edit-reset-confirm">Reset</button>
@@ -3729,7 +3732,7 @@ document.body.dataset.lockScrollY = window.scrollY;
     </div>
     <div id="privacy-body">
       <p><em>Effective 22 September 2026</em></p>
-      <p><strong>Note Builder</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
+      <p><strong>Bluebook</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
       <h3>Google sign-in &amp; sync</h3>
@@ -3762,9 +3765,9 @@ document.body.dataset.lockScrollY = window.scrollY;
     </div>
     <div id="cterms-body">
       <p><em>Effective 22 September 2026</em></p>
-      <p>Using <strong>Note Builder</strong> means you agree to these terms.</p>
+      <p>Using <strong>Bluebook</strong> means you agree to these terms.</p>
       <h3>Responsible Use</h3>
-      <p>You agree to use Note Builder for lawful purposes only. You may not use the app to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish — see below.</p>
+      <p>You agree to use Bluebook for lawful purposes only. You may not use the app to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish — see below.</p>
       <h3>Your Content</h3>
       <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to Essential Software's servers so you can restore them on another device. You are responsible for keeping your own backups if you don't sign in — without an account, Essential Software has no copy of your content and cannot recover it if it's lost.</p>
       <h3>Your Account</h3>
@@ -3774,7 +3777,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Advertising (Publish as Ad)</h3>
       <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing. To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons — no images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own Add media and Add post tools — YouTube, Instagram, and Spotify are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. Essential Software checks eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. Essential Software does not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
-      <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it’s shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance — views are not limited to first-time viewers. Note Builder also shows a separate <strong>unique viewers</strong> figure alongside your ad’s view count, for information only. It’s derived from an anonymous identifier generated and stored on each device, used solely to tell whether a device has already been counted once for a given ad; it isn’t tied to a Google account or any other identity, and is sent whether or not you’re signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
+      <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it’s shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance — views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad’s view count, for information only. It’s derived from an anonymous identifier generated and stored on each device, used solely to tell whether a device has already been counted once for a given ad; it isn’t tied to a Google account or any other identity, and is sent whether or not you’re signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
       <p>Purchased views are a consumable purchase through Google Play — refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:contactrhudio@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
       <h3>Purchases &amp; Eligibility</h3>
       <p>Buying view packages is handled entirely through Google Play Billing, and any age or account requirements for making a purchase are set and enforced by Google Play, not by Essential Software. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
@@ -6706,7 +6709,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
 
   // ---- Pasted-link handling shared by the media and social pickers ----
   // No backslashes in any regex here, on purpose: this whole block lives
-  // inside the Note Builder's outer content template literal, which eats
+  // inside the Bluebook's outer content template literal, which eats
   // a single backslash before the regex engine ever sees it. Character
   // classes like [/] and [.] stand in for escapes, and the tokenizer
   // below is a char loop rather than a whitespace regex.
@@ -8313,7 +8316,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // also scope by signed-in handle, carried over from Blank's version of
   // this same picker (Blank has multiple handles per device; a handle
   // switch there shouldn't leak one person's last color into another's)
-  // via a _comHandleScope() helper -- but Note Builder has no handle
+  // via a _comHandleScope() helper -- but Bluebook has no handle
   // concept at all, and that helper was never ported over, so every call
   // here threw (silently, into the catch below) and the picker never
   // actually remembered anything. Dropped the handle scoping since it
@@ -11300,7 +11303,7 @@ async function nbSyncPush(showFeedback) {
   // astronomically unlikely event of an id collision, wipe a note there
   // that was never actually deleted.
   const deletedIds = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff && (!t.acct || t.acct === acct.sub));
-  const payload = JSON.stringify({ app: 'Note Builder', version: 1, notes, images, deletedIds });
+  const payload = JSON.stringify({ app: 'Bluebook', version: 1, notes, images, deletedIds });
   if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) {
     if (showFeedback) showToast('Too much to sync \u2014 try removing large images first');
     return { ok: false, reason: 'too-large' };
@@ -11906,7 +11909,7 @@ async function hideSplash() {
 /* ===================== Notes data layer (stub — filled in on the Notes/Save build stage) ===================== */
 const NB_NOTES_KEY = 'nb_notes_v1';
 // Hoisted up from their original homes further down this file (Silent
-// error log / Note image store / Note Builder canvas sections) because
+// error log / Note image store / Bluebook canvas sections) because
 // the boot-time `buildCatBar(); nbRenderNotesScreen();` call below runs
 // synchronously at script-parse time, before those later `const`
 // statements would otherwise have executed -- reading any of these
@@ -12087,8 +12090,8 @@ function nbExportNotes() {
       try { const data = _nbGetImage(id); if (data) images[id] = data; } catch (e) {}
     }
   });
-  const backupJson = JSON.stringify({ app: 'Note Builder', version: 1, notes, images }, null, 2);
-  const fileName = 'note-builder-backup.json';
+  const backupJson = JSON.stringify({ app: 'Bluebook', version: 1, notes, images }, null, 2);
+  const fileName = 'bluebook-backup.json';
   // Inside a compiled Capacitor app, use the native Filesystem + Share
   // plugins instead of any browser API. This is real native code (a
   // FileOutputStream write + an Intent.ACTION_SEND under the hood), not
@@ -12131,7 +12134,7 @@ function nbExportNotes() {
     _nbDownloadBackupBlob(blob, fileName, canShareErr ? ('canShare threw: ' + canShareErr.message) : 'canShare({files}) returned false');
     return;
   }
-  navigator.share({ files: [file], title: 'Note Builder Backup' })
+  navigator.share({ files: [file], title: 'Bluebook Backup' })
     .then(() => showToast('Backup shared'))
     .catch(err => {
       // AbortError just means the user dismissed the share sheet —
@@ -12150,7 +12153,7 @@ async function _nbExportViaCapacitor(backupJson, fileName, cap) {
     // off to whatever app the user picks (Drive, Files, WhatsApp...).
     const result = await cap.Filesystem.writeFile({ path: fileName, data: base64, directory: 'CACHE' });
     if (cap.Share) {
-      await cap.Share.share({ title: 'Note Builder Backup', url: result.uri });
+      await cap.Share.share({ title: 'Bluebook Backup', url: result.uri });
       showToast('Backup shared');
     } else {
       showToast('Backup saved');
@@ -13947,7 +13950,7 @@ function nbRenderNotesScreen() {
   const carousel = document.getElementById('nb-onboard-carousel');
   if (!all.length) {
     // True first-run: no notes anywhere yet, regardless of filter/search.
-    emptyTitle.textContent = 'Welcome to Note Builder';
+    emptyTitle.textContent = 'Welcome to Bluebook';
     emptySub.textContent = 'Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one \u2014 it\u2019ll show up here, sorted by category.';
     empty.style.display = '';
     if (carousel) carousel.style.display = '';
@@ -14501,13 +14504,13 @@ function closeBackupSheet() {
   }, { passive: true });
 })();
 
-/* ===================== Reader header placeholders (wired up in the Note Builder editor stage) ===================== */
+/* ===================== Reader header placeholders (wired up in the Bluebook editor stage) ===================== */
 function navBack() {}
 function toggleReaderHeader() {}
 function toggleReaderInfoBar() {}
 function openEdit() {}
 
-/* ===================== Note Builder canvas: safe-HTML wrapper ===================== */
+/* ===================== Bluebook canvas: safe-HTML wrapper ===================== */
 // Ports of the original's _buildSafeMarkupHtml / _restoreStructuralContainers /
 // _rehydrateNoteImages / _NOTE_UI_STATE_SCRIPT, trimmed to what a single
 // always-fragment (never a full <!DOCTYPE> doc), always-standalone canvas
@@ -14750,7 +14753,7 @@ function nbBuildSafeHtml(htmlSrc, uiState, draftId) {
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="referrer" content="strict-origin-when-cross-origin"><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:#fff;color:#1a1a1a}</style>${_noScrollbarCss}</head><body>${_uiStateGlobals}${htmlSrc}${_errRelay}${_NB_NOTE_UI_STATE_SCRIPT}</body></html>`;
 }
 
-/* ===================== Note Builder canvas: draft state + render =====================
+/* ===================== Bluebook canvas: draft state + render =====================
    NB_DRAFT_ID_KEY/NB_EDITING_ID_KEY are declared with the rest of the
    notes data layer above -- see the hoist comment there. */
 function _nbDraftUiKey(id) { return 'nb_draft_uistate_' + id; }
@@ -15060,7 +15063,7 @@ function nbOpenNoteForEdit(id) {
 window.addEventListener('message', function (e) {
   if (!e.data) return;
   if (e.data.type === 'markup-error') {
-    console.error('Note Builder canvas error:', e.data.msg);
+    console.error('Bluebook canvas error:', e.data.msg);
   }
   if (e.data.type === 'markup-ui-state') {
     const iframe = document.getElementById('markup-iframe');
