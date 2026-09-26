@@ -1816,15 +1816,22 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 }
 #logout-profile-name-edit-btn {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
   border: none;
+  border-radius: 50%;
   background: none;
   color: #3366cc;
-  font-size: .78rem;
-  font-weight: 600;
-  font-family: inherit;
-  padding: .3rem .2rem;
+  padding: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent
+}
+#logout-profile-name-edit-btn:disabled {
+  opacity: .5;
+  cursor: default
 }
 body.night #logout-profile-name-edit-btn { color: #7fa8ff }
 body.pink #logout-profile-name-edit-btn { color: #e1306c }
@@ -3476,7 +3483,9 @@ body.pink .nb-empty { color: #b06080; }
 .nb-carousel {
   position: fixed; left: 0; right: 0; bottom: calc(58px + env(safe-area-inset-bottom, 0) + .9rem);
   width: calc(100% - 3rem); max-width: 360px; margin: 0 auto; z-index: 90;
+  transition: transform .15s ease, opacity .15s ease;
 }
+.nb-carousel.ptr-dragging { transition: none; }
 .nb-carousel-viewport { width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; position: relative; box-shadow: 0 4px 14px rgba(20,20,20,.12); touch-action: pan-y; cursor: grab; }
 .nb-carousel-track { display: flex; width: 100%; height: 100%; transition: transform .45s cubic-bezier(.4,0,.2,1); }
 .nb-carousel-track.dragging { transition: none; }
@@ -3978,7 +3987,10 @@ document.body.dataset.lockScrollY = window.scrollY;
       <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories)</span></label>
       <div id="logout-profile-name-field-wrap">
         <input id="logout-profile-name-input" class="com-field" type="text" maxlength="15" placeholder="e.g. Jo" disabled oninput="_nbOnProfileNameInput(this.value)">
-        <button id="logout-profile-name-edit-btn" type="button" onclick="_nbToggleProfileNameEdit()">Edit</button>
+        <button id="logout-profile-name-edit-btn" type="button" onclick="_nbToggleProfileNameEdit()" aria-label="Edit display name" title="Edit display name">
+          <svg id="logout-profile-name-edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          <svg id="logout-profile-name-save-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
       </div>
       <div id="logout-profile-name-status"></div>
     </div>
@@ -12063,7 +12075,7 @@ function openLogoutConfirm() {
   const nameStatus = document.getElementById('logout-profile-name-status');
   const nameEditBtn = document.getElementById('logout-profile-name-edit-btn');
   if (nameInput) { nameInput.value = _nbLoadCachedProfileName(); nameInput.disabled = true; }
-  if (nameEditBtn) { nameEditBtn.textContent = 'Edit'; nameEditBtn.disabled = false; }
+  if (nameEditBtn) { _nbSetProfileNameBtnMode('edit'); nameEditBtn.disabled = false; }
   if (nameStatus) nameStatus.textContent = '';
   _nbFetchProfileName(); // reconcile with the server in case another device set it
   document.getElementById('logout-more-body').style.display = 'none';
@@ -13887,6 +13899,18 @@ function _nbOnProfileNameInput(raw) {
 // server sync below and only re-locks the field once that succeeds, so
 // a failed save leaves it editable (with the reason already in
 // logout-profile-name-status) instead of silently discarding the edit.
+function _nbSetProfileNameBtnMode(mode) {
+  const btn = document.getElementById('logout-profile-name-edit-btn');
+  const editIcon = document.getElementById('logout-profile-name-edit-icon');
+  const saveIcon = document.getElementById('logout-profile-name-save-icon');
+  if (!btn || !editIcon || !saveIcon) return;
+  const isSave = mode === 'save';
+  editIcon.style.display = isSave ? 'none' : '';
+  saveIcon.style.display = isSave ? '' : 'none';
+  const label = isSave ? 'Save display name' : 'Edit display name';
+  btn.setAttribute('aria-label', label);
+  btn.setAttribute('title', label);
+}
 async function _nbToggleProfileNameEdit() {
   const input = document.getElementById('logout-profile-name-input');
   const btn = document.getElementById('logout-profile-name-edit-btn');
@@ -13895,7 +13919,7 @@ async function _nbToggleProfileNameEdit() {
     input.disabled = false;
     input.focus();
     input.select();
-    btn.textContent = 'Save';
+    _nbSetProfileNameBtnMode('save');
     return;
   }
   btn.disabled = true;
@@ -13903,7 +13927,7 @@ async function _nbToggleProfileNameEdit() {
   btn.disabled = false;
   if (ok) {
     input.disabled = true;
-    btn.textContent = 'Edit';
+    _nbSetProfileNameBtnMode('edit');
   }
 }
 async function _nbSaveProfileName(raw) {
@@ -15356,6 +15380,23 @@ function closeBackupSheet() {
   if (!bar) return;
   bar.innerHTML = '<span class="ptr-spinner"></span><span class="ptr-label"></span>';
   const label = bar.querySelector('.ptr-label');
+  // The onboarding carousel is position:fixed (see its CSS comment) so it
+  // doesn't sit in #feed-view's normal flow and never gets pushed down by
+  // ptr-bar growing the way the note cards/empty-state do. Mirror the same
+  // pull offset onto it by hand, only while it's actually on screen.
+  const carousel = document.getElementById('nb-onboard-carousel');
+  function carouselVisible() {
+    return !!carousel && carousel.style.display !== 'none';
+  }
+  function setCarouselPull(px) {
+    if (!carouselVisible()) return;
+    carousel.style.transform = px ? 'translateY(' + px + 'px)' : '';
+    // Fades out as it's pulled down, back to fully opaque at rest — same
+    // px range as the translate, just eased so it isn't gone before the
+    // spinner even arms (floor keeps it faintly visible while refreshing
+    // instead of invisible for the whole spin).
+    carousel.style.opacity = px ? Math.max(.35, 1 - px / MAX_PULL) : '';
+  }
 
   let startY = 0, pulling = false, dragging = false, refreshing = false;
 
@@ -15382,10 +15423,11 @@ function closeBackupSheet() {
     if (!pulling || refreshing) return;
     const deltaY = e.touches[0].clientY - startY;
     if (deltaY <= 0) return; // only pulling down counts; scrolling further up is left alone
-    if (!dragging) { dragging = true; bar.style.transition = 'none'; }
+    if (!dragging) { dragging = true; bar.style.transition = 'none'; if (carousel) carousel.classList.add('ptr-dragging'); }
     const pull = Math.min(MAX_PULL, deltaY * RESIST);
     bar.style.height = pull + 'px';
     bar.style.opacity = Math.min(1, pull / 32);
+    setCarouselPull(pull);
     const armed = pull >= THRESHOLD;
     bar.classList.toggle('ptr-armed', armed);
     label.textContent = armed ? 'Release to refresh' : 'Pull to refresh';
@@ -15398,14 +15440,16 @@ function closeBackupSheet() {
     if (!dragging) return;
     dragging = false;
     bar.style.transition = ''; // restore the CSS height transition for the snap
+    if (carousel) carousel.classList.remove('ptr-dragging'); // restore its own transform transition for the same snap
     const armed = bar.classList.contains('ptr-armed');
     bar.classList.remove('ptr-armed');
-    if (!armed) { bar.style.height = '0'; bar.style.opacity = ''; return; }
+    if (!armed) { bar.style.height = '0'; bar.style.opacity = ''; setCarouselPull(0); return; }
     refreshing = true;
     bar.classList.add('ptr-spinning');
     label.textContent = 'Refreshing\u2026';
     bar.style.height = '52px';
     bar.style.opacity = '1';
+    setCarouselPull(52);
     const minWait = new Promise(r => setTimeout(r, MIN_SPIN_MS));
     // Full refresh, not just the current category's list: re-fetch the
     // stories strip and, if signed in, pull (then push) the account's
@@ -15429,6 +15473,7 @@ function closeBackupSheet() {
         bar.style.height = '0';
         bar.style.opacity = '';
         label.textContent = '';
+        setCarouselPull(0);
       });
   }, { passive: true });
 })();
@@ -16271,8 +16316,16 @@ function nbOpenSaveDialog() {
     const pageBg = (uiState && uiState.pageBg) ? uiState.pageBg : note.pageBg;
     const pageBgCustom = (uiState && uiState.pageBg === 'custom' && uiState.pageBgCustom) ? uiState.pageBgCustom : note.pageBgCustom;
     const desktopView = (uiState && uiState.desktopView !== undefined) ? uiState.desktopView : note.desktopView;
+    // Current live content sig (frozen for the dialog's lifetime — content
+    // fields aren't editable here, so computing once is safe).
     _nbSaveDialogFixedContentSig = _hashStr([content, pageBg, pageBgCustom, desktopView].join('\u0001'));
-    _nbSaveDialogOrigSig = _hashStr([note.title || 'Untitled note', note.desc || '', note.category || '', (note.tags || []).join(','), _nbSaveDialogFixedContentSig].join('\u0001'));
+    // Separate sig for the note's last-saved content. Must NOT reuse
+    // _nbSaveDialogFixedContentSig above for this — that was the bug: both
+    // sides of the dirty compare baked in the same *current* content, so a
+    // canvas/background edit made before opening this dialog was invisible
+    // and the Update button stayed disabled.
+    const savedContentSig = _hashStr([savedFragment, note.pageBg, note.pageBgCustom, note.desktopView].join('\u0001'));
+    _nbSaveDialogOrigSig = _hashStr([note.title || 'Untitled note', note.desc || '', note.category || '', (note.tags || []).join(','), savedContentSig].join('\u0001'));
     _nbUpdateSaveDialogDirtyState();
   } else {
     _nbSaveDialogOrigSig = null;
