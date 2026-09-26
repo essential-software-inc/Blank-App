@@ -1739,7 +1739,7 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
   inset: 0;
   background: rgba(0, 0, 0, .55);
   z-index: 900;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center
 }
 
@@ -1749,12 +1749,57 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 
 #account-dialog {
   background: #fff;
-  border-radius: 18px;
-  padding: 1.3rem 1.2rem 1.1rem;
-  max-width: 300px;
-  width: 90%;
-  box-shadow: 0 16px 32px rgba(0, 0, 0, .12), 0 6px 12px rgba(0, 0, 0, .08);
+  border-radius: 16px 16px 0 0;
+  width: min(720px, 100vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
+  overflow: hidden;
   font-family: inherit
+}
+
+#account-hdr {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem 1rem;
+  border-bottom: 1px solid #f0f5ff;
+  flex-shrink: 0
+}
+
+#account-hdr-title {
+  font-size: .9rem;
+  font-weight: bold;
+  color: #202122;
+  flex: 1
+}
+
+#account-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #54595d;
+  padding: .2rem .4rem;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  line-height: 1
+}
+
+#account-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background: #fafcff
+}
+
+#account-body .rdlg-btns {
+  flex-direction: column
+}
+
+.bkp-btn:disabled {
+  opacity: .6;
+  cursor: default
 }
 
 .acct-sync-btn {
@@ -2441,6 +2486,27 @@ body.night #backup-body {
   background: #080808
 }
 
+body.night #account-dialog {
+  border: 1px solid #282828
+}
+
+body.night #account-hdr {
+  background: #111111;
+  border-color: #282828
+}
+
+body.night #account-hdr-title {
+  color: #e8e8e8
+}
+
+body.night #account-close {
+  color: #999999
+}
+
+body.night #account-body {
+  background: #080808
+}
+
 body.night .bkp-btn-pri {
   background: #3a3a3a;
   color: #f0f0f0
@@ -2513,7 +2579,7 @@ body.night .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #account-dialog, body.night #delete-account-dialog, body.night #sync-conflict-dialog {
+body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #delete-account-dialog, body.night #sync-conflict-dialog {
   background: #111111;
   border: 1px solid #282828;
   border-radius: 18px;
@@ -2765,6 +2831,29 @@ body.pink #backup-body {
   color: #1a0a12
 }
 
+body.pink #account-dialog {
+  color: #fff;
+  border-radius: 16px 16px 0 0
+}
+
+body.pink #account-hdr {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: transparent
+}
+
+body.pink #account-hdr-title {
+  color: #fff
+}
+
+body.pink #account-close {
+  color: rgba(255, 255, 255, 0.8)
+}
+
+body.pink #account-body {
+  background: #fff8fb;
+  color: #1a0a12
+}
+
 body.pink .bkp-btn-pri {
   background: #bd2856
 }
@@ -2830,7 +2919,7 @@ body.pink .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #account-dialog, body.pink #delete-account-dialog, body.pink #sync-conflict-dialog {
+body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #delete-account-dialog, body.pink #sync-conflict-dialog {
   background: #fff2f7;
   border: none;
   border-radius: 18px;
@@ -2954,6 +3043,7 @@ body.pink #pub-slug-input::placeholder {
 
 #site-header,
 #backup-sheet,
+#account-dialog,
 #edit-dialog {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px)
@@ -2964,7 +3054,8 @@ body:not(.night):not(.pink) #site-header::before {
 }
 
 body:not(.night):not(.pink) #site-header,
-body:not(.night):not(.pink) #backup-sheet {
+body:not(.night):not(.pink) #backup-sheet,
+body:not(.night):not(.pink) #account-dialog {
   background: #ffffff !important
 }
 
@@ -3369,6 +3460,58 @@ body:not(.night):not(.pink) #backup-close {
 
 body:not(.night):not(.pink) #backup-body {
   background: transparent !important
+}
+
+body:not(.night):not(.pink) #account-dialog {
+  background-color: #1a0f08 !important;
+  background-image: linear-gradient(rgba(26, 15, 8, 0.65), rgba(26, 15, 8, 0.85)), var(--splash-img) !important;
+  background-position: top center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  border-top: none !important;
+  border-bottom: none !important
+}
+
+body:not(.night):not(.pink) #account-hdr {
+  border-bottom: none !important;
+  background: #3366cc !important
+}
+
+body:not(.night):not(.pink) #account-hdr-title {
+  color: #ffffff !important
+}
+
+body:not(.night):not(.pink) #account-close {
+  color: #ffffff !important
+}
+
+body:not(.night):not(.pink) #account-body {
+  background: transparent !important
+}
+
+body:not(.night):not(.pink) #account-body .rdlg-body {
+  color: rgba(255, 255, 255, .85) !important
+}
+
+body:not(.night):not(.pink) #account-body .rdlg-body b {
+  color: #ffffff !important
+}
+
+body:not(.night):not(.pink) #logout-profile-name-row label {
+  color: rgba(255, 255, 255, .7) !important
+}
+
+body:not(.night):not(.pink) #logout-profile-name-status {
+  color: rgba(255, 255, 255, .7) !important
+}
+
+body:not(.night):not(.pink) #account-body .rdlg-more-toggle {
+  color: rgba(255, 255, 255, .7) !important;
+  border-top-color: rgba(255, 255, 255, .2) !important
+}
+
+body:not(.night):not(.pink) #account-body .rdlg-more-toggle svg {
+  color: rgba(255, 255, 255, .7) !important
 }
 
 body.backup-transparent:not(.night):not(.pink) #backup-sheet {
@@ -3975,33 +4118,42 @@ document.body.dataset.lockScrollY = window.scrollY;
 
 <div id="account-overlay" onclick="if(event.target===this)closeLogoutConfirm()">
   <div id="account-dialog">
-    <div class="rdlg-title" style="display:flex;align-items:center;gap:.5rem">
-      <span style="flex:1">Your account</span>
+    <div id="account-hdr">
+      <span id="account-hdr-title">Your account</span>
       <button class="acct-sync-btn" id="account-sync-btn" onclick="nbSyncNow()" aria-label="Sync now" title="Sync now">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/><polyline points="23 4 23 10 17 10"/></svg>
       </button>
+      <button id="account-close" onclick="closeLogoutConfirm()" aria-label="Close">✕</button>
     </div>
-    <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
-    <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
-    <div id="logout-profile-name-row">
-      <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories)</span></label>
-      <div id="logout-profile-name-field-wrap">
-        <input id="logout-profile-name-input" class="com-field" type="text" maxlength="15" placeholder="e.g. Jo" disabled oninput="_nbOnProfileNameInput(this.value)">
-        <button id="logout-profile-name-edit-btn" type="button" onclick="_nbToggleProfileNameEdit()" aria-label="Edit display name" title="Edit display name">
-          <svg id="logout-profile-name-edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          <svg id="logout-profile-name-save-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-        </button>
+    <div id="account-body">
+      <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
+      <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
+      <div id="logout-profile-name-row">
+        <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories)</span></label>
+        <div id="logout-profile-name-field-wrap">
+          <input id="logout-profile-name-input" class="com-field" type="text" maxlength="15" placeholder="e.g. Jo" disabled oninput="_nbOnProfileNameInput(this.value)">
+          <button id="logout-profile-name-edit-btn" type="button" onclick="_nbToggleProfileNameEdit()" aria-label="Edit display name" title="Edit display name">
+            <svg id="logout-profile-name-edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            <!-- Two separate fixes stacked on the pencil's own size/weight
+                 (16px, stroke-width 2): the circle gives it a closed
+                 silhouette instead of a bare floating line (shape), and
+                 sizing the whole glyph up a notch (18px/2.2) brings its
+                 visual weight back in line with the pencil's own multi-
+                 segment outline, which reads heavier at equal size (scale). -->
+            <svg id="logout-profile-name-save-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="9.5"/><polyline points="7.8 12.3 10.8 15.3 16.3 9.3"/></svg>
+          </button>
+        </div>
+        <div id="logout-profile-name-status"></div>
       </div>
-      <div id="logout-profile-name-status"></div>
-    </div>
-    <a class="rdlg-more-toggle" id="logout-more-toggle" onclick="toggleLogoutMore()">
-      <span id="logout-more-label">Show more</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-    </a>
-    <div class="rdlg-btns">
-      <button class="rdlg-cancel" id="logout-dialog-cancel" onclick="closeLogoutConfirm()">Cancel</button>
-      <button class="rdlg-cancel" id="delete-account-btn" onclick="openDeleteAccountConfirm()" style="display:none">Delete account</button>
-      <button class="rdlg-ok rdlg-ok--blue" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
+      <a class="rdlg-more-toggle" id="logout-more-toggle" onclick="toggleLogoutMore()">
+        <span id="logout-more-label">Show more</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </a>
+      <div class="rdlg-btns">
+        <button class="bkp-btn bkp-btn-sec" id="logout-dialog-cancel" onclick="closeLogoutConfirm()">Cancel</button>
+        <button class="bkp-btn bkp-btn-sec" id="delete-account-btn" onclick="openDeleteAccountConfirm()" style="display:none">Delete account</button>
+        <button class="bkp-btn bkp-btn-pri" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
+      </div>
     </div>
   </div>
 </div>
@@ -13615,6 +13767,23 @@ async function nbRenderStoriesStrip() {
   } catch (e) { _nbLog('stories strip', e); return; }
   _nbPaintStoriesStrip();
 }
+// Single source of truth for whether the strip is actually on screen.
+// Three independent things gate it — being on the Notes screen, the "All"
+// category being the active one (it's meant to read as a top-of-feed
+// intro, not something that follows you into Favorites/Subscribed/a
+// custom category), and there being any stories to show at all
+// (.has-stories, toggled in _nbPaintStoriesStrip) — so every place that
+// can change any one of them (screen switch, category switch, stories
+// finishing a (re)fetch) calls this rather than setting display itself.
+// Clearing the inline style rather than forcing 'flex' lets the
+// .has-stories CSS rule keep deciding flex-vs-none on its own.
+function _nbSyncStoriesStripVisibility() {
+  const strip = document.getElementById('nb-stories-strip');
+  if (!strip) return;
+  const screen = document.getElementById('screen-notes');
+  const onNotesAll = !!screen && screen.classList.contains('active') && _nbActiveCat === 'All';
+  strip.style.display = onNotesAll ? '' : 'none';
+}
 // If the ring's image fails to load (dead/expired data URI, offline,
 // whatever), swap it back to the title-text avatar rather than leaving a
 // broken-image icon in the ring.
@@ -13628,6 +13797,7 @@ function _nbPaintStoriesStrip() {
   const strip = document.getElementById('nb-stories-strip');
   if (!strip) return;
   strip.classList.toggle('has-stories', _nbStoriesCache.length > 0);
+  _nbSyncStoriesStripVisibility();
   strip.innerHTML = _nbStoriesCache.map(s => {
     const sid = s.slug.replace(/'/g, "\\'");
     const asub = (s.authorSub || '').replace(/'/g, "\\'");
@@ -14675,6 +14845,7 @@ function selectCat(cat) {
   _nbActiveCat = cat;
   buildCatBar();
   nbRenderNotesScreen();
+  _nbSyncStoriesStripVisibility();
 }
 function nbFilterNotes(q) {
   _nbSearchQ = (q || '').toLowerCase();
@@ -15192,10 +15363,11 @@ function nbGoScreen(name) {
   document.getElementById('feed-search-wrap').style.display = (name === 'notes') ? '' : 'none';
   // The stories strip is a Notes-screen feature (like the search bar
   // above) — it lives outside the .nb-screen sections so it isn't
-  // covered by the screen-switching classList wipe, and its own
-  // .has-stories class only controls whether it should show at all,
-  // not which screen it's allowed to show on.
-  document.getElementById('nb-stories-strip').style.display = (name === 'notes') ? '' : 'none';
+  // covered by the screen-switching classList wipe. Its final visibility
+  // is decided by _nbSyncStoriesStripVisibility, which also folds in
+  // whether the active category is "All" and whether there's actually
+  // anything to show (.has-stories) — not just which screen this is.
+  _nbSyncStoriesStripVisibility();
   document.getElementById('nb-save-btn').style.display = (name === 'create') ? '' : 'none';
   // The backup/restore icon doesn't belong on the Editor screen — it has
   // its own Reset/Save-image/Save icons instead.
@@ -15376,6 +15548,7 @@ function closeBackupSheet() {
   const MAX_PULL = 90;    // visual cap on how far the bar stretches
   const RESIST = .5;      // rubber-band: finger moves 2px for every 1px of pull
   const MIN_SPIN_MS = 550; // keep the spinner visible at least this long, even on a fast local render
+  const MAX_SPIN_MS = 8000; // hard cap on how long the spinner waits — the stories/pull/push calls below are plain fetch() with no per-request timeout of their own, so a stalled connection can otherwise leave it spinning indefinitely; past this the gesture just ends and whichever of those calls finishes later still applies its own result (re-render, toast) same as it would after any other silent background sync
   const bar = document.getElementById('ptr-bar');
   if (!bar) return;
   bar.innerHTML = '<span class="ptr-spinner"></span><span class="ptr-label"></span>';
@@ -15466,7 +15639,8 @@ function closeBackupSheet() {
       await Promise.all(tasks);
       try { await nbRenderNotesScreen(); } catch (e) { _nbLog('pull to refresh: notes', e); }
     };
-    Promise.all([doRefresh(), minWait])
+    const refreshOrTimeout = Promise.race([doRefresh(), new Promise(r => setTimeout(r, MAX_SPIN_MS))]);
+    Promise.all([refreshOrTimeout, minWait])
       .then(() => {
         refreshing = false;
         bar.classList.remove('ptr-spinning');
