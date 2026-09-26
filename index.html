@@ -609,6 +609,154 @@ body.pink .rdlg-more-toggle svg {
   font-weight: bold
 }
 
+/* ===================== Stories strip + viewer ===================== */
+#nb-stories-strip {
+  display: none;
+  gap: .7rem;
+  overflow-x: auto;
+  padding: .5rem .9rem .6rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none
+}
+#nb-stories-strip::-webkit-scrollbar { display: none }
+#nb-stories-strip.has-stories { display: flex }
+.nb-story-item {
+  flex-shrink: 0;
+  width: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0
+}
+.nb-story-ring {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  padding: 2.5px;
+  background: linear-gradient(45deg, #f5a623, #e1306c, #c13584, #833ab4);
+  display: flex;
+  align-items: center;
+  justify-content: center
+}
+.nb-story-ring.seen {
+  background: #d8dee8
+}
+.nb-story-ring-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: .56rem;
+  line-height: 1.15;
+  color: #3366cc;
+  overflow: hidden;
+  text-align: center;
+  padding: 0 4px;
+  word-break: break-word
+}
+.nb-story-ring-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+  display: block
+}
+.nb-story-label {
+  font-size: .62rem;
+  color: #54595d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 58px
+}
+#story-viewer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 950;
+  flex-direction: column
+}
+#story-viewer-overlay.open { display: flex }
+#story-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .8rem .9rem;
+  border-bottom: 1px solid #eef1f6;
+  flex-shrink: 0
+}
+#story-viewer-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #202122;
+  padding: .3rem;
+  display: flex
+}
+#story-viewer-title {
+  flex: 1;
+  font-weight: bold;
+  font-size: .95rem;
+  white-space: nowrap;
+  overflow: hidden
+}
+#story-viewer-sub-btn {
+  border: none;
+  border-radius: 99px;
+  padding: .35rem .9rem;
+  font-size: .78rem;
+  font-weight: bold;
+  cursor: pointer;
+  background: #3366cc;
+  color: #fff;
+  flex-shrink: 0
+}
+#story-viewer-sub-btn.is-subscribed {
+  background: #f0f5ff;
+  color: #3366cc;
+  border: 1px solid #d5e0f7
+}
+#story-viewer-frame {
+  flex: 1;
+  border: none;
+  width: 100%
+}
+/* Subscribed-feed note cards get the author's profile name shown before
+   the title (plan: cosmetic display name, not the real identity). */
+.gc-author-name {
+  font-size: .68rem;
+  color: #7d858c;
+  font-weight: 600;
+  display: block;
+  margin-bottom: .1rem
+}
+body.night #nb-stories-strip .nb-story-label { color: #b7bfca }
+body.night .nb-story-ring-inner { background: #111111; color: #7fa8ff }
+body.night .nb-story-ring.seen { background: #333d4d }
+body.night #story-viewer-overlay { background: #111111 }
+body.night #story-viewer-header { border-bottom-color: #282828; color: #fff }
+body.night #story-viewer-back { color: #fff }
+body.pink #nb-stories-strip .nb-story-label { color: #875068 }
+body.pink .nb-story-ring-inner { color: #c8365e }
+body.pink .nb-story-ring.seen { background: #f3cddc }
+body.pink #story-viewer-overlay { background: #fff8fb }
+body.pink #story-viewer-header { border-bottom-color: #f5c5d8; color: #1a0a12 }
+body.pink #story-viewer-back { color: #1a0a12 }
+body.pink #story-viewer-sub-btn { background: #e1306c }
+body.pink #story-viewer-sub-btn.is-subscribed { background: #ffe6ef; color: #e1306c; border-color: #ffd0e2 }
+
 #feed-search-wrap-inner {
   position: relative
 }
@@ -889,6 +1037,29 @@ body:not(.reader-mode) #hdr-edit-btn {
   pointer-events: none;
   flex-shrink: 0;
   gap: .15rem
+}
+.ptr-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  opacity: .45;
+  transition: transform .15s ease, opacity .15s ease
+}
+#ptr-bar.ptr-armed .ptr-spinner {
+  opacity: .9;
+  transform: rotate(180deg)
+}
+#ptr-bar.ptr-spinning .ptr-spinner {
+  opacity: 1;
+  animation: ptr-spin .7s linear infinite
+}
+@keyframes ptr-spin {
+  to { transform: rotate(360deg) }
+}
+.ptr-label {
+  font-size: .72rem
 }
 
 #bottom-nav {
@@ -1281,6 +1452,17 @@ body.pink .bn-item.active {
   background: #fff; border: 1px solid #d2daf0; border-radius: 10px;
   color: #3366cc; cursor: pointer
 }
+.pub-live-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem }
+.pub-live-top .bkp-help { flex: 1; min-width: 0 }
+.nb-switch-wrap { display: flex; align-items: center; gap: .45rem; cursor: pointer; flex-shrink: 0 }
+.nb-switch-label { font-size: .78rem; color: rgba(32,33,34,.65); white-space: nowrap }
+.nb-switch { position: relative; display: inline-flex; align-items: center; width: 38px; height: 22px; flex-shrink: 0 }
+.nb-switch-input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1 }
+.nb-switch-track { position: absolute; inset: 0; background: #d5d8e0; border-radius: 999px; transition: background .18s ease }
+.nb-switch-thumb { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .18s ease }
+.nb-switch-input:checked ~ .nb-switch-track { background: #3366cc }
+.nb-switch-input:checked ~ .nb-switch-track .nb-switch-thumb { transform: translateX(16px) }
+.nb-switch-input:focus-visible ~ .nb-switch-track { box-shadow: 0 0 0 2px rgba(51,102,204,.35) }
 body:not(.night):not(.pink) #publish-body .bkp-help { color: rgba(32,33,34,.65) }
 #publish-body .bkp-help { margin-bottom: 0 }
 #pub-footer-new,
@@ -1312,6 +1494,11 @@ body.night #publish-close { color: #999999 }
 body.night #publish-body { background: #080808; color: #f0f0f0 }
 body.night .pub-status { color: #9a9a9a }
 body.night .pub-url { background: #1c1c1c; border-color: #383838; color: #f0f0f0 }
+body.night .nb-switch-label { color: #787878 }
+body.night .nb-switch-track { background: #3a3a3a }
+body.night .nb-switch-input:checked ~ .nb-switch-track { background: #e0e0e0 }
+body.night .nb-switch-input:checked ~ .nb-switch-track .nb-switch-thumb { background: #111111 }
+body.night .nb-switch-input:focus-visible ~ .nb-switch-track { box-shadow: 0 0 0 2px rgba(224,224,224,.35) }
 body.night #pub-footer-new,
 body.night #pub-footer-live,
 body.night #pub-footer-ad-new,
@@ -1323,6 +1510,10 @@ body.pink #publish-close { color: rgba(255,255,255,.8) }
 body.pink #publish-body { background: #fff8fb; color: #1a0a12 }
 body.pink .pub-status { color: #875068 }
 body.pink .pub-url { background: #fff; border-color: #f5c5d8; color: #bd2856 }
+body.pink .nb-switch-label { color: #875068 }
+body.pink .nb-switch-track { background: #f3cddc }
+body.pink .nb-switch-input:checked ~ .nb-switch-track { background: #bd2856 }
+body.pink .nb-switch-input:focus-visible ~ .nb-switch-track { box-shadow: 0 0 0 2px rgba(189,40,86,.35) }
 body.pink #pub-footer-new,
 body.pink #pub-footer-live,
 body.pink #pub-footer-ad-new,
@@ -1581,6 +1772,37 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 .acct-sync-btn.syncing svg {
   animation: acct-sync-spin .8s linear infinite
 }
+
+/* Cosmetic display-name field in the Log Out dialog (plan: Stories
+   feature) — shown on Subscribed-feed note cards before the title. */
+#logout-profile-name-row {
+  margin-top: .7rem
+}
+#logout-profile-name-row label {
+  display: block;
+  font-size: .68rem;
+  color: #7d858c;
+  margin-bottom: .3rem;
+  font-weight: 600
+}
+#logout-profile-name-input {
+  width: 100%;
+  border: 1px solid #e4e9f5;
+  border-radius: 10px;
+  padding: .5rem .7rem;
+  font-size: .82rem;
+  font-family: inherit;
+  color: #202122;
+  background: #f9fafc
+}
+#logout-profile-name-status {
+  font-size: .65rem;
+  color: #7d858c;
+  margin-top: .25rem;
+  min-height: 1em
+}
+body.night #logout-profile-name-input { background: #1a1a1a; border-color: #333; color: #fff }
+body.pink #logout-profile-name-input { background: #fff; border-color: #ffd0e2 }
 
 @keyframes acct-sync-spin {
   from { transform: rotate(0deg) }
@@ -2100,6 +2322,10 @@ body.night .gc-title {
   color: #e8e8e8
 }
 
+body.night .gc-author-name {
+  color: #8f98a3
+}
+
 body.night .gc-play-icon {
   color: #585858
 }
@@ -2412,6 +2638,10 @@ body.pink .guide-card {
 
 body.pink .gc-title {
   color: #1a0a12
+}
+
+body.pink .gc-author-name {
+  color: #a86b85
 }
 
 body.pink .gc-play-icon {
@@ -3564,6 +3794,7 @@ document.body.dataset.lockScrollY = window.scrollY;
     </div>
     <div id="feed-cats"></div>
   </div>
+  <div id="nb-stories-strip"></div>
 
   <main id="nb-screens">
     <section class="nb-screen active" id="screen-create">
@@ -3712,6 +3943,11 @@ document.body.dataset.lockScrollY = window.scrollY;
     </div>
     <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
     <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
+    <div id="logout-profile-name-row">
+      <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories &mdash; not your email)</span></label>
+      <input id="logout-profile-name-input" type="text" maxlength="15" placeholder="e.g. Jo" oninput="_nbOnProfileNameInput(this.value)">
+      <div id="logout-profile-name-status"></div>
+    </div>
     <a class="rdlg-more-toggle" id="logout-more-toggle" onclick="toggleLogoutMore()">
       <span id="logout-more-label">Show more</span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -3719,9 +3955,20 @@ document.body.dataset.lockScrollY = window.scrollY;
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="logout-dialog-cancel" onclick="closeLogoutConfirm()">Cancel</button>
       <button class="rdlg-cancel" id="delete-account-btn" onclick="openDeleteAccountConfirm()" style="display:none">Delete account</button>
-      <button class="rdlg-ok" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
+      <button class="rdlg-ok rdlg-ok--blue" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
     </div>
   </div>
+</div>
+
+<div id="story-viewer-overlay">
+  <div id="story-viewer-header">
+    <button id="story-viewer-back" onclick="nbCloseStory()" aria-label="Back to Notes">
+      <svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg>
+    </button>
+    <span id="story-viewer-title"><span class="hdr-title-inner" id="story-viewer-title-text"></span></span>
+    <button id="story-viewer-sub-btn" onclick="nbToggleStorySubscribe()">Subscribe</button>
+  </div>
+  <iframe id="story-viewer-frame" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
 </div>
 
 <div id="privacy-overlay" onclick="if(event.target===this)closePrivacy()">
@@ -3833,12 +4080,12 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="edit-close" onclick="nbCloseSaveDialog()" aria-label="Close">✕</button>
     </div>
     <div class="markup-meta-fields show" id="nb-save-meta">
-      <input id="nb-save-title" class="com-field" placeholder="Page title" maxlength="100" autocomplete="off">
-      <input id="nb-save-desc" class="com-field" placeholder="Short description (optional)" maxlength="160" autocomplete="off">
+      <input id="nb-save-title" class="com-field" placeholder="Page title" maxlength="100" autocomplete="off" oninput="_nbUpdateSaveDialogDirtyState()">
+      <input id="nb-save-desc" class="com-field" placeholder="Short description (optional)" maxlength="160" autocomplete="off" oninput="_nbUpdateSaveDialogDirtyState()">
     </div>
     <div id="edit-meta-row" style="display:flex;gap:.5rem;padding:.38rem .9rem .5rem;flex-shrink:0">
-      <input id="nb-save-cat" class="com-field" placeholder="Category" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem">
-      <input id="nb-save-tags" class="com-field" placeholder="Tags (use commas)" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem">
+      <input id="nb-save-cat" class="com-field" placeholder="Category" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem" oninput="_nbUpdateSaveDialogDirtyState()">
+      <input id="nb-save-tags" class="com-field" placeholder="Tags (use commas)" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem" oninput="_nbUpdateSaveDialogDirtyState()">
     </div>
     <div id="edit-dfooter">
       <div id="edit-dfooter-r">
@@ -3887,7 +4134,16 @@ document.body.dataset.lockScrollY = window.scrollY;
           <div id="pub-slug-status" class="pub-status"></div>
         </div>
         <div id="pub-state-live" class="bkp-panel" style="display:none">
-          <p class="bkp-help">This note is live.</p>
+          <div class="pub-live-top">
+            <p class="bkp-help">This note is live.</p>
+            <label class="nb-switch-wrap" for="pub-stories-switch">
+              <span class="nb-switch-label">Show in stories</span>
+              <span class="nb-switch">
+                <input type="checkbox" id="pub-stories-switch" class="nb-switch-input" onchange="_pubOnStoriesToggle(this.checked)">
+                <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
+              </span>
+            </label>
+          </div>
           <div id="pub-live-url" class="pub-url" onclick="_pubCopyUrl()"></div>
           <div id="pub-save-status" class="pub-status"></div>
         </div>
@@ -6351,6 +6607,62 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     });
   }
 
+  // Longest side, in px, a locally-picked photo is downscaled to before
+  // being embedded as base64 (see downscaleImageForEmbed). 1600px is
+  // comfortably bigger than this editor ever displays a single image
+  // block at, even at full canvas width on a hi-DPI screen, so this is a
+  // storage/bandwidth saving, not a visible quality cut.
+  var IMG_EMBED_MAX_DIMENSION = 1600;
+  // Re-encoded as JPEG at this quality — chosen to keep a typical phone
+  // photo's embedded size down in the low hundreds of KB rather than
+  // several MB, while staying visually clean at IMG_EMBED_MAX_DIMENSION.
+  var IMG_EMBED_JPEG_QUALITY = 0.82;
+
+  // Shrinks and recompresses a locally-picked image file before it's
+  // embedded as a base64 data: URI in the note (see the fileInput
+  // 'change' handler below). Device photos routinely run several MB at
+  // full resolution — embedding one unmodified inflates it further via
+  // base64 and can by itself approach MAX_HTML_BYTES on the publish
+  // worker, and across many notes/pages is the single biggest lever on
+  // R2 storage growth. Always re-encodes to JPEG (dropping any alpha
+  // channel a source PNG might have) since this path is for photos, not
+  // graphics; onFail() is the caller's cue to fall back to embedding the
+  // original bytes unmodified.
+  function downscaleImageForEmbed(file, onDone, onFail) {
+    if (!file || !/^image\//.test(file.type)) { onFail(); return; }
+    var reader = new FileReader();
+    reader.onload = function() {
+      var img = new Image();
+      img.onload = function() {
+        var w = img.naturalWidth || img.width;
+        var h = img.naturalHeight || img.height;
+        if (!w || !h) { onFail(); return; }
+        var scale = Math.min(1, IMG_EMBED_MAX_DIMENSION / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * scale));
+        var ch = Math.max(1, Math.round(h * scale));
+        var canvas = document.createElement('canvas');
+        canvas.width = cw;
+        canvas.height = ch;
+        var ctx = canvas.getContext('2d');
+        if (!ctx) { onFail(); return; }
+        ctx.drawImage(img, 0, 0, cw, ch);
+        try {
+          var out = canvas.toDataURL('image/jpeg', IMG_EMBED_JPEG_QUALITY);
+          if (!out || out.indexOf('data:image/jpeg') !== 0) { onFail(); return; }
+          onDone(out);
+        } catch (e) {
+          // toDataURL can throw on a tainted canvas; shouldn't happen for
+          // a locally-picked file, but fail safe rather than lose the image.
+          onFail();
+        }
+      };
+      img.onerror = onFail;
+      img.src = reader.result;
+    };
+    reader.onerror = onFail;
+    reader.readAsDataURL(file);
+  }
+
   /* --- Image source picker: local file (embedded as base64) or a URL --- */
   var imgPicker = (function() {
     var overlay, box, handle, urlRow, urlInput, fileInput, targetImg;
@@ -6409,15 +6721,28 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       fileInput.addEventListener('change', function() {
         var file = fileInput.files && fileInput.files[0];
         if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function() {
-          setSrc(reader.result);
+        // Downscale/recompress before embedding (see downscaleImageForEmbed
+        // above): an un-resized phone photo can be several MB of base64,
+        // which is most of what actually drives R2/D1 storage growth for
+        // this app (see publish-feature-plan.md §6 / MAX_HTML_BYTES on the
+        // worker) — shrinking it here, once, at the source, is far cheaper
+        // than trying to claw the bytes back later.
+        downscaleImageForEmbed(file, function(dataUrl) {
+          setSrc(dataUrl);
           close();
-        };
-        reader.onerror = function() {
-          close();
-        };
-        reader.readAsDataURL(file);
+        }, function() {
+          // Fallback (canvas/decode failed, e.g. an exotic format): embed
+          // the original bytes rather than silently dropping the image.
+          var reader = new FileReader();
+          reader.onload = function() {
+            setSrc(reader.result);
+            close();
+          };
+          reader.onerror = function() {
+            close();
+          };
+          reader.readAsDataURL(file);
+        });
       });
       overlay.addEventListener('click', function(e) {
         if (e.target === overlay) close();
@@ -10623,7 +10948,16 @@ async function nbRefreshProStatus() {
   const Purchases = _nbRcPlugin();
   if (!Purchases) return;
   try {
-    const { customerInfo } = await Purchases.getCustomerInfo();
+    // Timed out the same way nbSignInWithGoogle() times out its native
+    // call (_nbWithTimeout, defined below) — without this, a hang here
+    // while offline (seen from nbSignOut()) never resolves or rejects,
+    // so nbSignOut() never reaches its own finally block, the Sign out
+    // button's spinner never clears, and _nbBusyBtnCount stays stuck
+    // above zero — which is what the hardware/system back button (see
+    // _nbBindBackButtonListener) checks before doing anything, so back
+    // silently stops working too. A rejected timeout is caught below the
+    // same as any other failure.
+    const { customerInfo } = await _nbWithTimeout(Purchases.getCustomerInfo(), 8000, 'RevenueCat getCustomerInfo timed out');
     _nbSetProFlag(_nbEntitlementActive(customerInfo));
   } catch (e) {
     _nbLog('RevenueCat getCustomerInfo failed', e);
@@ -10688,7 +11022,7 @@ async function nbPurchasePro() {
     // dismiss, not a failure worth logging or showing a toast for.
     if (!(e && e.userCancelled)) {
       _nbLog('RevenueCat purchase failed', e);
-      showToast('Purchase failed');
+      showToast('Purchase failed' + _nbFailureReason(e));
     }
   } finally {
     if (btn) _pubSetBtnLoading(btn, false);
@@ -10722,7 +11056,7 @@ async function nbRestorePurchases() {
     if (active) closePaywallDialog();
   } catch (e) {
     _nbLog('RevenueCat restore failed', e);
-    showToast('Restore failed \u2014 try again later');
+    showToast('Restore failed' + (_nbFailureReason(e) || ' \u2014 try again later'));
   } finally {
     if (link) _pubSetBtnLoading(link, false);
   }
@@ -11176,6 +11510,7 @@ async function _nbCompleteGoogleSignIn(idToken) {
   // not just whenever nbSyncPull below happens to add or remove a note.
   buildCatBar();
   nbRenderNotesScreen();
+  nbRenderStoriesStrip(); // ring state (seen/unseen) is per-account
   // Pull first so anything already backed up from another device merges
   // in locally, then push so the account's copy reflects the union of
   // both — mirrors nbImportNotes' additive-by-id merge, just without the
@@ -11209,7 +11544,7 @@ async function nbDeleteAccount() {
     if (!res.ok && res.status !== 401) throw new Error('account deletion failed: ' + res.status);
   } catch (e) {
     _nbLog('delete account', e);
-    showToast('Couldn\u2019t reach the server \u2014 try again');
+    showToast('Delete account failed' + (_nbFailureReason(e) || ' \u2014 try again'));
     return false;
   }
   _nbClearAccountLocal();
@@ -11250,9 +11585,14 @@ async function nbSignOutFromAccountScreen() {
 }
 async function nbSignOut() {
   const Purchases = _nbRcPlugin();
-  if (Purchases) { try { await Purchases.logOut(); } catch (e) { _nbLog('RevenueCat logOut', e); } }
+  // Same _nbWithTimeout reasoning as nbRefreshProStatus() above: these are
+  // native calls with a network round trip, and offline they can sit
+  // forever instead of rejecting — which used to hang this whole function,
+  // leaving nbSignOutFromAccountScreen()'s button (and, via _nbBusyBtnCount,
+  // the back button) stuck disabled/unresponsive with no way out.
+  if (Purchases) { try { await _nbWithTimeout(Purchases.logOut(), 8000, 'RevenueCat logOut timed out'); } catch (e) { _nbLog('RevenueCat logOut', e); } }
   const GAuth = _nbGoogleAuthPlugin();
-  if (GAuth) { try { await GAuth.signOut(); } catch (e) {} }
+  if (GAuth) { try { await _nbWithTimeout(GAuth.signOut(), 8000, 'Google sign-out timed out'); } catch (e) {} }
   _nbClearAccountLocal();
   await nbRefreshProStatus();
   showToast('Signed out');
@@ -11261,8 +11601,10 @@ async function nbSignOut() {
   // without this, any account-tagged notes stay on screen (still
   // deletable-as-if-local) until something else happens to trigger a
   // re-render, which is exactly how this bug showed up in the first place.
+  if (_nbActiveCat === 'Subscribed') _nbActiveCat = 'All'; // that category no longer exists signed out
   buildCatBar();
   nbRenderNotesScreen();
+  nbRenderStoriesStrip();
 }
 // Same {notes, images} shape nbExportNotes() writes to a backup file —
 // kept as its own small function rather than refactoring nbExportNotes
@@ -11336,7 +11678,7 @@ async function nbSyncPush(showFeedback) {
     return { ok: true };
   } catch (e) {
     _nbLog('sync push', e);
-    if (showFeedback) showToast('Sync failed');
+    if (showFeedback) showToast('Sync failed' + _nbFailureReason(e));
     return { ok: false, reason: 'error' };
   }
 }
@@ -11523,7 +11865,7 @@ async function nbSyncPull(showFeedback) {
     return { ok: true, restored: count, updated: updatedCount, removed: removedCount };
   } catch (e) {
     _nbLog('sync pull', e);
-    if (showFeedback) showToast('Sync failed');
+    if (showFeedback) showToast('Sync failed' + _nbFailureReason(e));
     return { ok: false, reason: 'error' };
   }
 }
@@ -11682,6 +12024,11 @@ function openLogoutConfirm() {
   const acct = nbAccount();
   const emailEl = document.getElementById('logout-email');
   if (emailEl) emailEl.textContent = (acct && acct.email) || 'your account';
+  const nameInput = document.getElementById('logout-profile-name-input');
+  const nameStatus = document.getElementById('logout-profile-name-status');
+  if (nameInput) nameInput.value = _nbLoadCachedProfileName();
+  if (nameStatus) nameStatus.textContent = '';
+  _nbFetchProfileName(); // reconcile with the server in case another device set it
   document.getElementById('logout-more-body').style.display = 'none';
   document.getElementById('delete-account-btn').style.display = 'none';
   document.getElementById('logout-more-label').textContent = 'Show more';
@@ -12052,7 +12399,7 @@ function nbLoadNotes() {
   } catch (e) { return []; }
 }
 function nbSaveNotesArr(arr) {
-  try { localStorage.setItem(NB_NOTES_KEY, JSON.stringify(arr)); } catch (e) { _nbLog('notes save', e); }
+  try { localStorage.setItem(NB_NOTES_KEY, JSON.stringify(arr)); } catch (e) { _nbLog('notes save', e); showToast('Couldn\u2019t save \u2014 storage may be full'); }
 }
 // Notes tagged with the account they've been synced to (see the `acct`
 // field set in nbSyncPush/nbSyncPull) shouldn't appear on the notes
@@ -12160,7 +12507,7 @@ async function _nbExportViaCapacitor(backupJson, fileName, cap) {
     }
   } catch (e) {
     _nbLog('capacitor backup export', e);
-    showToast('Backup failed');
+    showToast('Backup failed' + _nbFailureReason(e));
   }
 }
 function _nbUtf8ToBase64(str) {
@@ -12688,7 +13035,7 @@ function nbExportNoteWebsite(id) {
   if (!note) { showToast('Note not found'); return; }
   let html;
   try { html = nbBuildStaticNoteHtml(note); }
-  catch (e) { _nbLog('website export build', e); showToast('Export failed'); return; }
+  catch (e) { _nbLog('website export build', e); showToast('Export failed' + _nbFailureReason(e)); return; }
   const slug = (note.title || 'note').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'note';
   const fileName = slug + '.html';
   // Same native-vs-browser share path as nbExportNotes: Capacitor's
@@ -12887,6 +13234,7 @@ function nbOpenPublishSheet(id, keepTab) {
     liveState.style.display = '';
     liveFooter.style.display = '';
     document.getElementById('pub-live-url').textContent = _pubUrlFor(note.publishedSlug);
+    document.getElementById('pub-stories-switch').checked = !!note.showInStories;
     // Previously only came out right if you'd happened to open the note in
     // the editor first — nothing here ever actually compared current
     // content against what's live, so the button just sat at whatever its
@@ -13009,7 +13357,7 @@ async function nbPublishNote() {
   if (_pubOfflineGuard()) return;
   let html;
   try { html = nbBuildStaticNoteHtml(note, slug); }
-  catch (e) { _nbLog('publish build', e); showToast('Publish failed'); return; }
+  catch (e) { _nbLog('publish build', e); showToast('Publish failed' + _nbFailureReason(e)); return; }
   const btn = document.getElementById('pub-publish-btn');
   _pubSetBtnLoading(btn, true, 'Publishing…');
   try {
@@ -13022,13 +13370,39 @@ async function nbPublishNote() {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish', {
       method: 'POST',
       headers: pubHeaders,
-      body: JSON.stringify({ slug, html })
+      body: JSON.stringify({ slug, html, title: note.title || '' })
     });
+    if (res.status === 429) {
+      showToast('You\u2019re publishing too fast — wait a moment and try again');
+      _pubSetBtnLoading(btn, false);
+      btn.disabled = !_pubSlugAvailable;
+      return;
+    }
+    if (res.status === 413) {
+      showToast('This note is too large to publish — try trimming images or content');
+      _pubSetBtnLoading(btn, false);
+      btn.disabled = !_pubSlugAvailable;
+      return;
+    }
     // 409/403 here mean someone else claimed (or an admin locked) this
     // exact slug in the gap between the last availability check and this
     // click — rare, but a generic "Publish failed" would leave the person
     // retrying the same taken slug with no idea why it keeps not working.
+    // A 403 can also mean the account hit its live-page cap — that's not
+    // slug-scoped at all (a different slug won't help), so it needs its
+    // own message rather than falling into the "try another address" copy
+    // below. The two 403s only differ in the response body, so read it.
     if (res.status === 409 || res.status === 403) {
+      let errMsg = '';
+      if (res.status === 403) {
+        try { errMsg = (await res.json()).error || ''; } catch (e) {}
+      }
+      if (res.status === 403 && /page limit reached/.test(errMsg)) {
+        showToast(errMsg || 'You\u2019ve reached your account\u2019s page limit — unpublish something first');
+        _pubSetBtnLoading(btn, false);
+        btn.disabled = !_pubSlugAvailable;
+        return;
+      }
       const statusEl = document.getElementById('pub-slug-status');
       const sameSheet = _pubNoteId === note.id; // sheet may have been closed/reopened for another note mid-request
       if (sameSheet) _pubSlugAvailable = false;
@@ -13057,7 +13431,7 @@ async function nbPublishNote() {
     nbRenderNotesScreen();
   } catch (e) {
     _nbLog('publish', e);
-    showToast('Publish failed');
+    showToast('Publish failed' + _nbFailureReason(e));
     _pubSetBtnLoading(btn, false);
     btn.disabled = !_pubSlugAvailable;
   }
@@ -13083,7 +13457,7 @@ async function nbUpdatePublishedNote() {
   if (_pubOfflineGuard()) return;
   let html;
   try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
-  catch (e) { _nbLog('publish update build', e); showToast('Update failed'); return; }
+  catch (e) { _nbLog('publish update build', e); showToast('Update failed' + _nbFailureReason(e)); return; }
   const btn = document.getElementById('pub-save-btn');
   _pubSetBtnLoading(btn, true, 'Saving…');
   try {
@@ -13094,6 +13468,14 @@ async function nbUpdatePublishedNote() {
       headers: updHeaders,
       body: JSON.stringify({ html, token: note.publishToken })
     });
+    if (res.status === 429) {
+      showToast('You\u2019re saving too fast — wait a moment and try again');
+      return;
+    }
+    if (res.status === 413) {
+      showToast('This note is too large to save — try trimming images or content');
+      return;
+    }
     // A 404 means the remote side no longer has this page at all (admin
     // takedown, or it was purged) — without this, every future "Save
     // Changes" attempt would 404 forever with no way for the person to
@@ -13113,11 +13495,351 @@ async function nbUpdatePublishedNote() {
     if (_pubNoteId === note.id) closePublishSheet();
   } catch (e) {
     _nbLog('publish update', e);
-    showToast('Update failed');
+    showToast('Update failed' + _nbFailureReason(e));
   } finally {
     _pubSetBtnLoading(btn, false);
   }
 }
+// Fires on the live-state "Show in stories" switch. Independent of Save
+// Changes on purpose: Save Changes is gated on the content hash actually
+// having changed (see nbOpenPublishSheet), so a person who only flips
+// this switch — no content edit — would otherwise see a disabled button
+// and nothing would ever reach the server. The worker's PUT /publish/:slug
+// still requires html in the body regardless, so this rebuilds and resends
+// the current (unchanged) page alongside the flag.
+async function _pubOnStoriesToggle(checked) {
+  const note = _pubFindNote(_pubNoteId);
+  const sw = document.getElementById('pub-stories-switch');
+  if (!note || !note.publishedSlug) return;
+  if (_pubOfflineGuard()) { if (sw) sw.checked = !!note.showInStories; return; }
+  if (!nbIsSignedIn()) {
+    showToast('Sign in to show notes in stories');
+    if (sw) sw.checked = !!note.showInStories;
+    return;
+  }
+  let html;
+  try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
+  catch (e) { _nbLog('stories toggle build', e); showToast('Could not update' + _nbFailureReason(e)); if (sw) sw.checked = !!note.showInStories; return; }
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      body: JSON.stringify({ html, token: note.publishToken, title: note.title || '', showInStories: checked })
+    });
+    if (!res.ok) throw new Error('stories toggle failed: ' + res.status);
+    _pubSaveNoteFields(note.id, { showInStories: checked });
+    showToast(checked ? 'Now showing in stories' : 'Removed from stories');
+  } catch (e) {
+    _nbLog('stories toggle', e);
+    showToast('Could not update' + _nbFailureReason(e));
+    if (sw) sw.checked = !!note.showInStories;
+  }
+}
+/* ===================== Stories strip + inline viewer ===================== */
+// Cache of the last-fetched strip so nbCloseStory can re-render the ring
+// state (seen/unseen) without a second round trip right after marking a
+// story seen.
+let _nbStoriesCache = [];
+// Authors this account follows, cached locally (see the comment on
+// nbToggleStorySubscribe for why: the backend has no "list my
+// subscriptions" endpoint, only the feed join, so this is the local
+// source of truth for the Subscribe/Subscribed button and for whether
+// the "Subscribed" category shows at all).
+function _nbSubscribedAuthors() {
+  try { return new Set(JSON.parse(localStorage.getItem('nb_subscribed_authors_v1') || '[]')); }
+  catch (e) { return new Set(); }
+}
+function _nbSaveSubscribedAuthors(set) {
+  try { localStorage.setItem('nb_subscribed_authors_v1', JSON.stringify([...set])); } catch (e) {}
+}
+async function nbRenderStoriesStrip() {
+  const strip = document.getElementById('nb-stories-strip');
+  if (!strip) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return; // silently skip — not worth a toast on every cold load
+  try {
+    const headers = {};
+    if (nbIsSignedIn()) headers['Authorization'] = 'Bearer ' + nbSessionToken();
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/stories', { headers });
+    if (!res.ok) throw new Error('stories fetch failed: ' + res.status);
+    const data = await res.json();
+    _nbStoriesCache = (data && data.stories) || [];
+  } catch (e) { _nbLog('stories strip', e); return; }
+  _nbPaintStoriesStrip();
+}
+// If the ring's image fails to load (dead/expired data URI, offline,
+// whatever), swap it back to the title-text avatar rather than leaving a
+// broken-image icon in the ring.
+function _nbStoryImgError(imgEl, fallback) {
+  const span = document.createElement('span');
+  span.className = 'nb-story-ring-inner';
+  span.textContent = fallback;
+  imgEl.replaceWith(span);
+}
+function _nbPaintStoriesStrip() {
+  const strip = document.getElementById('nb-stories-strip');
+  if (!strip) return;
+  strip.classList.toggle('has-stories', _nbStoriesCache.length > 0);
+  strip.innerHTML = _nbStoriesCache.map(s => {
+    const sid = s.slug.replace(/'/g, "\\'");
+    const asub = (s.authorSub || '').replace(/'/g, "\\'");
+    const title = (s.title || 'Untitled note').replace(/'/g, "\\'");
+    // Preview the note's first image when there's one; otherwise fall
+    // back to the title text itself (not just its initial letter).
+    const fallbackText = s.title || 'Untitled';
+    const fallbackAttr = fallbackText.replace(/'/g, "\\'");
+    const avatarInner = s.imageUrl
+      ? `<img class="nb-story-ring-img" src="${esc(s.imageUrl)}" alt="" loading="lazy" onerror="_nbStoryImgError(this,'${fallbackAttr}')">`
+      : `<span class="nb-story-ring-inner">${esc(fallbackText)}</span>`;
+    return `
+    <button class="nb-story-item" onclick="nbOpenStory('${sid}','${asub}','${title}')">
+      <span class="nb-story-ring${s.seen ? ' seen' : ''}">${avatarInner}</span>
+      <span class="nb-story-label">${esc(s.title || 'Untitled')}</span>
+    </button>`;
+  }).join('');
+}
+// Shared with #hdr-title-text on the main header: measures the title text
+// against its clipped container and only turns on the horizontal scroll
+// (.hdr-title-inner.marquee, see hdr-marquee keyframes) when it genuinely
+// doesn't fit, so short titles just sit still instead of drifting.
+function nbUpdateTitleMarquee(titleEl, innerEl) {
+  if (!titleEl || !innerEl) return;
+  innerEl.classList.remove('marquee');
+  innerEl.style.removeProperty('--marquee-x');
+  requestAnimationFrame(() => {
+    const overflow = innerEl.scrollWidth - titleEl.clientWidth;
+    if (overflow > 4) {
+      innerEl.style.setProperty('--marquee-x', (-overflow - 12) + 'px');
+      innerEl.classList.add('marquee');
+    }
+  });
+}
+let _nbCurrentStoryAuthorSub = null;
+function nbOpenStory(slug, authorSub, title) {
+  _nbCurrentStoryAuthorSub = authorSub;
+  const storyTitleEl = document.getElementById('story-viewer-title');
+  const storyTitleInner = document.getElementById('story-viewer-title-text');
+  storyTitleInner.textContent = title || 'Untitled note';
+  nbUpdateTitleMarquee(storyTitleEl, storyTitleInner);
+  document.getElementById('story-viewer-frame').src = _pubUrlFor(slug);
+  const subBtn = document.getElementById('story-viewer-sub-btn');
+  const isSubscribed = _nbSubscribedAuthors().has(authorSub);
+  subBtn.textContent = isSubscribed ? 'Subscribed' : 'Subscribe';
+  subBtn.classList.toggle('is-subscribed', isSubscribed);
+  document.getElementById('story-viewer-overlay').classList.add('open');
+  lockScroll();
+  if (nbIsSignedIn()) {
+    fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/stories/' + encodeURIComponent(slug) + '/seen', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    }).then(() => {
+      const entry = _nbStoriesCache.find(s => s.slug === slug);
+      if (entry) entry.seen = true;
+    }).catch(e => _nbLog('mark story seen', e));
+  }
+}
+function nbCloseStory() {
+  document.getElementById('story-viewer-overlay').classList.remove('open');
+  document.getElementById('story-viewer-frame').src = 'about:blank';
+  unlockScroll();
+  _nbPaintStoriesStrip(); // reflect the ring just going grey, if it did
+}
+async function nbToggleStorySubscribe() {
+  const authorSub = _nbCurrentStoryAuthorSub;
+  if (!authorSub) return;
+  if (!nbIsSignedIn()) { showToast('Sign in to subscribe'); return; }
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) { showToast('No internet connection — try again once you\u2019re back online'); return; }
+  const subBtn = document.getElementById('story-viewer-sub-btn');
+  const set = _nbSubscribedAuthors();
+  const wasSubscribed = set.has(authorSub);
+  const method = wasSubscribed ? 'DELETE' : 'POST';
+  subBtn.disabled = true;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/subscriptions/' + encodeURIComponent(authorSub), {
+      method,
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) throw new Error('subscribe toggle failed: ' + res.status);
+    if (wasSubscribed) set.delete(authorSub); else set.add(authorSub);
+    _nbSaveSubscribedAuthors(set);
+    subBtn.textContent = wasSubscribed ? 'Subscribe' : 'Subscribed';
+    subBtn.classList.toggle('is-subscribed', !wasSubscribed);
+    showToast(wasSubscribed ? 'Unsubscribed' : 'Subscribed');
+    buildCatBar(); // "Subscribed" category appears/disappears with the first/last subscription
+  } catch (e) {
+    _nbLog('subscribe toggle', e);
+    showToast('Could not update' + _nbFailureReason(e));
+  } finally {
+    subBtn.disabled = false;
+  }
+}
+// GET /subscriptions/feed — every story (paginated, see below) from
+// every author this account follows, rendered into the same grid area
+// the note cards use. Distinct from a note card: no edit/publish/delete
+// actions (this isn't the person's own content), just open-to-read plus
+// the author's cosmetic display name shown before the title.
+//
+// Paginated like a normal feed rather than one flat fetch: the backend
+// hands back an opaque `nextCursor` (its own keyset position, not
+// anything the client constructs) alongside each page, and a sentinel
+// element at the bottom of the grid triggers loading the next page as
+// the person scrolls near it — see _nbSubFeedObserver below.
+let _nbSubFeedCursor = null;
+let _nbSubFeedLoading = false;
+let _nbSubFeedDone = false;
+let _nbSubFeedObserver = null;
+
+async function nbRenderSubscribedFeed() {
+  const empty = document.getElementById('notes-empty-state');
+  const emptyTitle = document.getElementById('notes-empty-title');
+  const emptySub = document.getElementById('notes-empty-sub');
+  const grid = document.getElementById('nb-notes-grid');
+  const carousel = document.getElementById('nb-onboard-carousel');
+  if (carousel) carousel.style.display = 'none';
+  if (_nbSubFeedObserver) { _nbSubFeedObserver.disconnect(); _nbSubFeedObserver = null; }
+  _nbSubFeedCursor = null;
+  _nbSubFeedDone = false;
+  grid.innerHTML = '';
+  if (!nbIsSignedIn()) {
+    empty.style.display = ''; grid.style.display = 'none';
+    emptyTitle.textContent = 'Sign in to see this';
+    emptySub.textContent = 'The Subscribed feed follows accounts, so it needs you to be signed in.';
+    return;
+  }
+  await _nbLoadSubFeedPage();
+}
+
+// Fetches and appends one page. Called for the first page (from
+// nbRenderSubscribedFeed, grid already cleared) and again by the
+// scroll-triggered IntersectionObserver for every subsequent page.
+async function _nbLoadSubFeedPage() {
+  if (_nbSubFeedLoading || _nbSubFeedDone || !nbIsSignedIn()) return;
+  const empty = document.getElementById('notes-empty-state');
+  const emptyTitle = document.getElementById('notes-empty-title');
+  const emptySub = document.getElementById('notes-empty-sub');
+  const grid = document.getElementById('nb-notes-grid');
+  _nbSubFeedLoading = true;
+  const isFirstPage = !_nbSubFeedCursor;
+  try {
+    const qs = _nbSubFeedCursor ? ('?cursor=' + encodeURIComponent(_nbSubFeedCursor)) : '';
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/subscriptions/feed' + qs, {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) throw new Error('subscriptions feed failed: ' + res.status);
+    const data = await res.json();
+    const stories = (data && data.stories) || [];
+    if (_nbActiveCat !== 'Subscribed') return; // category switched while this was in flight
+    if (isFirstPage && !stories.length) {
+      empty.style.display = ''; grid.style.display = 'none'; grid.innerHTML = '';
+      emptyTitle.textContent = 'No new stories';
+      emptySub.textContent = 'Notes the people you subscribe to publish (from when you subscribed onward) will show up here.';
+      _nbSubFeedDone = true;
+      return;
+    }
+    empty.style.display = 'none';
+    grid.style.display = '';
+    const cardsHtml = stories.map(s => {
+      const sid = s.slug.replace(/'/g, "\\'");
+      const asub = (s.authorSub || '').replace(/'/g, "\\'");
+      const title = (s.title || 'Untitled note').replace(/'/g, "\\'");
+      const imgsHtml = _buildImgsHtml(s.images || []);
+      return `
+      <div class="guide-card" onclick="nbOpenStory('${sid}','${asub}','${title}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenStory('${sid}','${asub}','${title}')">
+        ${s.authorProfileName ? `<span class="gc-author-name">${esc(s.authorProfileName)}</span>` : ''}
+        <div class="gc-title">${esc(s.title || 'Untitled note')}</div>
+        ${imgsHtml}
+      </div>`;
+    }).join('');
+    // Drop the old sentinel before appending — a fresh one goes back on
+    // at the new bottom right after.
+    const oldSentinel = document.getElementById('nb-subfeed-sentinel');
+    if (oldSentinel) oldSentinel.remove();
+    grid.insertAdjacentHTML('beforeend', cardsHtml);
+
+    _nbSubFeedCursor = data.nextCursor || null;
+    if (!_nbSubFeedCursor) {
+      _nbSubFeedDone = true;
+    } else {
+      grid.insertAdjacentHTML('beforeend', '<div id="nb-subfeed-sentinel" style="height:1px"></div>');
+      if (!_nbSubFeedObserver) {
+        _nbSubFeedObserver = new IntersectionObserver(entries => {
+          if (entries.some(e => e.isIntersecting)) _nbLoadSubFeedPage();
+        }, { rootMargin: '600px' });
+      }
+      _nbSubFeedObserver.observe(document.getElementById('nb-subfeed-sentinel'));
+    }
+  } catch (e) {
+    _nbLog('subscriptions feed', e);
+    if (_nbActiveCat !== 'Subscribed') return;
+    if (isFirstPage) {
+      empty.style.display = ''; grid.style.display = 'none'; grid.innerHTML = '';
+      emptyTitle.textContent = 'Could not load';
+      emptySub.textContent = 'Something went wrong loading the Subscribed feed — try again.';
+    } else {
+      showToast('Could not load more' + _nbFailureReason(e));
+    }
+  } finally {
+    _nbSubFeedLoading = false;
+  }
+}
+/* ===================== Profile name (Log Out dialog) ===================== */
+function _nbProfileNameCacheKey() { const acct = nbAccount(); return acct ? 'nb_profile_name_v1:' + acct.sub : null; }
+function _nbLoadCachedProfileName() {
+  const key = _nbProfileNameCacheKey();
+  if (!key) return '';
+  try { return localStorage.getItem(key) || ''; } catch (e) { return ''; }
+}
+// GET /account/profile-name — the local cache above is just a snappy
+// first paint for the dialog; this is the actual source of truth (a
+// name set from another device wouldn't otherwise ever reach this one).
+// Skipped while offline/signed-out (same guards as everywhere else),
+// and never overwrites what the person is actively typing.
+async function _nbFetchProfileName() {
+  const nameInput = document.getElementById('logout-profile-name-input');
+  if (!nbIsSignedIn()) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-name', {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) throw new Error('profile name fetch failed: ' + res.status);
+    const data = await res.json();
+    const name = (data && data.profileName) || '';
+    const key = _nbProfileNameCacheKey();
+    if (key) { try { localStorage.setItem(key, name); } catch (e) {} }
+    if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
+  } catch (e) { _nbLog('profile name fetch', e); showToast('Couldn\u2019t refresh your name'); }
+}
+let _nbProfileNameSaveTimer = null;
+function _nbOnProfileNameInput(raw) {
+  const statusEl = document.getElementById('logout-profile-name-status');
+  clearTimeout(_nbProfileNameSaveTimer);
+  if (statusEl) statusEl.textContent = '';
+  _nbProfileNameSaveTimer = setTimeout(() => _nbSaveProfileName(raw), 600);
+}
+async function _nbSaveProfileName(raw) {
+  const statusEl = document.getElementById('logout-profile-name-status');
+  if (!nbIsSignedIn()) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    if (statusEl) statusEl.textContent = 'No internet connection — not saved';
+    return;
+  }
+  const name = (raw || '').trim().slice(0, 15);
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-name', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      body: JSON.stringify({ name })
+    });
+    if (!res.ok) throw new Error('profile name save failed: ' + res.status);
+    const key = _nbProfileNameCacheKey();
+    if (key) { try { localStorage.setItem(key, name); } catch (e) {} }
+    if (statusEl) statusEl.textContent = 'Saved';
+  } catch (e) {
+    _nbLog('profile name save', e);
+    if (statusEl) statusEl.textContent = 'Could not save — try again';
+  }
+}
+
 // Shared by nbUnpublishNote's own confirm flow and nbDeleteNote's
 // unpublish-then-offer-to-delete flow — one place that actually talks to
 // the server for this instead of two copies of the same fetch drifting
@@ -13179,7 +13901,7 @@ function nbUnpublishNote() {
       nbRenderNotesScreen();
     } catch (e) {
       _nbLog('unpublish', e);
-      showToast('Unpublish failed');
+      showToast('Unpublish failed' + _nbFailureReason(e));
       _pubSetBtnLoading(confirmBtn, false);
     }
   };
@@ -13380,7 +14102,7 @@ async function _pubRefreshAdTab() {
 
   let html;
   try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
-  catch (e) { _nbLog('ad elig build', e); html = ''; }
+  catch (e) { _nbLog('ad elig build', e); html = ''; showToast('Couldn\u2019t check ad eligibility'); }
   const elig = nbAdCheckEligibility(html);
   const eligEl = document.getElementById('pub-ad-elig');
   if (elig.ok) {
@@ -13408,7 +14130,7 @@ async function _pubRefreshAdTab() {
     // Connection dropped between the guard above and the response — treat
     // it the same as being offline from the start, so it retries on 'online'.
     if (typeof navigator !== 'undefined' && navigator.onLine === false) _pubAdOfflinePending = true;
-    showToast('Could not load ad status');
+    showToast('Could not load ad status' + _nbFailureReason(e));
     return;
   }
   // Stale: another refresh started (tab re-opened, 'online' retry, a
@@ -13491,7 +14213,7 @@ async function _pubRenderAdPackages(eligible) {
       const offerings = await Purchases.getOfferings();
       const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
       packages = offering && offering.availablePackages;
-    } catch (e) { _nbLog('ad offerings', e); }
+    } catch (e) { _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages'); }
   }
   if (myToken !== _pubAdPkgsToken) return; // a newer call has since started; let it own the DOM
   wrap.innerHTML = '';
@@ -13565,7 +14287,7 @@ async function nbAdPublish() {
       if (res.status === 422) showToast('Not eligible to run as an ad \u2014 check the requirements above');
       else if (res.status === 409) showToast('This page is already registered as an ad');
       else if (res.status === 402) showToast('Not enough view credits yet \u2014 try again shortly');
-      else { _nbLog('ads/publish', msg); showToast('Publish as ad failed'); }
+      else { _nbLog('ads/publish', msg); showToast('Publish as ad failed' + _nbFailureReason(new Error('ads/publish: ' + res.status))); }
       return;
     }
     showToast('Ad published \u2014 it\u2019ll start showing on Create screens');
@@ -13573,7 +14295,7 @@ async function nbAdPublish() {
     await _pubRefreshAdTab();
   } catch (e) {
     _nbLog('ad publish', e);
-    showToast('Publish as ad failed');
+    showToast('Publish as ad failed' + _nbFailureReason(e));
   } finally {
     _pubSetBtnLoading(btn, false);
     btn.disabled = !_pubAdSelectedViews;
@@ -13586,7 +14308,7 @@ async function nbAdSaveChanges() {
   if (_pubOfflineGuard()) return;
   let html;
   try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
-  catch (e) { _nbLog('ad save build', e); showToast('Save failed'); return; }
+  catch (e) { _nbLog('ad save build', e); showToast('Save failed' + _nbFailureReason(e)); return; }
   const elig = nbAdCheckEligibility(html);
   if (!elig.ok) { showToast(AD_ELIGIBILITY_MESSAGES[elig.reason] || 'Not eligible'); return; }
   const btn = document.getElementById('pub-ad-save-btn');
@@ -13611,7 +14333,7 @@ async function nbAdSaveChanges() {
     if (_pubNoteId === note.id) closePublishSheet();
   } catch (e) {
     _nbLog('ad save', e);
-    showToast('Save failed');
+    showToast('Save failed' + _nbFailureReason(e));
   } finally {
     _pubSetBtnLoading(btn, false);
   }
@@ -13649,7 +14371,7 @@ function nbAdUnpublish() {
       await _pubRefreshAdTab();
     } catch (e) {
       _nbLog('ad unpublish', e);
-      showToast('Unpublish failed');
+      showToast('Unpublish failed' + _nbFailureReason(e));
       _pubSetBtnLoading(confirmBtn, false);
     }
   };
@@ -13823,7 +14545,12 @@ function buildCatBar() {
     if (!raw || NB_BASE_CATS.includes(raw)) return;
     customCats.set(raw.toLowerCase(), raw);
   });
-  const allCats = [...NB_BASE_CATS, ...customCats.values()];
+  // "Subscribed" appears right after Favorites, but only once the
+  // account has at least one subscription — see _nbSubscribedAuthors.
+  const withSubscribed = nbIsSignedIn() && _nbSubscribedAuthors().size > 0
+    ? [NB_BASE_CATS[0], NB_BASE_CATS[1], 'Subscribed', ...NB_BASE_CATS.slice(2)]
+    : NB_BASE_CATS;
+  const allCats = [...withSubscribed, ...customCats.values()];
   bar.innerHTML = allCats.map(c =>
     `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${c.replace(/'/g, "\\'")}')">${esc(c)}</button>`
   ).join('');
@@ -13942,6 +14669,12 @@ function _nbFilteredEmptyMessage() {
   return { title: 'No notes here yet', sub: lead + 'Notes you add to \u201c' + _nbActiveCat + '\u201d will show up here as you create them.' };
 }
 function nbRenderNotesScreen() {
+  if (_nbActiveCat === 'Subscribed') {
+    const carousel = document.getElementById('nb-onboard-carousel');
+    if (carousel) carousel.style.display = 'none';
+    return nbRenderSubscribedFeed(); // returned so pull-to-refresh can await it
+  }
+  if (_nbSubFeedObserver) { _nbSubFeedObserver.disconnect(); _nbSubFeedObserver = null; } // leaving Subscribed — stop paging it in the background
   const all = nbVisibleNotes();
   const empty = document.getElementById('notes-empty-state');
   const emptyTitle = document.getElementById('notes-empty-title');
@@ -14122,7 +14855,7 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
       // could end up deleting the local note anyway while the live page
       // is still up with no local record left to take it down with.
       _nbLog('delete-note unpublish', e);
-      showToast('Unpublish failed \u2014 note not deleted');
+      showToast('Unpublish failed' + (_nbFailureReason(e) || ' \u2014 note not deleted'));
       _pubSetBtnLoading(confirmBtn, false);
       return;
     }
@@ -14135,6 +14868,7 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
 }
 buildCatBar();
 nbRenderNotesScreen();
+nbRenderStoriesStrip();
 // A reload/reopen with an already-signed-in session (token already in
 // localStorage) never goes through _nbCompleteGoogleSignIn again, and
 // that's the only other place that pulled automatically before this —
@@ -14368,7 +15102,9 @@ function nbGoScreen(name) {
   document.getElementById('bn-create-icon-editor').style.display = (name === 'create') ? '' : 'none';
   document.getElementById('bn-create-icon-plus').style.display = (name === 'create') ? 'none' : '';
   document.getElementById('bn-create').setAttribute('aria-label', name === 'create' ? 'Editor' : 'New note');
-  document.getElementById('hdr-title-text').textContent = (name === 'create') ? 'Editor' : 'My Library';
+  const hdrTitleTextEl = document.getElementById('hdr-title-text');
+  hdrTitleTextEl.textContent = (name === 'create') ? 'Editor' : 'My Library';
+  nbUpdateTitleMarquee(document.getElementById('header-title'), hdrTitleTextEl);
   window.scrollTo(0, 0);
   // Auto-sync on leaving the Editor, or on landing on the Notes screen
   // from anywhere else — the two moments a person is either about to
@@ -14504,6 +15240,86 @@ function closeBackupSheet() {
   }, { passive: true });
 })();
 
+/* ===================== Pull-to-refresh (Notes screen) ===================== */
+// #ptr-bar itself has existed since the Stories work but was never wired
+// to a gesture — re-tapping the active category was the only way to
+// refresh (Subscribed included). Same touchstart/move/end shape as the
+// sheet-drag pattern above: rubber-banded pull, a snap-back or a
+// held-open spin, then nbRenderNotesScreen() re-fetches/re-renders
+// whatever category is currently active (the Subscribed feed hits the
+// server; any other category just re-runs its cheap local render, which
+// still matches how a re-tap already behaves there).
+(function initPullToRefresh() {
+  const THRESHOLD = 64;   // px of pull before release triggers a refresh
+  const MAX_PULL = 90;    // visual cap on how far the bar stretches
+  const RESIST = .5;      // rubber-band: finger moves 2px for every 1px of pull
+  const MIN_SPIN_MS = 550; // keep the spinner visible at least this long, even on a fast local render
+  const bar = document.getElementById('ptr-bar');
+  if (!bar) return;
+  bar.innerHTML = '<span class="ptr-spinner"></span><span class="ptr-label"></span>';
+  const label = bar.querySelector('.ptr-label');
+
+  let startY = 0, pulling = false, dragging = false, refreshing = false;
+
+  function atTop() {
+    return (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0) <= 0;
+  }
+  function notesScreenActive() {
+    const screen = document.getElementById('screen-notes');
+    return !!screen && screen.classList.contains('active');
+  }
+  function scrollLocked() {
+    return document.body.dataset.lockScrollY !== undefined; // an overlay/sheet is open over the Notes screen
+  }
+
+  document.addEventListener('touchstart', function (e) {
+    dragging = false;
+    if (refreshing || scrollLocked() || !notesScreenActive() || !atTop()) { pulling = false; return; }
+    if (e.target.closest && e.target.closest('#feed-search-input, .cat-pill, #nb-stories-strip')) { pulling = false; return; }
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (e) {
+    if (!pulling || refreshing) return;
+    const deltaY = e.touches[0].clientY - startY;
+    if (deltaY <= 0) return; // only pulling down counts; scrolling further up is left alone
+    if (!dragging) { dragging = true; bar.style.transition = 'none'; }
+    const pull = Math.min(MAX_PULL, deltaY * RESIST);
+    bar.style.height = pull + 'px';
+    bar.style.opacity = Math.min(1, pull / 32);
+    const armed = pull >= THRESHOLD;
+    bar.classList.toggle('ptr-armed', armed);
+    label.textContent = armed ? 'Release to refresh' : 'Pull to refresh';
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', function () {
+    if (!pulling) return;
+    pulling = false;
+    if (!dragging) return;
+    dragging = false;
+    bar.style.transition = ''; // restore the CSS height transition for the snap
+    const armed = bar.classList.contains('ptr-armed');
+    bar.classList.remove('ptr-armed');
+    if (!armed) { bar.style.height = '0'; bar.style.opacity = ''; return; }
+    refreshing = true;
+    bar.classList.add('ptr-spinning');
+    label.textContent = 'Refreshing\u2026';
+    bar.style.height = '52px';
+    bar.style.opacity = '1';
+    const minWait = new Promise(r => setTimeout(r, MIN_SPIN_MS));
+    Promise.all([Promise.resolve().then(nbRenderNotesScreen).catch(e => _nbLog('pull to refresh', e)), minWait])
+      .then(() => {
+        refreshing = false;
+        bar.classList.remove('ptr-spinning');
+        bar.style.height = '0';
+        bar.style.opacity = '';
+        label.textContent = '';
+      });
+  }, { passive: true });
+})();
+
 /* ===================== Reader header placeholders (wired up in the Bluebook editor stage) ===================== */
 function navBack() {}
 function toggleReaderHeader() {}
@@ -14537,6 +15353,35 @@ function _nbLog(ctx, err) {
   } catch (e) {}
 }
 
+// Turns a caught error into a short " — reason" suffix to append onto a
+// base toast message (e.g. 'Sync failed' + _nbFailureReason(e) ->
+// 'Sync failed — no connection'), or '' when nothing useful can be said.
+// Recognizes our own `throw new Error('xyz failed: ' + res.status)`
+// convention (see fetch call sites throughout) and common network
+// failure shapes; call sites keep their own fallback text for the ''
+// case rather than this guessing one.
+function _nbFailureReason(err) {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return ' \u2014 no connection';
+    const msg = err && (err.message || err.name) ? String(err.message || err.name) : '';
+    const m = msg.match(/(\d{3})\s*$/);
+    if (m) {
+      const code = parseInt(m[1], 10);
+      if (code === 401 || code === 403) return ' \u2014 signed out';
+      if (code === 404) return ' \u2014 not found';
+      if (code === 408) return ' \u2014 timed out';
+      if (code === 409) return ' \u2014 conflict, try again';
+      if (code === 413) return ' \u2014 too large';
+      if (code === 429) return ' \u2014 too many requests, try again shortly';
+      if (code >= 500) return ' \u2014 server error';
+      if (code >= 400) return ' \u2014 request error';
+    }
+    if (/failed to fetch|networkerror|load failed/i.test(msg)) return ' \u2014 no connection';
+    if (/timed? ?out/i.test(msg)) return ' \u2014 timed out';
+    return '';
+  } catch (e) { return ''; }
+}
+
 /* ===================== Note image store (IndexedDB, not localStorage) =====================
    Note images used to live directly in localStorage as base64 strings —
    that quota is small (~5-10MB on Android WebView) and a handful of
@@ -14549,6 +15394,7 @@ function _nbLog(ctx, err) {
    _nbImgCache/_nbImgCacheReady themselves are declared with the rest of
    the notes data layer above -- see the hoist comment there. */
 async function _nbInitImageCache() {
+  let loadFailures = 0;
   try {
     const db = await _idbOpen();
     const allKeys = await new Promise((res, rej) => {
@@ -14560,7 +15406,7 @@ async function _nbInitImageCache() {
     const imgKeys = allKeys.filter(k => typeof k === 'string' && k.indexOf('nb_img_') === 0);
     for (const key of imgKeys) {
       try { const val = await _idbGet(key); if (val) _nbImgCache.set(key.slice('nb_img_'.length), val); }
-      catch (e) { _nbLog('image cache load: ' + key, e); }
+      catch (e) { _nbLog('image cache load: ' + key, e); loadFailures++; }
     }
     // One-time migration: pull over anything still sitting in the old
     // localStorage keys from before this change, then clear them so
@@ -14579,15 +15425,17 @@ async function _nbInitImageCache() {
     } catch (e) { _nbLog('image migration', e); }
   } catch (e) {
     _nbLog('image cache init', e);
+    loadFailures++;
   } finally {
     _nbImgCacheReady = true;
+    if (loadFailures) showToast('Some images may not have loaded');
   }
 }
 function _nbGetImage(id) { return _nbImgCache.get(id) || null; }
 async function _nbSetImage(id, data) {
   _nbImgCache.set(id, data); // update the sync-readable cache immediately
   try { await _idbSet(_nbNoteImgKey(id), data); }
-  catch (e) { _nbLog('image save: ' + id, e); }
+  catch (e) { _nbLog('image save: ' + id, e); showToast('Image didn\u2019t save'); }
 }
 async function _nbDeleteImage(id) {
   _nbImgCache.delete(id);
@@ -14599,7 +15447,7 @@ async function _nbDeleteImage(id) {
       tx.oncomplete = res;
       tx.onerror = () => rej(tx.error);
     });
-  } catch (e) { _nbLog('image delete: ' + id, e); }
+  } catch (e) { _nbLog('image delete: ' + id, e); showToast('Couldn\u2019t delete image'); }
 }
 
 function _nbRehydrateImages(html) {
@@ -14787,9 +15635,10 @@ function _nbSaveDraftUiState(id, state) {
       try {
         localStorage.setItem(_nbDraftUiKey(id), JSON.stringify(withoutHist));
         return;
-      } catch (e2) { _nbLog('draft ui-state save (no hist)', e2); return; }
+      } catch (e2) { _nbLog('draft ui-state save (no hist)', e2); showToast('Couldn\u2019t save your edit \u2014 storage may be full'); return; }
     }
     _nbLog('draft ui-state save', e);
+    showToast('Couldn\u2019t save your edit' + _nbFailureReason(e));
   }
 }
 function _nbClearDraftUiState(id, keepFragment) {
@@ -15264,15 +16113,58 @@ function nbNewFromEditor() {
 //    while flow 2 is open, and is what nbConfirmSave/nbCloseSaveDialog
 //    branch on below.
 let _nbDetailsEditNoteId = null;
+// Dirty-state for the "Update" button below, mirroring the hash-compare
+// pattern the publish sheet's Save Changes button already uses (see
+// nbOpenPublishSheet's saveBtn.disabled / publishedContentHash). Null
+// means "don't gate this button" — the new-note Save flow and the
+// details-only Save flow both leave it alone and stay always-enabled,
+// since only an existing note's Update dialog has a prior saved state to
+// compare against. _nbSaveDialogFixedContentSig covers the parts that
+// can't change while this modal is open (canvas content, page background,
+// desktop/mobile view) — only the four text fields below can actually be
+// edited here, so those are all _nbUpdateSaveDialogDirtyState() needs to
+// re-hash on every keystroke.
+let _nbSaveDialogOrigSig = null;
+let _nbSaveDialogFixedContentSig = '';
+function _nbSaveDialogFieldSig() {
+  const title = document.getElementById('nb-save-title').value.trim() || 'Untitled note';
+  const desc = document.getElementById('nb-save-desc').value.trim();
+  const category = document.getElementById('nb-save-cat').value.trim();
+  const tags = document.getElementById('nb-save-tags').value.split(',').map(t => t.trim()).filter(Boolean).slice(0, NB_MAX_TAGS).join(',');
+  return _hashStr([title, desc, category, tags, _nbSaveDialogFixedContentSig].join('\u0001'));
+}
+function _nbUpdateSaveDialogDirtyState() {
+  if (_nbSaveDialogOrigSig === null) return; // Save (new note) / Edit details: always enabled
+  const btn = document.getElementById('nb-save-confirm-btn');
+  if (btn) btn.disabled = (_nbSaveDialogFieldSig() === _nbSaveDialogOrigSig);
+}
 function nbOpenSaveDialog() {
   _nbDetailsEditNoteId = null;
-  const { isExisting, note } = _nbCurrentBase();
+  const { isExisting, note, draftId, savedFragment } = _nbCurrentBase();
   document.getElementById('edit-dhdr-title').textContent = isExisting ? 'Update note' : 'Save note';
   document.getElementById('nb-save-confirm-btn').textContent = isExisting ? 'Update' : 'Save';
   document.getElementById('nb-save-title').value = isExisting ? (note.title || '') : '';
   document.getElementById('nb-save-desc').value = isExisting ? (note.desc || '') : '';
   document.getElementById('nb-save-cat').value = isExisting ? (note.category || '') : '';
   document.getElementById('nb-save-tags').value = isExisting ? (note.tags || []).join(', ') : '';
+  const confirmBtn = document.getElementById('nb-save-confirm-btn');
+  if (isExisting) {
+    // Same content/pageBg/desktopView derivation nbConfirmSave() itself
+    // uses when it actually writes the note — this has to match exactly,
+    // or the button could read "unchanged" while a real edit still goes
+    // through Update, or vice versa.
+    const uiState = _nbLoadDraftUiState(draftId);
+    const content = (uiState && typeof uiState.full === 'string') ? uiState.full : savedFragment;
+    const pageBg = (uiState && uiState.pageBg) ? uiState.pageBg : note.pageBg;
+    const pageBgCustom = (uiState && uiState.pageBg === 'custom' && uiState.pageBgCustom) ? uiState.pageBgCustom : note.pageBgCustom;
+    const desktopView = (uiState && uiState.desktopView !== undefined) ? uiState.desktopView : note.desktopView;
+    _nbSaveDialogFixedContentSig = _hashStr([content, pageBg, pageBgCustom, desktopView].join('\u0001'));
+    _nbSaveDialogOrigSig = _hashStr([note.title || 'Untitled note', note.desc || '', note.category || '', (note.tags || []).join(','), _nbSaveDialogFixedContentSig].join('\u0001'));
+    _nbUpdateSaveDialogDirtyState();
+  } else {
+    _nbSaveDialogOrigSig = null;
+    if (confirmBtn) confirmBtn.disabled = false;
+  }
   document.getElementById('edit-overlay').classList.add('open');
   lockScroll();
 }
@@ -15286,12 +16178,16 @@ function nbOpenNoteDetailsDialog(id) {
   document.getElementById('nb-save-desc').value = note.desc || '';
   document.getElementById('nb-save-cat').value = note.category || '';
   document.getElementById('nb-save-tags').value = (note.tags || []).join(', ');
+  _nbSaveDialogOrigSig = null;
+  document.getElementById('nb-save-confirm-btn').disabled = false;
   document.getElementById('edit-overlay').classList.add('open');
   lockScroll();
 }
 function nbCloseSaveDialog() {
   document.getElementById('edit-overlay').classList.remove('open');
   _nbDetailsEditNoteId = null;
+  _nbSaveDialogOrigSig = null;
+  document.getElementById('nb-save-confirm-btn').disabled = false;
   unlockScroll();
 }
 function nbConfirmSave() {
@@ -15619,6 +16515,14 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     }
 
     var ICON_ENTRANCE = 850;
+    var ROT_SPEED = 0.0009; // rad/ms
+    // How long the mark takes to turn a half rotation (Math.PI rad) at
+    // ROT_SPEED — callers (see the splash-only wiring below) can await
+    // this to make sure the spin is actually visible before tearing the
+    // splash down, rather than guessing a fixed delay that'd drift out
+    // of sync if ROT_SPEED ever changes.
+    var HALF_SPIN_MS = Math.PI / ROT_SPEED;
+    var halfSpin = new Promise(function (resolve) { setTimeout(resolve, HALF_SPIN_MS); });
     function easeOutBack(x) {
       // Gentler overshoot than the textbook constant (1.70158) — enough
       // to feel springy without the peak scale pushing the mark's edges
@@ -15629,7 +16533,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     function tickIcon(elapsed) {
       var p = Math.min(1, elapsed / ICON_ENTRANCE);
       iconGroup.scale.setScalar(Math.max(0.001, easeOutBack(p)));
-      iconGroup.rotation.y = elapsed * 0.0009;
+      iconGroup.rotation.y = elapsed * ROT_SPEED;
       iconGroup.rotation.x = Math.sin(elapsed * 0.0006) * 0.12;
       iconRenderer.render(iconScene, iconCamera);
     }
@@ -15660,7 +16564,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     initIcon();
     raf = requestAnimationFrame(loop);
 
-    return { stop: stopSplash3D };
+    return { stop: stopSplash3D, halfSpin: halfSpin };
   } catch (e) {
     // Any failure here (old WebView, blocked CDN, etc.) just means the
     // flat SVG/CSS mark that already rendered stays as-is.
@@ -15682,9 +16586,15 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
   if (!splashCtl) return;
   if (typeof window.hideSplash === 'function') {
     var _origHideSplash = window.hideSplash;
+    // Holds the actual teardown (fade-out + DOM removal) until the mark
+    // has turned at least half a rotation — otherwise a fast boot (or
+    // the resume fast-path's near-0ms floor) can call hideSplash while
+    // the spin has barely started, so the logo flashes by unrotated.
     window.hideSplash = function () {
-      splashCtl.stop();
-      _origHideSplash();
+      return Promise.resolve(splashCtl.halfSpin).then(function () {
+        splashCtl.stop();
+        return _origHideSplash();
+      });
     };
   }
 })();
