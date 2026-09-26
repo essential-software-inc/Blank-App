@@ -6629,7 +6629,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // graphics; onFail() is the caller's cue to fall back to embedding the
   // original bytes unmodified.
   function downscaleImageForEmbed(file, onDone, onFail) {
-    if (!file || !/^image\//.test(file.type)) { onFail(); return; }
+    if (!file || !/^image\\//.test(file.type)) { onFail(); return; }
     var reader = new FileReader();
     reader.onload = function() {
       var img = new Image();
@@ -15074,6 +15074,12 @@ function nbGoScreen(name) {
   if (screen) screen.classList.add('active');
   if (btn) btn.classList.add('active');
   document.getElementById('feed-search-wrap').style.display = (name === 'notes') ? '' : 'none';
+  // The stories strip is a Notes-screen feature (like the search bar
+  // above) — it lives outside the .nb-screen sections so it isn't
+  // covered by the screen-switching classList wipe, and its own
+  // .has-stories class only controls whether it should show at all,
+  // not which screen it's allowed to show on.
+  document.getElementById('nb-stories-strip').style.display = (name === 'notes') ? '' : 'none';
   document.getElementById('nb-save-btn').style.display = (name === 'create') ? '' : 'none';
   // The backup/restore icon doesn't belong on the Editor screen — it has
   // its own Reset/Save-image/Save icons instead.
@@ -15245,10 +15251,10 @@ function closeBackupSheet() {
 // to a gesture — re-tapping the active category was the only way to
 // refresh (Subscribed included). Same touchstart/move/end shape as the
 // sheet-drag pattern above: rubber-banded pull, a snap-back or a
-// held-open spin, then nbRenderNotesScreen() re-fetches/re-renders
-// whatever category is currently active (the Subscribed feed hits the
-// server; any other category just re-runs its cheap local render, which
-// still matches how a re-tap already behaves there).
+// held-open spin, then a full refresh — notes (synced from the account's
+// backup when signed in, otherwise just re-rendered), the Subscribed
+// feed, and the Stories strip — not just whichever category happens to
+// be showing.
 (function initPullToRefresh() {
   const THRESHOLD = 64;   // px of pull before release triggers a refresh
   const MAX_PULL = 90;    // visual cap on how far the bar stretches
@@ -15309,7 +15315,22 @@ function closeBackupSheet() {
     bar.style.height = '52px';
     bar.style.opacity = '1';
     const minWait = new Promise(r => setTimeout(r, MIN_SPIN_MS));
-    Promise.all([Promise.resolve().then(nbRenderNotesScreen).catch(e => _nbLog('pull to refresh', e)), minWait])
+    // Full refresh, not just the current category's list: re-fetch the
+    // stories strip and, if signed in, pull (then push) the account's
+    // notes backup so anything changed on another device shows up too —
+    // both run alongside the notes re-render rather than one at a time,
+    // since none of them depend on each other's result. nbSyncPullThenPush
+    // already re-renders the notes screen itself when the pull actually
+    // changes anything, but it's still called again unconditionally
+    // afterward so a pull that found nothing new (or no account at all)
+    // still leaves the screen visibly refreshed, matching the gesture.
+    const doRefresh = async () => {
+      const tasks = [nbRenderStoriesStrip().catch(e => _nbLog('pull to refresh: stories', e))];
+      if (nbIsSignedIn()) tasks.push(nbSyncPullThenPush().catch(e => _nbLog('pull to refresh: sync', e)));
+      await Promise.all(tasks);
+      try { await nbRenderNotesScreen(); } catch (e) { _nbLog('pull to refresh: notes', e); }
+    };
+    Promise.all([doRefresh(), minWait])
       .then(() => {
         refreshing = false;
         bar.classList.remove('ptr-spinning');
