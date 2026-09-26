@@ -1803,14 +1803,13 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 }
 
 .acct-sync-btn {
-  background: #f0f5ff;
+  background: none;
   border: none;
   cursor: pointer;
   color: #54595d;
   line-height: 1;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1878,8 +1877,10 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
   opacity: .5;
   cursor: default
 }
-body.night #logout-profile-name-edit-btn { color: #7fa8ff }
+body.night #logout-profile-name-edit-btn { color: #999999 }
 body.pink #logout-profile-name-edit-btn { color: #e1306c }
+body.pink #logout-profile-name-row label { color: #875068 }
+body.pink #logout-profile-name-status { color: #875068 }
 #logout-profile-name-status {
   font-size: .65rem;
   color: #7d858c;
@@ -2587,7 +2588,6 @@ body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog,
 }
 
 body.night .acct-sync-btn {
-  background: #1c1c1c;
   color: #999999
 }
 
@@ -2927,8 +2927,7 @@ body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, bo
 }
 
 body.pink .acct-sync-btn {
-  background: #f6d9e4;
-  color: #875068
+  color: rgba(255, 255, 255, 0.8)
 }
 
 body.pink .rdlg-title {
@@ -3334,6 +3333,12 @@ body.pink #backup-sheet {
   border-bottom: none !important
 }
 
+body.pink #account-dialog {
+  background: #c8365e !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 -4px 24px rgba(200, 54, 94, 0.3) !important;
+  border-bottom: none !important
+}
+
 body.pink #feed-search-wrap {
   background: #fff5f9 !important;
   border-bottom: 1px solid #f5c5d8 !important;
@@ -3482,6 +3487,10 @@ body:not(.night):not(.pink) #account-hdr-title {
 }
 
 body:not(.night):not(.pink) #account-close {
+  color: #ffffff !important
+}
+
+body:not(.night):not(.pink) .acct-sync-btn {
   color: #ffffff !important
 }
 
@@ -4131,7 +4140,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <div id="logout-profile-name-row">
         <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories)</span></label>
         <div id="logout-profile-name-field-wrap">
-          <input id="logout-profile-name-input" class="com-field" type="text" maxlength="15" placeholder="e.g. Jo" disabled oninput="_nbOnProfileNameInput(this.value)">
+          <input id="logout-profile-name-input" class="com-field" type="text" maxlength="30" placeholder="e.g. Jo" disabled oninput="_nbOnProfileNameInput(this.value)">
           <button id="logout-profile-name-edit-btn" type="button" onclick="_nbToggleProfileNameEdit()" aria-label="Edit display name" title="Edit display name">
             <svg id="logout-profile-name-edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
             <!-- Two separate fixes stacked on the pencil's own size/weight
@@ -4150,7 +4159,6 @@ document.body.dataset.lockScrollY = window.scrollY;
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </a>
       <div class="rdlg-btns">
-        <button class="bkp-btn bkp-btn-sec" id="logout-dialog-cancel" onclick="closeLogoutConfirm()">Cancel</button>
         <button class="bkp-btn bkp-btn-sec" id="delete-account-btn" onclick="openDeleteAccountConfirm()" style="display:none">Delete account</button>
         <button class="bkp-btn bkp-btn-pri" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
       </div>
@@ -4176,7 +4184,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 22 September 2026</em></p>
+      <p><em>Effective 26 September 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
@@ -4194,6 +4202,10 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. Essential Software has no involvement with these third-party hosts. A page published as an ad is additionally restricted to images hotlinked from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device — this is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
       <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently: it's a plain web page viewed in a browser, so links inside it are ordinary clickable links that open like any other link on the web.</p>
+      <h3>Stories &amp; subscriptions</h3>
+      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's slug, title, and a preview image extracted from the note the same way as for ads (see "Publishing as an ad" above), along with your account identifier so viewers can tell your stories apart from another author's and choose to follow you. Turning the toggle off removes the note from the strip going forward.</p>
+      <p>A display name is optional, separate from your Google name, and capped at 30 characters. If set, it's shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed. Leaving it blank means viewers just see the note's title instead.</p>
+      <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed and so an account can tell it's already following another; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip.</p>
       <h3>Analytics</h3>
       <p>Essential Software does not collect analytics, telemetry, or crash reports from this app. The one exception is the anonymous per-device identifier described under “Publishing as an ad” above: it exists only to count an ad’s unique viewers, isn’t used to track app usage generally, and doesn’t apply anywhere outside that feature.</p>
       <h3>Contact</h3>
@@ -4209,7 +4221,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 22 September 2026</em></p>
+      <p><em>Effective 26 September 2026</em></p>
       <p>Using <strong>Bluebook</strong> means you agree to these terms.</p>
       <h3>Responsible Use</h3>
       <p>You agree to use Bluebook for lawful purposes only. You may not use the app to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish — see below.</p>
@@ -4224,6 +4236,8 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. Essential Software does not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
       <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it’s shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance — views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad’s view count, for information only. It’s derived from an anonymous identifier generated and stored on each device, used solely to tell whether a device has already been counted once for a given ad; it isn’t tied to a Google account or any other identity, and is sent whether or not you’re signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
       <p>Purchased views are a consumable purchase through Google Play — refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:contactrhudio@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
+      <h3>Stories &amp; Subscriptions</h3>
+      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories the same way you're responsible for anything else you publish, and the Responsible Use section above applies. Essential Software may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons it can act on any other published content. An optional display name shown on your stories and to your subscribers doesn't need to be your real name, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
       <h3>Purchases &amp; Eligibility</h3>
       <p>Buying view packages is handled entirely through Google Play Billing, and any age or account requirements for making a purchase are set and enforced by Google Play, not by Essential Software. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
       <h3>Third-Party Content</h3>
@@ -14096,6 +14110,11 @@ async function _nbToggleProfileNameEdit() {
   const ok = await _nbSaveProfileName(input.value);
   btn.disabled = false;
   if (ok) {
+    // Without this, the selection left over from the .select() call above
+    // (when Edit was first tapped) stays visually highlighted even once
+    // the field goes back to disabled, which reads as broken since a
+    // disabled field shouldn't look like it still has something selected.
+    input.setSelectionRange(input.value.length, input.value.length);
     input.disabled = true;
     _nbSetProfileNameBtnMode('edit');
   }
@@ -14107,7 +14126,7 @@ async function _nbSaveProfileName(raw) {
     if (statusEl) statusEl.textContent = 'No internet connection — not saved';
     return false;
   }
-  const name = (raw || '').trim().slice(0, 15);
+  const name = (raw || '').trim().slice(0, 30);
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-name', {
       method: 'POST',
@@ -15361,6 +15380,11 @@ function nbGoScreen(name) {
   if (screen) screen.classList.add('active');
   if (btn) btn.classList.add('active');
   document.getElementById('feed-search-wrap').style.display = (name === 'notes') ? '' : 'none';
+  // #ptr-bar lives outside #nb-screens (see its init comment), so it isn't
+  // covered by the classList wipe above and an interrupted drag can leave
+  // it stuck mid-height, showing through on whatever screen this call is
+  // landing on.
+  if (name !== 'notes' && window.nbResetPullToRefresh) window.nbResetPullToRefresh();
   // The stories strip is a Notes-screen feature (like the search bar
   // above) — it lives outside the .nb-screen sections so it isn't
   // covered by the screen-switching classList wipe. Its final visibility
@@ -15459,7 +15483,8 @@ function closeBackupSheet() {
   const SHEETS = [
     { overlayId: 'backup-overlay', sheetId: 'backup-sheet', close: closeBackupSheet },
     { overlayId: 'edit-overlay', sheetId: 'edit-dialog', close: nbCloseSaveDialog },
-    { overlayId: 'publish-overlay', sheetId: 'publish-sheet', close: closePublishSheet }
+    { overlayId: 'publish-overlay', sheetId: 'publish-sheet', close: closePublishSheet },
+    { overlayId: 'account-overlay', sheetId: 'account-dialog', close: closeLogoutConfirm }
   ];
   let startY = 0, _drag = null;
   function isScrollable(el) {
@@ -15572,6 +15597,25 @@ function closeBackupSheet() {
   }
 
   let startY = 0, pulling = false, dragging = false, refreshing = false;
+
+  // Called from nbGoScreen whenever the Notes screen is left. If a pull
+  // gesture never got a touchend (e.g. the user tapped into a note mid-drag),
+  // `dragging`/`pulling` stay true and the bar is left however far it was
+  // stretched — with #ptr-bar sitting outside #nb-screens, that leftover
+  // height/opacity shows through on whatever screen is now active. Does not
+  // touch `refreshing` — an in-flight refresh should still finish and
+  // resolve normally even if the user has since navigated away.
+  window.nbResetPullToRefresh = function () {
+    pulling = false;
+    dragging = false;
+    bar.style.transition = '';
+    bar.classList.remove('ptr-armed', 'ptr-spinning');
+    bar.style.height = '0';
+    bar.style.opacity = '';
+    label.textContent = '';
+    if (carousel) carousel.classList.remove('ptr-dragging');
+    setCarouselPull(0);
+  };
 
   function atTop() {
     return (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0) <= 0;
