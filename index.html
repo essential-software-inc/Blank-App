@@ -490,7 +490,8 @@ body.pink .rdlg-more-toggle svg {
 }
 
 .rdlg-cancel:disabled,
-.ebtn-sec:disabled {
+.ebtn-sec:disabled,
+.bkp-btn-sec:disabled {
   opacity: .6;
   cursor: default
 }
@@ -13378,7 +13379,7 @@ let _nbBusyBtnCount = 0;
 function _pubLockSiblingSecondaries(btn, lock) {
   const row = btn.parentElement;
   if (!row) return;
-  row.querySelectorAll(':scope > .rdlg-cancel, :scope > .ebtn-sec').forEach(sib => {
+  row.querySelectorAll(':scope > .rdlg-cancel, :scope > .ebtn-sec, :scope > .bkp-btn-sec').forEach(sib => {
     if (sib === btn) return;
     if (lock) {
       if (!sib.disabled) { sib.disabled = true; sib.dataset.busyLocked = '1'; }
@@ -14102,7 +14103,10 @@ async function _nbToggleProfileNameEdit() {
   if (input.disabled) {
     input.disabled = false;
     input.focus();
-    input.select();
+    // Place the caret at the end instead of selecting the whole value —
+    // select() made the very first keystroke wipe out the existing name,
+    // which is surprising when the person just meant to tweak a letter.
+    input.setSelectionRange(input.value.length, input.value.length);
     _nbSetProfileNameBtnMode('save');
     return;
   }
@@ -14110,10 +14114,10 @@ async function _nbToggleProfileNameEdit() {
   const ok = await _nbSaveProfileName(input.value);
   btn.disabled = false;
   if (ok) {
-    // Without this, the selection left over from the .select() call above
-    // (when Edit was first tapped) stays visually highlighted even once
-    // the field goes back to disabled, which reads as broken since a
-    // disabled field shouldn't look like it still has something selected.
+    // Without this, any text the person selected manually while editing
+    // stays visually highlighted even once the field goes back to
+    // disabled, which reads as broken since a disabled field shouldn't
+    // look like it still has something selected.
     input.setSelectionRange(input.value.length, input.value.length);
     input.disabled = true;
     _nbSetProfileNameBtnMode('edit');
@@ -15597,17 +15601,31 @@ function closeBackupSheet() {
   }
 
   let startY = 0, pulling = false, dragging = false, refreshing = false;
+  // Bumped every time a refresh starts, and again whenever the Notes screen
+  // is left mid-refresh (see nbResetPullToRefresh below). A refresh's own
+  // completion handler captures the token it started with and compares it
+  // against the current value before touching `refreshing`/the bar, so a
+  // refresh that's been "orphaned" by leaving the screen can't clobber a
+  // later one, or keep new pulls locked out for as long as it takes that
+  // orphaned network work to finish (up to MAX_SPIN_MS).
+  let refreshToken = 0;
 
   // Called from nbGoScreen whenever the Notes screen is left. If a pull
   // gesture never got a touchend (e.g. the user tapped into a note mid-drag),
   // `dragging`/`pulling` stay true and the bar is left however far it was
   // stretched — with #ptr-bar sitting outside #nb-screens, that leftover
-  // height/opacity shows through on whatever screen is now active. Does not
-  // touch `refreshing` — an in-flight refresh should still finish and
-  // resolve normally even if the user has since navigated away.
+  // height/opacity shows through on whatever screen is now active.
+  //
+  // Also clears `refreshing` and bumps refreshToken if a refresh was in
+  // flight: its stories/sync/notes-render calls still run to completion in
+  // the background (nothing here cancels them — see the comment on
+  // refreshToken), but the person shouldn't have to wait for that to finish
+  // before a fresh pull on Notes is accepted again.
   window.nbResetPullToRefresh = function () {
     pulling = false;
     dragging = false;
+    refreshing = false;
+    refreshToken++;
     bar.style.transition = '';
     bar.classList.remove('ptr-armed', 'ptr-spinning');
     bar.style.height = '0';
@@ -15662,6 +15680,7 @@ function closeBackupSheet() {
     bar.classList.remove('ptr-armed');
     if (!armed) { bar.style.height = '0'; bar.style.opacity = ''; setCarouselPull(0); return; }
     refreshing = true;
+    const myToken = ++refreshToken;
     bar.classList.add('ptr-spinning');
     label.textContent = 'Refreshing\u2026';
     bar.style.height = '52px';
@@ -15686,6 +15705,11 @@ function closeBackupSheet() {
     const refreshOrTimeout = Promise.race([doRefresh(), new Promise(r => setTimeout(r, MAX_SPIN_MS))]);
     Promise.all([refreshOrTimeout, minWait])
       .then(() => {
+        // If nbResetPullToRefresh ran since this refresh started (screen
+        // left mid-refresh), refreshToken has already moved on — leave
+        // `refreshing` and the bar alone rather than stomping on whatever
+        // state a later pull has since put them in.
+        if (myToken !== refreshToken) return;
         refreshing = false;
         bar.classList.remove('ptr-spinning');
         bar.style.height = '0';
