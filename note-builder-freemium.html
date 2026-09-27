@@ -4309,7 +4309,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         <div id="logout-subscriber-count" aria-live="polite"></div>
       </div>
       <div id="logout-profile-name-row">
-        <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories)</span></label>
+        <label for="logout-profile-name-input">Display name</label>
         <div id="logout-profile-name-field-wrap">
           <input id="logout-profile-name-input" class="com-field" type="text" maxlength="30" placeholder="e.g. Jo" disabled oninput="_nbOnProfileNameInput(this.value)">
           <button id="logout-profile-name-edit-btn" type="button" onclick="_nbToggleProfileNameEdit()" aria-label="Edit display name" title="Edit display name">
@@ -14058,6 +14058,11 @@ function _nbStoryAvatarFallback(imgEl, storyImageUrl, initial) {
 function _nbPaintStoriesStrip() {
   const strip = document.getElementById('nb-stories-strip');
   if (!strip) return;
+  // Seen stories sink to the end, unseen stay up front — stable sort
+  // keeps each group's relative (server) order, so this just demotes
+  // whatever got marked seen since the last paint rather than reshuffling
+  // everything.
+  _nbStoriesCache.sort((a, b) => (a.seen === b.seen) ? 0 : (a.seen ? 1 : -1));
   strip.classList.toggle('has-stories', _nbStoriesCache.length > 0);
   _nbSyncStoriesStripVisibility();
   strip.innerHTML = _nbStoriesCache.map(s => {
