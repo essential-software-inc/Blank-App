@@ -12087,8 +12087,9 @@ async function nbSyncPush(showFeedback) {
     return { ok: true };
   } catch (e) {
     _nbLog('sync push', e);
-    if (showFeedback) showToast('Sync failed' + _nbFailureReason(e));
-    return { ok: false, reason: 'error' };
+    const detail = _nbFailureReason(e);
+    if (showFeedback) showToast('Sync failed' + detail);
+    return { ok: false, reason: 'error', detail };
   }
 }
 // A brand-new incoming note (id not seen locally yet) is always added,
@@ -12274,8 +12275,9 @@ async function nbSyncPull(showFeedback) {
     return { ok: true, restored: count, updated: updatedCount, removed: removedCount };
   } catch (e) {
     _nbLog('sync pull', e);
-    if (showFeedback) showToast('Sync failed' + _nbFailureReason(e));
-    return { ok: false, reason: 'error' };
+    const detail = _nbFailureReason(e);
+    if (showFeedback) showToast('Sync failed' + detail);
+    return { ok: false, reason: 'error', detail };
   }
 }
 // Every silent/automatic sync (sign-in completion, app boot, the poll
@@ -14138,6 +14140,11 @@ function nbUpdateTitleMarquee(titleEl, innerEl) {
   });
 }
 let _nbCurrentStoryAuthorSub = null;
+// Tracks which slug the viewer is currently showing, purely so a
+// reachability check that resolves after the person has already tapped
+// away to a different story (or closed the viewer) knows to keep quiet
+// instead of surfacing a toast about a story that's no longer on screen.
+let _nbCurrentStorySlug = null;
 // Icon-only Subscribe/Subscribed states for #story-viewer-sub-btn (see
 // _nbSetSubBtnState). Plain person+plus / person+check outlines, styled
 // to match the back button's stroke-based icon rather than app text.
@@ -14155,6 +14162,7 @@ function _nbSetSubBtnState(subBtn, isSubscribed) {
 // actually links to rather than a title the author could change anytime.
 function nbOpenStory(slug, authorSub, title) {
   _nbCurrentStoryAuthorSub = authorSub;
+  _nbCurrentStorySlug = slug;
   const storyTitleEl = document.getElementById('story-viewer-title');
   const storyTitleInner = document.getElementById('story-viewer-title-text');
   storyTitleInner.textContent = '@' + slug;
@@ -14172,6 +14180,12 @@ function nbOpenStory(slug, authorSub, title) {
   subBtn.style.display = (acct && acct.sub === authorSub) ? 'none' : '';
   document.getElementById('story-viewer-overlay').classList.add('open');
   lockScroll();
+  // The iframe opens optimistically above — cross-origin navigations
+  // don't reliably raise a JS error event on failure, so a dead link or
+  // a dropped connection would otherwise just sit there showing nothing
+  // with no explanation. This runs alongside it and reports the actual
+  // reason once it's known, without holding up the open.
+  _nbCheckStoryReachable(slug);
   if (nbIsSignedIn()) {
     fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/stories/' + encodeURIComponent(slug) + '/seen', {
       method: 'POST',
@@ -14182,9 +14196,38 @@ function nbOpenStory(slug, authorSub, title) {
     }).catch(e => _nbLog('mark story seen', e));
   }
 }
+// Confirms the story that nbOpenStory just pointed the iframe at is
+// actually reachable, and toasts the specific reason when it isn't.
+// Reuses /meta/:slug (same endpoint nbGoToNoteLink already calls to
+// resolve a pasted link) rather than re-fetching the full story page —
+// it's the cheap way to ask "does this still exist / can we reach it".
+function _nbCheckStoryReachable(slug) {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    showToast('Couldn\u2019t load that note \u2014 no internet connection');
+    return;
+  }
+  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(slug))
+    .then(res => {
+      // Only report on the story still actually on screen — a quick tap
+      // to a different one, or closing the viewer, retires this check.
+      if (_nbCurrentStorySlug !== slug || !document.getElementById('story-viewer-overlay').classList.contains('open')) return;
+      if (res.status === 404) { showToast('Couldn\u2019t load that note \u2014 it isn\u2019t available anymore'); return; }
+      if (!res.ok) { showToast('Couldn\u2019t load that note \u2014 server error (' + res.status + ')'); return; }
+      return res.json().then(data => {
+        if (_nbCurrentStorySlug !== slug) return;
+        if (!data || !data.found) showToast('Couldn\u2019t load that note \u2014 it isn\u2019t available anymore');
+      });
+    })
+    .catch(e => {
+      if (_nbCurrentStorySlug !== slug || !document.getElementById('story-viewer-overlay').classList.contains('open')) return;
+      _nbLog('story reachability check', e);
+      showToast('Couldn\u2019t load that note' + _nbFailureReason(e));
+    });
+}
 function nbCloseStory() {
   document.getElementById('story-viewer-overlay').classList.remove('open');
   document.getElementById('story-viewer-frame').src = 'about:blank';
+  _nbCurrentStorySlug = null;
   unlockScroll();
   _nbPaintStoriesStrip(); // reflect the ring just going grey, if it did
 }
@@ -14573,10 +14616,14 @@ async function _nbRemoveProfileImage() {
   // field goes quiet for the round-trip instead of showing it's doing
   // something, unlike the upload path right next to it.
   if (statusEl) statusEl.textContent = 'Removing\u2026';
+  // Drop to the fallback letter immediately rather than waiting on the
+  // round-trip — same reasoning as the preview in _nbOnProfileImageChosen.
+  // Snapshot first so a failed removal can put the old picture back.
+  const prevAvatar = _nbSnapshotAvatar();
+  _nbPreviewAvatarRemoved();
   const ok = await _nbSaveProfileImage(null);
   if (ok) {
     if (statusEl) statusEl.textContent = '';
-    _nbRefreshProfileAvatar();
     // Any live story ring currently showing this account's now-removed
     // picture would otherwise keep displaying the browser's cached copy
     // until the strip's next scheduled refetch. Bump the cache-busting
@@ -14584,6 +14631,8 @@ async function _nbRemoveProfileImage() {
     // the fallback chain (note image, then initial letter) right away.
     _nbProfileImageVersion = Date.now();
     _nbPaintStoriesStrip();
+  } else {
+    _nbRestoreAvatar(prevAvatar);
   }
 }
 // Fires once a file's actually been chosen from the OS picker. Resets
@@ -14600,13 +14649,21 @@ function _nbOnProfileImageChosen(file) {
     return;
   }
   if (statusEl) statusEl.textContent = 'Uploading\u2026';
+  // Snapshot the avatar as it looked before this pick, so a failed upload
+  // can be put back exactly as it was.
+  const prevAvatar = _nbSnapshotAvatar();
   _nbDownscaleImageForAvatar(file, async function(dataUrl) {
+    // Show the picked image right away — the downscale is instant and
+    // local, so there's no reason to leave the old avatar (or the blank
+    // fallback) up for the whole upload round-trip.
+    _nbPreviewAvatar(dataUrl);
     const ok = await _nbSaveProfileImage(dataUrl);
     if (ok) {
       if (statusEl) statusEl.textContent = '';
-      _nbRefreshProfileAvatar();
       _nbProfileImageVersion = Date.now();
       _nbPaintStoriesStrip();
+    } else {
+      _nbRestoreAvatar(prevAvatar);
     }
   }, function() {
     if (statusEl) statusEl.textContent = "Couldn\u2019t process that image";
@@ -14672,14 +14729,18 @@ window.addEventListener('online', () => {
   if (_nbProfileImageOfflinePending) {
     const statusEl = document.getElementById('logout-avatar-status');
     if (statusEl) statusEl.textContent = _nbProfileImagePendingDataUrl ? 'Uploading\u2026' : 'Removing\u2026';
+    // The avatar is already showing the pending picture/removal from when
+    // it was first picked (see _nbOnProfileImageChosen/_nbRemoveProfileImage),
+    // so success needs no visual change here — only a failure needs to put
+    // it back, mirroring those two functions' own revert.
+    const prevAvatar = _nbSnapshotAvatar();
     _nbSaveProfileImage(_nbProfileImagePendingDataUrl).then(function(ok) {
-      // Mirrors _nbOnProfileImageChosen/_nbRemoveProfileImage's own
-      // success handling, since this retry runs outside both of those.
       if (ok) {
         if (statusEl) statusEl.textContent = '';
-        _nbRefreshProfileAvatar();
         _nbProfileImageVersion = Date.now();
         _nbPaintStoriesStrip();
+      } else {
+        _nbRestoreAvatar(prevAvatar);
       }
     });
   }
@@ -14691,6 +14752,46 @@ function _nbAvatarFallbackLetter() {
   const acct = nbAccount();
   const src = (_nbLoadCachedProfileName() || (acct && acct.email) || '').trim();
   return src ? src.charAt(0).toUpperCase() : '?';
+}
+// Captures how the avatar is currently displayed (which of image/fallback
+// is showing, and the image's src) so a failed upload or removal can be
+// put back exactly as it was, instead of being left on the optimistic
+// preview that turned out to be wrong.
+function _nbSnapshotAvatar() {
+  const img = document.getElementById('logout-avatar-img');
+  const fallback = document.getElementById('logout-avatar-fallback');
+  if (!img || !fallback) return null;
+  return { src: img.src, imgDisplay: img.style.display, fallbackDisplay: fallback.style.display };
+}
+function _nbRestoreAvatar(snap) {
+  if (!snap) return;
+  const img = document.getElementById('logout-avatar-img');
+  const fallback = document.getElementById('logout-avatar-fallback');
+  if (!img || !fallback) return;
+  img.src = snap.src;
+  img.style.display = snap.imgDisplay;
+  fallback.style.display = snap.fallbackDisplay;
+}
+// Shows a just-picked image immediately, before the upload round-trip
+// completes — it's a data: URL we generated ourselves via the canvas
+// downscale, not a network fetch, so no onload/onerror wait is needed.
+function _nbPreviewAvatar(dataUrl) {
+  const img = document.getElementById('logout-avatar-img');
+  const fallback = document.getElementById('logout-avatar-fallback');
+  if (!img || !fallback) return;
+  img.onerror = null; img.onload = null;
+  img.src = dataUrl;
+  img.style.display = '';
+  fallback.style.display = 'none';
+}
+// Same idea for a removal: drop straight to the fallback letter rather
+// than waiting on the round-trip.
+function _nbPreviewAvatarRemoved() {
+  const img = document.getElementById('logout-avatar-img');
+  const fallback = document.getElementById('logout-avatar-fallback');
+  if (!img || !fallback) return;
+  img.style.display = 'none';
+  fallback.style.display = '';
 }
 // Re-points the dialog's avatar <img> at this account's picture (a fresh
 // v= query param busts the 5-minute cache on handleServeProfileImage so
@@ -16353,7 +16454,19 @@ function closeBackupSheet() {
     // still leaves the screen visibly refreshed, matching the gesture.
     const doRefresh = async () => {
       const tasks = [nbRenderStoriesStrip().catch(e => _nbLog('pull to refresh: stories', e))];
-      if (nbIsSignedIn()) tasks.push(nbSyncPullThenPush().catch(e => _nbLog('pull to refresh: sync', e)));
+      // Pull-to-refresh is the one moment this sync is a deliberate,
+      // user-initiated action rather than a background convenience (see
+      // nbGoScreen's own silent call above) — so unlike that one, a real
+      // failure here (not just "nothing backed up yet") is worth telling
+      // the person about, with the same exact-reason toast the story
+      // viewer's reachability check uses.
+      if (nbIsSignedIn()) tasks.push(
+        nbSyncPullThenPush()
+          .then(result => {
+            if (result && result.reason === 'error') showToast('Couldn\u2019t refresh your notes' + (result.detail || ''));
+          })
+          .catch(e => _nbLog('pull to refresh: sync', e))
+      );
       await Promise.all(tasks);
       try { await nbRenderNotesScreen(); } catch (e) { _nbLog('pull to refresh: notes', e); }
     };
@@ -16853,12 +16966,17 @@ function nbRenderCanvas(forcePreview) {
     // — so the reveal has to wait for an actual ready signal rather than
     // happening unconditionally right after assignment.
     let _revealed = false;
-    const reveal = function() {
+    const reveal = function(timedOut) {
       if (_revealed) return;
       _revealed = true;
       wrap.classList.add('show');
       unmaskAfterSettle();
       nbSyncUndoRedoButtons();
+      // Neither onload nor the readyState poll below ever caught it —
+      // something's actually stuck (bad srcdoc, a hung script), not just
+      // slow. Still reveal rather than leaving the loadmask spinning
+      // forever, but say so instead of quietly pretending it loaded fine.
+      if (timedOut) showToast('This note is taking too long to load \u2014 try reopening it');
     };
     iframe.onload = function() { iframe.onload = null; reveal(); };
     iframe.srcdoc = safeHtml;
@@ -16871,7 +16989,8 @@ function nbRenderCanvas(forcePreview) {
       let doc;
       try { doc = iframe.contentDocument; } catch (e) {}
       if (doc && doc.readyState !== 'loading') { reveal(); return; }
-      if (++_pollTries < 100) setTimeout(_pollReady, 30);
+      if (++_pollTries < 100) { setTimeout(_pollReady, 30); return; }
+      reveal(true); // ~3s of polling with nothing — give up waiting and say so
     };
     setTimeout(_pollReady, 30);
   }
@@ -16964,10 +17083,29 @@ function nbOpenNoteForEdit(id) {
   nbRenderCanvas(true);
 }
 
+// Rate-limits the markup-error toast below — a script error that fires
+// repeatedly (e.g. from inside a loop or a resize handler) would otherwise
+// spam one toast per occurrence; a single one is enough to say the note
+// didn't render right.
+let _nbLastCanvasErrorToast = 0;
 window.addEventListener('message', function (e) {
   if (!e.data) return;
   if (e.data.type === 'markup-error') {
-    console.error('Bluebook canvas error:', e.data.msg);
+    // The canvas iframe relays its own window.onerror here (see _errRelay
+    // in nbBuildSafeHtml) — this is the one place a JS error that breaks
+    // the note's rendering (corrupted content, a bad block) is actually
+    // detectable from out here, so surface it instead of just logging it.
+    const iframe = document.getElementById('markup-iframe');
+    const liveWin = iframe && iframe.contentWindow;
+    if (e.source && liveWin && e.source === liveWin) {
+      console.error('Bluebook canvas error:', e.data.msg);
+      const now = Date.now();
+      if (now - _nbLastCanvasErrorToast > 4000) {
+        _nbLastCanvasErrorToast = now;
+        const msg = String(e.data.msg || '').slice(0, 120);
+        showToast('This note didn\u2019t load correctly' + (msg ? ' \u2014 ' + msg : ''));
+      }
+    }
   }
   if (e.data.type === 'markup-ui-state') {
     const iframe = document.getElementById('markup-iframe');
