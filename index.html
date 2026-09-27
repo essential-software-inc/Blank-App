@@ -12917,7 +12917,8 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
       </div>
       <div style="margin-bottom:.2rem">
         <label for="nb-report-details" style="display:block;font-size:11px;font-weight:700;color:#8a8d99;margin-bottom:.4rem;letter-spacing:.04em;text-transform:uppercase">Details (optional)</label>
-        <textarea id="nb-report-details" rows="3" placeholder="Anything that helps us understand the issue" style="width:100%;padding:.6rem .7rem;border:1.5px solid #e2e5ee;border-radius:11px;font:inherit;font-size:14px;resize:vertical;overflow:auto;margin-bottom:.15rem;box-sizing:border-box;background:#f8f9fc;transition:border-color .15s"></textarea>
+        <textarea id="nb-report-details" class="com-field" rows="3" placeholder="Anything that helps us understand the issue" style="resize:vertical;overflow:auto;line-height:1.4;margin-bottom:.25rem"></textarea>
+        <div style="font-size:.72rem;color:#8f8f89;line-height:1.4">Drag the bottom-right corner to resize this box.</div>
       </div>
       <div id="nb-report-msg" role="status" aria-live="polite" aria-atomic="true" style="min-height:1.2em;margin:.4rem 0;font-size:12.5px;color:#a83232"></div>
       <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.5rem">
@@ -13652,6 +13653,29 @@ async function nbPublishNote() {
     btn.disabled = !_pubSlugAvailable;
   }
 }
+// Reuses the shared confirm dialog (delete-overlay/delete-dialog) the same
+// way the delete flows above rewrite its title/body/button text for their
+// own purpose — it already carries the night/pink theming, so a new dialog
+// markup isn't needed. Resolves true if the person wants the update to
+// resurface in stories, false otherwise; never rejects.
+function _nbAskResurfaceStories() {
+  return new Promise(resolve => {
+    const ov = document.getElementById('delete-overlay');
+    const titleEl = document.querySelector('#delete-dialog .rdlg-title');
+    const bodyEl = document.querySelector('#delete-dialog .rdlg-body');
+    const cancelBtn = document.getElementById('delete-dialog-cancel');
+    const confirmBtn = document.getElementById('delete-dialog-confirm');
+    titleEl.textContent = 'Show update in stories?';
+    bodyEl.textContent = 'This note is currently showing in stories. Show the updated version there again, as new?';
+    confirmBtn.textContent = 'Show in stories';
+    confirmBtn.disabled = false;
+    const done = (val) => { ov.classList.remove('open'); resolve(val); };
+    cancelBtn.onclick = () => done(false);
+    ov.onclick = (e) => { if (e.target === ov) done(false); };
+    confirmBtn.onclick = () => done(true);
+    ov.classList.add('open');
+  });
+}
 async function nbUpdatePublishedNote() {
   const note = _pubFindNote(_pubNoteId);
   // Live-refresh (see nbSyncPull) already catches most of this while the
@@ -13671,6 +13695,11 @@ async function nbUpdatePublishedNote() {
     return;
   }
   if (_pubOfflineGuard()) return;
+  // A note already showing in stories doesn't automatically resurface
+  // there just because its content changed — ask first, since the person
+  // might be fixing a typo (no need to re-show it) or landing a real
+  // update they do want followers to see again as new.
+  const resurfaceStories = note.showInStories ? await _nbAskResurfaceStories() : false;
   let html;
   try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
   catch (e) { _nbLog('publish update build', e); showToast('Update failed' + _nbFailureReason(e)); return; }
@@ -13679,10 +13708,21 @@ async function nbUpdatePublishedNote() {
   try {
     const updHeaders = { 'Content-Type': 'application/json' };
     if (nbIsSignedIn()) updHeaders['Authorization'] = 'Bearer ' + nbSessionToken();
+    const updBody = { html, token: note.publishToken };
+    // Same shape _pubOnStoriesToggle already sends when flipping the
+    // switch — title plus showInStories, so the worker has what it needs
+    // to re-surface the story. resurfaceStories is the flag that tells it
+    // this Save is meant to bump the story back to the top as new, not
+    // just carry the (unchanged) showInStories state along for the ride.
+    if (resurfaceStories) {
+      updBody.title = note.title || '';
+      updBody.showInStories = true;
+      updBody.resurfaceStories = true;
+    }
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
       method: 'PUT',
       headers: updHeaders,
-      body: JSON.stringify({ html, token: note.publishToken })
+      body: JSON.stringify(updBody)
     });
     if (res.status === 429) {
       showToast('You\u2019re saving too fast — wait a moment and try again');
@@ -13866,11 +13906,15 @@ function _nbSetSubBtnState(subBtn, isSubscribed) {
   subBtn.title = isSubscribed ? 'Subscribed' : 'Subscribe';
   subBtn.classList.toggle('is-subscribed', isSubscribed);
 }
+// title is still passed by both callers (stories strip, Subscribed feed
+// guide-card) but no longer used here — the header now shows the story's
+// published @slug instead of its title, so viewers see where the story
+// actually links to rather than a title the author could change anytime.
 function nbOpenStory(slug, authorSub, title) {
   _nbCurrentStoryAuthorSub = authorSub;
   const storyTitleEl = document.getElementById('story-viewer-title');
   const storyTitleInner = document.getElementById('story-viewer-title-text');
-  storyTitleInner.textContent = title || 'Untitled note';
+  storyTitleInner.textContent = '@' + slug;
   nbUpdateTitleMarquee(storyTitleEl, storyTitleInner);
   document.getElementById('story-viewer-frame').src = _pubUrlFor(slug);
   const subBtn = document.getElementById('story-viewer-sub-btn');
