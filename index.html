@@ -1559,6 +1559,13 @@ body.night #publish-hdr-title { color: #e8e8e8 }
 body.night #publish-close { color: #999999 }
 body.night #publish-body { background: #080808; color: #f0f0f0 }
 body.night .pub-status { color: #9a9a9a }
+/* body.night .pub-status above has higher specificity than .pub-status.ok/
+   .taken (the extra "body" type selector tips it), so without these it
+   silently overrides the green/taken-red back to muted grey in dark mode.
+   Kept as the same colors as light theme rather than picking new dark-
+   tuned shades — same approach the ad-eligibility text already uses. */
+body.night .pub-status.ok { color: #1a7f37 }
+body.night .pub-status.taken { color: #c0392b }
 body.night .pub-url { background: #1c1c1c; border-color: #383838; color: #f0f0f0 }
 body.night .nb-switch-label { color: #787878 }
 body.night .nb-switch-track { background: #3a3a3a }
@@ -1575,6 +1582,9 @@ body.pink #publish-hdr-title { color: #fff }
 body.pink #publish-close { color: rgba(255,255,255,.8) }
 body.pink #publish-body { background: #fff8fb; color: #1a0a12 }
 body.pink .pub-status { color: #875068 }
+/* Same specificity issue as body.night .pub-status above. */
+body.pink .pub-status.ok { color: #1a7f37 }
+body.pink .pub-status.taken { color: #c0392b }
 body.pink .pub-url { background: #fff; border-color: #f5c5d8; color: #bd2856 }
 body.pink .nb-switch-label { color: #875068 }
 body.pink .nb-switch-track { background: #f3cddc }
@@ -3660,6 +3670,14 @@ body:not(.night):not(.pink) #logout-profile-name-row label {
 }
 
 body:not(.night):not(.pink) #logout-profile-name-status {
+  color: rgba(255, 255, 255, .7) !important
+}
+
+/* Same reasoning as #logout-profile-name-status just above — this is the
+   avatar's own status line ("Uploading…"/"Removing…"/failure text) and
+   was missing the same white-on-dark override, so it inherited its base
+   near-black #7d858c and disappeared against the dark splash background. */
+body:not(.night):not(.pink) #logout-avatar-status {
   color: rgba(255, 255, 255, .7) !important
 }
 
