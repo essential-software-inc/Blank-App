@@ -3811,10 +3811,10 @@ body.pink .nb-empty { color: #b06080; }
 .nb-carousel {
   position: fixed; left: 0; right: 0; bottom: calc(58px + env(safe-area-inset-bottom, 0) + .9rem);
   width: calc(100% - 3rem); max-width: 360px; margin: 0 auto; z-index: 90;
-  transition: transform .15s ease, opacity .38s cubic-bezier(.4,0,.2,1);
+  transition: transform .38s cubic-bezier(.4,0,.2,1), opacity .38s cubic-bezier(.4,0,.2,1);
 }
 .nb-carousel.ptr-dragging { transition: none; }
-.nb-carousel.search-focused { opacity: 0; pointer-events: none; }
+.nb-carousel.search-focused { opacity: 0; pointer-events: none; transform: translateY(100%); }
 .nb-carousel-viewport { width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; position: relative; box-shadow: 0 4px 14px rgba(20,20,20,.12); touch-action: pan-y; cursor: grab; }
 .nb-carousel-track { display: flex; width: 100%; height: 100%; transition: transform .45s cubic-bezier(.4,0,.2,1); }
 .nb-carousel-track.dragging { transition: none; }
@@ -4379,11 +4379,11 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p><em>Effective 27 September 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
-      <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device. If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
+      <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device, with one exception: which stories you've opened is tracked server-side against your account when you're signed in, not stored on-device (see "Stories &amp; subscriptions" below). If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
       <h3>Google sign-in &amp; sync</h3>
       <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with a session token so you stay signed in. While signed in, your notes (including embedded images) are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance — see "In-app purchases" below — are linked to your account so they carry over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again. You can delete your account at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs you out and schedules everything stored with it (synced notes, published pages, running ads, and any unspent ad view-credit balance) for permanent removal after 30 days. Signing back in with the same Google account during that window cancels the deletion and restores full access.</p>
       <h3>In-app purchases</h3>
-      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on Essential Software's behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives your Google account identifier — used to link a purchase to your account and carry it over to another device — along with the purchase and entitlement data needed to confirm what you bought. Essential Software's servers receive confirmation from RevenueCat, not from Google directly, and use it to unlock Pro or credit views to your account; Essential Software never receives your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
+      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on Essential Software's behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives your Google account identifier — used to link a purchase to your account and carry it over to another device — along with the purchase and entitlement data needed to confirm what you bought. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through Essential Software's own servers. Ad view-credits do involve Essential Software's servers, which receive confirmation from RevenueCat — not from Google directly — and credit the views to your account. Essential Software never receives your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
       <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted.</p>
       <h3>Publishing as an ad</h3>
@@ -4395,10 +4395,10 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>External images &amp; embeds</h3>
       <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. Essential Software has no involvement with these third-party hosts. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device — this is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
-      <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently: it's a plain web page viewed in a browser, so links inside it are ordinary clickable links that open like any other link on the web.</p>
+      <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently, and how you're viewing it matters: someone who opens its public web address directly, outside the app, is looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Within the app itself, opening a story or a note found through search shows that same published page in-app, in the app's own built-in viewer (see "Stories &amp; subscriptions" below) — you don't leave the app to see it. A link tapped inside that in-app view currently does nothing — the app has no handler wired up to open it, so the tap is silently ignored rather than opening anywhere.</p>
       <h3>Stories &amp; subscriptions</h3>
-      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, and a preview image extracted from the note the same way as for ads (see "Publishing as an ad" above), along with your account identifier so viewers can tell your stories apart from another author's and choose to follow you. Turning the toggle off removes the note from the strip going forward.</p>
-      <p>A display name and profile picture are both optional, separate from your Google name/photo, and shown the same way: if set, to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed. A display name is capped at 30 characters; leaving it blank means viewers just see the note's title instead. A profile picture you upload is stored on Essential Software's servers and served back from a plain web address keyed to your account identifier — the same way a story's own preview image is served, this address isn't behind a sign-in check, so anyone who has or guesses that identifier can load the picture, not only people who've seen one of your stories. Removing the picture deletes it from Essential Software's servers; leaving it unset means viewers just see your display name's (or account email's) initial instead.</p>
+      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, and a preview image extracted from the note's published page, along with your account identifier. Viewers never see that identifier directly — it's the key behind the scenes that ties your picture and display name to your stories and lets a Subscribe tap reach the right account; what a viewer actually sees to tell you apart from another author is your display name, picture, or the note's title. Turning the toggle off removes the note from the strip going forward.</p>
+      <p>A display name and profile picture are both optional. A display name, if set, is shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed; leaving it blank means viewers just see the note's title instead, in both places. A display name is capped at 30 characters. A profile picture, if set, is shown only on your stories, as the ring avatar in the stories strip — it does not appear on your notes in the Subscribed feed. A profile picture you upload is stored on Essential Software's servers and served back from a plain web address keyed to your account identifier — the same way a story's own preview image is served, this address isn't behind a sign-in check, so anyone who has or guesses that identifier can load the picture, not only people who've seen one of your stories. Removing the picture deletes it from Essential Software's servers; leaving it unset (or removing it) means the story ring falls back first to the note's own image if it has one, and only then to an initial letter — taken from your display name, or the note's title if that's unset too. That initial is never taken from your account email, which is never sent to other viewers at all.</p>
       <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed and so an account can tell it's already following another; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip.</p>
       <h3>Analytics</h3>
       <p>Essential Software does not collect analytics, telemetry, or crash reports from this app. The one exception is the anonymous per-device identifier described under "Publishing as an ad" above: it exists only to count an ad's unique viewers, isn't used to track app usage generally, and doesn't apply anywhere outside that feature.</p>
@@ -11564,6 +11564,46 @@ function _nbGoogleAuthPlugin() {
   const cap = window.Capacitor && window.Capacitor.Plugins;
   return (cap && cap.GoogleAuth) || null;
 }
+// Same window.Capacitor.Plugins bridge as the others above — requires
+// @capacitor/inappbrowser installed and `cap sync`'d (it is, per
+// package.json). This is what actually opens a link tapped inside a
+// published note's story/search viewer (see the nb-link-tap relay in
+// nbBuildStaticNoteHtml and its handler below): the WebView only creates a
+// window for target="_blank" if something native claims it
+// (WebChromeClient.onCreateWindow / WKUIDelegate), which this app doesn't
+// otherwise implement, so an unhandled tap is a silent no-op rather than
+// opening anywhere.
+function _nbBrowserPlugin() {
+  const cap = window.Capacitor && window.Capacitor.Plugins;
+  return (cap && cap.InAppBrowser) || null;
+}
+// Opens a URL outside the app — the actual work behind _nbBrowserPlugin()
+// above. window.open only works here when this file is opened directly in
+// a desktop browser (no Capacitor bridge at all); inside the native
+// WebView it's a silent no-op unless something claims onCreateWindow,
+// which this app doesn't implement, and there is no plugin-free way to
+// hand a URL to the system browser (Capacitor's WebView does not
+// special-case a '_system' target the way Cordova's InAppBrowser did —
+// that's a different, unrelated framework). The clipboard fallback below
+// is only a safety net for the plugin somehow not being registered
+// on-device (e.g. not yet cap sync'd into a build) — normally
+// openInExternalBrowser handles this.
+function _nbOpenExternalLink(url) {
+  if (!url) return;
+  const Browser = _nbBrowserPlugin();
+  if (Browser) { Browser.openInExternalBrowser({ url: url }).catch(e => _nbLog('open external link', e)); return; }
+  if (window.Capacitor) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url)
+        .then(() => showToast('Could not open link — copied it instead'))
+        .catch(() => showToast('Could not open link'));
+    } else {
+      showToast('Could not open link');
+    }
+    return;
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
 // @capacitor/app's bridge, same window.Capacitor.Plugins pattern as
 // _nbRcPlugin()/_nbGoogleAuthPlugin() above. Used below only to catch the
 // app regaining foreground after the native account picker closes.
@@ -13444,6 +13484,27 @@ ${_nbGetPristineCanvasStyle()}
     // so resize again after everything's settled rather than locking
     // in a height measured against still-loading content.
     window.addEventListener('load', sizeCanvas);
+  })();
+  <\/script>
+  <script>
+  // Relays a tap on any link in the note out to whatever's hosting this
+  // page, instead of letting the browser's own target="_blank" handling
+  // run — which is silently a no-op inside the app's own story/search
+  // viewer (see _nbOpenExternalLink and its handler in the parent app),
+  // since nothing there claims the WebView's onCreateWindow. Only kicks
+  // in when actually embedded (window.self !== window.top): visited
+  // directly, outside the app, this page is just an ordinary web page and
+  // target="_blank" already works the normal way, so leave it alone.
+  (function() {
+    if (window.self === window.top) return;
+    document.addEventListener('click', function(e) {
+      var a = e.target && e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      if (!href || href.charAt(0) === '#') return;
+      e.preventDefault();
+      try { window.parent.postMessage({ type: 'nb-link-tap', href: a.href }, '*'); } catch (err) {}
+    });
   })();
   <\/script>${reportFooter}
 </body>
@@ -17090,6 +17151,17 @@ function nbOpenNoteForEdit(id) {
 let _nbLastCanvasErrorToast = 0;
 window.addEventListener('message', function (e) {
   if (!e.data) return;
+  if (e.data.type === 'nb-link-tap') {
+    // Relayed from inside the story/search note viewer's iframe (see the
+    // click relay nbBuildStaticNoteHtml bakes into every published page)
+    // — the WebView doesn't open target="_blank" on its own here, so this
+    // is what actually gets the tap out to a real browser.
+    const storyFrame = document.getElementById('story-viewer-frame');
+    const storyWin = storyFrame && storyFrame.contentWindow;
+    if (e.source && storyWin && e.source === storyWin) {
+      _nbOpenExternalLink(e.data.href);
+    }
+  }
   if (e.data.type === 'markup-error') {
     // The canvas iframe relays its own window.onerror here (see _errRelay
     // in nbBuildSafeHtml) — this is the one place a JS error that breaks
