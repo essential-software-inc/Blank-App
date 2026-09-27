@@ -14421,6 +14421,11 @@ async function _nbToggleProfileNameEdit() {
     return;
   }
   btn.disabled = true;
+  const statusEl = document.getElementById('logout-profile-name-status');
+  // Mirrors the picture save's 'Uploading…' status — without this the
+  // field just goes quiet for the length of the round-trip, which reads
+  // as unresponsive next to the avatar upload's own in-flight message.
+  if (statusEl) statusEl.textContent = 'Saving\u2026';
   const ok = await _nbSaveProfileName(input.value);
   btn.disabled = false;
   if (ok) {
@@ -14464,6 +14469,19 @@ async function _nbSaveProfileName(raw) {
     const key = _nbProfileNameCacheKey();
     if (key) { try { localStorage.setItem(key, name); } catch (e) {} }
     if (statusEl) statusEl.textContent = 'Saved';
+    // Keep the Log Out dialog's own avatar and any story rings for this
+    // account in step with the new name right away, rather than leaving
+    // them showing the old initial until the dialog's reopened or the
+    // strip's next scheduled /stories refetch happens to pick it up.
+    _nbRefreshProfileAvatar();
+    const acct = nbAccount();
+    if (acct && acct.sub) {
+      let touchedStories = false;
+      _nbStoriesCache.forEach(function(s) {
+        if (s.authorSub === acct.sub && s.authorProfileName !== name) { s.authorProfileName = name; touchedStories = true; }
+      });
+      if (touchedStories) _nbPaintStoriesStrip();
+    }
     return true;
   } catch (e) {
     _nbLog('profile name save', e);
@@ -14533,6 +14551,10 @@ function _nbClearProfileImage(event) {
 async function _nbRemoveProfileImage() {
   const statusEl = document.getElementById('logout-avatar-status');
   if (!nbIsSignedIn()) return;
+  // Mirrors _nbOnProfileImageChosen's own 'Uploading…' — without this the
+  // field goes quiet for the round-trip instead of showing it's doing
+  // something, unlike the upload path right next to it.
+  if (statusEl) statusEl.textContent = 'Removing\u2026';
   const ok = await _nbSaveProfileImage(null);
   if (ok) {
     if (statusEl) statusEl.textContent = '';
@@ -14616,6 +14638,8 @@ window.addEventListener('online', () => {
   if (_nbProfileNameOfflinePending) {
     const input = document.getElementById('logout-profile-name-input');
     if (input) {
+      const statusEl = document.getElementById('logout-profile-name-status');
+      if (statusEl) statusEl.textContent = 'Saving\u2026';
       _nbSaveProfileName(input.value).then(function(ok) {
         // Mirrors _nbToggleProfileNameEdit's own success handling, since
         // this retry runs outside that click handler.
@@ -14629,7 +14653,7 @@ window.addEventListener('online', () => {
   }
   if (_nbProfileImageOfflinePending) {
     const statusEl = document.getElementById('logout-avatar-status');
-    if (statusEl && _nbProfileImagePendingDataUrl) statusEl.textContent = 'Uploading\u2026';
+    if (statusEl) statusEl.textContent = _nbProfileImagePendingDataUrl ? 'Uploading\u2026' : 'Removing\u2026';
     _nbSaveProfileImage(_nbProfileImagePendingDataUrl).then(function(ok) {
       // Mirrors _nbOnProfileImageChosen/_nbRemoveProfileImage's own
       // success handling, since this retry runs outside both of those.
