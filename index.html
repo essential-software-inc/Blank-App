@@ -747,13 +747,13 @@ body.pink .rdlg-more-toggle svg {
   margin-bottom: .1rem
 }
 body.night #nb-stories-strip .nb-story-label { color: #b7bfca }
-body.night .nb-story-ring-inner { background: #111111; color: #7fa8ff }
+body.night .nb-story-ring-inner { background: #111111; color: #999999 }
 body.night .nb-story-ring.seen { background: #333d4d }
 body.night #story-viewer-overlay { background: #111111 }
 body.night #story-viewer-header { border-bottom-color: #282828; color: #fff }
 body.night #story-viewer-back { color: #fff }
 body.night #story-viewer-sub-btn { color: #fff }
-body.night #story-viewer-sub-btn.is-subscribed { color: #7fa8ff }
+body.night #story-viewer-sub-btn.is-subscribed { color: #999999 }
 body.pink #nb-stories-strip .nb-story-label { color: #875068 }
 body.pink .nb-story-ring-inner { color: #c8365e }
 body.pink .nb-story-ring.seen { background: #f3cddc }
@@ -3787,6 +3787,7 @@ body.pink .nb-empty { color: #b06080; }
   transition: transform .15s ease, opacity .15s ease;
 }
 .nb-carousel.ptr-dragging { transition: none; }
+.nb-carousel.search-focused { opacity: 0; pointer-events: none; }
 .nb-carousel-viewport { width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; position: relative; box-shadow: 0 4px 14px rgba(20,20,20,.12); touch-action: pan-y; cursor: grab; }
 .nb-carousel-track { display: flex; width: 100%; height: 100%; transition: transform .45s cubic-bezier(.4,0,.2,1); }
 .nb-carousel-track.dragging { transition: none; }
@@ -4131,7 +4132,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/>
         <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
-      <input id="feed-search-input" type="search" placeholder="Search notes or links…" oninput="nbSearchInputChanged(this.value)" onkeydown="if(event.key==='Enter'&&_nbLooksLikeNoteLink(this.value)){event.preventDefault();nbGoToNoteLink();}" autocomplete="off" spellcheck="false">
+      <input id="feed-search-input" type="search" placeholder="Search notes or links…" oninput="nbSearchInputChanged(this.value)" onkeydown="if(event.key==='Enter'&&_nbLooksLikeNoteLink(this.value)){event.preventDefault();nbGoToNoteLink();}" onfocus="var c=document.getElementById('nb-onboard-carousel'); if(c) c.classList.add('search-focused');" onblur="var c=document.getElementById('nb-onboard-carousel'); if(c) c.classList.remove('search-focused');" autocomplete="off" spellcheck="false">
       <button type="button" id="feed-search-go" class="feed-search-go" onclick="nbGoToNoteLink()" aria-label="Open link">GO</button>
     </div>
     <div id="feed-cats"></div>
