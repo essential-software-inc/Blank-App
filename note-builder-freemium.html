@@ -657,13 +657,10 @@ body.pink .rdlg-more-toggle svg {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: .56rem;
-  line-height: 1.15;
+  font-size: 1.05rem;
   color: #3366cc;
   overflow: hidden;
-  text-align: center;
-  padding: 0 4px;
-  word-break: break-word
+  text-align: center
 }
 .nb-story-ring-img {
   width: 100%;
@@ -1888,6 +1885,70 @@ body.pink #logout-profile-name-status { color: #875068 }
   margin-top: .25rem;
   min-height: 1em
 }
+#logout-avatar-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  margin-top: .2rem
+}
+#logout-avatar-btn {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: #eef1f5;
+  display: block;
+  -webkit-tap-highlight-color: transparent
+}
+#logout-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.6rem;
+  color: #3366cc;
+  background: #eef1f5
+}
+#logout-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block
+}
+#logout-avatar-badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #3366cc;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff
+}
+#logout-avatar-status {
+  font-size: .65rem;
+  color: #7d858c;
+  min-height: 1em
+}
+body.night #logout-avatar-fallback { background: #111111; color: #7fa8ff }
+body.night #logout-avatar-btn { background: #111111 }
+body.night #logout-avatar-badge { border-color: #0e0e10 }
+body.night #logout-avatar-status { color: #999999 }
+body.pink #logout-avatar-fallback { color: #c8365e }
+body.pink #logout-avatar-badge { background: #e1306c }
+body.pink #logout-avatar-status { color: #875068 }
 
 @keyframes acct-sync-spin {
   from { transform: rotate(0deg) }
@@ -4138,6 +4199,17 @@ document.body.dataset.lockScrollY = window.scrollY;
     <div id="account-body">
       <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
       <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
+      <div id="logout-avatar-row">
+        <button id="logout-avatar-btn" type="button" onclick="_nbPickProfileImage()" aria-label="Change profile picture" title="Change profile picture">
+          <span id="logout-avatar-fallback">?</span>
+          <img id="logout-avatar-img" alt="" style="display:none">
+          <span id="logout-avatar-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>
+          </span>
+        </button>
+        <input id="logout-avatar-input" type="file" accept="image/*" style="display:none" onchange="_nbOnProfileImageChosen(this.files[0])">
+        <div id="logout-avatar-status"></div>
+      </div>
       <div id="logout-profile-name-row">
         <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories)</span></label>
         <div id="logout-profile-name-field-wrap">
@@ -12245,6 +12317,7 @@ function openLogoutConfirm() {
   if (nameEditBtn) { _nbSetProfileNameBtnMode('edit'); nameEditBtn.disabled = false; }
   if (nameStatus) nameStatus.textContent = '';
   _nbFetchProfileName(); // reconcile with the server in case another device set it
+  _nbRefreshProfileAvatar();
   document.getElementById('logout-more-body').style.display = 'none';
   document.getElementById('delete-account-btn').style.display = 'none';
   document.getElementById('logout-more-label').textContent = 'Show more';
@@ -13847,13 +13920,29 @@ function _nbSyncStoriesStripVisibility() {
   strip.style.display = onNotesAll ? '' : 'none';
 }
 // If the ring's image fails to load (dead/expired data URI, offline,
-// whatever), swap it back to the title-text avatar rather than leaving a
-// broken-image icon in the ring.
+// whatever), swap it back to the initial-letter avatar rather than
+// leaving a broken-image icon in the ring. Last link in the fallback
+// chain — see _nbStoryAvatarFallback for the tier before this one.
 function _nbStoryImgError(imgEl, fallback) {
   const span = document.createElement('span');
   span.className = 'nb-story-ring-inner';
   span.textContent = fallback;
   imgEl.replaceWith(span);
+}
+// First tier of the ring avatar's fallback chain: the author's profile
+// picture (src set in _nbPaintStoriesStrip) failed to load — either they
+// never set one, or the request errored. Try the note's own first image
+// next, if this story has one; a second failure (or no story image to
+// try) falls through to the initial letter via _nbStoryImgError. The
+// dataset flag is what stops this from re-running once the story-image
+// attempt also fails, since it's wired to the same onerror.
+function _nbStoryAvatarFallback(imgEl, storyImageUrl, initial) {
+  if (storyImageUrl && !imgEl.dataset.triedStoryImage) {
+    imgEl.dataset.triedStoryImage = '1';
+    imgEl.src = storyImageUrl;
+    return;
+  }
+  _nbStoryImgError(imgEl, initial);
 }
 function _nbPaintStoriesStrip() {
   const strip = document.getElementById('nb-stories-strip');
@@ -13864,13 +13953,23 @@ function _nbPaintStoriesStrip() {
     const sid = s.slug.replace(/'/g, "\\'");
     const asub = (s.authorSub || '').replace(/'/g, "\\'");
     const title = (s.title || 'Untitled note').replace(/'/g, "\\'");
-    // Preview the note's first image when there's one; otherwise fall
-    // back to the title text itself (not just its initial letter).
-    const fallbackText = s.title || 'Untitled';
-    const fallbackAttr = fallbackText.replace(/'/g, "\\'");
-    const avatarInner = s.imageUrl
-      ? `<img class="nb-story-ring-img" src="${esc(s.imageUrl)}" alt="" loading="lazy" onerror="_nbStoryImgError(this,'${fallbackAttr}')">`
-      : `<span class="nb-story-ring-inner">${esc(fallbackText)}</span>`;
+    // Ring avatar fallback chain: the author's profile picture first,
+    // then the note's own first image, then an initial letter (the
+    // author's display name if they've set one, else the note title's)
+    // — see _nbStoryAvatarFallback / _nbStoryImgError for the onerror
+    // handoff between tiers.
+    const initialSrc = (s.authorProfileName || s.title || 'Untitled note').trim();
+    const initial = initialSrc ? initialSrc.charAt(0).toUpperCase() : '?';
+    const initialAttr = initial.replace(/'/g, "\\'");
+    const storyImgAttr = s.imageUrl ? s.imageUrl.replace(/'/g, "\\'") : '';
+    const profileImgUrl = s.authorSub
+      ? NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(s.authorSub)
+      : null;
+    const avatarInner = profileImgUrl
+      ? `<img class="nb-story-ring-img" src="${esc(profileImgUrl)}" alt="" loading="lazy" onerror="_nbStoryAvatarFallback(this,'${storyImgAttr}','${initialAttr}')">`
+      : (s.imageUrl
+          ? `<img class="nb-story-ring-img" src="${esc(s.imageUrl)}" alt="" loading="lazy" onerror="_nbStoryImgError(this,'${initialAttr}')">`
+          : `<span class="nb-story-ring-inner">${esc(initial)}</span>`);
     return `
     <button class="nb-story-item" onclick="nbOpenStory('${sid}','${asub}','${title}')">
       <span class="nb-story-ring${s.seen ? ' seen' : ''}">${avatarInner}</span>
@@ -14200,7 +14299,125 @@ async function _nbSaveProfileName(raw) {
   }
 }
 
+/* --- Profile picture (Log Out dialog avatar) ---
+   Same downscale/recompress approach as the note editor's own
+   downscaleImageForEmbed (1600px longest side, JPEG @ 0.82) — that one is
+   private to the drag-and-drop block canvas module (see its own header
+   comment: it's meant to be copy-pasted as a self-contained unit), so
+   this is a standalone copy for the one other place a locally-picked
+   photo needs the same treatment. */
+const _NB_AVATAR_MAX_DIMENSION = 1600;
+const _NB_AVATAR_JPEG_QUALITY = 0.82;
+function _nbDownscaleImageForAvatar(file, onDone, onFail) {
+  if (!file || !/^image\//.test(file.type)) { onFail(); return; }
+  var reader = new FileReader();
+  reader.onload = function() {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.naturalWidth || img.width;
+      var h = img.naturalHeight || img.height;
+      if (!w || !h) { onFail(); return; }
+      var scale = Math.min(1, _NB_AVATAR_MAX_DIMENSION / Math.max(w, h));
+      var cw = Math.max(1, Math.round(w * scale));
+      var ch = Math.max(1, Math.round(h * scale));
+      var canvas = document.createElement('canvas');
+      canvas.width = cw;
+      canvas.height = ch;
+      var ctx = canvas.getContext('2d');
+      if (!ctx) { onFail(); return; }
+      ctx.drawImage(img, 0, 0, cw, ch);
+      try {
+        var out = canvas.toDataURL('image/jpeg', _NB_AVATAR_JPEG_QUALITY);
+        if (!out || out.indexOf('data:image/jpeg') !== 0) { onFail(); return; }
+        onDone(out);
+      } catch (e) {
+        onFail();
+      }
+    };
+    img.onerror = onFail;
+    img.src = reader.result;
+  };
+  reader.onerror = onFail;
+  reader.readAsDataURL(file);
+}
+function _nbPickProfileImage() {
+  const input = document.getElementById('logout-avatar-input');
+  if (input) input.click();
+}
+// Fires once a file's actually been chosen from the OS picker. Resets
+// the input's value first so picking the exact same file again still
+// fires 'change' next time (browsers don't fire it on an unchanged
+// value).
+function _nbOnProfileImageChosen(file) {
+  const input = document.getElementById('logout-avatar-input');
+  if (input) input.value = '';
+  if (!file) return;
+  const statusEl = document.getElementById('logout-avatar-status');
+  if (!/^image\//.test(file.type)) {
+    if (statusEl) statusEl.textContent = 'Please choose an image file';
+    return;
+  }
+  if (statusEl) statusEl.textContent = 'Uploading\u2026';
+  _nbDownscaleImageForAvatar(file, async function(dataUrl) {
+    const ok = await _nbSaveProfileImage(dataUrl);
+    if (ok) {
+      if (statusEl) statusEl.textContent = '';
+      _nbRefreshProfileAvatar();
+    }
+  }, function() {
+    if (statusEl) statusEl.textContent = "Couldn\u2019t process that image";
+  });
+}
+// POST /account/profile-image — mirrors _nbSaveProfileName's shape
+// (immediate save, no debounce, same offline/failure handling).
+async function _nbSaveProfileImage(dataUrl) {
+  const statusEl = document.getElementById('logout-avatar-status');
+  if (!nbIsSignedIn()) return false;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    if (statusEl) statusEl.textContent = 'No internet connection — not saved';
+    return false;
+  }
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      body: JSON.stringify({ dataUrl })
+    });
+    if (!res.ok) throw new Error('profile image save failed: ' + res.status);
+    return true;
+  } catch (e) {
+    _nbLog('profile image save', e);
+    if (statusEl) statusEl.textContent = 'Could not save' + _nbFailureReason(e);
+    return false;
+  }
+}
+// Single letter shown in the Log Out dialog avatar until (or unless) an
+// actual picture loads: the cached display name's initial if there is
+// one, else the account email's.
+function _nbAvatarFallbackLetter() {
+  const acct = nbAccount();
+  const src = (_nbLoadCachedProfileName() || (acct && acct.email) || '').trim();
+  return src ? src.charAt(0).toUpperCase() : '?';
+}
+// Re-points the dialog's avatar <img> at this account's picture (a fresh
+// v= query param busts the 5-minute cache on handleServeProfileImage so
+// a just-uploaded picture shows immediately) and lets its onload/onerror
+// pair decide whether the image or the letter fallback ends up visible
+// — same img-first-then-fallback pattern as the story ring avatars.
+function _nbRefreshProfileAvatar() {
+  const acct = nbAccount();
+  const img = document.getElementById('logout-avatar-img');
+  const fallback = document.getElementById('logout-avatar-fallback');
+  if (!img || !fallback) return;
+  fallback.textContent = _nbAvatarFallbackLetter();
+  if (!acct || !acct.sub) { img.style.display = 'none'; fallback.style.display = ''; return; }
+  img.onerror = function() { img.style.display = 'none'; fallback.style.display = ''; };
+  img.onload = function() { img.style.display = ''; fallback.style.display = 'none'; };
+  img.src = NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(acct.sub) + '?v=' + Date.now();
+}
+
 // Shared by nbUnpublishNote's own confirm flow and nbDeleteNote's
+
 // unpublish-then-offer-to-delete flow — one place that actually talks to
 // the server for this instead of two copies of the same fetch drifting
 // apart. Throws on a real failure (anything but 404, which just means
