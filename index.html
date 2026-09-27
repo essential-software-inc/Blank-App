@@ -1917,6 +1917,7 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
   justify-content: center;
   width: 2rem;
   height: 2rem;
+  margin-right: -8px;
   border: none;
   border-radius: 50%;
   background: none;
@@ -3792,7 +3793,7 @@ body.pink .nb-empty { color: #b06080; }
 .nb-carousel {
   position: fixed; left: 0; right: 0; bottom: calc(58px + env(safe-area-inset-bottom, 0) + .9rem);
   width: calc(100% - 3rem); max-width: 360px; margin: 0 auto; z-index: 90;
-  transition: transform .15s ease, opacity .15s ease;
+  transition: transform .15s ease, opacity .38s cubic-bezier(.4,0,.2,1);
 }
 .nb-carousel.ptr-dragging { transition: none; }
 .nb-carousel.search-focused { opacity: 0; pointer-events: none; }
@@ -11898,6 +11899,7 @@ async function _nbCompleteGoogleSignIn(idToken) {
   buildCatBar();
   nbRenderNotesScreen();
   nbRenderStoriesStrip(); // ring state (seen/unseen) is per-account
+  _nbFetchSubscriberCount(); // so it's already cached by the time the sign-out sheet is first opened
   _nbFetchProfileName(); // pick up whatever name this account already has set, if any
   // Pull first so anything already backed up from another device merges
   // in locally, then push so the account's copy reflects the union of
@@ -11993,6 +11995,7 @@ async function nbSignOut() {
   buildCatBar();
   nbRenderNotesScreen();
   nbRenderStoriesStrip();
+  _nbFetchSubscriberCount(); // clears/resets now that we're signed out
 }
 // Same {notes, images} shape nbExportNotes() writes to a backup file —
 // kept as its own small function rather than refactoring nbExportNotes
@@ -15707,6 +15710,7 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
 buildCatBar();
 nbRenderNotesScreen();
 nbRenderStoriesStrip();
+_nbFetchSubscriberCount(); // warm the cache at boot so the sign-out sheet doesn't flash blank the first time it's opened
 // A reload/reopen with an already-signed-in session (token already in
 // localStorage) never goes through _nbCompleteGoogleSignIn again, and
 // that's the only other place that pulled automatically before this —
