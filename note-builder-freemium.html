@@ -793,7 +793,61 @@ body:not(.night):not(.pink) #story-viewer-sub-btn {
   font-family: inherit;
   outline: none;
   color: #202122;
-  text-overflow: ellipsis
+  text-overflow: ellipsis;
+  transition: padding-right .12s
+}
+
+/* Right-hand "GO" pill: only ever shown while #feed-search-input's value
+   looks like a pasted note link (see _nbLooksLikeNoteLink/
+   nbSearchInputChanged) rather than a plain notes-search term — link
+   searches open straight into the story viewer instead of filtering this
+   device's own notes grid, so they need their own affordance rather than
+   reusing Enter-to-search. Sized/positioned off the same wrap-inner the
+   logo icon anchors to, mirroring the accent colors nb-story-ring's
+   themed siblings already use for a "primary action" button elsewhere in
+   this file (see .bkp-btn-pri) so it reads as the same kind of control
+   across themes rather than a one-off shape.
+   #feed-search-wrap-inner.has-go's padding-right keeps typed text from
+   ever running under the pill once it appears. */
+#feed-search-wrap-inner.has-go #feed-search-input {
+  padding-right: 3.05rem
+}
+.feed-search-go {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: .3rem;
+  top: 50%;
+  transform: translateY(-50%) scale(.85);
+  opacity: 0;
+  min-width: 2.15rem;
+  height: 1.7rem;
+  padding: 0 .55rem;
+  border: none;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .03em;
+  cursor: pointer;
+  background: #3366cc;
+  color: #fff;
+  transition: opacity .12s, transform .12s
+}
+.feed-search-go.show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(-50%) scale(1)
+}
+.feed-search-go:disabled {
+  cursor: default;
+  opacity: .75
+}
+.feed-search-go .com-spinner {
+  margin-right: 0;
+  width: 12px;
+  height: 12px
 }
 
 .guide-card {
@@ -1949,13 +2003,29 @@ body.pink #logout-profile-name-status { color: #875068 }
   color: #7d858c;
   min-height: 1em
 }
-body.night #logout-avatar-fallback { background: #111111; color: #7fa8ff }
+/* Subscriber count sits right under the avatar/status line, styled as a
+   quiet stat rather than a headline number — this is a side-detail on the
+   account sheet, not the sheet's main purpose, so it stays the same small
+   muted treatment #logout-avatar-status already uses rather than
+   introducing a second visual weight here. Empty until
+   _nbFetchSubscriberCount resolves (see openLogoutConfirm), same
+   fetch-after-open pattern _nbFetchProfileName already follows for the
+   display name field right below it. */
+#logout-subscriber-count {
+  font-size: .68rem;
+  font-weight: 600;
+  color: #54595d;
+  min-height: 1em
+}
+body.night #logout-avatar-fallback { background: #111111; color: #999999 }
 body.night #logout-avatar-btn { background: #111111 }
-body.night #logout-avatar-badge { border-color: #0e0e10 }
+body.night #logout-avatar-badge { background: #3a3a3d; border-color: #0e0e10 }
 body.night #logout-avatar-status { color: #999999 }
+body.night #logout-subscriber-count { color: #b7bfca }
 body.pink #logout-avatar-fallback { color: #c8365e }
 body.pink #logout-avatar-badge { background: #e1306c }
 body.pink #logout-avatar-status { color: #875068 }
+body.pink #logout-subscriber-count { color: #875068 }
 
 @keyframes acct-sync-spin {
   from { transform: rotate(0deg) }
@@ -2448,6 +2518,11 @@ body.night #feed-search-logo {
   color: #505868
 }
 
+body.night .feed-search-go {
+  background: #3a3a3a;
+  color: #f0f0f0
+}
+
 body.night #feed-cats .cat-pill {
   background: #1c1c1e;
   border-color: #1c1c1e;
@@ -2780,6 +2855,11 @@ body.pink #feed-search-wrap {
 
 body.pink #feed-search-logo {
   color: #c898b0
+}
+
+body.pink .feed-search-go {
+  background: #bd2856;
+  color: #fff
 }
 
 body.pink #feed-cats .cat-pill {
@@ -4051,7 +4131,8 @@ document.body.dataset.lockScrollY = window.scrollY;
         <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/>
         <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
-      <input id="feed-search-input" type="search" placeholder="Search your notes…" oninput="nbFilterNotes(this.value)" autocomplete="off" spellcheck="false">
+      <input id="feed-search-input" type="search" placeholder="Search notes or links…" oninput="nbSearchInputChanged(this.value)" onkeydown="if(event.key==='Enter'&&_nbLooksLikeNoteLink(this.value)){event.preventDefault();nbGoToNoteLink();}" autocomplete="off" spellcheck="false">
+      <button type="button" id="feed-search-go" class="feed-search-go" onclick="nbGoToNoteLink()" aria-label="Open link">GO</button>
     </div>
     <div id="feed-cats"></div>
   </div>
@@ -4216,6 +4297,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         </div>
         <input id="logout-avatar-input" type="file" accept="image/*" style="display:none" onchange="_nbOnProfileImageChosen(this.files[0])">
         <div id="logout-avatar-status"></div>
+        <div id="logout-subscriber-count" aria-live="polite"></div>
       </div>
       <div id="logout-profile-name-row">
         <label for="logout-profile-name-input">Display name <span style="font-weight:400">(shown on your stories)</span></label>
@@ -4234,11 +4316,11 @@ document.body.dataset.lockScrollY = window.scrollY;
         </div>
         <div id="logout-profile-name-status"></div>
       </div>
+      <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
       <a class="rdlg-more-toggle" id="logout-more-toggle" onclick="toggleLogoutMore()">
         <span id="logout-more-label">Show more</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </a>
-      <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
       <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
       <div class="rdlg-btns">
         <button class="bkp-btn bkp-btn-sec" id="delete-account-btn" onclick="openDeleteAccountConfirm()" style="display:none">Delete account</button>
@@ -12327,6 +12409,8 @@ function openLogoutConfirm() {
   if (nameStatus) nameStatus.textContent = '';
   _nbFetchProfileName(); // reconcile with the server in case another device set it
   _nbRefreshProfileAvatar();
+  document.getElementById('logout-subscriber-count').textContent = '';
+  _nbFetchSubscriberCount();
   document.getElementById('logout-more-body').style.display = 'none';
   document.getElementById('delete-account-btn').style.display = 'none';
   document.getElementById('logout-more-label').textContent = 'Show more';
@@ -13885,6 +13969,13 @@ async function _pubOnStoriesToggle(checked) {
 // state (seen/unseen) without a second round trip right after marking a
 // story seen.
 let _nbStoriesCache = [];
+// Bumped whenever the signed-in account's own profile picture changes
+// (set or removed) so the next stories-strip repaint requests a fresh
+// URL instead of reusing whatever the browser already has cached for
+// that author's ring avatar — see _nbSaveProfileImage's callers, which
+// bump this and immediately repaint so a removal is reflected right
+// away rather than waiting for the strip's next scheduled refetch.
+let _nbProfileImageVersion = 0;
 // Authors this account follows, cached locally (see the comment on
 // nbToggleStorySubscribe for why: the backend has no "list my
 // subscriptions" endpoint, only the feed join, so this is the local
@@ -13972,7 +14063,7 @@ function _nbPaintStoriesStrip() {
     const initialAttr = initial.replace(/'/g, "\\'");
     const storyImgAttr = s.imageUrl ? s.imageUrl.replace(/'/g, "\\'") : '';
     const profileImgUrl = s.authorSub
-      ? NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(s.authorSub)
+      ? NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(s.authorSub) + '?v=' + _nbProfileImageVersion
       : null;
     const avatarInner = profileImgUrl
       ? `<img class="nb-story-ring-img" src="${esc(profileImgUrl)}" alt="" loading="lazy" onerror="_nbStoryAvatarFallback(this,'${storyImgAttr}','${initialAttr}')">`
@@ -14230,6 +14321,26 @@ async function _nbFetchProfileName() {
     if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
   } catch (e) { _nbLog('profile name fetch', e); showToast('Couldn\u2019t refresh your name'); }
 }
+// Populates #logout-subscriber-count on the account sheet. Silent on
+// failure/offline (no toast) — same reasoning nbRenderStoriesStrip
+// already uses for its own background fetch: a stat line failing to load
+// isn't worth interrupting the person over, it just stays blank until the
+// sheet's reopened or _nbFetchSubscriberCount is retried.
+async function _nbFetchSubscriberCount() {
+  const el = document.getElementById('logout-subscriber-count');
+  if (!el) return;
+  if (!nbIsSignedIn()) { el.textContent = ''; return; }
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/subscriber-count', {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) throw new Error('subscriber count fetch failed: ' + res.status);
+    const data = await res.json();
+    const count = (data && data.count) || 0;
+    el.textContent = count === 1 ? '1 subscriber' : count + ' subscribers';
+  } catch (e) { _nbLog('subscriber count fetch', e); }
+}
 // Field is disabled until Edit is tapped; tapping it again (now labeled
 // Save) syncs to the server right away rather than on a debounce — see
 // _nbToggleProfileNameEdit. This just clears the stale status message
@@ -14369,6 +14480,13 @@ async function _nbRemoveProfileImage() {
   if (ok) {
     if (statusEl) statusEl.textContent = '';
     _nbRefreshProfileAvatar();
+    // Any live story ring currently showing this account's now-removed
+    // picture would otherwise keep displaying the browser's cached copy
+    // until the strip's next scheduled refetch. Bump the cache-busting
+    // version and repaint immediately so those rings drop straight to
+    // the fallback chain (note image, then initial letter) right away.
+    _nbProfileImageVersion = Date.now();
+    _nbPaintStoriesStrip();
   }
 }
 // Fires once a file's actually been chosen from the OS picker. Resets
@@ -14390,6 +14508,8 @@ function _nbOnProfileImageChosen(file) {
     if (ok) {
       if (statusEl) statusEl.textContent = '';
       _nbRefreshProfileAvatar();
+      _nbProfileImageVersion = Date.now();
+      _nbPaintStoriesStrip();
     }
   }, function() {
     if (statusEl) statusEl.textContent = "Couldn\u2019t process that image";
@@ -15168,6 +15288,89 @@ function selectCat(cat) {
 function nbFilterNotes(q) {
   _nbSearchQ = (q || '').toLowerCase();
   nbRenderNotesScreen();
+}
+// A search string only counts as "looks like a link" when it contains an
+// '@' handle segment (mirrors the /@slug published-note URL format from
+// _pubUrlFor) — deliberately loose, no http(s):// or domain required, so
+// a bare paste of "example.com/@my-note" or even just "@my-note" still
+// triggers it, matching how casually people actually paste these around.
+function _nbLooksLikeNoteLink(raw) {
+  return /@[a-z0-9-]/i.test((raw || '').trim());
+}
+// Pulls the slug out of anything _nbLooksLikeNoteLink already flagged.
+// Takes the LAST @-segment in the string, so a stray '@' earlier in a
+// pasted URL (a userinfo segment, an unrelated mention) never gets
+// mistaken for the handle — the real /@slug is always what a published
+// link ends on. Trims trailing punctuation/slashes a messaging app's
+// auto-linker commonly tacks on, then runs it through the exact same
+// format check the publish flow already uses (_pubValidSlugFormat) so a
+// clearly-malformed paste fails fast instead of round-tripping to the
+// server first.
+function _nbParseNoteLinkSlug(raw) {
+  const matches = (raw || '').trim().match(/@([a-z0-9-]+)/gi);
+  if (!matches || !matches.length) return '';
+  return matches[matches.length - 1].slice(1).toLowerCase().replace(/-+$/, '');
+}
+// Wired to #feed-search-input's oninput in place of a direct
+// nbFilterNotes call. While the value looks like a link, the "GO" pill
+// (#feed-search-go) is shown and the notes grid is deliberately left
+// showing whatever it already was — filtering it against a pasted URL on
+// every keystroke would just flash it to "no matches" for a result
+// nobody's asking for, since a link search opens straight into the story
+// viewer rather than searching this device's own notes.
+function nbSearchInputChanged(value) {
+  const wrap = document.getElementById('feed-search-wrap-inner');
+  const goBtn = document.getElementById('feed-search-go');
+  const isLink = _nbLooksLikeNoteLink(value);
+  if (wrap) wrap.classList.toggle('has-go', isLink);
+  if (goBtn) goBtn.classList.toggle('show', isLink);
+  if (isLink) return;
+  nbFilterNotes(value);
+}
+// Opens a pasted note link straight into the story viewer — same
+// nbOpenStory flow a stories-strip ring already uses, so Subscribe works
+// identically once it's open. The stories strip gets slug+authorSub
+// together from GET /stories; an arbitrary pasted link only ever carries
+// the slug, so this needs its own lookup by slug. check-slug can't serve
+// that (it only ever answers "is this taken", never who owns it or what
+// it's called) — this calls a sibling GET /meta/:slug on the same
+// publish worker instead, expected to respond with
+// { found: true, slug, title, authorSub } for a live published note, or
+// { found: false } (or a plain 404) otherwise. That endpoint has to exist
+// server-side for this to work; nothing in this file stands it up.
+async function nbGoToNoteLink() {
+  const input = document.getElementById('feed-search-input');
+  const goBtn = document.getElementById('feed-search-go');
+  const slug = _nbParseNoteLinkSlug(input ? input.value : '');
+  if (!slug || !_pubValidSlugFormat(slug)) { showToast('That link doesn\u2019t look right'); return; }
+  // Free shortcut: if this slug is already sitting in the stories cache
+  // (i.e. GET /stories already handed us its authorSub for the strip),
+  // use that straight away rather than round-tripping to /meta/:slug for
+  // a note we already have full info on.
+  const cached = _nbStoriesCache.find(s => s.slug === slug);
+  if (cached) {
+    nbOpenStory(cached.slug, cached.authorSub || '', cached.title || '');
+    if (input) input.value = '';
+    nbSearchInputChanged('');
+    return;
+  }
+  if (_pubOfflineGuard()) return;
+  _pubSetBtnLoading(goBtn, true, '');
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(slug));
+    if (res.status === 404) { showToast('No note found at that link'); return; }
+    if (!res.ok) throw new Error('note meta fetch failed: ' + res.status);
+    const data = await res.json();
+    if (!data || !data.found) { showToast('No note found at that link'); return; }
+    nbOpenStory(data.slug || slug, data.authorSub || '', data.title || '');
+    if (input) input.value = '';
+    nbSearchInputChanged('');
+  } catch (e) {
+    _nbLog('note link open', e);
+    showToast('Could not open that link' + _nbFailureReason(e));
+  } finally {
+    _pubSetBtnLoading(goBtn, false);
+  }
 }
 // Onboarding carousel under the Notes empty state — see its markup/CSS
 // near notes-empty-state. Inits once (idempotent) and just keeps ticking
