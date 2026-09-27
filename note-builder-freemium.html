@@ -1892,10 +1892,14 @@ body.pink #logout-profile-name-status { color: #875068 }
   gap: .35rem;
   margin-top: .2rem
 }
-#logout-avatar-btn {
+#logout-avatar-wrap {
   position: relative;
   width: 72px;
-  height: 72px;
+  height: 72px
+}
+#logout-avatar-btn {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   border: none;
   padding: 0;
@@ -1935,7 +1939,10 @@ body.pink #logout-profile-name-status { color: #875068 }
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #fff
+  border: 2px solid #fff;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent
 }
 #logout-avatar-status {
   font-size: .65rem;
@@ -4197,16 +4204,16 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="account-close" onclick="closeLogoutConfirm()" aria-label="Close">✕</button>
     </div>
     <div id="account-body">
-      <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
-      <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
       <div id="logout-avatar-row">
-        <button id="logout-avatar-btn" type="button" onclick="_nbPickProfileImage()" aria-label="Change profile picture" title="Change profile picture">
-          <span id="logout-avatar-fallback">?</span>
-          <img id="logout-avatar-img" alt="" style="display:none">
-          <span id="logout-avatar-badge">
+        <div id="logout-avatar-wrap">
+          <button id="logout-avatar-btn" type="button" onclick="_nbPickProfileImage()" aria-label="Change profile picture" title="Change profile picture">
+            <span id="logout-avatar-fallback">?</span>
+            <img id="logout-avatar-img" alt="" style="display:none">
+          </button>
+          <button id="logout-avatar-badge" type="button" onclick="_nbClearProfileImage(event)" aria-label="Remove profile picture" title="Remove profile picture">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>
-          </span>
-        </button>
+          </button>
+        </div>
         <input id="logout-avatar-input" type="file" accept="image/*" style="display:none" onchange="_nbOnProfileImageChosen(this.files[0])">
         <div id="logout-avatar-status"></div>
       </div>
@@ -4231,6 +4238,8 @@ document.body.dataset.lockScrollY = window.scrollY;
         <span id="logout-more-label">Show more</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </a>
+      <div class="rdlg-body">Signing out means you&rsquo;ll need to sign in again to sync notes to <b id="logout-email"></b> — notes already saved on this device aren&rsquo;t affected.</div>
+      <div class="rdlg-body" id="logout-more-body" style="display:none">Deleting your account schedules your synced notes and published pages on Essential Software&rsquo;s servers for removal. You have 30 days to sign back in &mdash; after that, they&rsquo;re gone for good.</div>
       <div class="rdlg-btns">
         <button class="bkp-btn bkp-btn-sec" id="delete-account-btn" onclick="openDeleteAccountConfirm()" style="display:none">Delete account</button>
         <button class="bkp-btn bkp-btn-pri" id="logout-dialog-confirm" onclick="confirmLogout()">Sign out</button>
@@ -14343,6 +14352,24 @@ function _nbDownscaleImageForAvatar(file, onDone, onFail) {
 function _nbPickProfileImage() {
   const input = document.getElementById('logout-avatar-input');
   if (input) input.click();
+}
+// Camera badge on the avatar: clears whatever picture is set (letting the
+// person go back to the plain initial) without opening the file picker.
+// Stops propagation so a badge overlapping the avatar's own button never
+// also fires _nbPickProfileImage. Tapping the avatar itself still reopens
+// the picker to choose a new image.
+function _nbClearProfileImage(event) {
+  if (event) event.stopPropagation();
+  _nbRemoveProfileImage();
+}
+async function _nbRemoveProfileImage() {
+  const statusEl = document.getElementById('logout-avatar-status');
+  if (!nbIsSignedIn()) return;
+  const ok = await _nbSaveProfileImage(null);
+  if (ok) {
+    if (statusEl) statusEl.textContent = '';
+    _nbRefreshProfileAvatar();
+  }
 }
 // Fires once a file's actually been chosen from the OS picker. Resets
 // the input's value first so picking the exact same file again still
