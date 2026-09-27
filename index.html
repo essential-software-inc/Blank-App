@@ -12462,6 +12462,8 @@ function closeLogoutConfirm() {
   if (confirmBtn && confirmBtn.disabled) return;
   document.getElementById('account-overlay').classList.remove('open');
   unlockScroll();
+  _nbProfileNameOfflinePending = false;
+  _nbProfileImageOfflinePending = false;
 }
 // Confirmed from the "Log out?" dialog: sign out, then land on the same
 // full-screen view a signed-out tap of the header icon would open —
@@ -13741,6 +13743,11 @@ function _pubOnSlugInput(raw) {
     } catch (e) {
       _nbLog('check-slug', e);
       if (seq !== _pubSlugCheckSeq) return;
+      // Connection dropped between the pre-check above and the response —
+      // treat it the same as being offline from the start, so the existing
+      // 'online' listener (see _pubSlugOfflinePending above) retries this
+      // once connectivity returns instead of leaving the message stuck.
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) _pubSlugOfflinePending = true;
       statusEl.textContent = 'Could not check availability — try again';
       statusEl.className = 'pub-status taken';
     }
@@ -14426,10 +14433,23 @@ async function _nbToggleProfileNameEdit() {
     _nbSetProfileNameBtnMode('edit');
   }
 }
+// Set when a Log Out dialog save (name or picture) couldn't run, or
+// failed, because we were offline — same idea as _pubAdOfflinePending
+// for the Publish sheet's Ad tab, so the "Could not save"/"not saved"
+// status left behind doesn't just sit there once connectivity returns.
+let _nbProfileNameOfflinePending = false;
+let _nbProfileImageOfflinePending = false;
+// The dataUrl (or null, for a remove) that was being saved when
+// _nbProfileImageOfflinePending last got set — the 'online' listener below
+// needs this to retry with the same payload, since unlike the name field
+// there's no DOM input it can just re-read at retry time.
+let _nbProfileImagePendingDataUrl;
 async function _nbSaveProfileName(raw) {
   const statusEl = document.getElementById('logout-profile-name-status');
   if (!nbIsSignedIn()) return false;
+  _nbProfileNameOfflinePending = false;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    _nbProfileNameOfflinePending = true;
     if (statusEl) statusEl.textContent = 'No internet connection — not saved';
     return false;
   }
@@ -14447,6 +14467,10 @@ async function _nbSaveProfileName(raw) {
     return true;
   } catch (e) {
     _nbLog('profile name save', e);
+    // Connection dropped between the pre-check above and the response —
+    // treat it the same as being offline from the start (see
+    // _pubRefreshAdTab's matching comment on its ads/mine fetch).
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) _nbProfileNameOfflinePending = true;
     if (statusEl) statusEl.textContent = 'Could not save' + _nbFailureReason(e);
     return false;
   }
@@ -14553,7 +14577,10 @@ function _nbOnProfileImageChosen(file) {
 async function _nbSaveProfileImage(dataUrl) {
   const statusEl = document.getElementById('logout-avatar-status');
   if (!nbIsSignedIn()) return false;
+  _nbProfileImageOfflinePending = false;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    _nbProfileImageOfflinePending = true;
+    _nbProfileImagePendingDataUrl = dataUrl;
     if (statusEl) statusEl.textContent = 'No internet connection — not saved';
     return false;
   }
@@ -14567,10 +14594,54 @@ async function _nbSaveProfileImage(dataUrl) {
     return true;
   } catch (e) {
     _nbLog('profile image save', e);
+    // Connection dropped between the pre-check above and the response —
+    // treat it the same as being offline from the start, same as the
+    // matching branch in _nbSaveProfileName.
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      _nbProfileImageOfflinePending = true;
+      _nbProfileImagePendingDataUrl = dataUrl;
+    }
     if (statusEl) statusEl.textContent = 'Could not save' + _nbFailureReason(e);
     return false;
   }
 }
+// Silently re-runs whichever Account-sheet save(s) didn't complete because
+// we were offline, matching _pubSlugOfflinePending/_pubAdOfflinePending's
+// pattern for the Publish sheet. Only fires if the dialog is still open —
+// someone who closed it (closeLogoutConfirm resets both flags) shouldn't
+// get a stale save re-fire on them.
+window.addEventListener('online', () => {
+  const overlay = document.getElementById('account-overlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  if (_nbProfileNameOfflinePending) {
+    const input = document.getElementById('logout-profile-name-input');
+    if (input) {
+      _nbSaveProfileName(input.value).then(function(ok) {
+        // Mirrors _nbToggleProfileNameEdit's own success handling, since
+        // this retry runs outside that click handler.
+        if (ok) {
+          input.setSelectionRange(input.value.length, input.value.length);
+          input.disabled = true;
+          _nbSetProfileNameBtnMode('edit');
+        }
+      });
+    }
+  }
+  if (_nbProfileImageOfflinePending) {
+    const statusEl = document.getElementById('logout-avatar-status');
+    if (statusEl && _nbProfileImagePendingDataUrl) statusEl.textContent = 'Uploading\u2026';
+    _nbSaveProfileImage(_nbProfileImagePendingDataUrl).then(function(ok) {
+      // Mirrors _nbOnProfileImageChosen/_nbRemoveProfileImage's own
+      // success handling, since this retry runs outside both of those.
+      if (ok) {
+        if (statusEl) statusEl.textContent = '';
+        _nbRefreshProfileAvatar();
+        _nbProfileImageVersion = Date.now();
+        _nbPaintStoriesStrip();
+      }
+    });
+  }
+});
 // Single letter shown in the Log Out dialog avatar until (or unless) an
 // actual picture loads: the cached display name's initial if there is
 // one, else the account email's.
