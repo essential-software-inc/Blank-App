@@ -3914,11 +3914,6 @@ document.body.dataset.lockScrollY = window.scrollY;
   <button class="hdr-btn" id="editor-info-btn" aria-label="About the editor" title="About the editor" onclick="openEditorInfo()" style="display:none">
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="7"/><line x1="9" y1="8" x2="9" y2="13"/><circle cx="9" cy="5.2" r="0.9" fill="currentColor" stroke="none"/></svg>
   </button>
-  <button class="hdr-btn" id="backup-toggle-btn" aria-label="Backup and Restore" title="Backup & Restore" onclick="openBackupSheet()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
-  </button>
   <button class="hdr-btn" id="dark-btn" aria-label="Toggle theme" title="Toggle theme">
     <svg id="icon-moon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M15 10.5a6 6 0 0 1-7.5-7.5A6 6 0 1 0 15 10.5z"/>
@@ -3937,6 +3932,11 @@ document.body.dataset.lockScrollY = window.scrollY;
       <ellipse cx="9" cy="4.5" rx="2" ry="3.5" transform="rotate(216 9 9)"/>
       <ellipse cx="9" cy="4.5" rx="2" ry="3.5" transform="rotate(288 9 9)"/>
       <circle cx="9" cy="9" r="1.8" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+  <button class="hdr-btn" id="backup-toggle-btn" aria-label="Backup and Restore" title="Backup & Restore" onclick="openBackupSheet()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
     </svg>
   </button>
   <button class="hdr-btn" id="account-toggle-btn" aria-label="Account" title="Account" onclick="nbAccountBtnClick()">
@@ -4200,11 +4200,11 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p>This applies the same way to pages currently running as ads — an ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
       <p>Right now, the app doesn't show you that address while an ad appears as a starting point on the Create screen. To find it: without adding anything new to it, save the ad and open the Publish sheet for that note — it will automatically fill in the ad's own web address for you. Open that address in a browser and you'll see the report link.</p>
       <h3>External images &amp; embeds</h3>
-      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. Essential Software has no involvement with these third-party hosts. A page published as an ad is additionally restricted to images hotlinked from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device — this is checked automatically before an ad can go live or be updated.</p>
+      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. Essential Software has no involvement with these third-party hosts. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device — this is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
       <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently: it's a plain web page viewed in a browser, so links inside it are ordinary clickable links that open like any other link on the web.</p>
       <h3>Stories &amp; subscriptions</h3>
-      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's slug, title, and a preview image extracted from the note the same way as for ads (see "Publishing as an ad" above), along with your account identifier so viewers can tell your stories apart from another author's and choose to follow you. Turning the toggle off removes the note from the strip going forward.</p>
+      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, and a preview image extracted from the note the same way as for ads (see "Publishing as an ad" above), along with your account identifier so viewers can tell your stories apart from another author's and choose to follow you. Turning the toggle off removes the note from the strip going forward.</p>
       <p>A display name is optional, separate from your Google name, and capped at 30 characters. If set, it's shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed. Leaving it blank means viewers just see the note's title instead.</p>
       <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed and so an account can tell it's already following another; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip.</p>
       <h3>Analytics</h3>
@@ -12917,7 +12917,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
       </div>
       <div style="margin-bottom:.2rem">
         <label for="nb-report-details" style="display:block;font-size:11px;font-weight:700;color:#8a8d99;margin-bottom:.4rem;letter-spacing:.04em;text-transform:uppercase">Details (optional)</label>
-        <textarea id="nb-report-details" rows="3" placeholder="Anything that helps us understand the issue" style="width:100%;padding:.6rem .7rem;border:1.5px solid #e2e5ee;border-radius:11px;font:inherit;font-size:14px;resize:vertical;margin-bottom:.15rem;box-sizing:border-box;background:#f8f9fc;transition:border-color .15s"></textarea>
+        <textarea id="nb-report-details" rows="3" placeholder="Anything that helps us understand the issue" style="width:100%;padding:.6rem .7rem;border:1.5px solid #e2e5ee;border-radius:11px;font:inherit;font-size:14px;resize:vertical;overflow:auto;margin-bottom:.15rem;box-sizing:border-box;background:#f8f9fc;transition:border-color .15s"></textarea>
       </div>
       <div id="nb-report-msg" role="status" aria-live="polite" aria-atomic="true" style="min-height:1.2em;margin:.4rem 0;font-size:12.5px;color:#a83232"></div>
       <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.5rem">
@@ -13745,6 +13745,13 @@ async function _pubOnStoriesToggle(checked) {
     if (!res.ok) throw new Error('stories toggle failed: ' + res.status);
     _pubSaveNoteFields(note.id, { showInStories: checked });
     showToast(checked ? 'Now showing in stories' : 'Removed from stories');
+    // Fire-and-forget: the strip should reflect this note's new state right
+    // away rather than waiting for the next cold load or pull-to-refresh,
+    // but the toast above must not wait on it — a stalled/slow stories
+    // fetch would otherwise hold up feedback for an action that already
+    // succeeded (matches the pattern in nbCompleteGoogleSignIn/pull-to-
+    // refresh, which also don't await this call before their own toast).
+    nbRenderStoriesStrip().catch(e => _nbLog('stories toggle: strip refresh', e));
   } catch (e) {
     _nbLog('stories toggle', e);
     showToast('Could not update' + _nbFailureReason(e));
