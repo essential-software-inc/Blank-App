@@ -794,6 +794,15 @@ body.pink { --skel-a: #f8e3ec; --skel-b: #fff5f9; }
 .nb-skel-card:nth-child(2) .nb-skel-line:first-child { width: 92%; }
 .nb-skel-card:nth-child(2) .nb-skel-line:last-child:not(:first-child) { width: 46%; }
 .nb-skel-card:nth-child(3) .nb-skel-line { width: 62%; }
+/* Local-category card skeleton: title, description/time line, thumbnails, action icons. */
+.nb-skel-desc { width: 58%; height: .8rem; margin: .1rem 0 .3rem; }
+.nb-skel-card:nth-child(2) .nb-skel-desc { width: 72%; }
+.nb-skel-time { width: 14%; height: .7rem; margin: 0 0 .5rem auto; }
+.nb-skel-tags { display: flex; gap: .35rem; margin-bottom: .28rem; }
+.nb-skel-tag { width: 46px; height: 1.2rem; border-radius: 10px; }
+.nb-skel-card:nth-child(2) .nb-skel-tag:last-child { width: 34px; }
+.nb-skel-actions { display: flex; justify-content: flex-end; gap: .85rem; margin-top: .15rem; }
+.nb-skel-dot { width: 15px; height: 15px; border-radius: 50%; }
 @keyframes nb-skel-shimmer {
   from { background-position: 100% 0; }
   to { background-position: 0% 0; }
@@ -3853,6 +3862,8 @@ body.backup-transparent:not(.night):not(.pink) #backup-overlay {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: 1.75rem 1.5rem; color: #8a8f98; gap: .4rem;
 }
+.nb-empty { transition: opacity .38s cubic-bezier(.4,0,.2,1); }
+@media (prefers-reduced-motion: reduce) { .nb-empty { transition: none; } }
 .nb-empty svg { opacity: .35; margin-bottom: .15rem; }
 .nb-empty-title { font-size: .95rem; font-weight: 600; color: #54595d; }
 .nb-empty-sub { font-size: .82rem; max-width: 260px; line-height: 1.5; }
@@ -4222,7 +4233,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/>
         <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
-      <input id="feed-search-input" type="search" placeholder="Search notes or links…" oninput="nbSearchInputChanged(this.value)" onkeydown="if(event.key==='Enter'&&_nbLooksLikeNoteLink(this.value)){event.preventDefault();nbGoToNoteLink();}" onfocus="var c=document.getElementById('nb-onboard-carousel'); if(c) c.classList.add('search-focused');" onblur="var c=document.getElementById('nb-onboard-carousel'); if(c) c.classList.remove('search-focused');" autocomplete="off" spellcheck="false">
+      <input id="feed-search-input" type="search" placeholder="Search notes or links…" oninput="nbSearchInputChanged(this.value)" onkeydown="if(event.key==='Enter'&&_nbLooksLikeNoteLink(this.value)){event.preventDefault();nbGoToNoteLink();}" onfocus="nbCarouselSearchFocus(true)" onblur="nbCarouselSearchFocus(false)" autocomplete="off" spellcheck="false">
       <button type="button" id="feed-search-go" class="feed-search-go" onclick="nbGoToNoteLink()" aria-label="Open link">GO</button>
     </div>
     <div id="feed-cats"></div>
@@ -4450,7 +4461,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>In-app purchases</h3>
       <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on Essential Software's behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID: before you sign in that's an anonymous ID RevenueCat generates for your install, and once you sign in it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through Essential Software's own servers. Ad view-credits do involve Essential Software's servers, which receive confirmation from RevenueCat — not from Google directly — and credit the views to your account. Essential Software never receives your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
-      <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted. Publishing also briefly checks your IP address (for about a minute) to limit spam, without storing it.</p>
+      <p>Publishing is optional — it only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted. Publishing also briefly checks your IP address (for about a minute) to limit spam, without storing it.</p>
       <h3>Publishing as an ad</h3>
       <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create — not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, Essential Software credits the corresponding number of views to your account. Essential Software also stores how many views an ad has used and its current status (running, used up, or taken down). To also report how many unique viewers an ad has reached, alongside its total view count, Essential Software stores an anonymous identifier generated and kept on each device — sent whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and exists only to tell whether a repeat view of a given ad came from a device already counted toward that ad; see "Analytics" below. Unpublishing an ad removes it from Create immediately and forfeits any views it had left — that balance is not restored to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched — ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
       <h3>Reporting a published page</h3>
@@ -4462,9 +4473,9 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Linked pages</h3>
       <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently, and how you're viewing it matters: someone who opens its public web address directly, outside the app, is looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Within the app itself, opening a story or a note found through search shows that same published page in-app, in the app's own built-in viewer (see "Stories, subscriptions &amp; likes" below) — you don't leave the app to see it. A link tapped inside that in-app view currently does nothing — the app has no handler wired up to open it, so the tap is silently ignored rather than opening anywhere.</p>
       <h3>Stories, subscriptions &amp; likes</h3>
-      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, and up to three preview images extracted from the note's published page (plus how many images the note has, so a feed card can show how many more there are), along with your account identifier. Preview images that come from your device are copied to Essential Software's servers and can be loaded without a sign-in check while the story is showing; a preview image added by URL isn't copied, so viewers' devices load it directly from its source when they see your story or feed card, and that host can see their IP address. Turning the toggle off or unpublishing the note deletes the stored copies. Other people's devices never receive your Google account identifier or email. Instead, each account is given a separate random author ID that means nothing outside the app; it's sent with your stories so your picture and display name can be tied to them and a Subscribe tap can reach the right account. It's generated by Essential Software, isn't derived from your Google account, and is deleted with your account. What a viewer sees to tell you apart from another author is your display name, picture, or the note's title. A story appears in the strip for 24 hours; it stays in the Subscribed feed of people who follow you (from when they followed you onward) until you turn the toggle off or unpublish the note. Turning the toggle off removes the note from the strip going forward.</p>
+      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, description and tags (if you've added them), when the note was created, and up to three preview images extracted from the note's published page (plus how many images the note has, so a feed card can show how many more there are), along with your account identifier. The title is shown on your story; the title, description, tags and how long ago the note was created are shown on the note's card in the Subscribed feed of anyone who subscribes to you. Preview images that come from your device are copied to Essential Software's servers and can be loaded without a sign-in check while the story is showing; a preview image added by URL isn't copied, so viewers' devices load it directly from its source when they see your story or feed card, and that host can see their IP address. Turning the toggle off or unpublishing the note deletes the stored copies, including the stored description and tags. Other people's devices never receive your Google account identifier or email. Instead, each account is given a separate random author ID that means nothing outside the app; it's sent with your stories so your picture and display name can be tied to them and a Subscribe tap can reach the right account. It's generated by Essential Software, isn't derived from your Google account, and is deleted with your account. What a viewer sees to tell you apart from another author is your display name, picture, or the note's title. A story appears in the strip for 24 hours; it stays in the Subscribed feed of people who follow you (from when they followed you onward) until you turn the toggle off or unpublish the note. Turning the toggle off removes the note from the strip going forward.</p>
       <p>A display name and profile picture are both optional. A display name, if set, is shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed; leaving it blank means viewers just see the note's title instead, in both places. A display name is capped at 30 characters. A profile picture, if set, is shown only on your stories, as the ring avatar in the stories strip — it does not appear on your notes in the Subscribed feed. A profile picture you upload is stored on Essential Software's servers and served back from a web address keyed to your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing (or to you, when you're signed in) — so anyone who has your author ID, for instance from seeing one of your stories, can load it during that time, and no one else can. Once you have no stories showing, the picture is no longer served to others. Removing the picture deletes it from Essential Software's servers; leaving it unset (or removing it) means the story ring falls back first to the note's own image if it has one, and only then to an initial letter — taken from your display name, or the note's title if that's unset too. That initial is never taken from your account email, which is never sent to other viewers at all.</p>
-      <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed and so an account can tell it's already following another. You can see how many accounts follow you, as a total, not who; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip. A signed-in account can also like a published note; Essential Software records, tied to your account, which notes you've liked so the heart shows correctly across your devices, and shows the note's author only a total number of likes, not who liked it.</p>
+      <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed and so an account can tell it's already following another. You can see how many accounts follow you, as a total, not who; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip. Searching your Subscribed feed happens on your device, against the stories already loaded; what you type is not sent to Essential Software. A signed-in account can also like a published note; Essential Software records, tied to your account, which notes you've liked so the heart shows correctly across your devices, and shows the note's author only a total number of likes, not who liked it.</p>
       <h3>Third-party requests &amp; server logs</h3>
       <p>Using the app makes some requests to third parties, which see your IP address like any website you visit: a script library (three.js) is loaded from Cloudflare's cdnjs when the app opens; Google's sign-in code is loaded from Google when you sign in; and the app occasionally requests a tiny blank page from Google (gstatic.com) just to check whether you're online. Requests to Essential Software's servers run on Cloudflare, which processes them and may keep standard request logs (such as time, address requested, and IP address) that Essential Software can use to operate and debug the service. Essential Software doesn't use them for analytics or tracking.</p>
       <h3>Analytics</h3>
@@ -4498,7 +4509,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it's shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance — views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad's view count, for information only. It's derived from an anonymous identifier generated and stored on each device, used solely to tell whether a device has already been counted once for a given ad; it isn't tied to a Google account or any other identity, and is sent whether or not you're signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
       <p>Purchased views are a consumable purchase through Google Play — refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:contactrhudio@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
-      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories the same way you're responsible for anything else you publish, and the Responsible Use section above applies. Essential Software may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons it can act on any other published content. An optional display name and profile picture shown on your stories and to your subscribers don't need to be your real name or photo, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
+      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags, and preview images, and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description, and tags, the same way you're responsible for anything else you publish, and the Responsible Use section above applies. Essential Software may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons it can act on any other published content. An optional display name and profile picture shown on your stories and to your subscribers don't need to be your real name or photo, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
       <p>A signed-in account can also like a published note. Likes are a simple sign of appreciation: the note's author sees only a total number of likes, not who liked it, and you agree not to use likes abusively, such as by using multiple accounts or automated means to inflate or suppress a note's count. Essential Software may remove likes, or suspend your ability to like, for the same reasons it can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what is recorded about likes.</p>
       <h3>Purchases &amp; Eligibility</h3>
       <p>Buying view packages is handled entirely through Google Play Billing (processed on Essential Software's behalf by RevenueCat), and any age or account requirements for making a purchase are set and enforced by Google Play, not by Essential Software. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
@@ -12064,7 +12075,7 @@ async function _nbCompleteGoogleSignIn(idToken) {
   // if switching accounts on this device) need to show/hide immediately,
   // not just whenever nbSyncPull below happens to add or remove a note.
   buildCatBar();
-  nbRenderNotesScreen();
+  if (!nbRefreshCurrentView('signin', true)) nbRenderNotesScreen();
   nbRenderStoriesStrip(); // ring state (seen/unseen) is per-account
   _nbFetchSubscriberCount(); // so it's already cached by the time the sign-out sheet is first opened
   _nbReconcileAccountActions(); // this account's follows and likes, wherever they were made
@@ -12161,7 +12172,7 @@ async function nbSignOut() {
   // re-render, which is exactly how this bug showed up in the first place.
   if (_nbActiveCat === 'Subscribed') _nbActiveCat = 'All'; // that category no longer exists signed out
   buildCatBar();
-  nbRenderNotesScreen();
+  if (!nbRefreshCurrentView('signout', true)) nbRenderNotesScreen();
   nbRenderStoriesStrip();
   _nbFetchSubscriberCount(); // clears/resets now that we're signed out
 }
@@ -14264,7 +14275,7 @@ async function nbPublishNote() {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish', {
       method: 'POST',
       headers: pubHeaders,
-      body: JSON.stringify({ slug, html, title: note.title || '' })
+      body: JSON.stringify({ slug, html, title: note.title || '', desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null })
     });
     if (res.status === 429) {
       showToast('You\u2019re publishing too fast — wait a moment and try again');
@@ -14386,7 +14397,7 @@ async function nbUpdatePublishedNote() {
   try {
     const updHeaders = { 'Content-Type': 'application/json' };
     if (nbIsSignedIn()) updHeaders['Authorization'] = 'Bearer ' + nbSessionToken();
-    const updBody = { html, token: note.publishToken };
+    const updBody = { html, token: note.publishToken, desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null };
     // Same shape _pubOnStoriesToggle already sends when flipping the
     // switch — title plus showInStories, so the worker has what it needs
     // to re-surface the story. resurfaceStories is the flag that tells it
@@ -14458,7 +14469,7 @@ async function _pubOnStoriesToggle(checked) {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
-      body: JSON.stringify({ html, token: note.publishToken, title: note.title || '', showInStories: checked })
+      body: JSON.stringify({ html, token: note.publishToken, title: note.title || '', desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null, showInStories: checked })
     });
     if (!res.ok) throw new Error('stories toggle failed: ' + res.status);
     _pubSaveNoteFields(note.id, { showInStories: checked });
@@ -15110,6 +15121,7 @@ let _nbSubFeedCursor = null;
 let _nbSubFeedLoading = false;
 let _nbSubFeedDone = false;
 let _nbSubFeedObserver = null;
+let _nbSubFeedStories = []; // every story loaded so far, so search can filter without re-fetching
 
 // Same onboarding carousel the other categories keep under their empty
 // states. Shown whenever the Subscribed feed has nothing to list (signed
@@ -15121,17 +15133,11 @@ let _nbSubFeedObserver = null;
 const NB_SUB_EMPTY_LEAD = 'Mix text, photos, checklists, and more into scrapbook-style notes. ';
 // Three placeholder cards mirroring a loaded Subscribed card (author line,
 // title, thumbnail row) — swapped out wholesale when the first page lands.
-function _nbSubSkeletonHtml() {
-  const imgs = n => '<div class="nb-skel-imgs">' + '<div class="nb-skel nb-skel-img"></div>'.repeat(n) + '</div>';
-  const line = '<div class="nb-skel nb-skel-line"></div>';
-  const card = (titleLines, n) => '<div class="guide-card nb-skel-card" aria-hidden="true">'
-    + '<div class="nb-skel nb-skel-author"></div><div class="nb-skel-title">' + line.repeat(titleLines) + '</div>' + imgs(n) + '</div>';
-  return card(1, 3) + card(2, 3) + card(1, 3);
-}
+function _nbSubSkeletonHtml() { return _nbCardSkeletonHtml(true); }
 function _nbSubCarousel(show) {
   const c = document.getElementById('nb-onboard-carousel');
   if (!c) return;
-  c.style.display = show ? '' : 'none';
+  if (show) _nbRevealFade(c); else c.style.display = 'none';
   if (show) nbInitOnboardCarousel();
 }
 async function nbRenderSubscribedFeed() {
@@ -15144,6 +15150,7 @@ async function nbRenderSubscribedFeed() {
   if (_nbSubFeedObserver) { _nbSubFeedObserver.disconnect(); _nbSubFeedObserver = null; }
   _nbSubFeedCursor = null;
   _nbSubFeedDone = false;
+  _nbSubFeedStories = [];
   grid.innerHTML = '';
   // Hide whatever the previous category left on screen (its empty state,
   // or its grid) while the first page loads — otherwise the old category's
@@ -15152,7 +15159,7 @@ async function nbRenderSubscribedFeed() {
   empty.style.display = 'none';
   grid.style.display = 'none';
   if (!nbIsSignedIn()) {
-    empty.style.display = ''; grid.style.display = 'none';
+    _nbRevealFade(empty); grid.style.display = 'none';
     emptyTitle.textContent = 'Sign in to see this';
     emptySub.textContent = NB_SUB_EMPTY_LEAD + 'The Subscribed feed follows accounts, so it needs you to be signed in.';
     _nbSubCarousel(true);
@@ -15166,6 +15173,88 @@ async function nbRenderSubscribedFeed() {
 // Fetches and appends one page. Called for the first page (from
 // nbRenderSubscribedFeed, grid already cleared) and again by the
 // scroll-triggered IntersectionObserver for every subsequent page.
+// Description comes from the feed (s.desc); the worker has to return it — the published
+// page's <meta name="description"> and the publish requests both carry it now.
+function _nbSubStoryDesc(s) { return String(s.desc || s.description || '').trim(); }
+function _nbSubStoryTags(s) { return Array.isArray(s.tags) ? s.tags.filter(Boolean).slice(0, 10) : []; }
+// Accepts epoch ms, epoch seconds, or an ISO string; returns ms or 0.
+function _nbSubStoryTs(s) {
+  let v = s.noteCreatedAt != null ? s.noteCreatedAt : (s.createdAt != null ? s.createdAt : s.publishedAt);
+  if (typeof v === 'string' && v && isNaN(Number(v))) v = Date.parse(v);
+  v = Number(v);
+  if (!v || !isFinite(v)) return 0;
+  return v < 1e12 ? v * 1000 : v;
+}
+function _nbSubStoryMatches(s) {
+  const q = _nbSearchQ;
+  if (!q) return true;
+  return (s.title || '').toLowerCase().includes(q)
+    || _nbSubStoryDesc(s).toLowerCase().includes(q)
+    || (s.authorProfileName || '').toLowerCase().includes(q)
+    || _nbSubStoryTags(s).some(tg => String(tg).toLowerCase().includes(q));
+}
+function _nbSubCardHtml(s) {
+  const sid = escJs(s.slug);
+  const asub = escJs(s.authorSub);
+  const title = escJs(s.title || 'Untitled note');
+  const desc = _nbSubStoryDesc(s);
+  const ts = _nbSubStoryTs(s);
+  const tags = _nbSubStoryTags(s);
+  const imgsHtml = _buildImgsHtml(s.images || [], s.imageCount);
+  return `
+      <div class="guide-card" onclick="nbOpenStory('${sid}','${asub}','${title}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenStory('${sid}','${asub}','${title}')">
+        ${s.authorProfileName ? `<span class="gc-author-name">${esc(s.authorProfileName)}</span>` : ''}
+        <div class="gc-title">${esc(s.title || 'Untitled note')}</div>
+        ${(desc || ts) ? `<div class="gc-desc">${desc ? `<span class="gc-desc-text">${esc(desc)}</span>` : ''}${ts ? `<span class="gc-desc-time">${_nbShortTimeAgo(ts)}</span>` : ''}</div>` : ''}
+        ${imgsHtml}
+        ${tags.length ? `<div class="gc-tags-row">${tags.map(tg => `<span class="gc-tag">${esc(tg)}</span>`).join('')}</div>` : ''}
+      </div>`;
+}
+function _nbSubAttachSentinel() {
+  const grid = document.getElementById('nb-notes-grid');
+  const old = document.getElementById('nb-subfeed-sentinel');
+  if (old) old.remove();
+  if (_nbSubFeedDone || !_nbSubFeedCursor) return;
+  grid.insertAdjacentHTML('beforeend', '<div id="nb-subfeed-sentinel" style="height:1px"></div>');
+  if (!_nbSubFeedObserver) {
+    _nbSubFeedObserver = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) _nbLoadSubFeedPage();
+    }, { rootMargin: '600px' });
+  }
+  _nbSubFeedObserver.observe(document.getElementById('nb-subfeed-sentinel'));
+}
+// Nothing on screen matches the query: keep paging until something does, then say "No matches".
+function _nbSubAfterPage() {
+  if (!_nbSearchQ || _nbActiveCat !== 'Subscribed') return;
+  const grid = document.getElementById('nb-notes-grid');
+  if (grid.querySelector('.guide-card:not(.nb-skel-card)')) return;
+  if (!_nbSubFeedDone) { setTimeout(() => { if (_nbActiveCat === 'Subscribed') _nbLoadSubFeedPage(); }, 0); return; }
+  const msg = _nbFilteredEmptyMessage();
+  grid.style.display = 'none'; grid.innerHTML = '';
+  document.getElementById('notes-empty-title').textContent = msg.title;
+  document.getElementById('notes-empty-sub').textContent = msg.sub;
+  _nbRevealFade(document.getElementById('notes-empty-state'));
+  _nbSubCarousel(true);
+}
+// Search typed/cleared while Subscribed is showing: re-filter what's loaded, no re-fetch.
+function _nbSubApplySearch() {
+  if (!_nbSubFeedStories.length) return; // first page still loading (it applies the query itself), or an empty/signed-out/error state is showing
+  const grid = document.getElementById('nb-notes-grid');
+  const empty = document.getElementById('notes-empty-state');
+  const matches = _nbSubFeedStories.filter(_nbSubStoryMatches);
+  if (_nbSubFeedObserver) { _nbSubFeedObserver.disconnect(); _nbSubFeedObserver = null; }
+  grid.innerHTML = matches.map(_nbSubCardHtml).join('');
+  if (matches.length) {
+    empty.style.display = 'none'; grid.style.display = '';
+    _nbSubCarousel(nbVisibleNotes().length <= 1);
+    _nbSubAttachSentinel();
+    return;
+  }
+  if (_nbSubFeedDone) { _nbSubAfterPage(); return; }
+  empty.style.display = 'none';
+  grid.innerHTML = _nbSubSkeletonHtml(); grid.style.display = '';
+  _nbSubAfterPage();
+}
 async function _nbLoadSubFeedPage() {
   if (_nbSubFeedLoading || _nbSubFeedDone || !nbIsSignedIn()) return;
   const empty = document.getElementById('notes-empty-state');
@@ -15184,7 +15273,7 @@ async function _nbLoadSubFeedPage() {
     const stories = (data && data.stories) || [];
     if (_nbActiveCat !== 'Subscribed') return; // category switched while this was in flight
     if (isFirstPage && !stories.length) {
-      empty.style.display = ''; grid.style.display = 'none'; grid.innerHTML = '';
+      _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       emptyTitle.textContent = 'No new stories';
       emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Notes the people you subscribe to publish (from when you subscribed onward) will show up here.';
       _nbSubFeedDone = true;
@@ -15194,42 +15283,23 @@ async function _nbLoadSubFeedPage() {
     empty.style.display = 'none';
     grid.style.display = '';
     if (isFirstPage) _nbSubCarousel(nbVisibleNotes().length <= 1);
-    const cardsHtml = stories.map(s => {
-      const sid = escJs(s.slug);
-      const asub = escJs(s.authorSub);
-      const title = escJs(s.title || 'Untitled note');
-      const imgsHtml = _buildImgsHtml(s.images || [], s.imageCount);
-      return `
-      <div class="guide-card" onclick="nbOpenStory('${sid}','${asub}','${title}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenStory('${sid}','${asub}','${title}')">
-        ${s.authorProfileName ? `<span class="gc-author-name">${esc(s.authorProfileName)}</span>` : ''}
-        <div class="gc-title">${esc(s.title || 'Untitled note')}</div>
-        ${imgsHtml}
-      </div>`;
-    }).join('');
-    if (isFirstPage) grid.innerHTML = ''; // drop the loading skeleton
-    // Drop the old sentinel before appending — a fresh one goes back on
-    // at the new bottom right after.
+    if (isFirstPage) _nbSubFeedStories = [];
+    _nbSubFeedStories.push(...stories);
+    const shown = stories.filter(_nbSubStoryMatches);
+    _nbSubFeedCursor = data.nextCursor || null;
+    if (!_nbSubFeedCursor) _nbSubFeedDone = true;
+    // Keep the skeleton up while a search is still hunting for its first match.
+    if (shown.length || _nbSubFeedDone) grid.querySelectorAll('.nb-skel-card').forEach(el => el.remove());
     const oldSentinel = document.getElementById('nb-subfeed-sentinel');
     if (oldSentinel) oldSentinel.remove();
-    grid.insertAdjacentHTML('beforeend', cardsHtml);
-
-    _nbSubFeedCursor = data.nextCursor || null;
-    if (!_nbSubFeedCursor) {
-      _nbSubFeedDone = true;
-    } else {
-      grid.insertAdjacentHTML('beforeend', '<div id="nb-subfeed-sentinel" style="height:1px"></div>');
-      if (!_nbSubFeedObserver) {
-        _nbSubFeedObserver = new IntersectionObserver(entries => {
-          if (entries.some(e => e.isIntersecting)) _nbLoadSubFeedPage();
-        }, { rootMargin: '600px' });
-      }
-      _nbSubFeedObserver.observe(document.getElementById('nb-subfeed-sentinel'));
-    }
+    grid.insertAdjacentHTML('beforeend', shown.map(_nbSubCardHtml).join(''));
+    _nbSubAttachSentinel();
+    _nbSubAfterPage();
   } catch (e) {
     _nbLog('subscriptions feed', e);
     if (_nbActiveCat !== 'Subscribed') return;
     if (isFirstPage) {
-      empty.style.display = ''; grid.style.display = 'none'; grid.innerHTML = '';
+      _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       emptyTitle.textContent = 'Could not load';
       emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Something went wrong loading the Subscribed feed — try again.';
       _nbSubCarousel(true);
@@ -16407,14 +16477,105 @@ function buildCatBar() {
     `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')">${esc(c)}</button>`
   ).join('');
 }
+// Card-shaped placeholder for the local categories — mirrors a loaded note card
+// (title, desc/time line, thumbnails, action icons), same shimmer as the Subscribed one.
+// One placeholder card shaped like a real note card — author line (Subscribed only), title,
+// description + time, thumbnails, tags, and the action icons (own notes only).
+function _nbCardSkeletonHtml(withAuthor) {
+  const line = '<div class="nb-skel nb-skel-line"></div>';
+  const card = titleLines => '<div class="guide-card nb-skel-card" aria-hidden="true">'
+    + (withAuthor ? '<div class="nb-skel nb-skel-author"></div>' : '')
+    + '<div class="nb-skel-title">' + line.repeat(titleLines) + '</div>'
+    + '<div class="nb-skel nb-skel-desc"></div><div class="nb-skel nb-skel-time"></div>'
+    + '<div class="nb-skel-imgs">' + '<div class="nb-skel nb-skel-img"></div>'.repeat(3) + '</div>'
+    + '<div class="nb-skel-tags">' + '<div class="nb-skel nb-skel-tag"></div>'.repeat(3) + '</div>'
+    + (withAuthor ? '' : '<div class="nb-skel-actions">' + '<div class="nb-skel nb-skel-dot"></div>'.repeat(4) + '</div>')
+    + '</div>';
+  return card(1) + card(2) + card(1);
+}
+function _nbNoteSkeletonHtml() { return _nbCardSkeletonHtml(false); }
+// Data half of a refresh, same sources as pull-to-refresh: stories strip (only visible
+// under "All") and, when signed in, the account backup pull/push (which re-renders the
+// screen itself if it changed anything). Never throws.
+let _nbLastDataRefresh = 0;
+const NB_AUTO_REFRESH_MIN_MS = 15000; // automatic triggers (switch, resume, landing) skip the network if it ran this recently
+function nbRefreshData() {
+  _nbLastDataRefresh = Date.now();
+  const tasks = [];
+  if (_nbActiveCat === 'All') tasks.push(Promise.resolve(nbRenderStoriesStrip()).catch(e => _nbLog('refresh: stories', e)));
+  if (nbIsSignedIn()) tasks.push(Promise.resolve(nbSyncPullThenPush()).catch(e => _nbLog('refresh: sync', e)));
+  return Promise.all(tasks);
+}
+// Shimmer, then the category. Notes are local, so the wait is a short minimum; fresh data
+// gets up to SWITCH_DATA_CAP_MS to land under the shimmer, otherwise the local list shows
+// and the sync re-renders it if anything changed.
+let _nbSwitchToken = 0;
+async function nbShowCategoryWithShimmer(forceData) {
+  const token = ++_nbSwitchToken;
+  const grid = document.getElementById('nb-notes-grid');
+  const empty = document.getElementById('notes-empty-state');
+  const carousel = document.getElementById('nb-onboard-carousel');
+  if (_nbSubFeedObserver) { _nbSubFeedObserver.disconnect(); _nbSubFeedObserver = null; }
+  empty.style.display = 'none';
+  if (carousel) carousel.style.display = 'none';
+  grid.innerHTML = _nbNoteSkeletonHtml();
+  grid.style.display = '';
+  const due = forceData || (Date.now() - _nbLastDataRefresh >= NB_AUTO_REFRESH_MIN_MS);
+  const data = due ? Promise.race([nbRefreshData(), new Promise(r => setTimeout(r, 1500))]) : Promise.resolve();
+  await Promise.all([new Promise(r => setTimeout(r, 350)), data]);
+  if (token !== _nbSwitchToken || _nbActiveCat === 'Subscribed') return; // superseded by a newer switch
+  nbRenderNotesScreen();
+}
+// One entry point for every "refresh what's on screen" moment. Returns true if it took
+// over rendering. force = ignore the throttle and shimmer local categories too (online,
+// sign-in); otherwise only the Subscribed feed re-fetches visibly (resume, landing) and
+// local categories refresh in the background.
+function nbRefreshCurrentView(reason, force) {
+  const screen = document.getElementById('screen-notes');
+  if (!screen || !screen.classList.contains('active')) return false;
+  const throttled = !force && Date.now() - _nbLastDataRefresh < NB_AUTO_REFRESH_MIN_MS;
+  if (_nbActiveCat === 'Subscribed') {
+    if (throttled) return true;
+    _nbLastDataRefresh = Date.now();
+    nbRenderNotesScreen();
+    return true;
+  }
+  if (force) { nbShowCategoryWithShimmer(true); return true; }
+  if (!throttled) nbRefreshData();
+  return true;
+}
+// Show a hidden element with a fade instead of a pop. Only animates when it was actually
+// hidden (display:none); if it's already showing, this is just a no-op.
+function _nbRevealFade(el) {
+  if (!el) return;
+  const wasHidden = el.style.display === 'none';
+  el.style.display = '';
+  if (!wasHidden) return;
+  el.style.opacity = '0';
+  void el.offsetWidth; // commit the 0 so the change below transitions
+  requestAnimationFrame(() => { el.style.opacity = ''; });
+}
 function selectCat(cat) {
+  const same = cat === _nbActiveCat;
   _nbActiveCat = cat;
   buildCatBar();
-  nbRenderNotesScreen();
   _nbSyncStoriesStripVisibility();
+  if (cat === 'Subscribed') { _nbSwitchToken++; nbRenderNotesScreen(); return; } // has its own skeleton + fetch
+  nbShowCategoryWithShimmer(same);
 }
+// Back online: give the connection a moment (the event can fire early), then refresh like a pull.
+let _nbOnlineViewTimer = null;
+window.addEventListener('online', () => {
+  clearTimeout(_nbOnlineViewTimer);
+  _nbOnlineViewTimer = setTimeout(() => nbRefreshCurrentView('online', true), 800);
+});
+// Back in the app / tab: refresh the Subscribed feed (throttled); local categories sync in the background.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) nbRefreshCurrentView('resume', false);
+});
 function nbFilterNotes(q) {
   _nbSearchQ = (q || '').toLowerCase();
+  if (_nbActiveCat === 'Subscribed') { _nbSubApplySearch(); return; } // filter the loaded feed; don't re-fetch per keystroke
   nbRenderNotesScreen();
 }
 // A search string only counts as "looks like a link" when it contains an
@@ -16586,6 +16747,17 @@ function nbGoToCarouselSlide(i, userInitiated) {
   // otherwise the very next auto-tick could immediately undo the tap.
   if (userInitiated) nbStartCarouselAutoplay();
 }
+// Search focus tucks the carousel away; blur brings it back and advances it one slide
+// (once, at the same moment it starts rising, so the slide happens during the rise).
+function nbCarouselSearchFocus(focused) {
+  const c = document.getElementById('nb-onboard-carousel');
+  if (!c) return;
+  if (focused) { c.classList.add('search-focused'); return; }
+  const wasTucked = c.classList.contains('search-focused');
+  c.classList.remove('search-focused');
+  if (!wasTucked || c.style.display === 'none') return;
+  nbGoToCarouselSlide(_nbCarouselIdx + 1, true); // true restarts the autoplay clock so it doesn't double-advance
+}
 function nbStartCarouselAutoplay() {
   clearInterval(_nbCarouselTimer);
   _nbCarouselTimer = setInterval(() => nbGoToCarouselSlide(_nbCarouselIdx + 1, false), 4500);
@@ -16621,8 +16793,8 @@ function nbRenderNotesScreen() {
     // True first-run: no notes anywhere yet, regardless of filter/search.
     emptyTitle.textContent = 'Welcome to Bluebook';
     emptySub.textContent = 'Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one \u2014 it\u2019ll show up here, sorted by category.';
-    empty.style.display = '';
-    if (carousel) carousel.style.display = '';
+    _nbRevealFade(empty);
+    _nbRevealFade(carousel);
     grid.style.display = 'none';
     grid.innerHTML = '';
     nbInitOnboardCarousel();
@@ -16651,8 +16823,8 @@ function nbRenderNotesScreen() {
     const msg = _nbFilteredEmptyMessage();
     emptyTitle.textContent = msg.title;
     emptySub.textContent = msg.sub;
-    empty.style.display = '';
-    if (carousel) carousel.style.display = '';
+    _nbRevealFade(empty);
+    _nbRevealFade(carousel);
     grid.style.display = 'none';
     grid.innerHTML = '';
     nbInitOnboardCarousel();
@@ -16662,7 +16834,7 @@ function nbRenderNotesScreen() {
   // Carousel stays up through the first note too — only more than one
   // note (all.length, not filtered.length: it's general app orientation,
   // not tied to the current category/search view) retires it.
-  if (carousel) carousel.style.display = all.length > 1 ? 'none' : '';
+  if (all.length > 1) { if (carousel) carousel.style.display = 'none'; } else _nbRevealFade(carousel);
   grid.style.display = '';
   grid.innerHTML = filtered.map(n => {
     const isFav = _nbFavorites.has(n.id);
@@ -17076,7 +17248,7 @@ function nbGoScreen(name) {
   // interrupting the screen switch over, and the manual "Sync now"
   // button remains for anyone who wants to confirm it.
   if (leavingEditor || name === 'notes') nbSyncPullThenPush();
-  if (name === 'notes') _nbReconcileAccountActions();
+  if (name === 'notes') { _nbReconcileAccountActions(); if (_nbActiveCat === 'Subscribed') nbRefreshCurrentView('landing', false); }
 }
 // Enforce the landing state explicitly (Create screen + search bar hidden)
 // rather than relying on the HTML's default classes matching this JS.
