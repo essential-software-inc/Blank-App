@@ -4710,7 +4710,15 @@ const _NB_NOTE_UI_STATE_SCRIPT = `<script data-noteinfra="1">(function(){
         img.setAttribute('data-note-img-ref', id);
       });
       var html = clone.innerHTML;
-      if (html.length <= FULL_SNAPSHOT_MAX_CHARS) { st.full = html; st.imgRefs = Object.keys(images); }
+      if (html.length <= FULL_SNAPSHOT_MAX_CHARS) {
+        st.full = html; st.imgRefs = Object.keys(images);
+        // Report "default background" explicitly (empty string) instead of leaving pageBg out. An omitted
+        // key can't be told apart from "never touched", so the stale value from the previous snapshot
+        // (Object.assign in the 'markup-ui-state' handler) or the note's old background used to win on
+        // save — picking the default color looked like it reverted. Only done alongside st.full, since
+        // nbRestoreState only re-applies the saved background when it restores from st.full.
+        if (st.pageBg === undefined) { st.pageBg = ''; st.pageBgCustom = ''; }
+      }
     } catch(e) {}
     return { st: st, images: images };
   }
@@ -13602,6 +13610,9 @@ function _pubSaveNoteFields(id, fields) {
   // a note that's actually already live. Same reasoning nbConfirmSave's
   // quick-edit branch already follows for title/desc/tag changes.
   Object.assign(arr[idx], fields, { updatedAt: Date.now() });
+  // Explicit publish/update/unpublish by the person — clear a reseeded demo note's provisional flag so the
+  // pull-then-push below can't replace this state with the older server copy (see nbSyncPull).
+  if (arr[idx].seedProvisional) arr[idx].seedProvisional = false;
   nbSaveNotesArr(arr);
   // Every caller here is a publish/update/unpublish action from outside
   // the editor, none of which land on nbGoScreen's two sync triggers —
@@ -14093,7 +14104,7 @@ function _nbSaveSubscribedAuthors(set) {
 async function nbRenderStoriesStrip() {
   const strip = document.getElementById('nb-stories-strip');
   if (!strip) return;
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) return; // silently skip — not worth a toast on every cold load
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return false; // silently skip — not worth a toast on every cold load
   try {
     const headers = {};
     if (nbIsSignedIn()) headers['Authorization'] = 'Bearer ' + nbSessionToken();
@@ -14101,9 +14112,29 @@ async function nbRenderStoriesStrip() {
     if (!res.ok) throw new Error('stories fetch failed: ' + res.status);
     const data = await res.json();
     _nbStoriesCache = (data && data.stories) || [];
-  } catch (e) { _nbLog('stories strip', e); return; }
+  } catch (e) { _nbLog('stories strip', e); return false; }
   _nbPaintStoriesStrip();
+  return true; // callers can tell a real refresh from a skipped/failed one (see the 'online' retry below)
 }
+// Refresh the strip as soon as connectivity returns. Without this, a cold load or pull-to-refresh done
+// offline left the strip stale (or empty) until the person happened to pull to refresh again. 'online'
+// can fire before requests actually go through (same caveat as _retryPendingEmbeds), so a failed attempt
+// is retried a few times with a growing delay instead of giving up after the first miss. A newer 'online'
+// event supersedes any retry chain still waiting.
+let _nbStoriesOnlineToken = 0;
+window.addEventListener('online', () => {
+  const token = ++_nbStoriesOnlineToken;
+  const delays = [0, 2000, 5000, 10000];
+  (function attempt(i) {
+    setTimeout(async () => {
+      if (token !== _nbStoriesOnlineToken) return;
+      let ok = false;
+      try { ok = await nbRenderStoriesStrip(); } catch (e) { _nbLog('stories strip: online refresh', e); }
+      if (ok || token !== _nbStoriesOnlineToken) return;
+      if (i + 1 < delays.length) attempt(i + 1);
+    }, delays[i]);
+  })(0);
+});
 // Single source of truth for whether the strip is actually on screen.
 // Three independent things gate it — being on the Notes screen, the "All"
 // category being the active one (it's meant to read as a top-of-feed
@@ -17313,7 +17344,7 @@ function _nbCommitDraftToNote() {
   const idx = notes.findIndex(n => n.id === existingNote.id);
   if (idx === -1) return false;
   const content = (typeof uiState.full === 'string') ? uiState.full : savedFragment;
-  const pageBg = uiState.pageBg || existingNote.pageBg;
+  const pageBg = (uiState.pageBg !== undefined) ? uiState.pageBg : existingNote.pageBg; // '' = explicitly default
   const pageBgCustom = (uiState.pageBg === 'custom' && uiState.pageBgCustom) ? uiState.pageBgCustom : existingNote.pageBgCustom;
   // Same reasoning as pageBg above: the mobile/desktop view toggle lives
   // outside `content` (see snapshot()'s st.desktopView), so it needs its
@@ -17322,6 +17353,9 @@ function _nbCommitDraftToNote() {
   // only covers a draft saved before this field existed.
   const desktopView = (uiState.desktopView !== undefined) ? uiState.desktopView : existingNote.desktopView;
   notes[idx] = Object.assign({}, notes[idx], { content, pageBg, pageBgCustom, desktopView, updatedAt: Date.now() });
+  // A real save is the person's own edit, so a reseeded demo note stops being "provisional" here —
+  // otherwise the next sync pull replaces this edit with the older server copy (see nbSyncPull).
+  if (notes[idx].seedProvisional) notes[idx].seedProvisional = false;
   nbSaveNotesArr(notes);
   return true;
 }
@@ -17420,7 +17454,7 @@ function nbOpenSaveDialog() {
     // through Update, or vice versa.
     const uiState = _nbLoadDraftUiState(draftId);
     const content = (uiState && typeof uiState.full === 'string') ? uiState.full : savedFragment;
-    const pageBg = (uiState && uiState.pageBg) ? uiState.pageBg : note.pageBg;
+    const pageBg = (uiState && uiState.pageBg !== undefined) ? uiState.pageBg : note.pageBg;
     const pageBgCustom = (uiState && uiState.pageBg === 'custom' && uiState.pageBgCustom) ? uiState.pageBgCustom : note.pageBgCustom;
     const desktopView = (uiState && uiState.desktopView !== undefined) ? uiState.desktopView : note.desktopView;
     // Current live content sig (frozen for the dialog's lifetime — content
@@ -17478,6 +17512,9 @@ function nbConfirmSave() {
     const idx = notes.findIndex(n => n.id === id);
     if (idx !== -1) {
       notes[idx] = Object.assign({}, notes[idx], { title, desc, category, tags, updatedAt: Date.now() });
+      // Explicit edit by the person — clear a reseeded demo note's provisional flag so the sync pull
+      // triggered below can't replace these details with the older server copy (see nbSyncPull).
+      if (notes[idx].seedProvisional) notes[idx].seedProvisional = false;
       nbSaveNotesArr(notes);
       // This quick-edit dialog never goes through the editor or leaves
       // the Notes screen, so neither of nbGoScreen's two sync triggers
@@ -17524,7 +17561,7 @@ function nbConfirmSave() {
   // written onto the note at all — every save silently reset it back to
   // default on reopen. Persist it here too, falling back to whatever the
   // note already had when this session's draft never touched it.
-  const pageBg = (uiState && uiState.pageBg) ? uiState.pageBg : (isExisting ? existingNote.pageBg : undefined);
+  const pageBg = (uiState && uiState.pageBg !== undefined) ? uiState.pageBg : (isExisting ? existingNote.pageBg : undefined);
   const pageBgCustom = (uiState && uiState.pageBg === 'custom' && uiState.pageBgCustom) ? uiState.pageBgCustom : (isExisting ? existingNote.pageBgCustom : undefined);
   // Same reasoning as pageBg above: the mobile/desktop view toggle lives
   // outside #cv-canvas (see snapshot()'s st.desktopView), so it isn't
@@ -17544,6 +17581,9 @@ function nbConfirmSave() {
     const idx = notes.findIndex(n => n.id === existingNote.id);
     if (idx !== -1) {
       notes[idx] = Object.assign({}, notes[idx], { title, desc, category, tags, content, pageBg, pageBgCustom, desktopView, updatedAt: Date.now() });
+      // Same reason as in _nbCommitDraftToNote: an explicit save clears the reseed's provisional flag
+      // so a later sync pull can't overwrite it with the older server copy.
+      if (notes[idx].seedProvisional) notes[idx].seedProvisional = false;
     } else {
       deletedElsewhere = true;
     }
