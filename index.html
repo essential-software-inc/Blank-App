@@ -732,6 +732,26 @@ body.pink .rdlg-more-toggle svg {
 #story-viewer-sub-btn.is-subscribed {
   color: #3366cc
 }
+/* Like (heart) button — sits just left of the Subscribe button and shares its
+   look. Separate from Favorites (a private, on-device bookmark): this is a
+   public per-account like on the published note. Turns red when liked. */
+#story-viewer-like-btn {
+  position: absolute;
+  right: 2.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #202122;
+  padding: .3rem;
+  display: flex
+}
+#story-viewer-like-btn svg { transition: transform .12s ease }
+#story-viewer-like-btn:active svg { transform: scale(.85) }
+/* Room for both buttons on the right so the @slug title doesn't run under them. */
+#story-viewer-header.has-actions #story-viewer-title { padding-right: 4.8rem }
 #story-viewer-frame {
   flex: 1;
   border: none;
@@ -754,6 +774,7 @@ body.night #story-viewer-header { border-bottom-color: #282828; color: #fff }
 body.night #story-viewer-back { color: #fff }
 body.night #story-viewer-sub-btn { color: #fff }
 body.night #story-viewer-sub-btn.is-subscribed { color: #999999 }
+body.night #story-viewer-like-btn { color: #fff }
 body.pink #nb-stories-strip .nb-story-label { color: #875068 }
 body.pink .nb-story-ring-inner { color: #c8365e }
 body.pink .nb-story-ring.seen { background: #f3cddc }
@@ -762,11 +783,21 @@ body.pink #story-viewer-header { border-bottom-color: #f5c5d8; color: #1a0a12 }
 body.pink #story-viewer-back { color: #1a0a12 }
 body.pink #story-viewer-sub-btn { color: #1a0a12 }
 body.pink #story-viewer-sub-btn.is-subscribed { color: #e1306c }
+body.pink #story-viewer-like-btn { color: #1a0a12 }
 /* Blue matches the main header's icon buttons (#back-btn/.hdr-btn) in
    light mode — story viewer used the plain text color here before. */
 body:not(.night):not(.pink) #story-viewer-back,
-body:not(.night):not(.pink) #story-viewer-sub-btn {
+body:not(.night):not(.pink) #story-viewer-sub-btn,
+body:not(.night):not(.pink) #story-viewer-like-btn {
   color: #3366cc
+}
+/* Liked = red in every theme. The :not() chain matches the light-theme rule's
+   specificity above so this wins there too. */
+#story-viewer-like-btn.is-liked,
+body.night #story-viewer-like-btn.is-liked,
+body.pink #story-viewer-like-btn.is-liked,
+body:not(.night):not(.pink) #story-viewer-like-btn.is-liked {
+  color: #e0245e
 }
 
 #feed-search-wrap-inner {
@@ -3912,7 +3943,6 @@ body.night .step-chk.checked{background:#585858;border-color:#585858}
 body.pink .step-chk{border-color:#e8a0bc;background:#fff0f5}
 body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 </style>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 </head>
 <body>
 <script>
@@ -4263,7 +4293,7 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="delete-account-overlay">
   <div id="delete-account-dialog" style="z-index:911">
     <div class="rdlg-title">Delete account?</div>
-    <div class="rdlg-body">This signs you out and schedules your synced notes and published pages for permanent removal from Essential Software&rsquo;s servers in 30 days. Notes already saved on this device aren&rsquo;t affected. Sign back in with the same Google account within 30 days to cancel &mdash; after that, it can&rsquo;t be undone.</div>
+    <div class="rdlg-body">This signs you out on all your devices and schedules your synced notes, published pages, ads, and unspent ad view credits for permanent removal from Essential Software&rsquo;s servers in 30 days. Notes already saved on this device aren&rsquo;t affected. Sign back in with the same Google account within 30 days to cancel &mdash; after that, it can&rsquo;t be undone.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="delete-account-dialog-cancel">Cancel</button>
       <button class="rdlg-ok" id="delete-account-dialog-confirm">Delete account</button>
@@ -4364,6 +4394,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg>
     </button>
     <span id="story-viewer-title"><span class="hdr-title-inner" id="story-viewer-title-text"></span></span>
+    <button id="story-viewer-like-btn" onclick="nbToggleStoryLike()" aria-label="Like"></button>
     <button id="story-viewer-sub-btn" onclick="nbToggleStorySubscribe()" aria-label="Subscribe"></button>
   </div>
   <iframe id="story-viewer-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
@@ -4376,20 +4407,21 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 27 September 2026</em></p>
+      <p><em>Effective 28 September 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
-      <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device, with one exception: which stories you've opened is tracked server-side against your account when you're signed in, not stored on-device (see "Stories &amp; subscriptions" below). If you sign in with Google, your notes are additionally backed up to Essential Software's servers — see below.</p>
+      <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device, with one exception: which stories you've opened is tracked server-side against your account when you're signed in, not stored on-device (see "Stories &amp; subscriptions" below). If you sign in with Google, your notes, along with your favorites and theme choice, are additionally backed up to Essential Software's servers — see below.</p>
       <h3>Google sign-in &amp; sync</h3>
-      <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with a session token so you stay signed in. While signed in, your notes (including embedded images) are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance — see "In-app purchases" below — are linked to your account so they carry over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again. You can delete your account at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs you out and schedules everything stored with it (synced notes, published pages, running ads, and any unspent ad view-credit balance) for permanent removal after 30 days. Signing back in with the same Google account during that window cancels the deletion and restores full access.</p>
+      <p>Signing in is optional. It's handled by Google — Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with when you signed up, when you last signed in, and a session token so you stay signed in (a session lasts up to 30 days). While signed in, your notes (including embedded images), along with which notes you've marked as favorites and your theme choice, are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance — see "In-app purchases" below — are linked to your account so they carry over too. Signing out stops further syncing but does not delete the backup already stored — sign back in to pick it up again.</p>
+      <p>You can delete your account at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs this device out and schedules your account for deletion in 30 days. When that time comes, Essential Software permanently deletes your account record, synced notes and images, profile name and picture, subscriptions (both ones you made and ones to you), story-seen and like records, running ads and their view statistics, and any unspent ad view-credit balance, and takes down every page you published (a copy of each page is then kept for up to 30 more days, as described under "Publishing a page"). Until then your published pages and stories stay online. Signing back in with the same Google account during the 30 days cancels the deletion and restores full access. Every device where you're signed in is signed out as part of the deletion (each one finds out the next time the app contacts the server, usually within about a minute). Deleting your account does not delete anything held by Google or RevenueCat, which is governed by their own policies.</p>
       <h3>In-app purchases</h3>
-      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on Essential Software's behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives your Google account identifier — used to link a purchase to your account and carry it over to another device — along with the purchase and entitlement data needed to confirm what you bought. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through Essential Software's own servers. Ad view-credits do involve Essential Software's servers, which receive confirmation from RevenueCat — not from Google directly — and credit the views to your account. Essential Software never receives your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
+      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on Essential Software's behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID: before you sign in that's an anonymous ID RevenueCat generates for your install, and once you sign in it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through Essential Software's own servers. Ad view-credits do involve Essential Software's servers, which receive confirmation from RevenueCat — not from Google directly — and credit the views to your account. Essential Software never receives your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
-      <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted.</p>
+      <p>Publishing is optional — it only happens when you tap Publish. Your page's content and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side — only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted. Publishing also briefly checks your IP address (for about a minute) to limit spam, without storing it.</p>
       <h3>Publishing as an ad</h3>
       <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create — not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, Essential Software credits the corresponding number of views to your account. Essential Software also stores how many views an ad has used and its current status (running, used up, or taken down). To also report how many unique viewers an ad has reached, alongside its total view count, Essential Software stores an anonymous identifier generated and kept on each device — sent whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and exists only to tell whether a repeat view of a given ad came from a device already counted toward that ad; see "Analytics" below. Unpublishing an ad removes it from Create immediately and forfeits any views it had left — that balance is not restored to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched — ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
       <h3>Reporting a published page</h3>
-      <p>Anyone can report a published page from its public link. Reporting checks the reporter's IP address for about a minute, just to stop spam, then discards it — it's never stored as part of the report itself. Essential Software keeps only the reason and details submitted. Essential Software keeps every report on file so it can be reviewed. Reports of child sexual abuse material are specifically preserved, not deleted, because that material must be kept and passed to the proper authority.</p>
+      <p>Anyone can report a published page from its public link. Reporting checks the reporter's IP address for about a minute, just to stop spam, then discards it — it's never stored as part of the report itself. Essential Software keeps only the reason and details submitted, along with which page it's about and when. Each report is kept on file so it can be reviewed, and may also be forwarded as a notification to Essential Software's private alerting channel. Reports of child sexual abuse material are handled as the law requires, including being passed to the proper authority.</p>
       <p>This applies the same way to pages currently running as ads — an ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
       <p>Right now, the app doesn't show you that address while an ad appears as a starting point on the Create screen. To find it: without adding anything new to it, save the ad and open the Publish sheet for that note — it will automatically fill in the ad's own web address for you. Open that address in a browser and you'll see the report link.</p>
       <h3>External images &amp; embeds</h3>
@@ -4397,9 +4429,11 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Linked pages</h3>
       <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page — nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently, and how you're viewing it matters: someone who opens its public web address directly, outside the app, is looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Within the app itself, opening a story or a note found through search shows that same published page in-app, in the app's own built-in viewer (see "Stories &amp; subscriptions" below) — you don't leave the app to see it. A link tapped inside that in-app view currently does nothing — the app has no handler wired up to open it, so the tap is silently ignored rather than opening anywhere.</p>
       <h3>Stories &amp; subscriptions</h3>
-      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, and a preview image extracted from the note's published page, along with your account identifier. Viewers never see that identifier directly — it's the key behind the scenes that ties your picture and display name to your stories and lets a Subscribe tap reach the right account; what a viewer actually sees to tell you apart from another author is your display name, picture, or the note's title. Turning the toggle off removes the note from the strip going forward.</p>
-      <p>A display name and profile picture are both optional. A display name, if set, is shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed; leaving it blank means viewers just see the note's title instead, in both places. A display name is capped at 30 characters. A profile picture, if set, is shown only on your stories, as the ring avatar in the stories strip — it does not appear on your notes in the Subscribed feed. A profile picture you upload is stored on Essential Software's servers and served back from a plain web address keyed to your account identifier — the same way a story's own preview image is served, this address isn't behind a sign-in check, so anyone who has or guesses that identifier can load the picture, not only people who've seen one of your stories. Removing the picture deletes it from Essential Software's servers; leaving it unset (or removing it) means the story ring falls back first to the note's own image if it has one, and only then to an initial letter — taken from your display name, or the note's title if that's unset too. That initial is never taken from your account email, which is never sent to other viewers at all.</p>
-      <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed and so an account can tell it's already following another; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip.</p>
+      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app — not only to people who have the link — similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, and a preview image extracted from the note's published page, along with your account identifier. Other people's devices never receive your Google account identifier or email. Instead, each account is given a separate random author ID that means nothing outside the app; it's sent with your stories so your picture and display name can be tied to them and a Subscribe tap can reach the right account. It's generated by Essential Software, isn't derived from your Google account, and is deleted with your account. What a viewer sees to tell you apart from another author is your display name, picture, or the note's title. A story appears in the strip for 24 hours; it stays in the Subscribed feed of people who follow you until you turn the toggle off or unpublish the note. Turning the toggle off removes the note from the strip going forward.</p>
+      <p>A display name and profile picture are both optional. A display name, if set, is shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed; leaving it blank means viewers just see the note's title instead, in both places. A display name is capped at 30 characters. A profile picture, if set, is shown only on your stories, as the ring avatar in the stories strip — it does not appear on your notes in the Subscribed feed. A profile picture you upload is stored on Essential Software's servers and served back from a web address keyed to your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing (or to you, when you're signed in) — so anyone who has your author ID, for instance from seeing one of your stories, can load it during that time, and no one else can. Once you have no stories showing, the picture is no longer served to others. Removing the picture deletes it from Essential Software's servers; leaving it unset (or removing it) means the story ring falls back first to the note's own image if it has one, and only then to an initial letter — taken from your display name, or the note's title if that's unset too. That initial is never taken from your account email, which is never sent to other viewers at all.</p>
+      <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed and so an account can tell it's already following another. You can see how many accounts follow you, as a total, not who; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip. A signed-in account can also like a published note; Essential Software records, tied to your account, which notes you've liked so the heart shows correctly across your devices, and shows the note's author only a total number of likes, not who liked it.</p>
+      <h3>Third-party requests &amp; server logs</h3>
+      <p>Using the app makes some requests to third parties, which see your IP address like any website you visit: a script library (three.js) is loaded from Cloudflare's cdnjs when the app opens; Google's sign-in code is loaded from Google when you sign in; and the app occasionally requests a tiny blank page from Google (gstatic.com) just to check whether you're online. Requests to Essential Software's servers run on Cloudflare, which processes them and may keep standard request logs (such as time, address requested, and IP address) that Essential Software can use to operate and debug the service. Essential Software doesn't use them for analytics or tracking.</p>
       <h3>Analytics</h3>
       <p>Essential Software does not collect analytics, telemetry, or crash reports from this app. The one exception is the anonymous per-device identifier described under "Publishing as an ad" above: it exists only to count an ad's unique viewers, isn't used to track app usage generally, and doesn't apply anywhere outside that feature.</p>
       <h3>Contact</h3>
@@ -11192,6 +11226,10 @@ window.addEventListener('online', () => showToast('Back online'));
 
 /* ===================== Theme ===================== */
 const DK = 'nb_theme_v1';
+// When the theme was last changed on THIS device (ms). Rides along in the account backup next to the
+// theme itself so the newest change wins across devices — see _nbMergeIncomingTheme.
+const NB_THEME_TS_KEY = 'nb_theme_ts_v1';
+function _nbThemeTs() { try { return parseInt(localStorage.getItem(NB_THEME_TS_KEY) || '0', 10) || 0; } catch (e) { return 0; } }
 function applyTheme(mode) {
   document.body.classList.toggle('night', mode === 'dark');
   document.body.classList.toggle('pink', mode === 'pink');
@@ -11214,7 +11252,8 @@ function cycleTheme() {
   const cur = document.body.classList.contains('pink') ? 'pink' : document.body.classList.contains('night') ? 'dark' : 'light';
   const next = cur === 'light' ? 'dark' : cur === 'dark' ? 'pink' : 'light';
   applyTheme(next);
-  try { localStorage.setItem(DK, next); } catch (e) {}
+  try { localStorage.setItem(DK, next); localStorage.setItem(NB_THEME_TS_KEY, String(Date.now())); } catch (e) {}
+  _nbSchedulePullThenPush(); // carry the new theme to the account's other devices
   showToast(next === 'dark' ? 'Dark theme' : next === 'pink' ? 'Pink theme' : 'Light theme');
   setTimeout(() => document.body.classList.remove('theme-switching'), 200);
   // nbBuildSafeHtml() bakes the accent color directly into the note's
@@ -11497,12 +11536,30 @@ const NB_SYNC_MAX_BYTES = 8 * 1024 * 1024;
 // {id, deletedAt} kept alongside the notes array, pushed and pulled like
 // the notes are, and consulted on pull to both skip re-adding a note
 // that's been deleted elsewhere and to remove a locally-held copy of one.
-// Pruned to NB_TOMBSTONE_MAX_AGE_MS so it doesn't grow forever — that
-// window just needs to outlast the longest gap between two devices
-// syncing, not be permanent.
+// No longer pruned by age: a device that stayed offline or unused past the
+// old 90-day window would bring a deleted note back on its next sync, because
+// the delete record it needed had already expired. Each record is only an id
+// and a timestamp, so they're kept and merely capped by count (newest kept,
+// see _nbSaveDeletedIds) so the list can't grow without bound.
 const NB_DELETED_IDS_KEY = 'nbDeletedNoteIds';
-const NB_TOMBSTONE_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
-const NB_SYNC_POLL_MS = 60 * 1000;
+const NB_TOMBSTONE_MAX_AGE_MS = Infinity; // kept as a constant so the cutoff checks below stay valid (cutoff = -Infinity)
+const NB_TOMBSTONE_MAX_COUNT = 5000;
+const NB_SYNC_POLL_MS = 20 * 1000; // cheap: an unchanged backup answers 304 and an unchanged push is skipped
+// ETag of the backup version this device last pulled or pushed. Sent back as
+// If-Match on the next push so the worker only overwrites that exact version;
+// if another device pushed in between it answers 409 and we pull, merge and
+// retry instead of silently erasing that device's change. null = don't send
+// (nothing pulled yet, no backup exists yet, or an older worker that sends none).
+let _nbSyncEtag = null;
+// What this device knows about the server's backup: 'have' (pulled or pushed a
+// known version), 'none' (a pull definitively found no backup), or null
+// (unknown: nothing pulled yet, or the last pull failed before we had any
+// baseline). nbSyncPush refuses to push on null, so a failed pull can never be
+// followed by a push that overwrites a backup we never saw.
+let _nbSyncBaseline = null;
+// Last payload pushed and the ETag the server gave it. If the next payload is
+// identical and the server is still at that ETag there is nothing to send.
+let _nbLastPushedPayload = null, _nbLastPushedEtag = null;
 // Every pull adds whatever it merged in here, whether it ran silently
 // (boot, poll, foreground) or from the Sync now tap itself. nbSyncNow
 // reports this total, not just its own pull's diff, then zeroes it —
@@ -11514,6 +11571,9 @@ function _nbLoadDeletedIds() {
   try { return JSON.parse(localStorage.getItem(NB_DELETED_IDS_KEY) || '[]'); } catch (e) { return []; }
 }
 function _nbSaveDeletedIds(arr) {
+  if (arr.length > NB_TOMBSTONE_MAX_COUNT) {
+    arr = arr.slice().sort((a, b) => ((b && b.deletedAt) || 0) - ((a && a.deletedAt) || 0)).slice(0, NB_TOMBSTONE_MAX_COUNT);
+  }
   try { localStorage.setItem(NB_DELETED_IDS_KEY, JSON.stringify(arr)); } catch (e) {}
 }
 // Called at the moment a note is deleted locally. Re-recording an id
@@ -11557,7 +11617,9 @@ function nbAccount() {
 }
 function nbIsSignedIn() { return !!(nbSessionToken() && nbAccount()); }
 function _nbClearAccountLocal() {
-  try { localStorage.removeItem(NB_SESSION_KEY); localStorage.removeItem(NB_ACCOUNT_KEY); } catch (e) {}
+  try { const k = _nbSyncedImgsKey(); if (k) localStorage.removeItem(k); } catch (e) {}
+  try { localStorage.removeItem(NB_SESSION_KEY); localStorage.removeItem(NB_ACCOUNT_KEY); localStorage.removeItem('nb_subscribed_authors_v1'); } catch (e) {}
+  _nbSyncEtag = null; _nbSyncBaseline = null; _nbLastPushedPayload = null; _nbLastPushedEtag = null;
   _nbSyncChangesSinceCheck = { restored: 0, updated: 0, removed: 0 };
 }
 // Same window.Capacitor.Plugins bridge _nbRcPlugin() already uses —
@@ -11663,6 +11725,7 @@ function _nbBindAppResumeListener() {
       if (state && state.isActive) {
         _nbNudgeWebViewRepaint();
         nbSyncPullThenPush();
+        _nbReconcileAccountActions();
         // Autoplay's setInterval can die silently while backgrounded;
         // nbInitOnboardCarousel() is a no-op past its first call except
         // for restarting that timer, so this is safe even when the
@@ -11933,7 +11996,8 @@ async function _nbCompleteGoogleSignIn(idToken) {
   const data = await res.json();
   try {
     localStorage.setItem(NB_SESSION_KEY, data.sessionToken);
-    localStorage.setItem(NB_ACCOUNT_KEY, JSON.stringify({ sub: data.sub, email: data.email }));
+    _nbSyncEtag = null; _nbSyncBaseline = null; _nbLastPushedPayload = null; _nbLastPushedEtag = null; // a new session never inherits another account's baseline
+    localStorage.setItem(NB_ACCOUNT_KEY, JSON.stringify({ sub: data.sub, email: data.email, authorId: data.authorId || undefined }));
   } catch (e) {}
   // Re-homes the RevenueCat identity onto this Google account (rather
   // than the anonymous per-install ID Purchases.configure() started
@@ -11966,6 +12030,7 @@ async function _nbCompleteGoogleSignIn(idToken) {
   nbRenderNotesScreen();
   nbRenderStoriesStrip(); // ring state (seen/unseen) is per-account
   _nbFetchSubscriberCount(); // so it's already cached by the time the sign-out sheet is first opened
+  _nbReconcileAccountActions(); // this account's follows and likes, wherever they were made
   _nbFetchProfileName(); // pick up whatever name this account already has set, if any
   // Pull first so anything already backed up from another device merges
   // in locally, then push so the account's copy reflects the union of
@@ -12088,8 +12153,221 @@ function _nbGatherNotesAndImages() {
   });
   return { notes, images };
 }
+// ---- Cross-device favorites + theme -------------------------------------
+// Both used to live only on the device. They now ride in the same account
+// backup as the notes (extra `favorites` / `settings` fields; the worker
+// stores the blob as-is), merged per item by timestamp so an unfavorite on
+// one device isn't undone by a stale copy on another.
+const NB_FAV_META_KEY = 'nb_favorites_meta_v1'; // { [noteId]: { f: 0|1, t: ms } }
+function _nbLoadFavMeta() {
+  try { const m = JSON.parse(localStorage.getItem(NB_FAV_META_KEY) || '{}'); return (m && typeof m === 'object') ? m : {}; } catch (e) { return {}; }
+}
+function _nbSaveFavMeta(m) { try { localStorage.setItem(NB_FAV_META_KEY, JSON.stringify(m)); } catch (e) {} }
+// Only this account's visible notes' favorites go into its backup, so one
+// account's ids never end up in another's when accounts are switched here.
+// A favorite from before timestamps existed has none, so it goes up as t:0
+// (loses to any real change made elsewhere, wins over nothing).
+function _nbFavoritesForSync(noteIds) {
+  const meta = _nbLoadFavMeta();
+  const out = {};
+  Object.keys(meta).forEach(id => { if (noteIds.has(id)) out[id] = meta[id]; });
+  _nbFavorites.forEach(id => { if (noteIds.has(id) && !out[id]) out[id] = { f: 1, t: 0 }; });
+  return out;
+}
+function _nbMergeIncomingFavorites(remote) {
+  if (!remote || typeof remote !== 'object') return false;
+  const meta = _nbLoadFavMeta();
+  let changed = false;
+  Object.keys(remote).forEach(id => {
+    const r = remote[id];
+    if (!r || typeof r.t !== 'number') return;
+    const local = meta[id] || (_nbFavorites.has(id) ? { f: 1, t: 0 } : null);
+    if (local && r.t <= local.t) return;
+    meta[id] = { f: r.f ? 1 : 0, t: r.t };
+    if (r.f) { if (!_nbFavorites.has(id)) { _nbFavorites.add(id); changed = true; } }
+    else if (_nbFavorites.delete(id)) changed = true;
+  });
+  _nbSaveFavMeta(meta);
+  if (changed) { try { localStorage.setItem('nb_favorites_v1', JSON.stringify([..._nbFavorites])); } catch (e) {} }
+  return changed;
+}
+function _nbMergeIncomingTheme(remote) {
+  if (!remote || typeof remote.t !== 'number' || ['light', 'dark', 'pink'].indexOf(remote.v) === -1) return false;
+  if (remote.t <= _nbThemeTs()) return false;
+  applyTheme(remote.v);
+  try { localStorage.setItem(DK, remote.v); localStorage.setItem(NB_THEME_TS_KEY, String(remote.t)); } catch (e) {}
+  // The open canvas bakes the accent color into its markup when built (see cycleTheme).
+  const editor = document.getElementById('screen-create');
+  if (editor && editor.classList.contains('active') && typeof nbRenderCanvas === 'function') nbRenderCanvas();
+  return true;
+}
+// A favorite/theme change isn't a note edit, so nothing else would trigger a
+// sync for it. Debounced so a burst of taps is one round trip.
+let _nbPushSoonTimer = null;
+function _nbSchedulePullThenPush() {
+  if (!nbIsSignedIn()) return;
+  clearTimeout(_nbPushSoonTimer);
+  _nbPushSoonTimer = setTimeout(() => { nbSyncPullThenPush().catch(e => _nbLog('sync after setting change', e)); }, 1500);
+}
+// The backup is one blob with an 8 MB cap. Past it, background pushes used to
+// fail without a word. Say so once per session (and on every manual sync).
+let _nbSyncTooLargeNotified = false;
+const NB_SYNC_TOO_LARGE_MSG = 'Too much to sync \u2014 auto-backup is paused. Try removing large images.';
+function _nbSyncTooLarge(showFeedback) {
+  let notified = false;
+  if (showFeedback || !_nbSyncTooLargeNotified) { showToast(NB_SYNC_TOO_LARGE_MSG); notified = true; }
+  _nbSyncTooLargeNotified = true;
+  return { ok: false, reason: 'too-large', notified };
+}
+// ---- Backup images ------------------------------------------------------
+// Images are no longer embedded in the backup file. Each one is uploaded once
+// as its own object (ids are content hashes, so an id never changes what it
+// points at), and the backup carries only the text plus references. That keeps
+// the backup small no matter how many photos there are. The list below is just
+// a local shortcut for "already on the server"; a new device or a reinstall
+// starts empty and asks the server (/sync/images/missing) instead of
+// re-uploading everything.
+const NB_SYNC_IMG_MAX_BYTES = 6 * 1024 * 1024; // mirrors the worker's per-image cap
+function _nbSyncedImgsKey() { const a = nbAccount(); return a ? 'nb_synced_imgs_v1:' + a.sub : null; }
+function _nbSyncedImgs() {
+  const k = _nbSyncedImgsKey();
+  if (!k) return new Set();
+  try { return new Set(JSON.parse(localStorage.getItem(k) || '[]')); } catch (e) { return new Set(); }
+}
+function _nbSaveSyncedImgs(set) {
+  const k = _nbSyncedImgsKey();
+  if (!k) return;
+  try { localStorage.setItem(k, JSON.stringify([...set])); } catch (e) {}
+}
+let _nbImgTooLarge = new Set(); // this session only: ids the server refused as too big, so we don't retry them every minute
+let _nbImgTooLargeNotified = false;
+let _nbImgCapNotified = false;
+let _nbImgCapHit = 0; // timestamp of the last time the account's backed-up image limit was hit (0 = not hit)
+// Uploads whichever of `images` ({id: dataURL}) the server doesn't have yet.
+// Runs BEFORE the notes that reference them are pushed, so another device can
+// never pull a note whose images aren't there. Returns:
+//   {ok:true}                      everything referenced is on the server (or was skipped as too large)
+//   {ok:true, legacy:true}         worker predates image routes: caller should embed images in the backup as before
+//   {ok:false, reason:'session-expired'}
+// and throws on a network/server failure, same as the rest of nbSyncPush.
+async function _nbSyncUploadImages(images) {
+  const base = NB_PUBLISH_API.replace(/\/$/, '');
+  const auth = { 'Authorization': 'Bearer ' + nbSessionToken() };
+  const synced = _nbSyncedImgs();
+  const todo = Object.keys(images).filter(id => !synced.has(id) && !_nbImgTooLarge.has(id));
+  // After the account's image limit was hit, don't hammer the server every
+  // minute: try again only every 10 minutes (e.g. after the person deleted notes).
+  if (_nbImgCapHit && Date.now() - _nbImgCapHit < 10 * 60 * 1000) return { ok: true };
+  if (!todo.length) return { ok: true };
+  const missing = [];
+  for (let i = 0; i < todo.length; i += 500) {
+    const chunk = todo.slice(i, i + 500);
+    const res = await fetch(base + '/sync/images/missing', {
+      method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, auth), body: JSON.stringify({ ids: chunk })
+    });
+    if (res.status === 401) return { ok: false, reason: 'session-expired' };
+    if (res.status === 404 || res.status === 405) return { ok: true, legacy: true };
+    if (!res.ok) throw new Error('image check failed: ' + res.status);
+    const data = await res.json();
+    const miss = new Set((data && Array.isArray(data.missing)) ? data.missing : chunk);
+    chunk.forEach(id => { if (miss.has(id)) missing.push(id); else synced.add(id); });
+  }
+  _nbSaveSyncedImgs(synced);
+  let tooLarge = false;
+  try {
+    for (const id of missing) {
+      const data = images[id];
+      if (new TextEncoder().encode(data).length > NB_SYNC_IMG_MAX_BYTES) { _nbImgTooLarge.add(id); tooLarge = true; continue; }
+      const res = await fetch(base + '/sync/images/' + encodeURIComponent(id), { method: 'PUT', headers: auth, body: data });
+      if (res.status === 401) return { ok: false, reason: 'session-expired' };
+      if (res.status === 413) {
+        let msg = ''; try { msg = (await res.json()).error || ''; } catch (e) {}
+        if (/too many/i.test(msg)) { // the per-account image cap, not this image's size
+          _nbImgCapHit = Date.now();
+          if (!_nbImgCapNotified) { _nbImgCapNotified = true; showToast('Image backup limit reached \u2014 new images won\u2019t sync. Notes still do.'); }
+          break; // every further upload would be refused the same way
+        }
+        _nbImgTooLarge.add(id); tooLarge = true; continue;
+      }
+      if (!res.ok) throw new Error('image upload failed: ' + res.status);
+      synced.add(id);
+    }
+  } finally { _nbSaveSyncedImgs(synced); } // keep progress even if we stop partway
+  if (tooLarge && !_nbImgTooLargeNotified) { _nbImgTooLargeNotified = true; showToast('One image is too large to back up \u2014 the rest still sync.'); }
+  return { ok: true };
+}
+// After a pull: any image a visible note references that isn't on this device
+// gets downloaded from the account's backup. Runs in the background (a pull
+// never waits on it), a few at a time, and is safe to run every poll: what's
+// already here is skipped, and an image the server doesn't have is retried
+// only every 10 minutes.
+let _nbFetchingImgs = false;
+const _nbImgRemoteMiss = new Map();
+async function _nbSyncFetchMissingImages() {
+  if (_nbFetchingImgs || !nbIsSignedIn()) return;
+  const want = new Set();
+  nbVisibleNotes().forEach(n => {
+    const re = /data-note-img-ref="([^"]+)"/g; let m;
+    while ((m = re.exec(n.content || ''))) { if (!_nbGetImage(m[1])) want.add(m[1]); }
+  });
+  const now = Date.now();
+  const ids = [...want].filter(id => !(_nbImgRemoteMiss.get(id) > now - 10 * 60 * 1000));
+  if (!ids.length) return;
+  _nbFetchingImgs = true;
+  const base = NB_PUBLISH_API.replace(/\/$/, '');
+  const synced = _nbSyncedImgs();
+  let got = 0, stop = false;
+  const worker = async () => {
+    while (ids.length && !stop) {
+      const id = ids.shift();
+      try {
+        const res = await fetch(base + '/sync/images/' + encodeURIComponent(id), { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } });
+        if (res.status === 404) { _nbImgRemoteMiss.set(id, Date.now()); continue; }
+        if (res.status === 401) { stop = true; return; }
+        if (!res.ok) { _nbImgRemoteMiss.set(id, Date.now()); continue; }
+        await _nbSetImage(id, await res.text());
+        synced.add(id); got++;
+      } catch (e) { stop = true; return; } // offline / dropped — the next poll retries
+    }
+  };
+  try { await Promise.all([worker(), worker(), worker()]); }
+  finally {
+    _nbFetchingImgs = false;
+    if (got) { _nbSaveSyncedImgs(synced); try { nbRenderNotesScreen(); } catch (e) {} }
+  }
+}
+// Fields that only mean something on this device, kept out of the backup.
+function _nbStripLocalSyncFields(n) {
+  if (!n || n.syncBaseAt === undefined) return n;
+  const c = Object.assign({}, n); delete c.syncBaseAt; return c;
+}
+// Both devices changed the note since the version they last shared. syncBaseAt
+// is that shared version's updatedAt (set on every pull merge and push).
+// Unknown (notes from before this existed, never synced) = plain last-write-wins.
+function _nbIsSyncConflict(local, incoming) {
+  const base = local.syncBaseAt;
+  if (typeof base !== 'number') return false;
+  const l = local.updatedAt || 0, i = incoming.updatedAt || 0;
+  return l > base && i > base && l !== i;
+}
+// A separate note holding the losing version. Publish state is stripped: the
+// live page belongs to the original note, and two notes must never both
+// claim one page or its owner token.
+function _nbMakeConflictCopy(src, acct) {
+  const c = Object.assign({}, src, {
+    id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    title: (src.title || 'Untitled') + ' (conflict copy)',
+    createdAt: Date.now(), updatedAt: Date.now(),
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
+  });
+  delete c.syncBaseAt; delete c.seedProvisional;
+  if (acct) c.acct = acct.sub;
+  return c;
+}
 async function nbSyncPush(showFeedback) {
   if (!nbIsSignedIn()) return { ok: false, reason: 'not-signed-in' };
+  // Never push without knowing what's on the server (see _nbSyncBaseline).
+  if (!_nbSyncBaseline) return { ok: false, reason: 'no-baseline' };
   const acct = nbAccount();
   const { notes, images } = _nbGatherNotesAndImages();
   const cutoff = Date.now() - NB_TOMBSTONE_MAX_AGE_MS;
@@ -12102,18 +12380,39 @@ async function nbSyncPush(showFeedback) {
   // astronomically unlikely event of an id collision, wipe a note there
   // that was never actually deleted.
   const deletedIds = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff && (!t.acct || t.acct === acct.sub));
-  const payload = JSON.stringify({ app: 'Bluebook', version: 1, notes, images, deletedIds });
-  if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) {
-    if (showFeedback) showToast('Too much to sync \u2014 try removing large images first');
-    return { ok: false, reason: 'too-large' };
+  let themeNow = 'light';
+  try { themeNow = localStorage.getItem(DK) || 'light'; } catch (e) {}
+  // Images go up first, each once, so the backup itself stays text-only. If the
+  // worker is an older one without the image routes, fall back to embedding
+  // them in the backup like before so sync keeps working during a rollout.
+  let imgRes;
+  try { imgRes = await _nbSyncUploadImages(images); }
+  catch (e) {
+    _nbLog('sync images', e);
+    const detail = _nbFailureReason(e);
+    if (showFeedback) showToast('Sync failed' + detail);
+    return { ok: false, reason: 'error', detail };
   }
+  if (!imgRes.ok) { if (imgRes.reason === 'session-expired') { _nbHandleSessionExpired(); } return { ok: false, reason: imgRes.reason }; }
+  const payload = JSON.stringify(Object.assign({
+    app: 'Bluebook', version: imgRes.legacy ? 1 : 2, notes: notes.map(_nbStripLocalSyncFields), deletedIds,
+    favorites: _nbFavoritesForSync(new Set(notes.map(n => n.id))),
+    settings: { theme: { v: themeNow, t: _nbThemeTs() } }
+  }, imgRes.legacy ? { images } : {}));
+  if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) return _nbSyncTooLarge(showFeedback);
+  if (_nbSyncEtag && payload === _nbLastPushedPayload && _nbSyncEtag === _nbLastPushedEtag) return { ok: true, skipped: true };
   try {
+    const pushHeaders = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() };
+    if (_nbSyncEtag) pushHeaders['If-Match'] = _nbSyncEtag;
+    else if (_nbSyncBaseline === 'none') pushHeaders['If-None-Match'] = '*'; // first backup: create only, never overwrite one that appeared meanwhile
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/sync/notes', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      headers: pushHeaders,
       body: payload
     });
     if (res.status === 401) { _nbHandleSessionExpired(); return { ok: false, reason: 'session-expired' }; }
+    if (res.status === 409) return { ok: false, reason: 'conflict' }; // another device pushed first — caller re-pulls and retries
+    if (res.status === 413) return _nbSyncTooLarge(showFeedback); // the worker's own cap
     if (!res.ok) throw new Error('sync push failed: ' + res.status);
     // Tag every note that was just backed up with this account's sub, so
     // it can be correctly hidden from the notes screen if the user signs
@@ -12124,13 +12423,23 @@ async function nbSyncPush(showFeedback) {
     // back into the FULL local array, not the filtered `notes` list —
     // overwriting the store with just `notes` would silently delete
     // any other account's notes from this device.
-    const pushedIds = new Set(notes.map(n => n.id));
+    // Also record, per note, the version the server now holds (syncBaseAt):
+    // the next pull uses it to tell "edited on both devices" from "edited
+    // on one" (see _nbIsSyncConflict). Uses the pushed snapshot's updatedAt,
+    // not the note's current one, in case it was edited while this ran.
+    const pushedAt = new Map(notes.map(n => [n.id, n.updatedAt || 0]));
     const all = nbLoadNotes();
     let changed = false;
     all.forEach(n => {
-      if (pushedIds.has(n.id) && n.acct !== acct.sub) { n.acct = acct.sub; changed = true; }
+      if (!pushedAt.has(n.id)) return;
+      if (n.acct !== acct.sub) { n.acct = acct.sub; changed = true; }
+      if (n.syncBaseAt !== pushedAt.get(n.id)) { n.syncBaseAt = pushedAt.get(n.id); changed = true; }
     });
     if (changed) nbSaveNotesArr(all);
+    try { const done = await res.json(); _nbSyncEtag = (done && done.etag) || null; } catch (e) { _nbSyncEtag = null; }
+    _nbSyncBaseline = _nbSyncEtag ? 'have' : null; // no ETag back = can't vouch for the next push; pull first
+    _nbLastPushedPayload = _nbSyncEtag ? payload : null; _nbLastPushedEtag = _nbSyncEtag;
+    _nbSyncTooLargeNotified = false; // back under the cap — a future overflow should be announced again
     if (showFeedback) showToast('Synced to your account');
     return { ok: true };
   } catch (e) {
@@ -12163,12 +12472,16 @@ async function nbSyncPush(showFeedback) {
 async function nbSyncPull(showFeedback) {
   if (!nbIsSignedIn()) return { ok: false, reason: 'not-signed-in' };
   try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/sync/notes', {
-      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
-    });
+    const pullHeaders = { 'Authorization': 'Bearer ' + nbSessionToken() };
+    if (_nbSyncEtag && _nbSyncBaseline === 'have') pullHeaders['If-None-Match'] = _nbSyncEtag; // unchanged = 304, no download
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/sync/notes', { headers: pullHeaders });
     if (res.status === 401) { _nbHandleSessionExpired(); return { ok: false, reason: 'session-expired' }; }
-    if (res.status === 404) { if (showFeedback) showToast('Nothing backed up yet'); return { ok: false, reason: 'not-found' }; }
+    if (res.status === 304) { if (showFeedback) showToast('Already up to date'); return { ok: true, restored: 0, updated: 0, removed: 0, unchanged: true }; }
+    if (res.status === 404) { _nbSyncEtag = null; _nbSyncBaseline = 'none'; _nbLastPushedPayload = null; if (showFeedback) showToast('Nothing backed up yet'); return { ok: false, reason: 'not-found' }; }
     if (!res.ok) throw new Error('sync pull failed: ' + res.status);
+    // Held until the merge below succeeds: if it throws halfway we must not
+    // claim to have seen this version (a later push would then overwrite it).
+    const pulledEtag = res.headers.get('ETag') || null;
     const data = await res.json();
     const incoming = data && Array.isArray(data.notes) ? data.notes : [];
     const incomingDeleted = data && Array.isArray(data.deletedIds) ? data.deletedIds : [];
@@ -12192,6 +12505,8 @@ async function nbSyncPull(showFeedback) {
       if (!prev || t.deletedAt > prev.deletedAt) tombstones.set(t.id, t);
     });
     _nbSaveDeletedIds([...tombstones.values()]);
+    const favChanged = _nbMergeIncomingFavorites(data && data.favorites);
+    _nbMergeIncomingTheme(data && data.settings && data.settings.theme);
     let existing = nbLoadNotes();
     const indexById = new Map(existing.map((n, i) => [n.id, i]));
     let count = 0;
@@ -12214,6 +12529,7 @@ async function nbSyncPull(showFeedback) {
     const editingId = _nbGetEditingId();
     let editorTouchedNote = null;
     let editorLocalSavedFragment = null;
+    let conflictCount = 0, baseTouched = false;
     incoming.forEach(n => {
       if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
       // Came from the account's backup, so it belongs to this account —
@@ -12221,11 +12537,27 @@ async function nbSyncPull(showFeedback) {
       // again if the user later signs out. See nbSyncPush for the tag.
       if (acct) n.acct = acct.sub;
       const idx = indexById.get(n.id);
+      const conflict = idx !== undefined && !existing[idx].seedProvisional && _nbIsSyncConflict(existing[idx], n);
       if (idx === undefined) {
+        n.syncBaseAt = n.updatedAt || 0;
         existing.push(n);
         indexById.set(n.id, existing.length - 1);
         count++;
+      } else if (conflict && (n.updatedAt || 0) < (existing[idx].updatedAt || 0)) {
+        // Edited on both devices and this device's edit is the newer one, so it
+        // stays. The other device's version is kept as a copy instead of being
+        // overwritten by the next push. syncBaseAt moves up so the same remote
+        // version isn't copied again on the next pull.
+        existing.push(_nbMakeConflictCopy(n, acct));
+        existing[idx].syncBaseAt = n.updatedAt || 0;
+        conflictCount++;
+      } else if (!existing[idx].seedProvisional && (n.updatedAt || 0) === (existing[idx].updatedAt || 0)) {
+        if (existing[idx].syncBaseAt !== (n.updatedAt || 0)) { existing[idx].syncBaseAt = n.updatedAt || 0; baseTouched = true; } // same version on both sides
       } else if (existing[idx].seedProvisional || (n.updatedAt || 0) > (existing[idx].updatedAt || 0)) {
+        // Edited on both devices and the incoming edit is newer: it replaces the
+        // local note below, and the local edit survives as a copy.
+        if (conflict) { existing.push(_nbMakeConflictCopy(existing[idx], acct)); conflictCount++; }
+        n.syncBaseAt = n.updatedAt || 0;
         // Only the publish-relevant fields matter for the live-refresh
         // check — an incoming edit to title/content shouldn't yank the
         // sheet out from under someone mid-typing a slug for a note
@@ -12274,7 +12606,7 @@ async function nbSyncPull(showFeedback) {
     _nbSyncChangesSinceCheck.restored += count;
     _nbSyncChangesSinceCheck.updated += updatedCount;
     _nbSyncChangesSinceCheck.removed += removedCount;
-    if (count || updatedCount || removedCount || provisionalCleared) {
+    if (count || updatedCount || removedCount || provisionalCleared || favChanged || conflictCount || baseTouched) {
       // New notes just got push()'d onto the end above (see the merge
       // loop) regardless of when they were actually created — the list's
       // only real ordering rule is "new local notes go to index 0 and
@@ -12284,7 +12616,7 @@ async function nbSyncPull(showFeedback) {
       // pulled-in notes land where they belong instead of wherever the
       // merge happened to leave them; existing on-device notes that
       // didn't change keep their relative order since sort is stable.
-      if (count) existing.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      if (count || conflictCount) existing.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       nbSaveNotesArr(existing);
       buildCatBar();
       nbRenderNotesScreen();
@@ -12313,14 +12645,17 @@ async function nbSyncPull(showFeedback) {
         }
       }
     }
-    if (showFeedback) {
+    _nbSyncFetchMissingImages().catch(e => _nbLog('fetch backup images', e)); // background; never delays or fails the pull
+    _nbSyncEtag = pulledEtag; _nbSyncBaseline = 'have'; // merge finished cleanly: this is now the known server version
+    if (conflictCount) showToast(conflictCount === 1 ? 'Edited on two devices \u2014 kept both, the other is a \u201cconflict copy\u201d' : conflictCount + ' notes were edited on two devices \u2014 kept both, see \u201cconflict copy\u201d');
+    else if (showFeedback) {
       const parts = [];
       if (count) parts.push(count === 1 ? '1 note restored' : count + ' notes restored');
       if (updatedCount) parts.push(updatedCount === 1 ? '1 note updated' : updatedCount + ' notes updated');
       if (removedCount) parts.push(removedCount === 1 ? '1 note removed' : removedCount + ' notes removed');
       showToast(parts.length ? parts.join(', ') : 'Already up to date');
     }
-    return { ok: true, restored: count, updated: updatedCount, removed: removedCount };
+    return { ok: true, restored: count, updated: updatedCount, removed: removedCount, conflicts: conflictCount };
   } catch (e) {
     _nbLog('sync pull', e);
     const detail = _nbFailureReason(e);
@@ -12338,9 +12673,30 @@ async function nbSyncPull(showFeedback) {
 // "Sync now" button doesn't use this: it wants both results separately
 // to report on, and staying signed in un-syncable until the next retry
 // isn't a risk worth caring about there since the user's watching.
-async function nbSyncPullThenPush() {
-  const pull = await nbSyncPull(false);
-  if (pull.ok || pull.reason === 'not-found') await nbSyncPush(false);
+// Only one sync operation at a time. Poll, foreground, online, screen changes
+// and Sync now used to overlap, and an older response could land after a newer
+// one. A call made while a run is queued (not started) shares that run.
+let _nbSyncLock = Promise.resolve();
+function _nbWithSyncLock(fn) { const run = _nbSyncLock.then(fn, fn); _nbSyncLock = run.catch(() => {}); return run; }
+let _nbSyncQueued = null;
+function nbSyncPullThenPush() {
+  if (_nbSyncQueued) return _nbSyncQueued;
+  const p = _nbWithSyncLock(() => { _nbSyncQueued = null; return _nbSyncPullThenPushOnce(); });
+  _nbSyncQueued = p;
+  return p;
+}
+async function _nbSyncPullThenPushOnce() {
+  let pull = await nbSyncPull(false);
+  if (pull.ok || pull.reason === 'not-found') {
+    let push = await nbSyncPush(false);
+    // Another device pushed between our pull and push: take its changes in
+    // (pull merges them), then push the union. Bounded so a busy account can't loop.
+    for (let i = 0; push && push.reason === 'conflict' && i < 2; i++) {
+      pull = await nbSyncPull(false);
+      if (!(pull.ok || pull.reason === 'not-found')) break;
+      push = await nbSyncPush(false);
+    }
+  }
   return pull;
 }
 // The one place a person can deliberately ask "did that actually work?"
@@ -12356,12 +12712,17 @@ async function nbSyncPullThenPush() {
 function nbSyncNow() {
   const btn = document.getElementById('account-sync-btn');
   if (btn) { btn.classList.add('syncing'); btn.disabled = true; }
-  (async () => {
+  _nbWithSyncLock(async () => {
     const pull = await nbSyncPull(false);
     if (pull && pull.reason === 'session-expired') { if (btn) { btn.classList.remove('syncing'); btn.disabled = false; } return; }
-    const push = await nbSyncPush(false);
+    let push = await nbSyncPush(false);
+    if (push && push.reason === 'conflict') { // another device pushed first — merge its changes and try once more
+      const again = await nbSyncPull(false);
+      if (again && (again.ok || again.reason === 'not-found')) push = await nbSyncPush(false);
+    }
     if (btn) { btn.classList.remove('syncing'); btn.disabled = false; }
     if (push && push.reason === 'session-expired') return;
+    if (push && push.reason === 'too-large') { if (!push.notified) showToast(NB_SYNC_TOO_LARGE_MSG); return; }
     const pullOk = pull && pull.ok;
     const pullNotFound = pull && pull.reason === 'not-found';
     const pushOk = push && push.ok;
@@ -12386,7 +12747,7 @@ function nbSyncNow() {
     if (!pushOk) parts.push('backup failed');
     const msg = parts.length ? parts.join(', ') : 'Already up to date';
     showToast(msg.charAt(0).toUpperCase() + msg.slice(1));
-  })();
+  });
 }
 // A session token the worker no longer recognizes (expired, or its KV
 // entry was cleared — including the case where an account was actually
@@ -14101,9 +14462,39 @@ function _nbSubscribedAuthors() {
 function _nbSaveSubscribedAuthors(set) {
   try { localStorage.setItem('nb_subscribed_authors_v1', JSON.stringify([...set])); } catch (e) {}
 }
+// Other people's devices only ever see an account's opaque author ID, never its
+// Google sub. These compare against both so an account that signed in before the
+// worker started issuing IDs still recognises its own stories until the ID is
+// fetched (_nbEnsureAuthorId).
+function _nbIsOwnAuthor(id) {
+  const a = nbAccount();
+  return !!(a && id && (a.authorId === id || a.sub === id));
+}
+function _nbMyAuthorRef() { const a = nbAccount(); return a ? (a.authorId || a.sub || '') : ''; }
+let _nbAuthorIdFetching = false;
+async function _nbEnsureAuthorId() {
+  const a = nbAccount();
+  if (!a || a.authorId || _nbAuthorIdFetching || !nbSessionToken()) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  _nbAuthorIdFetching = true;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-name', {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const cur = nbAccount();
+    if (data && data.authorId && cur && cur.sub === a.sub) {
+      cur.authorId = data.authorId;
+      try { localStorage.setItem(NB_ACCOUNT_KEY, JSON.stringify(cur)); } catch (e) {}
+    }
+  } catch (e) { /* silent — retried next time a story or the strip renders */ }
+  finally { _nbAuthorIdFetching = false; }
+}
 async function nbRenderStoriesStrip() {
   const strip = document.getElementById('nb-stories-strip');
   if (!strip) return;
+  _nbEnsureAuthorId(); // no-op once known; lets own stories be recognised by their opaque ID
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return false; // silently skip — not worth a toast on every cold load
   try {
     const headers = {};
@@ -14263,13 +14654,23 @@ function nbOpenStory(slug, authorSub, title) {
   const subBtn = document.getElementById('story-viewer-sub-btn');
   const isSubscribed = _nbSubscribedAuthors().has(authorSub);
   _nbSetSubBtnState(subBtn, isSubscribed);
+  _nbEnsureAuthorId();
+  _nbReconcileSubscriptions(); // correct the button if this account follows them from another device
   // The worker rejects POST /subscriptions/:authorSub with 400 "can't
   // subscribe to yourself" when authorSub is the signed-in account's own
   // sub (see handleSubscribe) — this is your own story showing in the
   // strip. Hide the button rather than let that tap round-trip into an
   // error toast.
   const acct = nbAccount();
-  subBtn.style.display = (acct && acct.sub === authorSub) ? 'none' : '';
+  const isOwnStory = _nbIsOwnAuthor(authorSub);
+  subBtn.style.display = isOwnStory ? 'none' : '';
+  // Like button follows the same rule (no liking your own note) and reserves
+  // header room for both buttons only while they're showing.
+  const likeBtn = document.getElementById('story-viewer-like-btn');
+  likeBtn.style.display = isOwnStory ? 'none' : '';
+  document.getElementById('story-viewer-header').classList.toggle('has-actions', !isOwnStory);
+  _nbSetLikeBtnState(likeBtn, _nbLikedSlugs().has(slug));
+  if (!isOwnStory) _nbRefreshLikeState(slug);
   document.getElementById('story-viewer-overlay').classList.add('open');
   lockScroll();
   // The iframe opens optimistically above — cross-origin navigations
@@ -14282,7 +14683,8 @@ function nbOpenStory(slug, authorSub, title) {
     fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/stories/' + encodeURIComponent(slug) + '/seen', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
-    }).then(() => {
+    }).then(res => {
+      if (!res.ok) return; // rate-limited or refused — don't grey the ring for something the server didn't record
       const entry = _nbStoriesCache.find(s => s.slug === slug);
       if (entry) entry.seen = true;
     }).catch(e => _nbLog('mark story seen', e));
@@ -14323,22 +14725,309 @@ function nbCloseStory() {
   unlockScroll();
   _nbPaintStoriesStrip(); // reflect the ring just going grey, if it did
 }
+// ---- Likes ----------------------------------------------------------
+// Per-account like on a published note (by slug). Not Favorites — that's a
+// private on-device bookmark; this is public and counts toward the author's
+// "likes" total on their Account sheet.
+// Worker contract (expected): GET /likes/:slug -> { liked: boolean }
+// (Authorization optional; absent = liked:false); POST /likes/:slug and
+// DELETE /likes/:slug (Authorization required) like / unlike, idempotent.
+const NB_LIKE_ICON = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+const NB_LIKED_ICON = '<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+function _nbLikedSlugsKey() { const acct = nbAccount(); return acct ? 'nb_liked_slugs_v1:' + acct.sub : null; }
+// Local copy of which notes this account has liked, for a snappy first paint
+// of the heart (reconciled with the server in _nbRefreshLikeState).
+function _nbLikedSlugs() {
+  const key = _nbLikedSlugsKey();
+  if (!key) return new Set();
+  try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch (e) { return new Set(); }
+}
+function _nbSaveLikedSlugs(set) {
+  const key = _nbLikedSlugsKey();
+  if (!key) return;
+  try { localStorage.setItem(key, JSON.stringify([...set])); } catch (e) {}
+}
+function _nbSetLikeBtnState(btn, isLiked) {
+  btn.innerHTML = isLiked ? NB_LIKED_ICON : NB_LIKE_ICON;
+  btn.setAttribute('aria-label', isLiked ? 'Liked — tap to unlike' : 'Like');
+  btn.title = isLiked ? 'Liked' : 'Like';
+  btn.classList.toggle('is-liked', isLiked);
+}
+// ---- Offline queue (likes + subscriptions) -------------------------------
+// A like/subscribe tapped with no connection (or one that fails because the
+// connection drops mid-request) is applied locally right away and queued, then
+// sent once we're back online. One entry per item — the latest wish wins.
+// Kept per account so it can never be sent under a different one.
+function _nbPendingKey() { const a = nbAccount(); return a ? 'nb_pending_actions_v1:' + a.sub : null; }
+function _nbLoadPending() {
+  const k = _nbPendingKey();
+  if (!k) return [];
+  try { const a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
+function _nbSavePending(arr) {
+  const k = _nbPendingKey();
+  if (!k) return;
+  try { if (arr.length) localStorage.setItem(k, JSON.stringify(arr)); else localStorage.removeItem(k); } catch (e) {}
+}
+function _nbQueuePending(kind, id, want) {
+  const arr = _nbLoadPending().filter(p => !(p.kind === kind && p.id === id));
+  arr.push({ kind, id, want: !!want, t: Date.now() });
+  _nbSavePending(arr);
+}
+function _nbPendingFor(kind, id) { return _nbLoadPending().find(p => p.kind === kind && p.id === id) || null; }
+function _nbDropPending(kind, id) { _nbSavePending(_nbLoadPending().filter(p => !(p.kind === kind && p.id === id))); }
+// A failed request that never got an HTTP answer (offline, dropped, timed out).
+function _nbIsNetworkError(e) { return !(e && e.status); }
+let _nbFlushingPending = false;
+async function _nbFlushPending() {
+  if (_nbFlushingPending || !nbIsSignedIn()) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  if (!_nbLoadPending().length) return;
+  _nbFlushingPending = true;
+  let subChanged = false;
+  try {
+    for (const p of _nbLoadPending()) {
+      let res;
+      try {
+        res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + (p.kind === 'like' ? '/likes/' : '/subscriptions/') + encodeURIComponent(p.id), {
+          method: p.want ? 'POST' : 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + nbSessionToken(), 'X-Action-Time': String(p.t) } // when it was tapped, not when it's sent: the worker keeps the newest tap
+        });
+      } catch (e) { break; } // still offline / flaky — keep the rest queued
+      if (res.status === 401 || res.status === 429) break; // session or rate limit — try again later
+      if (res.status >= 500) continue; // server trouble — leave it queued
+      // Settled (accepted, or definitely refused). Drop it unless the person
+      // toggled the same thing again while this was in flight.
+      const cur = _nbPendingFor(p.kind, p.id);
+      const unchanged = !!cur && cur.t === p.t;
+      if (unchanged) _nbDropPending(p.kind, p.id);
+      if (p.kind === 'sub') { subChanged = true; _nbSubMutationSeq++; }
+      if (p.kind === 'like') _nbLikeMutationSeq++;
+      if (res.ok && unchanged) {
+        // A newer tap from another device beats this replay; the reply carries the real state.
+        let d = null; try { d = await res.json(); } catch (e) {}
+        const on = d && (p.kind === 'like' ? d.liked : d.subscribed);
+        if (typeof on === 'boolean' && on !== p.want) _nbAdoptServerState(p.kind, p.id, on);
+      }
+      if (!res.ok && unchanged) {
+        // Refused: undo the optimistic local state so the UI matches the server.
+        let msg = '';
+        try { msg = (await res.json()).error || ''; } catch (e) {}
+        if (p.kind === 'like') {
+          const set = _nbLikedSlugs(); if (p.want) set.delete(p.id); else set.add(p.id); _nbSaveLikedSlugs(set);
+          const b = document.getElementById('story-viewer-like-btn');
+          if (b && _nbCurrentStorySlug === p.id) _nbSetLikeBtnState(b, !p.want);
+        } else {
+          const set = _nbSubscribedAuthors(); if (p.want) set.delete(p.id); else set.add(p.id); _nbSaveSubscribedAuthors(set);
+          const b = document.getElementById('story-viewer-sub-btn');
+          if (b && _nbCurrentStoryAuthorSub === p.id) _nbSetSubBtnState(b, !p.want);
+        }
+        showToast('Couldn\u2019t sync your ' + (p.kind === 'like' ? 'like' : 'subscription') + (msg ? ' \u2014 ' + msg : ''));
+      }
+    }
+  } finally { _nbFlushingPending = false; }
+  if (subChanged) buildCatBar();
+}
+function _nbApplyQueuedLike(slug, want) {
+  const set = _nbLikedSlugs();
+  if (want) set.add(slug); else set.delete(slug);
+  _nbSaveLikedSlugs(set);
+  _nbLikeMutationSeq++;
+  _nbQueuePending('like', slug, want);
+  const btn = document.getElementById('story-viewer-like-btn');
+  if (btn && _nbCurrentStorySlug === slug) _nbSetLikeBtnState(btn, want);
+  showToast((want ? 'Liked' : 'Unliked') + ' \u2014 will sync when you\u2019re back online');
+}
+function _nbApplyQueuedSub(authorSub, want) {
+  const set = _nbSubscribedAuthors();
+  if (want) set.add(authorSub); else set.delete(authorSub);
+  _nbSaveSubscribedAuthors(set);
+  _nbSubMutationSeq++;
+  _nbQueuePending('sub', authorSub, want);
+  const btn = document.getElementById('story-viewer-sub-btn');
+  if (btn && _nbCurrentStoryAuthorSub === authorSub) _nbSetSubBtnState(btn, want);
+  buildCatBar();
+  showToast((want ? 'Subscribed' : 'Unsubscribed') + ' \u2014 will sync when you\u2019re back online');
+}
+// Reconciles the heart with the server when a note opens (e.g. it was liked
+// on another device). Silent on failure/offline, same as the other background
+// fetches here. Skipped while a tap is in flight so it can't undo it.
+async function _nbRefreshLikeState(slug) {
+  if (!nbIsSignedIn()) return;
+  if (_nbPendingFor('like', slug)) return; // an unsent tap is the newer truth
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/likes/' + encodeURIComponent(slug), {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) throw new Error('like state fetch failed: ' + res.status);
+    const data = await res.json();
+    const liked = !!(data && data.liked);
+    const set = _nbLikedSlugs();
+    if (liked) set.add(slug); else set.delete(slug);
+    _nbSaveLikedSlugs(set);
+    const btn = document.getElementById('story-viewer-like-btn');
+    if (_nbCurrentStorySlug === slug && btn && !btn.disabled) _nbSetLikeBtnState(btn, liked);
+  } catch (e) { _nbLog('like state fetch', e); }
+}
+// Mirrors nbToggleStorySubscribe: the button is disabled while the request is
+// in flight, the heart only changes once the server confirms, and a toast
+// reports the result (or the server's own reason on failure).
+async function nbToggleStoryLike() {
+  const slug = _nbCurrentStorySlug;
+  if (!slug) return;
+  if (!nbIsSignedIn()) { showToast('Sign in to like'); return; }
+  const acct = nbAccount();
+  if (_nbIsOwnAuthor(_nbCurrentStoryAuthorSub)) return; // own note — button is hidden, but guard anyway
+  const btn = document.getElementById('story-viewer-like-btn');
+  const set = _nbLikedSlugs();
+  const wasLiked = set.has(slug);
+  const method = wasLiked ? 'DELETE' : 'POST';
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) { _nbApplyQueuedLike(slug, !wasLiked); return; }
+  btn.disabled = true;
+  _nbLikeTapsInFlight++; _nbLikeMutationSeq++;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/likes/' + encodeURIComponent(slug), {
+      method,
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken(), 'X-Action-Time': String(Date.now()) }
+    });
+    if (!res.ok) {
+      let errMsg = '';
+      try { errMsg = (await res.json()).error || ''; } catch (e) {}
+      throw Object.assign(new Error('like toggle failed: ' + res.status), { serverMsg: errMsg, status: res.status });
+    }
+    let srv = null; try { srv = await res.json(); } catch (e) {}
+    const nowLiked = (srv && typeof srv.liked === 'boolean') ? srv.liked : !wasLiked; // server's word wins if a newer tap elsewhere beat this one
+    if (nowLiked) set.add(slug); else set.delete(slug);
+    _nbSaveLikedSlugs(set);
+    _nbDropPending('like', slug);
+    if (_nbCurrentStorySlug === slug) _nbSetLikeBtnState(btn, nowLiked);
+    showToast(nowLiked === !wasLiked ? (wasLiked ? 'Unliked' : 'Liked') : (nowLiked ? 'Liked' : 'Unliked') + ' \u2014 updated from your other device');
+  } catch (e) {
+    _nbLog('like toggle', e);
+    if (_nbIsNetworkError(e)) { _nbApplyQueuedLike(slug, !wasLiked); return; } // connection dropped — queue it
+    showToast('Could not update' + (e && e.serverMsg ? ' \u2014 ' + e.serverMsg : _nbFailureReason(e)));
+  } finally {
+    btn.disabled = false;
+    _nbLikeTapsInFlight--; _nbLikeMutationSeq++;
+  }
+}
+// Bumped whenever a subscribe/unsubscribe on this device succeeds, so a
+// reconcile request that was already in flight (and so predates it) is
+// discarded instead of overwriting the change with a stale list.
+let _nbSubMutationSeq = 0;
+// The worker is the source of truth for who this account follows
+// (GET /subscriptions); the local list is a cache of it. Reconciling makes the
+// Subscribe button and the "Subscribed" category right on a new or second
+// device, and picks up follows/unfollows made elsewhere. Silent on
+// failure/offline, like the other background fetches here.
+async function _nbReconcileSubscriptions() {
+  if (!nbIsSignedIn()) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  await _nbFlushPending(); // send anything tapped while offline before trusting the server's list
+  const seq = _nbSubMutationSeq;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/subscriptions', {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (res.status === 401) return; // session handling lives with the sync calls
+    if (!res.ok) throw new Error('subscriptions fetch failed: ' + res.status);
+    const data = await res.json();
+    if (!data || !Array.isArray(data.subs)) return;
+    if (seq !== _nbSubMutationSeq || !nbIsSignedIn()) return;
+    const before = _nbSubscribedAuthors();
+    const next = new Set(data.subs.filter(x => typeof x === 'string' && x));
+    // Follows/unfollows still waiting to be sent are newer than the server's list.
+    _nbLoadPending().forEach(p => { if (p.kind === 'sub') { if (p.want) next.add(p.id); else next.delete(p.id); } });
+    if (before.size === next.size && [...next].every(x => before.has(x))) return;
+    _nbSaveSubscribedAuthors(next);
+    const droppedFeed = _nbActiveCat === 'Subscribed' && next.size === 0;
+    if (droppedFeed) _nbActiveCat = 'All'; // that category disappears with the last follow
+    buildCatBar();
+    if (droppedFeed || _nbActiveCat === 'Subscribed') nbRenderNotesScreen();
+    const subBtn = document.getElementById('story-viewer-sub-btn');
+    if (subBtn && _nbCurrentStoryAuthorSub && document.getElementById('story-viewer-overlay').classList.contains('open')) {
+      _nbSetSubBtnState(subBtn, next.has(_nbCurrentStoryAuthorSub));
+    }
+  } catch (e) { _nbLog('subscriptions reconcile', e); }
+}
+// Bumped on every local like change (tap start/finish, queued, replayed) so a
+// GET /likes that started before it is discarded instead of undoing it.
+let _nbLikeMutationSeq = 0, _nbLikeTapsInFlight = 0;
+function _nbAdoptServerState(kind, id, on) {
+  if (kind === 'like') {
+    const set = _nbLikedSlugs(); if (on) set.add(id); else set.delete(id); _nbSaveLikedSlugs(set);
+    const b = document.getElementById('story-viewer-like-btn');
+    if (b && _nbCurrentStorySlug === id) _nbSetLikeBtnState(b, on);
+  } else {
+    const set = _nbSubscribedAuthors(); if (on) set.add(id); else set.delete(id); _nbSaveSubscribedAuthors(set);
+    _nbSubMutationSeq++;
+    const b = document.getElementById('story-viewer-sub-btn');
+    if (b && _nbCurrentStoryAuthorSub === id) _nbSetSubBtnState(b, on);
+    buildCatBar();
+  }
+}
+// Same idea as _nbReconcileSubscriptions, for hearts: GET /likes lists every
+// note this account liked, so a second device shows them without opening each note.
+async function _nbReconcileLikes() {
+  if (!nbIsSignedIn() || _nbLikeTapsInFlight) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  const seq = _nbLikeMutationSeq;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/likes', {
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) return; // 401 is handled by the sync calls
+    const data = await res.json();
+    if (!data || !Array.isArray(data.slugs)) return;
+    if (seq !== _nbLikeMutationSeq || _nbLikeTapsInFlight || !nbIsSignedIn()) return;
+    const before = _nbLikedSlugs();
+    const next = new Set(data.slugs.filter(x => typeof x === 'string' && x));
+    if (data.slugs.length >= 5000) before.forEach(x => next.add(x)); // list was cut off — only add, never remove
+    _nbLoadPending().forEach(p => { if (p.kind === 'like') { if (p.want) next.add(p.id); else next.delete(p.id); } }); // unsent taps are newer
+    if (before.size === next.size && [...next].every(x => before.has(x))) return;
+    _nbSaveLikedSlugs(next);
+    const btn = document.getElementById('story-viewer-like-btn');
+    if (btn && !btn.disabled && _nbCurrentStorySlug && document.getElementById('story-viewer-overlay').classList.contains('open')) {
+      _nbSetLikeBtnState(btn, next.has(_nbCurrentStorySlug));
+    }
+  } catch (e) { _nbLog('likes reconcile', e); }
+}
+// Follows and likes together. Throttled so foreground + visibility + online
+// firing at once cost one round of requests.
+let _nbLastActionsReconcile = 0;
+async function _nbReconcileAccountActions() {
+  if (!nbIsSignedIn()) return;
+  const now = Date.now();
+  if (now - _nbLastActionsReconcile < 5000) return;
+  _nbLastActionsReconcile = now;
+  await _nbReconcileSubscriptions();
+  await _nbReconcileLikes();
+}
+window.addEventListener('online', () => { _nbReconcileAccountActions(); if (nbIsSignedIn()) nbSyncPullThenPush(); });
+// Back on screen (browser tab, or a WebView resuming): catch up right away
+// instead of waiting for the next poll tick.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden || !nbIsSignedIn()) return;
+  nbSyncPullThenPush();
+  _nbReconcileAccountActions();
+});
 async function nbToggleStorySubscribe() {
   const authorSub = _nbCurrentStoryAuthorSub;
   if (!authorSub) return;
   if (!nbIsSignedIn()) { showToast('Sign in to subscribe'); return; }
   const acct = nbAccount();
-  if (acct && acct.sub === authorSub) return; // own story — button is hidden, but guard anyway
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) { showToast('No internet connection — try again once you\u2019re back online'); return; }
+  if (_nbIsOwnAuthor(authorSub)) return; // own story — button is hidden, but guard anyway
   const subBtn = document.getElementById('story-viewer-sub-btn');
   const set = _nbSubscribedAuthors();
   const wasSubscribed = set.has(authorSub);
   const method = wasSubscribed ? 'DELETE' : 'POST';
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) { _nbApplyQueuedSub(authorSub, !wasSubscribed); return; }
   subBtn.disabled = true;
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/subscriptions/' + encodeURIComponent(authorSub), {
       method,
-      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken(), 'X-Action-Time': String(Date.now()) }
     });
     // A bare status-code throw only ever surfaces as the generic bucket
     // in _nbFailureReason (e.g. any unrecognized 4xx becomes "request
@@ -14349,15 +15038,20 @@ async function nbToggleStorySubscribe() {
     if (!res.ok) {
       let errMsg = '';
       try { errMsg = (await res.json()).error || ''; } catch (e) {}
-      throw Object.assign(new Error('subscribe toggle failed: ' + res.status), { serverMsg: errMsg });
+      throw Object.assign(new Error('subscribe toggle failed: ' + res.status), { serverMsg: errMsg, status: res.status });
     }
-    if (wasSubscribed) set.delete(authorSub); else set.add(authorSub);
+    let srv = null; try { srv = await res.json(); } catch (e) {}
+    const nowSub = (srv && typeof srv.subscribed === 'boolean') ? srv.subscribed : !wasSubscribed; // server's word wins if a newer tap elsewhere beat this one
+    if (nowSub) set.add(authorSub); else set.delete(authorSub);
     _nbSaveSubscribedAuthors(set);
-    _nbSetSubBtnState(subBtn, !wasSubscribed);
-    showToast(wasSubscribed ? 'Unsubscribed' : 'Subscribed');
+    _nbDropPending('sub', authorSub);
+    _nbSubMutationSeq++;
+    _nbSetSubBtnState(subBtn, nowSub);
+    showToast(nowSub === !wasSubscribed ? (wasSubscribed ? 'Unsubscribed' : 'Subscribed') : (nowSub ? 'Subscribed' : 'Unsubscribed') + ' \u2014 updated from your other device');
     buildCatBar(); // "Subscribed" category appears/disappears with the first/last subscription
   } catch (e) {
     _nbLog('subscribe toggle', e);
+    if (_nbIsNetworkError(e)) { _nbApplyQueuedSub(authorSub, !wasSubscribed); return; } // connection dropped — queue it
     showToast('Could not update' + (e && e.serverMsg ? ' \u2014 ' + e.serverMsg : _nbFailureReason(e)));
   } finally {
     subBtn.disabled = false;
@@ -14495,6 +15189,7 @@ async function _nbFetchProfileName() {
     if (!res.ok) throw new Error('profile name fetch failed: ' + res.status);
     const data = await res.json();
     const name = (data && data.profileName) || '';
+    if (data && data.authorId) { const cur = nbAccount(); if (cur && !cur.authorId) { cur.authorId = data.authorId; try { localStorage.setItem(NB_ACCOUNT_KEY, JSON.stringify(cur)); } catch (e) {} } }
     const key = _nbProfileNameCacheKey();
     if (key) { try { localStorage.setItem(key, name); } catch (e) {} }
     if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
@@ -14529,7 +15224,12 @@ async function _nbFetchSubscriberCount() {
     if (!res.ok) throw new Error('subscriber count fetch failed: ' + res.status);
     const data = await res.json();
     const count = (data && data.count) || 0;
-    const text = count === 1 ? '1 subscriber' : count + ' subscribers';
+    let text = count === 1 ? '1 subscriber' : count + ' subscribers';
+    // Total likes across the author's published notes, from the same response
+    // (expected field: likes). Left out entirely if the worker doesn't send it yet.
+    if (data && typeof data.likes === 'number') {
+      text += ' \u2022 ' + (data.likes === 1 ? '1 like' : data.likes + ' likes');
+    }
     el.textContent = text;
     if (key) { try { localStorage.setItem(key, text); } catch (e) {} }
   } catch (e) { _nbLog('subscriber count fetch', e); }
@@ -14631,7 +15331,7 @@ async function _nbSaveProfileName(raw) {
     if (acct && acct.sub) {
       let touchedStories = false;
       _nbStoriesCache.forEach(function(s) {
-        if (s.authorSub === acct.sub && s.authorProfileName !== name) { s.authorProfileName = name; touchedStories = true; }
+        if (_nbIsOwnAuthor(s.authorSub) && s.authorProfileName !== name) { s.authorProfileName = name; touchedStories = true; }
       });
       if (touchedStories) _nbPaintStoriesStrip();
     }
@@ -14897,9 +15597,24 @@ function _nbRefreshProfileAvatar() {
   if (!img || !fallback) return;
   fallback.textContent = _nbAvatarFallbackLetter();
   if (!acct || !acct.sub) { img.style.display = 'none'; fallback.style.display = ''; return; }
-  img.onerror = function() { img.style.display = 'none'; fallback.style.display = ''; };
-  img.onload = function() { img.style.display = ''; fallback.style.display = 'none'; };
-  img.src = NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(acct.sub) + '?v=' + Date.now();
+  // The worker only serves a picture to the public while its owner has a live
+  // story, but always to the owner — who proves it with their session token. An
+  // <img src> can't send that header, so fetch it and show it as a blob.
+  const token = nbSessionToken();
+  const showFallback = function() { img.style.display = 'none'; fallback.style.display = ''; };
+  if (!token) { showFallback(); return; }
+  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(acct.authorId || acct.sub) + '?v=' + Date.now(), {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(res) {
+    if (!res.ok) throw new Error('no picture');
+    return res.blob();
+  }).then(function(blob) {
+    if (img._nbBlobUrl) { try { URL.revokeObjectURL(img._nbBlobUrl); } catch (e) {} }
+    img._nbBlobUrl = URL.createObjectURL(blob);
+    img.onerror = showFallback;
+    img.onload = function() { img.style.display = ''; fallback.style.display = 'none'; };
+    img.src = img._nbBlobUrl;
+  }).catch(showFallback);
 }
 
 // Shared by nbUnpublishNote's own confirm flow and nbDeleteNote's
@@ -16030,10 +16745,11 @@ _nbFetchSubscriberCount(); // warm the cache at boot so the sign-out sheet doesn
 // in the background, and a browser tab throttles but doesn't always stop
 // timers) so a signed-in device left backgrounded isn't polling a server
 // nobody's about to look at.
-if (nbIsSignedIn()) { nbSyncPullThenPush(); _nbFetchProfileName(); }
-let _nbSyncPollBusy = false;
+if (nbIsSignedIn()) { nbSyncPullThenPush(); _nbFetchProfileName(); _nbReconcileAccountActions(); }
+let _nbSyncPollBusy = false, _nbPollTick = 0;
 setInterval(() => {
   if (!nbIsSignedIn() || document.hidden || _nbSyncPollBusy) return;
+  if (++_nbPollTick % 3 === 0) _nbReconcileAccountActions(); // follows/likes from another device, about once a minute
   _nbSyncPollBusy = true;
   nbSyncPullThenPush().finally(() => { _nbSyncPollBusy = false; });
 }, NB_SYNC_POLL_MS);
@@ -16074,6 +16790,10 @@ function nbToggleFav(id, btn) {
   if (_nbFavorites.has(id)) _nbFavorites.delete(id); else _nbFavorites.add(id);
   try { localStorage.setItem('nb_favorites_v1', JSON.stringify([..._nbFavorites])); } catch (e) {}
   const isFav = _nbFavorites.has(id);
+  const favMeta = _nbLoadFavMeta();
+  favMeta[id] = { f: isFav ? 1 : 0, t: Date.now() };
+  _nbSaveFavMeta(favMeta);
+  _nbSchedulePullThenPush(); // carry it to the account's other devices
   if (btn) {
     btn.classList.toggle('active', isFav);
     btn.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
@@ -16280,6 +17000,7 @@ function nbGoScreen(name) {
   // interrupting the screen switch over, and the manual "Sync now"
   // button remains for anyone who wants to confirm it.
   if (leavingEditor || name === 'notes') nbSyncPullThenPush();
+  if (name === 'notes') _nbReconcileAccountActions();
 }
 // Enforce the landing state explicitly (Create screen + search bar hidden)
 // rather than relying on the HTML's default classes matching this JS.
