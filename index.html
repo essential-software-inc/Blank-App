@@ -998,7 +998,8 @@ body:not(.night):not(.pink) #story-viewer-like-btn.is-liked {
   margin-top: .05rem
 }
 
-.gc-likes {
+.gc-likes,
+.gc-uptime {
   display: inline-flex;
   align-items: baseline;
   gap: .22rem;
@@ -1006,8 +1007,12 @@ body:not(.night):not(.pink) #story-viewer-like-btn.is-liked {
 }
 
 /* Baseline-align the heart with the digits, then drop it by the empty strip under the
-   heart shape in its viewBox (3/24 of its height) so its bottom sits on the baseline. */
-.gc-likes svg {
+   heart shape in its viewBox (3/24 of its height) so its bottom sits on the baseline.
+   The clock is drawn to the same height, bottom edge and 11px box height as the heart, with
+   its viewBox cropped to the circle so its gap to the text matches; it uses currentColor,
+   so it follows each theme's .gc-desc-time colour. */
+.gc-likes svg,
+.gc-uptime svg {
   flex-shrink: 0;
   position: relative;
   top: .125em
@@ -15409,12 +15414,27 @@ async function nbRenderSubscribedFeed() {
 function _nbSubStoryDesc(s) { return String(s.desc || s.description || '').trim(); }
 function _nbSubStoryTags(s) { return Array.isArray(s.tags) ? s.tags.filter(Boolean).slice(0, 10) : []; }
 // Accepts epoch ms, epoch seconds, or an ISO string; returns ms or 0.
-function _nbSubStoryTs(s) {
-  let v = s.noteCreatedAt != null ? s.noteCreatedAt : (s.createdAt != null ? s.createdAt : s.publishedAt);
+function _nbSubEpoch(v) {
   if (typeof v === 'string' && v && isNaN(Number(v))) v = Date.parse(v);
   v = Number(v);
   if (!v || !isFinite(v)) return 0;
   return v < 1e12 ? v * 1000 : v;
+}
+// Published/Stories keep the note's creation time; Subscribed/Liked show when it became a story
+// (a liked note that isn't a story falls back to when it was published).
+function _nbSubStoryTs(s) {
+  if (_nbActiveCat === 'Published') return _nbSubEpoch(s.noteCreatedAt != null ? s.noteCreatedAt : (s.createdAt != null ? s.createdAt : s.publishedAt));
+  return _nbSubEpoch(s.createdAt != null ? s.createdAt : s.publishedAt);
+}
+// How long something has been up: 5m, 3h, 12d, 2mo, 1y.
+function _nbShortDuration(ts) {
+  const diff = Math.max(0, Date.now() - ts);
+  const min = 60000, hr = 3600000, day = 86400000;
+  if (diff < hr) return Math.max(1, Math.floor(diff / min)) + 'm';
+  if (diff < day) return Math.floor(diff / hr) + 'h';
+  if (diff < day * 30) return Math.floor(diff / day) + 'd';
+  if (diff < day * 365) return Math.floor(diff / (day * 30)) + 'mo';
+  return Math.floor(diff / (day * 365)) + 'y';
 }
 // 1234 -> 1.2k, 1500000 -> 1.5M; under 1000 shows as-is.
 function _nbCompactCount(n) {
@@ -15458,6 +15478,11 @@ function _nbSubCardHtmlRaw(s) {
   const imgsHtml = own ? _buildImgsHtml(extractImagesFromHtml(_nbRehydrateImages(own.content || ''))) : _buildImgsHtml(s.images || [], s.imageCount);
   const likes = (typeof s.likes === 'number' && isFinite(s.likes)) ? Math.max(0, Math.floor(s.likes)) : null; // absent from an older worker: show nothing rather than a false 0
   const likesHtml = likes === null ? '' : `<span class="gc-likes" aria-label="${likes} ${likes === 1 ? 'like' : 'likes'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.3 2.6 4.5 6.3 4.5c2 0 3.6 1 5.7 3.2 2.1-2.2 3.7-3.2 5.7-3.2 3.7 0 5.5 3.8 3.9 7.3C19.5 16.4 12 21 12 21z"/></svg>${_nbCompactCount(likes)}</span>`;
+  // Published/Stories only: how long the note has been published / showing in stories, before the like count.
+  const inStoriesTab = _nbActiveCat === 'Published' && _nbFeedKind() === 'stories';
+  const upTs = _nbActiveCat === 'Published' ? _nbSubEpoch(inStoriesTab ? s.createdAt : s.publishedAt) : 0;
+  const upLabel = upTs ? (inStoriesTab ? 'In stories for ' : 'Published for ') + _nbShortDuration(upTs) : '';
+  const uptimeHtml = upTs ? `<span class="gc-uptime" title="${esc(upLabel)}" aria-label="${esc(upLabel)}"><svg width="7.6" height="11" viewBox="3.75 0 16.5 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12.75" r="7.25"/><path d="M12 9.2v3.6l2.5 1.5"/></svg>${_nbShortDuration(upTs)}</span>` : '';
   const showAuthor = s.authorProfileName && _nbActiveCat !== 'Published'; // your own notes don't need your name on them
   // Same action buttons as a normal card, wired to the local copy (none if that note hasn't synced to this device yet).
   // Your own notes open in the editor (like a card in All); the story viewer is the fallback if the local copy isn't on this device.
@@ -15466,7 +15491,7 @@ function _nbSubCardHtmlRaw(s) {
       <div class="guide-card" data-slug="${esc(s.slug)}" onclick="${open}" role="button" tabindex="0" onkeydown="if (event.key==='Enter') { ${open} }">
         ${showAuthor ? `<span class="gc-author-name">${esc(s.authorProfileName)}</span>` : ''}
         <div class="gc-title">${esc(shownTitle || 'Untitled note')}</div>
-        ${(desc || ts || likesHtml) ? `<div class="gc-desc">${desc ? `<span class="gc-desc-text">${esc(desc)}</span>` : ''}${(ts || likesHtml) ? `<span class="gc-desc-time">${likesHtml}${ts ? _nbShortTimeAgo(ts) : ''}</span>` : ''}</div>` : ''}
+        ${(desc || ts || likesHtml || uptimeHtml) ? `<div class="gc-desc">${desc ? `<span class="gc-desc-text">${esc(desc)}</span>` : ''}${(ts || likesHtml || uptimeHtml) ? `<span class="gc-desc-time">${uptimeHtml}${likesHtml}${ts ? _nbShortTimeAgo(ts) : ''}</span>` : ''}</div>` : ''}
         ${imgsHtml}
         ${tags.length ? `<div class="gc-tags-row">${tags.map(tg => `<span class="gc-tag">${esc(tg)}</span>`).join('')}</div>` : ''}
         ${own ? _nbCardActionsHtml(own) : ''}
