@@ -14481,7 +14481,12 @@ async function nbUpdatePublishedNote() {
 // and nothing would ever reach the server. The worker's PUT /publish/:slug
 // still requires html in the body regardless, so this rebuilds and resends
 // the current (unchanged) page alongside the flag.
-async function _pubOnStoriesToggle(checked) {
+// Optimistic by design: the toast and the strip change the moment the switch is flipped, and the
+// request runs behind that. A failure puts the switch and strip back and says so. Requests for the
+// same session run one after another (_pubStoriesChain) so a quick on/off can't reach the server
+// out of order.
+let _pubStoriesChain = Promise.resolve();
+function _pubOnStoriesToggle(checked) {
   const note = _pubFindNote(_pubNoteId);
   const sw = document.getElementById('pub-stories-switch');
   if (!note || !note.publishedSlug) return;
@@ -14491,30 +14496,53 @@ async function _pubOnStoriesToggle(checked) {
     if (sw) sw.checked = !!note.showInStories;
     return;
   }
-  let html;
-  try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
-  catch (e) { _nbLog('stories toggle build', e); showToast('Could not update' + _nbFailureReason(e)); if (sw) sw.checked = !!note.showInStories; return; }
+  const noteId = note.id;
+  showToast(checked ? 'Now showing in stories' : 'Removed from stories');
+  _nbStoryOptimistic(note, checked);
+  _pubStoriesChain = _pubStoriesChain
+    .then(() => _pubSendStoriesToggle(noteId, checked))
+    .catch(e => _nbLog('stories toggle chain', e));
+}
+async function _pubSendStoriesToggle(noteId, checked) {
+  const note = _pubFindNote(noteId);
+  if (!note || !note.publishedSlug) return;
+  const slug = note.publishedSlug;
   try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
-      body: JSON.stringify({ html, token: note.publishToken, title: note.title || '', desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null, showInStories: checked })
-    });
-    if (!res.ok) throw new Error('stories toggle failed: ' + res.status);
-    _pubSaveNoteFields(note.id, { showInStories: checked });
-    showToast(checked ? 'Now showing in stories' : 'Removed from stories');
-    // Fire-and-forget: the strip should reflect this note's new state right
-    // away rather than waiting for the next cold load or pull-to-refresh,
-    // but the toast above must not wait on it — a stalled/slow stories
-    // fetch would otherwise hold up feedback for an action that already
-    // succeeded (matches the pattern in nbCompleteGoogleSignIn/pull-to-
-    // refresh, which also don't await this call before their own toast).
-    nbRenderStoriesStrip().catch(e => _nbLog('stories toggle: strip refresh', e));
+    const story = await _pubPutStoriesFlag(note, checked);
+    _pubSaveNoteFields(noteId, { showInStories: checked });
+    if (checked && story) _nbStoryServerRow(slug, story); // the server's own row replaces the provisional one
   } catch (e) {
     _nbLog('stories toggle', e);
-    showToast('Could not update' + _nbFailureReason(e));
-    if (sw) sw.checked = !!note.showInStories;
+    _nbStoryOverrides.delete(slug);
+    const sw = document.getElementById('pub-stories-switch');
+    if (sw && _pubNoteId === noteId) sw.checked = !!note.showInStories; // put the switch back to what's actually saved
+    nbRenderStoriesStrip().catch(err => _nbLog('stories toggle: strip refresh', err));
+    showToast('Could not update' + _nbFailureReason(e) + ' \u2014 change undone');
   }
+}
+// Sends the flag. Preferred route: PUT /publish/:slug/stories, which carries only the flag (no page
+// rebuild, no upload) and returns the story row. A worker without that route answers 400 "invalid slug"
+// (it reads "<slug>/stories" as a slug), 404 or 405, in which case this falls back to the original
+// PUT /publish/:slug that re-sends the whole page, so the app and worker can be deployed in any order.
+async function _pubPutStoriesFlag(note, checked) {
+  const base = NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug);
+  const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() };
+  const card = { title: note.title || '', desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null };
+  const res = await fetch(base + '/stories', {
+    method: 'PUT', headers,
+    body: JSON.stringify({ token: note.publishToken, showInStories: checked, ...card })
+  });
+  if (res.ok) { try { const d = await res.json(); return (d && d.story) || null; } catch (e) { return null; } }
+  let msg = ''; try { msg = await res.text(); } catch (e) {}
+  const oldWorker = res.status === 404 && !/not found|page content missing/i.test(msg) || res.status === 405 || (res.status === 400 && /invalid slug/i.test(msg));
+  if (!oldWorker) throw new Error('stories toggle failed: ' + res.status);
+  const html = nbBuildStaticNoteHtml(note, note.publishedSlug);
+  const res2 = await fetch(base, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ html, token: note.publishToken, ...card, showInStories: checked })
+  });
+  if (!res2.ok) throw new Error('stories toggle failed: ' + res2.status);
+  return null;
 }
 /* ===================== Stories strip + inline viewer ===================== */
 // Cache of the last-fetched strip so nbCloseStory can re-render the ring
@@ -14589,6 +14617,47 @@ async function _nbEnsureAuthorId() {
   } catch (e) { /* silent — retried next time a story or the strip renders */ }
   finally { _nbAuthorIdFetching = false; }
 }
+// Optimistic "Show in stories" changes (slug -> { show, entry, until }). A strip fetch that lands
+// before the server has caught up (or that is simply a shuffled discovery slice without this note)
+// must not undo what the person just did, so the fetched list is adjusted to match until the server
+// agrees or the entry expires.
+const _nbStoryOverrides = new Map();
+const NB_STORY_OVERRIDE_MS = 30000;
+function _nbApplyStoryOverrides(list) {
+  const now = Date.now();
+  let out = list;
+  _nbStoryOverrides.forEach((o, slug) => {
+    const present = out.some(x => x.slug === slug);
+    if (o.until < now || present === o.show) { _nbStoryOverrides.delete(slug); return; } // expired, or the server agrees now
+    out = o.show ? [o.entry, ...out] : out.filter(x => x.slug !== slug);
+  });
+  return out;
+}
+// Put this note into (or take it out of) the strip right now, from what's on the device.
+function _nbStoryOptimistic(note, show) {
+  const slug = note.publishedSlug;
+  const acct = nbAccount() || {};
+  const entry = {
+    slug,
+    title: note.title || 'Untitled note',
+    authorSub: acct.authorId || '',
+    authorProfileName: _nbLoadCachedProfileName() || null,
+    createdAt: Date.now(),
+    seen: false,
+    imageUrl: null
+  };
+  _nbStoryOverrides.set(slug, { show, entry, until: Date.now() + NB_STORY_OVERRIDE_MS });
+  _nbStoriesCache = show ? [entry, ..._nbStoriesCache.filter(x => x.slug !== slug)] : _nbStoriesCache.filter(x => x.slug !== slug);
+  _nbPaintStoriesStrip();
+}
+// The server confirmed with its own row (real preview image, author ID, name): swap it in.
+function _nbStoryServerRow(slug, row) {
+  const o = _nbStoryOverrides.get(slug);
+  if (o && o.show) { o.entry = row; o.until = Date.now() + NB_STORY_OVERRIDE_MS; }
+  if (_nbStoriesCache.some(x => x.slug === slug)) _nbStoriesCache = _nbStoriesCache.map(x => x.slug === slug ? row : x);
+  else _nbStoriesCache = [row, ..._nbStoriesCache];
+  _nbPaintStoriesStrip();
+}
 let _nbStoriesFetchSeq = 0;
 async function nbRenderStoriesStrip() {
   const strip = document.getElementById('nb-stories-strip');
@@ -14603,7 +14672,7 @@ async function nbRenderStoriesStrip() {
     if (!res.ok) throw new Error('stories fetch failed: ' + res.status);
     const data = await res.json();
     if (fetchId !== _nbStoriesFetchSeq) return true; // superseded — a newer fetch (or the just-saved name) is the fresher truth
-    _nbStoriesCache = (data && data.stories) || [];
+    _nbStoriesCache = _nbApplyStoryOverrides((data && data.stories) || []);
   } catch (e) { _nbLog('stories strip', e); return false; }
   _nbPaintStoriesStrip();
   return true; // callers can tell a real refresh from a skipped/failed one (see the 'online' retry below)
@@ -14676,7 +14745,11 @@ function _nbPaintStoriesStrip() {
   // keeps each group's relative (server) order, so this just demotes
   // whatever got marked seen since the last paint rather than reshuffling
   // everything.
-  _nbStoriesCache.sort((a, b) => (a.seen === b.seen) ? 0 : (a.seen ? 1 : -1));
+  // Your own stories always lead (the worker sends them first); among everyone else's, seen ones
+  // sink to the end.
+  const _myAuthorId = (nbAccount() || {}).authorId || null;
+  const _rank = x => (_myAuthorId && x.authorSub === _myAuthorId) ? 0 : (x.seen ? 2 : 1);
+  _nbStoriesCache.sort((a, b) => _rank(a) - _rank(b));
   strip.classList.toggle('has-stories', _nbStoriesCache.length > 0);
   _nbSyncStoriesStripVisibility();
   strip.innerHTML = _nbStoriesCache.map(s => {
@@ -15223,6 +15296,13 @@ async function nbToggleStorySubscribe() {
 let _nbSubFeedCursor = null;
 let _nbSubFeedLoading = false;
 let _nbSubFeedDone = false;
+// In-place refresh (Published/Stories): what the grid currently shows is keyed by category + list +
+// account; while that key still matches, a re-render patches cards where they are instead of
+// clearing the grid, re-showing the shimmer and losing the scroll position.
+let _nbSubFeedPaintKey = null;
+let _nbSubFeedPages = 0;
+let _nbSubCardCache = new Map(); // slug -> the html last drawn for that card
+function _nbSubPaintKeyNow() { return _nbActiveCat + '|' + _nbFeedKind() + '|' + ((nbAccount() || {}).sub || ''); }
 let _nbSubFeedObserver = null;
 let _nbSubFeedStories = []; // every story loaded so far, so search can filter without re-fetching
 
@@ -15236,7 +15316,7 @@ let _nbSubFeedStories = []; // every story loaded so far, so search can filter w
 const NB_SUB_EMPTY_LEAD = 'Mix text, photos, checklists, and more into scrapbook-style notes. ';
 // Three placeholder cards mirroring a loaded Subscribed card (author line,
 // title, thumbnail row) — swapped out wholesale when the first page lands.
-function _nbSubSkeletonHtml() { return _nbActiveCat === 'Published' ? _nbCardSkeletonHtml(false, true) : _nbCardSkeletonHtml(true); }
+function _nbSubSkeletonHtml() { return _nbActiveCat === 'Published' ? _nbCardSkeletonHtml(false) : _nbCardSkeletonHtml(true); }
 function _nbSubCarousel(show) {
   const c = document.getElementById('nb-onboard-carousel');
   if (!c) return;
@@ -15254,6 +15334,9 @@ async function nbRenderSubscribedFeed() {
   _nbSubFeedCursor = null;
   _nbSubFeedDone = false;
   _nbSubFeedStories = [];
+  _nbSubFeedPaintKey = null;
+  _nbSubFeedPages = 0;
+  _nbSubCardCache = new Map();
   grid.innerHTML = '';
   // Hide whatever the previous category left on screen (its empty state,
   // or its grid) while the first page loads — otherwise the old category's
@@ -15296,32 +15379,54 @@ function _nbCompactCount(n) {
   if (n < 1e6) return (Math.floor(n / 100) / 10).toString().replace(/\.0$/, '') + 'k';
   return (Math.floor(n / 1e5) / 10).toString().replace(/\.0$/, '') + 'M';
 }
+// Published/Stories are the user's own notes: when the local copy is on this device it is the
+// source of truth for what the card shows (so an edit-details change shows at once, like in All);
+// the server row only supplies the like count and stands in when the note hasn't synced here yet.
+function _nbOwnNoteFor(s) {
+  return _nbActiveCat === 'Published' ? (nbVisibleNotes().find(n => n.publishedSlug === s.slug) || null) : null;
+}
 function _nbSubStoryMatches(s) {
   const q = _nbSearchQ;
   if (!q) return true;
-  return (s.title || '').toLowerCase().includes(q)
-    || _nbSubStoryDesc(s).toLowerCase().includes(q)
+  const own = _nbOwnNoteFor(s);
+  const title = own ? own.title : s.title;
+  const desc = own ? String(own.desc || '').trim() : _nbSubStoryDesc(s);
+  const tags = own ? (own.tags || []).filter(Boolean) : _nbSubStoryTags(s);
+  return (title || '').toLowerCase().includes(q)
+    || desc.toLowerCase().includes(q)
     || (s.authorProfileName || '').toLowerCase().includes(q)
-    || _nbSubStoryTags(s).some(tg => String(tg).toLowerCase().includes(q));
+    || tags.some(tg => String(tg).toLowerCase().includes(q));
 }
 function _nbSubCardHtml(s) {
+  const html = _nbSubCardHtmlRaw(s);
+  _nbSubCardCache.set(s.slug, html);
+  return html;
+}
+function _nbSubCardHtmlRaw(s) {
   const sid = escJs(s.slug);
   const asub = escJs(s.authorSub);
-  const title = escJs(s.title || 'Untitled note');
-  const desc = _nbSubStoryDesc(s);
-  const ts = _nbSubStoryTs(s);
-  const tags = _nbSubStoryTags(s);
-  const imgsHtml = _buildImgsHtml(s.images || [], s.imageCount);
+  // Published/Stories: the local copy (if on this device) drives everything the card shows except the like count.
+  const own = _nbOwnNoteFor(s);
+  const shownTitle = own ? own.title : s.title;
+  const title = escJs(shownTitle || 'Untitled note');
+  const desc = own ? String(own.desc || '').trim() : _nbSubStoryDesc(s);
+  const ts = own ? (Number(own.createdAt) || 0) : _nbSubStoryTs(s);
+  const tags = own ? (own.tags || []).filter(Boolean).slice(0, 10) : _nbSubStoryTags(s);
+  const imgsHtml = own ? _buildImgsHtml(extractImagesFromHtml(_nbRehydrateImages(own.content || ''))) : _buildImgsHtml(s.images || [], s.imageCount);
   const likes = (typeof s.likes === 'number' && isFinite(s.likes)) ? Math.max(0, Math.floor(s.likes)) : null; // absent from an older worker: show nothing rather than a false 0
   const likesHtml = likes === null ? '' : `<span class="gc-likes" aria-label="${likes} ${likes === 1 ? 'like' : 'likes'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.3 2.6 4.5 6.3 4.5c2 0 3.6 1 5.7 3.2 2.1-2.2 3.7-3.2 5.7-3.2 3.7 0 5.5 3.8 3.9 7.3C19.5 16.4 12 21 12 21z"/></svg>${_nbCompactCount(likes)}</span>`;
   const showAuthor = s.authorProfileName && _nbActiveCat !== 'Published'; // your own notes don't need your name on them
+  // Same action buttons as a normal card, wired to the local copy (none if that note hasn't synced to this device yet).
+  // Your own notes open in the editor (like a card in All); the story viewer is the fallback if the local copy isn't on this device.
+  const open = own ? `nbOpenNoteForEdit('${escJs(own.id)}')` : `nbOpenStory('${sid}','${asub}','${title}')`;
   return `
-      <div class="guide-card" data-slug="${esc(s.slug)}" onclick="nbOpenStory('${sid}','${asub}','${title}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenStory('${sid}','${asub}','${title}')">
+      <div class="guide-card" data-slug="${esc(s.slug)}" onclick="${open}" role="button" tabindex="0" onkeydown="if (event.key==='Enter') { ${open} }">
         ${showAuthor ? `<span class="gc-author-name">${esc(s.authorProfileName)}</span>` : ''}
-        <div class="gc-title">${esc(s.title || 'Untitled note')}</div>
+        <div class="gc-title">${esc(shownTitle || 'Untitled note')}</div>
         ${(desc || ts || likesHtml) ? `<div class="gc-desc">${desc ? `<span class="gc-desc-text">${esc(desc)}</span>` : ''}${(ts || likesHtml) ? `<span class="gc-desc-time">${likesHtml}${ts ? _nbShortTimeAgo(ts) : ''}</span>` : ''}</div>` : ''}
         ${imgsHtml}
         ${tags.length ? `<div class="gc-tags-row">${tags.map(tg => `<span class="gc-tag">${esc(tg)}</span>`).join('')}</div>` : ''}
+        ${own ? _nbCardActionsHtml(own) : ''}
       </div>`;
 }
 function _nbSubAttachSentinel() {
@@ -15396,6 +15501,78 @@ function _nbSubApplySearch() {
   grid.innerHTML = _nbSubSkeletonHtml(); grid.style.display = '';
   _nbSubAfterPage();
 }
+// Make the grid's cards match `rows` without rebuilding it: unchanged cards keep their node, changed
+// ones are swapped, missing ones are added, gone ones removed, and order follows `rows`.
+function _nbSubReconcile(rows) {
+  const grid = document.getElementById('nb-notes-grid');
+  if (!grid) return;
+  const seen = new Set();
+  const shown = rows.filter(r => r && r.slug && !seen.has(r.slug) && seen.add(r.slug)).filter(_nbSubStoryMatches);
+  const existing = new Map();
+  grid.querySelectorAll('.guide-card[data-slug]').forEach(el => existing.set(el.getAttribute('data-slug'), el));
+  const keep = new Set();
+  const tpl = document.createElement('template');
+  let prev = null;
+  shown.forEach(row => {
+    let el = existing.get(row.slug);
+    const before = _nbSubCardCache.get(row.slug);
+    const html = _nbSubCardHtml(row);
+    if (!el || before !== html) {
+      tpl.innerHTML = html.trim();
+      const fresh = tpl.content.firstElementChild;
+      if (el) el.replaceWith(fresh);
+      el = fresh;
+    }
+    keep.add(row.slug);
+    const want = prev ? prev.nextElementSibling : grid.firstElementChild;
+    if (want !== el) grid.insertBefore(el, want);
+    prev = el;
+  });
+  existing.forEach((el, slug) => { if (!keep.has(slug)) el.remove(); });
+}
+// Re-render for Published/Stories while its cards are already on screen: repaint from the rows we
+// have (so local edits show at once), then silently re-fetch the pages already loaded and patch the
+// differences in. Nothing clears, no shimmer, scroll stays. An empty answer falls back to the full path.
+let _nbSubInPlaceBusy = false;
+async function nbRefreshSubFeedInPlace() {
+  const key = _nbSubFeedPaintKey;
+  _nbSubReconcile(_nbSubFeedStories);
+  if (_nbSubFeedLoading || _nbSubInPlaceBusy || !nbIsSignedIn()) return;
+  _nbSubInPlaceBusy = true;
+  _nbSubFeedLoading = true; // holds off scroll paging while the pages are swapped
+  let fallback = false;
+  try {
+    const path = _nbFeedKind() === 'stories' ? '/account/stories' : '/account/published-notes';
+    const pages = Math.max(1, _nbSubFeedPages);
+    let cursor = null, rows = [], fetched = 0, done = false;
+    for (let i = 0; i < pages; i++) {
+      const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + path + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''), {
+        headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+      });
+      if (!res.ok) throw new Error('in-place refresh failed: ' + res.status);
+      const data = await res.json();
+      rows.push(...((data && data.stories) || []));
+      fetched++;
+      cursor = (data && data.nextCursor) || null;
+      if (!cursor) { done = true; break; }
+    }
+    if (!_nbIsFeedCat(_nbActiveCat) || _nbSubFeedPaintKey !== key || key !== _nbSubPaintKeyNow()) return; // moved on meanwhile
+    if (!rows.length) { fallback = true; return; }
+    _nbSubFeedStories = rows;
+    _nbSubFeedCursor = cursor;
+    _nbSubFeedDone = done;
+    _nbSubFeedPages = fetched;
+    _nbSubReconcile(rows);
+  } catch (e) {
+    _nbLog('in-place refresh', e); // keep what's on screen; the next sync or pull will try again
+  } finally {
+    _nbSubInPlaceBusy = false;
+    _nbSubFeedLoading = false;
+    if (fallback) { _nbSubFeedPaintKey = null; nbRenderSubscribedFeed(); }
+    else if (_nbSubFeedPaintKey === null && _nbIsFeedCat(_nbActiveCat)) setTimeout(() => { if (_nbIsFeedCat(_nbActiveCat)) _nbLoadSubFeedPage(); }, 0); // a full reload (list switch) was blocked by our loading flag: run it now
+    else if (_nbIsFeedCat(_nbActiveCat)) { _nbSubAttachSentinel(); _nbSubAfterPage(); }
+  }
+}
 async function _nbLoadSubFeedPage() {
   if (_nbSubFeedLoading || _nbSubFeedDone || !nbIsSignedIn()) return;
   const empty = document.getElementById('notes-empty-state');
@@ -15434,6 +15611,7 @@ async function _nbLoadSubFeedPage() {
         emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Notes the people you subscribe to publish (from when you subscribed onward) will show up here.';
       }
       _nbSubFeedDone = true;
+      _nbSubFeedPaintKey = null;
       _nbSubCarousel(true);
       return;
     }
@@ -15442,6 +15620,8 @@ async function _nbLoadSubFeedPage() {
     if (isFirstPage) _nbSubCarousel(false); // stories are on screen (the empty case returned above)
     if (isFirstPage) _nbSubFeedStories = [];
     _nbSubFeedStories.push(...stories);
+    _nbSubFeedPages = isFirstPage ? 1 : _nbSubFeedPages + 1;
+    _nbSubFeedPaintKey = _nbSubPaintKeyNow();
     const shown = stories.filter(_nbSubStoryMatches);
     _nbSubFeedCursor = data.nextCursor || null;
     if (!_nbSubFeedCursor) _nbSubFeedDone = true;
@@ -15456,6 +15636,7 @@ async function _nbLoadSubFeedPage() {
     _nbLog('subscriptions feed', e);
     if (!_nbIsFeedCat(_nbActiveCat)) return;
     if (isFirstPage) {
+      _nbSubFeedPaintKey = null;
       _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       emptyTitle.textContent = 'Could not load';
       emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Something went wrong loading ' + (tab === 'stories' ? 'your stories' : tab === 'published' ? 'your published notes' : (tab === 'liked' ? 'your liked notes' : 'the Subscribed feed')) + ' \u2014 try again.';
@@ -16776,7 +16957,7 @@ function selectCat(cat, tab) {
   _nbActiveCat = cat;
   buildCatBar();
   _nbSyncStoriesStripVisibility();
-  if (_nbIsFeedCat(cat)) { _nbSwitchToken++; nbRenderNotesScreen(); return; } // has its own skeleton + fetch
+  if (_nbIsFeedCat(cat)) { _nbSwitchToken++; _nbSubFeedPaintKey = null; nbRenderNotesScreen(); return; } // a tap is a real switch/reload: own skeleton + fetch
   nbShowCategoryWithShimmer(same);
 }
 // Back online: give the connection a moment (the event can fire early), then refresh like a pull.
@@ -17015,10 +17196,39 @@ function _nbFilteredEmptyMessage() {
   }
   return { title: 'No notes here yet', sub: lead + 'Notes you add to \u201c' + _nbActiveCat + '\u201d will show up here as you create them.' };
 }
+// The action row on a note card (play icon, favorite, edit details, publish, delete). Shared by the
+// local cards and the Published/Stories cards, which are the user's own notes and look the same.
+function _nbCardActionsHtml(n) {
+  const isFav = _nbFavorites.has(n.id);
+  const nid = escJs(n.id);
+  const playSvg = _noteHasVideoEmbed(n.content || '') ? `<svg class="gc-play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>` : '';
+  return `
+      <div class="gc-steps-row">
+        ${playSvg ? `<span class="gc-steps" style="display:flex;align-items:center">${playSvg}</span>` : ''}
+        <div style="display:flex;align-items:center;gap:.85rem;flex-shrink:0;margin-left:auto">
+          <button class="gc-fav${isFav ? ' active' : ''}" onclick="event.stopPropagation();nbToggleFav('${nid}',this)" aria-label="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? '#e1306c' : 'none'}" stroke="${isFav ? '#e1306c' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+          <button class="gc-edit" onclick="event.stopPropagation();nbOpenNoteDetailsDialog('${nid}')" aria-label="Edit details">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="gc-edit" onclick="event.stopPropagation();nbOpenPublishSheet('${nid}')" aria-label="${n.publishedSlug ? 'Manage published page' : 'Publish to web'}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </button>
+          <button class="gc-trash" onclick="event.stopPropagation();nbDeleteNote('${nid}')" aria-label="Delete">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
+        </div>
+      </div>
+`;
+}
 function nbRenderNotesScreen() {
   if (_nbIsFeedCat(_nbActiveCat)) {
     const carousel = document.getElementById('nb-onboard-carousel');
     if (carousel) carousel.style.display = 'none';
+    const grid0 = document.getElementById('nb-notes-grid');
+    if (_nbActiveCat === 'Published' && _nbSubFeedPaintKey && _nbSubFeedPaintKey === _nbSubPaintKeyNow()
+        && grid0 && grid0.querySelector('.guide-card[data-slug]')) return nbRefreshSubFeedInPlace(); // same list still on screen: patch, don't rebuild
     return nbRenderSubscribedFeed(); // returned so pull-to-refresh can await it
   }
   if (_nbSubFeedObserver) { _nbSubFeedObserver.disconnect(); _nbSubFeedObserver = null; } // leaving Subscribed — stop paging it in the background
@@ -17076,11 +17286,9 @@ function nbRenderNotesScreen() {
   if (all.length > 1) { if (carousel) carousel.style.display = 'none'; } else _nbRevealFade(carousel);
   grid.style.display = '';
   grid.innerHTML = filtered.map(n => {
-    const isFav = _nbFavorites.has(n.id);
     const imgUrls = extractImagesFromHtml(_nbRehydrateImages(n.content || ''));
     const imgsHtml = _buildImgsHtml(imgUrls);
     const nid = escJs(n.id);
-    const playSvg = _noteHasVideoEmbed(n.content || '') ? `<svg class="gc-play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>` : '';
     nbInitOnboardCarousel();
     return `
     <div class="guide-card" data-note-id="${esc(n.id)}" onclick="nbOpenNoteForEdit('${nid}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenNoteForEdit('${nid}')">
@@ -17088,23 +17296,7 @@ function nbRenderNotesScreen() {
       ${(n.desc || n.createdAt) ? `<div class="gc-desc">${n.desc ? `<span class="gc-desc-text">${esc(n.desc)}</span>` : ''}${n.createdAt ? `<span class="gc-desc-time">${_nbShortTimeAgo(n.createdAt)}</span>` : ''}</div>` : ''}
       ${imgsHtml}
       ${(n.tags || []).length ? `<div class="gc-tags-row">${(n.tags || []).slice(0, 10).map(t => `<span class="gc-tag">${esc(t)}</span>`).join('')}</div>` : ''}
-      <div class="gc-steps-row">
-        ${playSvg ? `<span class="gc-steps" style="display:flex;align-items:center">${playSvg}</span>` : ''}
-        <div style="display:flex;align-items:center;gap:.85rem;flex-shrink:0;margin-left:auto">
-          <button class="gc-fav${isFav ? ' active' : ''}" onclick="event.stopPropagation();nbToggleFav('${nid}',this)" aria-label="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? '#e1306c' : 'none'}" stroke="${isFav ? '#e1306c' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          </button>
-          <button class="gc-edit" onclick="event.stopPropagation();nbOpenNoteDetailsDialog('${nid}')" aria-label="Edit details">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          </button>
-          <button class="gc-edit" onclick="event.stopPropagation();nbOpenPublishSheet('${nid}')" aria-label="${n.publishedSlug ? 'Manage published page' : 'Publish to web'}">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          </button>
-          <button class="gc-trash" onclick="event.stopPropagation();nbDeleteNote('${nid}')" aria-label="Delete">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-          </button>
-        </div>
-      </div>
+      ${_nbCardActionsHtml(n)}
     </div>
   `;
   }).join('');
