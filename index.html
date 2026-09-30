@@ -622,6 +622,12 @@ body.pink .rdlg-more-toggle svg {
 body.night #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active) { border-left-color: #2a2a2c }
 body.pink #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active) { border-left-color: #f5b8cf }
 
+.cat-badge { display: inline-block; min-width: 1.05em; margin-left: .3rem; padding: 0 .3em; border-radius: 99px; background: #d33; color: #fff; font-size: .62rem; font-weight: bold; line-height: 1.5; text-align: center; vertical-align: 1px }
+/* Alerts: read-only cards (no open action) — message, time-ago, delete. */
+.alert-card { cursor: default }
+.alert-card .gc-desc-text { display: block; -webkit-line-clamp: unset; overflow: visible }
+.alert-card .gc-desc-time { display: inline; margin: 0; text-align: left }
+
 /* ===================== Stories strip + viewer ===================== */
 #nb-stories-strip {
   display: none;
@@ -4369,7 +4375,7 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="delete-account-overlay">
   <div id="delete-account-dialog" style="z-index:911">
     <div class="rdlg-title">Delete account?</div>
-    <div class="rdlg-body">This signs you out on all your devices and schedules your synced notes, published pages, ads, and unspent ad view credits for permanent removal from Essential Software&rsquo;s servers in 30 days. Notes already saved on this device aren&rsquo;t affected. Sign back in with the same Google account within 30 days to cancel. After that, it can&rsquo;t be undone.</div>
+    <div class="rdlg-body">This signs you out on all your devices and schedules your synced notes, published pages, ads, and unspent ad view credits for permanent removal from our servers in 30 days. Notes already saved on this device aren&rsquo;t affected. Changed your mind? Sign back in with the same Google account within 30 days to cancel. After that, it can&rsquo;t be undone.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="delete-account-dialog-cancel">Cancel</button>
       <button class="rdlg-ok" id="delete-account-dialog-confirm">Delete account</button>
@@ -4391,7 +4397,7 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="terms-overlay">
   <div id="terms-dialog">
     <div class="rdlg-title" id="terms-dialog-title">Before you continue</div>
-    <div class="rdlg-body" id="terms-dialog-body">By continuing to use this app, you agree to our <a onclick="openConsumerTerms()">Consumer Terms</a> and <a onclick="openPrivacy()">Privacy Policy</a>.</div>
+    <div class="rdlg-body" id="terms-dialog-body">Thanks for choosing Bluebook! By continuing, you agree to our <a onclick="openConsumerTerms()">Consumer Terms</a> and <a onclick="openPrivacy()">Privacy Policy</a>.</div>
     <div class="rdlg-btns">
       <button class="rdlg-ok rdlg-ok--blue" id="terms-dialog-btn" onclick="acceptTerms()">Continue</button>
     </div>
@@ -4484,38 +4490,40 @@ document.body.dataset.lockScrollY = window.scrollY;
     </div>
     <div id="privacy-body">
       <p><em>Effective 30 September 2026</em></p>
-      <p><strong>Bluebook</strong> is published by Essential Software. This policy describes what data the app stores, where it lives, and what leaves your device.</p>
+      <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo; and &ldquo;us&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
-      <p>All pages, drafts, images, favourites, preferences, and UI state are stored locally on your device, with one exception: which stories you've opened is tracked server-side against your account when you're signed in, not stored on-device (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy), a short queue of any likes or follows you tapped while offline that haven't been sent yet, and a small number recording how far your device's clock is from Essential Software's servers, used to time-stamp those taps correctly. If you sign in with Google, your notes, along with your favorites and theme choice, are additionally backed up to Essential Software's servers (see below).</p>
+      <p>Your pages, drafts, images, favourites, preferences, and UI state all live on your device, with one exception: when you're signed in, which stories you've opened is tracked on our servers, against your account, instead of on your device (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy), a short queue of any likes or follows you tapped while offline that haven't been sent yet, and a small number recording how far your device's clock is off from our servers, so those taps are time-stamped correctly. If you sign in with Google, your notes, along with your favorites and theme choice, are additionally backed up to our servers (see below).</p>
       <h3>Google sign-in &amp; sync</h3>
-      <p>Signing in is optional. It's handled by Google. Essential Software never sees your Google password. Essential Software receives your Google account identifier and email address, and stores them along with when you signed up, when you last signed in, when the app was last active on your account (see "Activity counts" below), and a session token so you stay signed in (a session lasts up to 30 days). While signed in, your notes (including embedded images), along with which notes you've marked as favorites and your theme choice, are backed up to Essential Software's servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance (see "In-app purchases" below) are linked to your account so they carry over too. Signing out stops further syncing but does not delete the backup already stored. Sign back in to pick it up again.</p>
-      <p>You can delete your account at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs this device out and schedules your account for deletion in 30 days. When that time comes, Essential Software permanently deletes your account record, synced notes and images, profile name and picture, subscriptions (both ones you made and ones to you), story-seen, like and follow records (including the timestamps kept for them), running ads and their view statistics, and any unspent ad view-credit balance, and takes down every page you published (a copy of each page is then kept for up to 30 more days, as described under "Publishing a page"). Until then your published pages and stories stay online. Signing back in with the same Google account during the 30 days cancels the deletion and restores full access. Every device where you're signed in is signed out as part of the deletion (each one finds out the next time the app contacts the server, usually within about a minute). Deleting your account does not delete anything held by Google or RevenueCat, which is governed by their own policies.</p>
+      <p>Signing in is entirely optional, and Google handles it, so we never see your Google password. We receive your Google account identifier and email address, and keep them with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a session token that keeps you signed in (a session lasts up to 30 days). While signed in, your notes (including embedded images), along with which notes you've marked as favorites and your theme choice, are backed up to our servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance (see "In-app purchases" below) are linked to your account so they carry over too. Signing out stops further syncing. Your backup stays in place so you can pick it up again when you sign back in, and deleting your account removes it, as described below.</p>
+      <p>Your account is yours to keep or remove: you can delete it at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs this device out and schedules your account for deletion in 30 days. When that time comes, we permanently delete your account record, synced notes and images, profile name and picture, subscriptions (both ones you made and ones to you), story-seen, like and follow records (including the timestamps kept for them), running ads and their view statistics, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance, and take down every page you published (a copy of each page is then kept for up to 30 more days, as described under "Publishing a page"). Until then your published pages and stories stay online. Changed your mind? Signing back in with the same Google account during the 30 days cancels the deletion and restores full access. Every device where you're signed in is signed out as part of the deletion (each one finds out the next time the app contacts the server, usually within about a minute). Deleting your account does not delete anything held by Google or RevenueCat, which is governed by their own policies.</p>
       <h3>In-app purchases</h3>
-      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on Essential Software's behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID. Before you sign in, that's an anonymous ID RevenueCat generates for your install, and once you sign in, it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through Essential Software's own servers. Ad view-credits do involve Essential Software's servers, which receive confirmation from RevenueCat, not from Google directly, and credit the views to your account. Essential Software never receives your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
+      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on our behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID. Before you sign in, that's an anonymous ID RevenueCat generates for your install, and once you sign in, it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through our own servers. Ad view-credits do involve our servers, which receive confirmation from RevenueCat, not from Google directly, and credit the views to your account. We never receive your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
-      <p>Publishing is optional. It only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, Essential Software links the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). If Essential Software removes a page for a takedown request or abuse report, its address is reserved permanently, and the small record that keeps it reserved is kept indefinitely: the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID. This record is not removed when the copy is deleted or the account is deleted. Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
+      <p>Publishing is always your choice, and it only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to us and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for that page. It's stored on your device, not kept as-is on our side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). If we remove a page for a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as that address stays reserved: the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID. This record stays even after the copy or the account is deleted, since removing it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
       <h3>Publishing as an ad</h3>
-      <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create, not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, Essential Software credits the corresponding number of views to your account. Essential Software also stores how many views an ad has used and its current status (running, used up, or taken down). To also report how many unique viewers an ad has reached, alongside its total view count, Essential Software stores an anonymous identifier generated and kept on each device, sent whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and is used to tell whether a repeat view of a given ad came from a device already counted toward that ad, and for the activity counts described under "Activity counts" below; see also "Analytics" below. Unpublishing an ad removes it from Create immediately and forfeits any views it had left. That balance is not restored to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched. Ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
+      <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create, not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, we credit the corresponding number of views to your account. We also store how many views an ad has used and its current status (running, used up, or taken down). To report how many unique viewers an ad has reached, alongside its total view count, we store an anonymous identifier that each device generates, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and is used to tell whether a repeat view of a given ad came from a device already counted toward that ad, and for the activity counts described under "Activity counts" below; see also "Analytics" below. Unpublishing an ad removes it from Create immediately, and any views it had left go unused. That balance isn't returned to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched. Ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
       <h3>Reporting a published page</h3>
-      <p>Anyone can report a published page from its public link. Reporting counts requests from the reporter's IP address for about a minute, just to stop spam. The address sits in a short-lived counter that expires on its own, and it's never stored as part of the report itself. Essential Software keeps only the reason and details submitted, along with which page it's about and when. A report doesn't record who sent it. A report stays on file until it's reviewed, even if the page is unpublished or its author's account is deleted in the meantime. Once handled, it's deleted, except reports of child sexual abuse material, which are kept for 18 months, along with a copy of the reported page. The report's 18 months run from when it is closed; the page copy's run from when it was reported. A notification with the page's address, the reason, and the details may also be forwarded to Essential Software's private alerting channel. Reports of child sexual abuse material are handled as the law requires, including being passed to the proper authority. Moderation actions Essential Software takes (such as a takedown, a dismissed report, or a restored page) are logged with the action, the page's address, and the time, for about 13 months.</p>
+      <p>Reports help keep Bluebook a good place for everyone. Anyone can report a published page from its public link. Reporting counts requests from the reporter's IP address for about a minute, just to stop spam. The address sits in a short-lived counter that expires on its own, and it's never stored as part of the report itself. We keep only the reason and details submitted, along with which page it's about and when. A report doesn't record who sent it. A report stays on file until it's reviewed, even if the page is unpublished or its author's account is deleted in the meantime. Once handled, it's deleted, except reports of child sexual abuse material, which are kept for 18 months, along with a copy of the reported page. The report's 18 months run from when it is closed; the page copy's run from when it was reported. A notification with the page's address, the reason, and the details may also be forwarded to our private alerting channel. Reports of child sexual abuse material are handled as the law requires, including being passed to the proper authority. Moderation actions we take (such as a takedown, a dismissed report, or a restored page) are logged with the action, the page's address, and the time for about 13 months, as a record of what was done.</p>
       <p>This applies the same way to pages currently running as ads. An ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
       <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Create screen. To find it, save the ad without adding anything new to it, then open the Publish sheet for that note, which fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
+      <h3>Alerts</h3>
+      <p>We want you to know what's going on with your account. When one of your pages is reported, or we remove or pause something of yours or change your account's status, you'll get an automatic message (an alert) stating the reason. Alerts appear under Alerts in your library, which only shows once your account has at least one. A count on it shows how many have arrived since you last viewed the list, and the list's own title shows how many you have in total. We store the text of each alert (which can name the page or item concerned), when it was sent, and when you deleted it, plus a single timestamp against your account marking the newest alert you've been shown, which is what lets that count follow you across your devices. Deleting an alert removes it from your list only; we keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes the reporter's identity or the details they wrote, which we don't pass on. If you delete your account, your alerts and that timestamp are deleted with it.</p>
       <h3>External images &amp; embeds</h3>
-      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. Essential Software has no involvement with these third-party hosts. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device. This is checked automatically before an ad can go live or be updated.</p>
+      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. We have no involvement with these third-party hosts. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device. This is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
-      <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page. Nothing is fetched, and Essential Software has no visibility into what links a page contains. A published page works differently, and how you're viewing it matters: someone who opens its public web address directly, outside the app, is looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Within the app itself, opening a story or a note found through search shows that same published page in-app, in the app's own built-in viewer (see "Stories, subscriptions &amp; likes" below). You don't leave the app to see it. A link tapped inside that in-app view currently does nothing. The app has no handler wired up to open it, so the tap is silently ignored rather than opening anywhere.</p>
+      <p>This section covers links inside the app. Tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page. Nothing is fetched, and we have no visibility into what links a page contains. A published page works differently, and how you're viewing it matters: someone who opens its public web address directly, outside the app, is looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Within the app itself, opening a story or a note found through search shows that same published page in-app, in the app's own built-in viewer (see "Stories, subscriptions &amp; likes" below). You don't leave the app to see it. A link tapped inside that in-app view currently does nothing. It isn't set up to open anywhere, so the tap is simply ignored.</p>
       <h3>Stories, subscriptions &amp; likes</h3>
-      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app, not only to people who have the link, similar to how Publish as Ad works, but without purchased views. Essential Software's servers store the note's web address, title, description and tags (if you've added them), when the note was created, and up to three preview images extracted from the note's published page (plus how many images the note has, so a feed card can show how many more there are), along with your account identifier. The title is shown on your story; the title, description, tags, how long ago the note was created, and how many likes it has are shown on the note's card in the Subscribed feed of anyone who subscribes to you. Preview images that come from your device are copied to Essential Software's servers and can be loaded without a sign-in check while the story is showing; a preview image added by URL isn't copied, so viewers' devices load it directly from its source when they see your story or feed card, and that host can see their IP address. Turning the toggle off or unpublishing the note deletes the stored copies, including the stored description and tags. Other people's devices never receive your Google account identifier or email. Instead, each account is given a separate random author ID that means nothing outside the app; it's sent with your stories so your picture and display name can be tied to them and a Subscribe tap can reach the right account. It's generated by Essential Software, isn't derived from your Google account, and is deleted with your account. What a viewer sees to tell you apart from another author is your display name, picture, or the note's title. A story is eligible to appear in the strip for 24 hours from when you turn on "Show in stories" (editing the note doesn't restart that clock), after which it leaves the strip and your Stories tab. The strip isn't a list of every story: it shows a selection of other people's stories that reshuffles every few hours, so a story still within its 24 hours may or may not be shown to a given viewer. Your own live stories always lead your own strip, and stories from accounts a viewer already follows appear in their Subscribed feed instead of the strip. A story stays in the Subscribed feed of people who follow you (from when they followed you onward) for 7 days from when you turned on "Show in stories", or until you turn the toggle off or unpublish the note, whichever comes first; after that it leaves the feed, though the published page itself stays online. Turning the toggle off removes the note from the strip going forward.</p>
-      <p>A display name and profile picture are both optional. A display name, if set, is shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed; leaving it blank means viewers just see the note's title instead, in both places. A display name is capped at 30 characters. A profile picture, if set, is shown only on your stories, as the ring avatar in the stories strip. It does not appear on your notes in the Subscribed feed. A profile picture you upload is stored on Essential Software's servers and served back from a web address keyed to your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing (or to you, when you're signed in), so anyone who has your author ID, for instance from seeing one of your stories, can load it during that time, and no one else can. Once you have no stories showing, the picture is no longer served to others. Removing the picture deletes it from Essential Software's servers; leaving it unset (or removing it) means the story ring falls back first to the note's own image if it has one, and only then to an initial letter, taken from your display name, or the note's title if that's unset too. That initial is never taken from your account email, which is never sent to other viewers at all.</p>
-      <p>A signed-in account can subscribe to (follow) another account from that account's story. Essential Software stores who follows whom so it can build your Subscribed feed, so an account can tell it's already following another, and so your follows show up on any device you sign in on. You can see how many accounts follow you, as a total, not who; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. Essential Software also records, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip. Searching your Subscribed feed happens on your device, against the stories already loaded; what you type is not sent to Essential Software. A signed-in account can also like a published note; Essential Software records, tied to your account, which notes you've liked so the heart shows correctly across your devices. For each note you like or unlike, and each account you follow or unfollow, it also keeps the time of your most recent such action, so that taps made on different devices (or offline and sent later) are applied in the right order; that timestamp remains after you unlike or unfollow and is removed once the like or follow is gone and the timestamp is older than 30 days, or when your account is deleted. Each published note's own like count is shown on its card wherever that card appears: your Published and Stories tabs, and the Subscribed feed or Liked tab of anyone who sees the note, but never who liked it. You can also see one combined total, the number of likes across all your published notes, on your account screen. Unpublishing a note removes the likes it received, so both that note's count and the combined total go down accordingly. When a published note that isn't showing as a story appears as a card, either in its author's Published tab or in someone's Liked tab, Essential Software may copy up to three preview images from that page to its servers. Like story preview images, these copies can be loaded without a sign-in check, and they are deleted when the note is unpublished or its author's account is deleted.</p>
+      <p>From a published note's Publish sheet, you can turn on "Show in stories" (this requires signing in). Doing so adds the note to a stories strip shown to other people using the app, not only to people who have the link, similar to how Publish as Ad works, but without purchased views. Our servers store the note's web address, title, description and tags (if you've added them), when the note was created, and up to three preview images extracted from the note's published page (plus how many images the note has, so a feed card can show how many more there are), along with your account identifier. The title is shown on your story; the title, description, tags, how long ago the note was created, and how many likes it has are shown on the note's card in the Subscribed feed of anyone who subscribes to you. Preview images that come from your device are copied to our servers and can be loaded without a sign-in check while the story is showing; a preview image added by URL isn't copied, so viewers' devices load it directly from its source when they see your story or feed card, and that host can see their IP address. Turning the toggle off or unpublishing the note deletes the stored copies, including the stored description and tags. Other people's devices never receive your Google account identifier or email. Instead, each account is given a separate random author ID that means nothing outside the app; it's sent with your stories so your picture and display name can be tied to them and a Subscribe tap can reach the right account. It's generated by us, isn't derived from your Google account, and is deleted with your account. What a viewer sees to tell you apart from another author is your display name, picture, or the note's title. A story is eligible to appear in the strip for 24 hours from when you turn on "Show in stories" (editing the note doesn't restart that clock), after which it leaves the strip and your Stories tab. The strip isn't a list of every story: it shows a selection of other people's stories that reshuffles every few hours, so a story still within its 24 hours may or may not be shown to a given viewer. Your own live stories always lead your own strip, and stories from accounts a viewer already follows appear in their Subscribed feed instead of the strip. A story stays in the Subscribed feed of people who follow you (from when they followed you onward) for 7 days from when you turned on "Show in stories", or until you turn the toggle off or unpublish the note, whichever comes first; after that it leaves the feed, though the published page itself stays online. Turning the toggle off removes the note from the strip going forward.</p>
+      <p>A display name and profile picture are both optional. A display name, if set, is shown to other people on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed; leaving it blank means viewers just see the note's title instead, in both places. A display name is capped at 30 characters. A profile picture, if set, is shown only on your stories, as the ring avatar in the stories strip. It does not appear on your notes in the Subscribed feed. A profile picture you upload is stored on our servers and served back from a web address keyed to your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing (or to you, when you're signed in), so anyone who has your author ID, for instance from seeing one of your stories, can load it during that time, and no one else can. Once you have no stories showing, the picture is no longer served to others. Removing the picture deletes it from our servers; leaving it unset (or removing it) means the story ring falls back first to the note's own image if it has one, and only then to an initial letter, taken from your display name, or the note's title if that's unset too. That initial is never taken from your account email, which is never sent to other viewers at all.</p>
+      <p>A signed-in account can subscribe to (follow) another account from that account's story. We store who follows whom to build your Subscribed feed, to show whether you're already following an account, and to keep your follows on any device you sign in on. You can see how many accounts follow you, as a total, not who; the app also keeps a local copy of who you follow on your device to show the Subscribe/Subscribed button without a round trip. We also record, tied to your account, which stories you've opened, so a story you've already seen doesn't keep drawing your attention in the strip. Searching your Subscribed feed happens on your device, against the stories already loaded; what you type is not sent to us. A signed-in account can also like a published note; we record, tied to your account, which notes you've liked so the heart shows correctly across your devices. For each note you like or unlike, and each account you follow or unfollow, it also keeps the time of your most recent such action, so that taps made on different devices (or offline and sent later) are applied in the right order; that timestamp remains after you unlike or unfollow and is removed once the like or follow is gone and the timestamp is older than 30 days, or when your account is deleted. Each published note's own like count is shown on its card wherever that card appears: your Published and Stories tabs, and the Subscribed feed or Liked tab of anyone who sees the note, but never who liked it. You can also see one combined total, the number of likes across all your published notes, on your account screen. Unpublishing a note removes the likes it received, so both that note's count and the combined total go down accordingly. When a published note that isn't showing as a story appears as a card, either in its author's Published tab or in someone's Liked tab, we may copy up to three preview images from that page to our servers. Like story preview images, these copies can be loaded without a sign-in check, and they are deleted when the note is unpublished or its author's account is deleted.</p>
       <h3>Third-party requests &amp; server logs</h3>
-      <p>Using the app makes some requests to third parties, which see your IP address like any website you visit: a script library (three.js) is loaded from Cloudflare's cdnjs when the app opens; Google's sign-in code is loaded from Google when you sign in; and the app occasionally requests a tiny blank page from Google (gstatic.com) just to check whether you're online. Requests to Essential Software's servers run on Cloudflare, which processes them and may keep standard request logs (such as time, address requested, and IP address) that Essential Software can use to operate and debug the service. Essential Software doesn't use them for analytics or tracking.</p>
+      <p>Using the app makes some requests to third parties, which see your IP address like any website you visit: a script library (three.js) is loaded from Cloudflare's cdnjs when the app opens; Google's sign-in code is loaded from Google when you sign in; and the app occasionally requests a tiny blank page from Google (gstatic.com) just to check whether you're online. Requests to our servers run on Cloudflare, which processes them and may keep standard request logs (such as time, address requested, and IP address) that we can use to operate and debug the service. We don't use them for analytics or tracking.</p>
       <h3>Activity counts</h3>
-      <p>To know roughly how many people use the app, and how many are using it right now, Essential Software's servers record when the app is open. While the app is open, it contacts the server on launch, when you return to it, and about every four minutes, sending the same anonymous per-device identifier described under "Publishing as an ad" above. If you're signed in, this (and any other request you make while signed in) records only the time your account was last active, against your account. If you're not signed in, the server records the device identifier with the times it was first and last seen, and nothing else: it isn't linked to a name, email address, or Google account, and if you later sign in on that device the signed-out record is deleted. Essential Software uses these records only for private, aggregate totals (such as total, new and currently active users and devices) and to look up an account's last activity when operating the service. They're never shown to other people, shared, or used for advertising, and a record is deleted about 90 days after its last activity (an account's record is also deleted with the account). There is no separate opt-out, since nothing else is collected; clearing the app's storage means a fresh anonymous identifier is used from then on.</p>
+      <p>To know roughly how many people use the app, and how many are using it right now, our servers record when the app is open. While the app is open, it contacts the server on launch, when you return to it, and about every four minutes, sending the same anonymous per-device identifier described under "Publishing as an ad" above. If you're signed in, this (and any other request you make while signed in) records only the time your account was last active, against your account. If you're not signed in, the server records the device identifier with the times it was first and last seen (plus the daily log described below), and nothing else: it isn't linked to a name, email address, or Google account, and if you later sign in on that device the signed-out record is deleted. We use these records only for private, aggregate totals (such as total, new and currently active users and devices) and to look up an account's last activity when operating the service. They're never shown to other people, shared, or used for advertising, and that last-activity record is deleted about 90 days after its last activity (an account's is also deleted with the account). Separately, so usage can be charted across weeks, months and years, the server keeps a minimal daily log: for each day an account or device was active, one entry holding just that date and the account or device identifier, with no name, email, or content. These entries are used only for those aggregate charts and are removed automatically after 800 days (about 26 months). They aren't removed early when you delete your account or sign in on a device that was signed out. There's no setting to turn this off, because nothing beyond this is collected; clearing the app's storage gives you a fresh anonymous identifier from then on.</p>
       <h3>Analytics</h3>
-      <p>Essential Software does not collect analytics, telemetry, or crash reports from this app, and does not track what you do inside it. The only usage figures it keeps are the two uses of the anonymous per-device identifier described above: counting an ad's unique viewers (see "Publishing as an ad"), and the activity counts (see "Activity counts").</p>
+      <p>We do not collect analytics, telemetry, or crash reports from this app, and do not track what you do inside it. The only usage figures it keeps are the two uses of the anonymous per-device identifier described above: counting an ad's unique viewers (see "Publishing as an ad"), and the activity counts (see "Activity counts").</p>
       <h3>Contact</h3>
-      <p>Questions about this policy can be sent to <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
+      <p>Questions about this policy? We're happy to help at <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
     </div>
   </div>
 </div>
@@ -4528,31 +4536,33 @@ document.body.dataset.lockScrollY = window.scrollY;
     </div>
     <div id="cterms-body">
       <p><em>Effective 30 September 2026</em></p>
-      <p>Using <strong>Bluebook</strong> means you agree to these terms.</p>
+      <p>Welcome to <strong>Bluebook</strong>, made by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;)! By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language, and you're welcome to reach out anytime with questions.</p>
       <h3>Responsible Use</h3>
-      <p>You agree to use Bluebook for lawful purposes only. You may not use the app to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish (see below).</p>
+      <p>Please use Bluebook kindly and lawfully. You agree to use it for lawful purposes only, and not to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish (see below).</p>
       <h3>Your Content</h3>
-      <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to Essential Software's servers so you can restore them on another device. You are responsible for keeping your own backups if you don't sign in. Without an account, Essential Software has no copy of your content and cannot recover it if it's lost.</p>
+      <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to our servers so you can restore them on another device. Without an account, your content lives only on your device: we have no copy and can't recover it if it's lost. Signing in, or keeping your own backups, is how you protect it.</p>
       <h3>Your Account</h3>
-      <p>Signing in is optional and handled by Google. Keep your Google account secure. Anyone with access to it can access your synced notes, Pro entitlement, and ad view credits through this app. Essential Software records when your account was last active, and counts active devices, only to run and understand the service; see the Privacy Policy's "Activity counts" section.</p>
+      <p>Signing in is optional and handled by Google. Keep your Google account secure. Anyone with access to it can access your synced notes, Pro entitlement, and ad view credits through this app. We record when your account was last active, and count active devices, only to run and understand the service; see the Privacy Policy's "Activity counts" section.</p>
       <h3>Published Content</h3>
-      <p>A published page is stored on Essential Software's servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. Essential Software may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. A page you publish while signed out isn't tied to an account; if you later sign in and use its private token to show it in stories or save an update, it becomes part of your account, counts toward your account's page limit, and is taken down if you delete your account. Unpublish it yourself and its address frees up right away for reuse. If Essential Software removes it instead, for a takedown or abuse report, the address stays down for good and can't be reclaimed or republished.</p>
+      <p>A published page is stored on our servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. We may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. A page you publish while signed out isn't tied to an account; if you later sign in and use its private token to show it in stories or save an update, it becomes part of your account, counts toward your account's page limit, and is taken down if you delete your account. Unpublish it yourself and its address frees up right away for reuse. If we remove it instead, for a takedown or abuse report, the address stays permanently reserved and can't be reclaimed or republished.</p>
+      <h3>Reports, Alerts &amp; Suspension</h3>
+      <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad) or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages appear under Alerts in your library. A profile picture that appears to impersonate someone else may be removed. <strong>To keep the app safe for everyone, multiple reports against your content, or repeated violations of these terms, can lead to your account being suspended.</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, to run and moderate the service.</p>
       <h3>Advertising (Publish as Ad)</h3>
-      <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing (processed on Essential Software's behalf by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons. No images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own Add media and Add post tools. YouTube, Instagram, and Spotify are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. Essential Software checks eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
-      <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. Essential Software does not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
+      <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing (processed on our behalf by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons. No images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own Add media and Add post tools. YouTube, Instagram, and Spotify are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. We check eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
+      <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. We do not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
       <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it's shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance. Views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad's view count, for information only. It's derived from an anonymous identifier generated and stored on each device, used to tell whether a device has already been counted once for a given ad (and, separately, for the activity counts described in the Privacy Policy); it isn't tied to a Google account or any other identity, and is sent whether or not you're signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
-      <p>Purchased views are a consumable purchase through Google Play. Refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:essentialsoftware.support@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
+      <p>Purchased views are a consumable purchase through Google Play. Refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad in error after it was approved, <a href="mailto:essentialsoftware.support@gmail.com">contact us</a> and we will, at our discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown, and any views it had left go unused (so check your balance before you unpublish); those views aren't returned to your account or transferable to another ad, and any unspent view-credit balance likewise goes unused if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
-      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags, and preview images, and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description, and tags, the same way you're responsible for anything else you publish, and the Responsible Use section above applies. Essential Software may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons it can act on any other published content. An optional display name and profile picture shown on your stories and to your subscribers don't need to be your real name or photo, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
-      <p>A signed-in account can also like a published note. Likes are a simple sign of appreciation. Each note's own like count is visible on its card to you as its author in your Published and Stories tabs, and to anyone who sees the note in their Subscribed feed or Liked tab, but never who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. You agree not to use likes abusively, such as by using multiple accounts or automated means to inflate or suppress a note's count. Essential Software may remove likes, or suspend your ability to like, for the same reasons it can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what is recorded about likes.</p>
+      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags, and preview images, and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description, and tags, the same way you're responsible for anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. An optional display name and profile picture shown on your stories and to your subscribers don't need to be your real name or photo, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
+      <p>A signed-in account can also like a published note. Likes are a simple sign of appreciation. Each note's own like count is visible on its card to you as its author in your Published and Stories tabs, and to anyone who sees the note in their Subscribed feed or Liked tab, but never who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. You agree not to use likes abusively, such as by using multiple accounts or automated means to inflate or suppress a note's count. We may remove likes, or suspend your ability to like, for the same reasons we can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what is recorded about likes.</p>
       <h3>Purchases &amp; Eligibility</h3>
-      <p>Buying view packages is handled entirely through Google Play Billing (processed on Essential Software's behalf by RevenueCat), and any age or account requirements for making a purchase are set and enforced by Google Play, not by Essential Software. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
+      <p>Buying view packages is handled entirely through Google Play Billing (processed on our behalf by RevenueCat), and any age or account requirements for making a purchase are set and enforced by Google Play, not by us. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
       <h3>Third-Party Content</h3>
       <p>Images, video, and audio you embed by URL are loaded directly from the source you provide. You are responsible for having the right to use any content you embed. Images used in an ad are restricted as described above, and the required attribution notice exists specifically because third-party trademarks, logos, and brand names may appear in an ad's content or images. You're still responsible for having the right to use whatever you include, and that notice does not grant any rights of its own.</p>
       <h3>Changes to These Terms</h3>
-      <p>Essential Software may update these terms from time to time. Continued use of the app after changes are posted constitutes acceptance of the revised terms.</p>
+      <p>We may update these terms from time to time. If you keep using the app after changes are posted, you're accepting the revised terms.</p>
       <h3>Contact</h3>
-      <p>Questions about these terms can be sent to <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
+      <p>Questions about these terms? We're happy to help at <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
     </div>
   </div>
 </div>
@@ -11404,7 +11414,7 @@ function openTermsDialog(mode) {
     btnEl.textContent = 'Close';
   } else {
     titleEl.textContent = 'Before you continue';
-    bodyEl.innerHTML = 'By continuing to use this app, you agree to our <a onclick="openConsumerTerms()">Consumer Terms</a> and <a onclick="openPrivacy()">Privacy Policy</a>.';
+    bodyEl.innerHTML = 'Thanks for choosing Bluebook! By continuing, you agree to our <a onclick="openConsumerTerms()">Consumer Terms</a> and <a onclick="openPrivacy()">Privacy Policy</a>.';
     btnEl.textContent = 'Continue';
   }
   document.getElementById('terms-overlay').classList.add('open');
@@ -12206,7 +12216,7 @@ async function nbSignOut() {
   // without this, any account-tagged notes stay on screen (still
   // deletable-as-if-local) until something else happens to trigger a
   // re-render, which is exactly how this bug showed up in the first place.
-  if (_nbActiveCat === 'Subscribed' || _nbActiveCat === 'Published') _nbActiveCat = 'All'; // those categories no longer exist signed out
+  if (_nbActiveCat === 'Subscribed' || _nbActiveCat === 'Published' || _nbActiveCat === 'Alerts') _nbActiveCat = 'All'; // those categories no longer exist signed out
   buildCatBar();
   if (!nbRefreshCurrentView('signout', true)) nbRenderNotesScreen();
   nbRenderStoriesStrip();
@@ -14983,7 +14993,7 @@ function _nbSetLikeBtnState(btn, isLiked) {
 // number in place so nothing re-renders, flashes or loses scroll.
 let _nbLikePollBusy = false;
 async function _nbPollLikeCounts() {
-  if (_nbLikePollBusy || !nbIsSignedIn() || document.hidden || !_nbIsFeedCat(_nbActiveCat)) return;
+  if (_nbLikePollBusy || !nbIsSignedIn() || document.hidden || !_nbIsFeedCat(_nbActiveCat) || _nbActiveCat === 'Alerts') return; // alerts have no likes
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   const grid = document.getElementById('nb-notes-grid');
   if (!grid) return;
@@ -15410,7 +15420,11 @@ let _nbSubFeedTotal = null; // size of the whole list, as the worker reports it 
 const NB_SUB_EMPTY_LEAD = 'Mix text, photos, checklists, and more into scrapbook-style notes. ';
 // Three placeholder cards mirroring a loaded Subscribed card (author line,
 // title, thumbnail row) — swapped out wholesale when the first page lands.
-function _nbSubSkeletonHtml() { return _nbActiveCat === 'Published' ? _nbCardSkeletonHtml(false) : _nbCardSkeletonHtml(true); }
+function _nbAlertSkeletonHtml() {
+  const card = '<div class="guide-card nb-skel-card alert-card" aria-hidden="true"><div class="nb-skel nb-skel-desc"></div><div class="nb-skel nb-skel-desc"></div><div class="nb-skel nb-skel-time"></div></div>';
+  return card + card + card;
+}
+function _nbSubSkeletonHtml() { return _nbActiveCat === 'Alerts' ? _nbAlertSkeletonHtml() : _nbActiveCat === 'Published' ? _nbCardSkeletonHtml(false) : _nbCardSkeletonHtml(true); }
 function _nbSubCarousel(show) {
   const c = document.getElementById('nb-onboard-carousel');
   if (!c) return;
@@ -15445,7 +15459,9 @@ async function nbRenderSubscribedFeed() {
     emptyTitle.textContent = 'Sign in to see this';
     emptySub.textContent = NB_SUB_EMPTY_LEAD + (_nbActiveCat === 'Published'
       ? 'Stories and published notes are tied to your account, so this needs you to be signed in.'
-      : 'The Subscribed feed follows accounts, so it needs you to be signed in.');
+      : _nbActiveCat === 'Alerts'
+        ? 'Alerts are messages about your account, so this needs you to be signed in.'
+        : 'The Subscribed feed follows accounts, so it needs you to be signed in.');
     _nbSubCarousel(true);
     return;
   }
@@ -15499,6 +15515,7 @@ function _nbOwnNoteFor(s) {
 function _nbSubStoryMatches(s) {
   const q = _nbSearchQ;
   if (!q) return true;
+  if (_nbActiveCat === 'Alerts') return String(s.message || '').toLowerCase().includes(q);
   const own = _nbOwnNoteFor(s);
   const title = own ? own.title : s.title;
   const desc = own ? String(own.desc || '').trim() : _nbSubStoryDesc(s);
@@ -15513,7 +15530,72 @@ function _nbSubCardHtml(s) {
   _nbSubCardCache.set(s.slug, html);
   return html;
 }
+// An alert: a short automatic statement, how long ago it was sent, and a delete icon. No open action.
+function _nbAlertCardHtml(s) {
+  const ts = _nbSubEpoch(s.createdAt);
+  return `
+      <div class="guide-card alert-card" data-slug="${esc(s.slug)}">
+        <div class="gc-desc"><span class="gc-desc-text">${esc(s.message || '')}</span></div>
+        <div class="gc-steps-row">
+          <span class="gc-desc-time">${ts ? _nbShortTimeAgo(ts) : ''}</span>
+          <button class="gc-trash" onclick="nbDeleteAlert('${escJs(String(s.id || ''))}')" aria-label="Delete alert">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
+        </div>
+      </div>`;
+}
+const NB_ALERTS_EMPTY_SUB = NB_SUB_EMPTY_LEAD + 'Messages about your account, like a report on one of your notes, will show up here.';
+// Same confirmation dialog as deleting a note (#delete-dialog), reworded for an alert.
+function nbDeleteAlert(id) {
+  const ov = document.getElementById('delete-overlay');
+  const cancelBtn = document.getElementById('delete-dialog-cancel');
+  const confirmBtn = document.getElementById('delete-dialog-confirm');
+  document.querySelector('#delete-dialog .rdlg-title').textContent = 'Delete alert?';
+  document.querySelector('#delete-dialog .rdlg-body').textContent = 'This alert will be removed from your list. This can\u2019t be undone.';
+  confirmBtn.textContent = 'Delete';
+  confirmBtn.disabled = false;
+  cancelBtn.onclick = () => ov.classList.remove('open');
+  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  confirmBtn.onclick = () => { ov.classList.remove('open'); _nbDeleteAlertNow(id); };
+  ov.classList.add('open');
+}
+// The delete itself: the card leaves the list at once; if the server call fails the list reloads.
+async function _nbDeleteAlertNow(id) {
+  const key = 'alert:' + id;
+  const i = _nbSubFeedStories.findIndex(x => x.slug === key);
+  if (i >= 0) _nbSubFeedStories.splice(i, 1);
+  _nbSubCardCache.delete(key);
+  const grid = document.getElementById('nb-notes-grid');
+  grid.querySelectorAll('.guide-card[data-slug]').forEach(el => { if (el.getAttribute('data-slug') === key) el.remove(); });
+  if (_nbSubFeedTotal !== null) _nbSubFeedTotal = Math.max(0, _nbSubFeedTotal - 1);
+  if (_nbAlertTotal !== null) _nbAlertTotal = Math.max(0, _nbAlertTotal - 1);
+  nbUpdateLibraryTitle();
+  try {
+    const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/alerts/' + encodeURIComponent(id), {
+      method: 'DELETE', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) throw new Error('delete alert failed: ' + res.status);
+    showToast('Alert deleted');
+  } catch (e) {
+    _nbLog('delete alert', e);
+    showToast('Couldn\u2019t delete' + _nbFailureReason(e));
+    if (_nbActiveCat === 'Alerts') { _nbSubFeedPaintKey = null; nbRenderNotesScreen(); }
+    return;
+  }
+  if (_nbActiveCat !== 'Alerts' || grid.querySelector('.guide-card:not(.nb-skel-card)')) return;
+  if (!_nbSubFeedStories.length && _nbSubFeedDone) {
+    grid.style.display = 'none'; grid.innerHTML = '';
+    document.getElementById('notes-empty-title').textContent = 'No alerts';
+    document.getElementById('notes-empty-sub').textContent = NB_ALERTS_EMPTY_SUB;
+    _nbRevealFade(document.getElementById('notes-empty-state'));
+    _nbSubCarousel(true);
+    return;
+  }
+  if (_nbSubFeedStories.length && _nbSearchQ) { _nbSubApplySearch(); return; }
+  if (!_nbSubFeedDone) _nbLoadSubFeedPage();
+}
 function _nbSubCardHtmlRaw(s) {
+  if (_nbActiveCat === 'Alerts') return _nbAlertCardHtml(s);
   const sid = escJs(s.slug);
   const asub = escJs(s.authorSub);
   // Published/Stories: the local copy (if on this device) drives everything the card shows except the like count.
@@ -15706,16 +15788,24 @@ async function _nbLoadSubFeedPage() {
     const qs = _nbSubFeedCursor ? ('?cursor=' + encodeURIComponent(_nbSubFeedCursor)) : '';
     const path = tab === 'stories' ? '/account/stories'
       : tab === 'published' ? '/account/published-notes'
+      : tab === 'alerts' ? '/alerts'
       : tab === 'liked' ? '/account/liked-notes' : '/subscriptions/feed';
     const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + path + qs, {
       headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
     });
     if (!res.ok) throw new Error(tab + ' feed failed: ' + res.status);
     const data = await res.json();
-    const stories = (data && data.stories) || [];
+    // Alerts come back as {alerts:[{id,...}]}; give each a slug-style key so the shared list code can track it.
+    const stories = tab === 'alerts'
+      ? ((data && data.alerts) || []).map(a => Object.assign({ slug: 'alert:' + a.id }, a))
+      : (data && data.stories) || [];
+    if (isFirstPage && tab === 'alerts') { _nbAlertTotal = (data && typeof data.total === 'number') ? data.total : stories.length; _nbRefreshAlertsCat(); }
     if (!_nbIsFeedCat(_nbActiveCat)) return; // category switched while this was in flight
     if (isFirstPage && tab === _nbFeedKind()) _nbSubFeedTotal = (data && typeof data.total === 'number') ? data.total : null;
     if (tab !== _nbFeedKind()) { setTimeout(() => { if (_nbIsFeedCat(_nbActiveCat)) _nbLoadSubFeedPage(); }, 0); return; } // list switched: load the current one once this call has released the lock
+    // Everything on this first page is now on screen, so it counts as seen, up to the newest one shown (the pill's
+    // badge counts what arrived after that; the title count is the list's total).
+    if (isFirstPage && tab === 'alerts' && stories.length) _nbMarkAlertsSeen(Math.max(...stories.map(a => _nbSubEpoch(a.createdAt))));
     if (isFirstPage && !stories.length) {
       _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       if (tab === 'stories') {
@@ -15724,6 +15814,9 @@ async function _nbLoadSubFeedPage() {
       } else if (tab === 'published') {
         emptyTitle.textContent = 'No published notes yet';
         emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Notes you publish from the web icon on a note will show up here, with how many likes each has received.';
+      } else if (tab === 'alerts') {
+        emptyTitle.textContent = 'No alerts';
+        emptySub.textContent = NB_ALERTS_EMPTY_SUB;
       } else if (tab === 'liked') {
         emptyTitle.textContent = 'No liked notes yet';
         emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Tap the heart on a story, or on a note you opened from a link, and it will be kept here.';
@@ -15762,7 +15855,7 @@ async function _nbLoadSubFeedPage() {
       _nbSubFeedPaintKey = null;
       _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       emptyTitle.textContent = 'Could not load';
-      emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Something went wrong loading ' + (tab === 'stories' ? 'your stories' : tab === 'published' ? 'your published notes' : (tab === 'liked' ? 'your liked notes' : 'the Subscribed feed')) + '. Try again.';
+      emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Something went wrong loading ' + (tab === 'stories' ? 'your stories' : tab === 'published' ? 'your published notes' : tab === 'alerts' ? 'your alerts' : (tab === 'liked' ? 'your liked notes' : 'the Subscribed feed')) + '. Try again.';
       _nbSubCarousel(true);
     } else {
       showToast('Couldn\u2019t load more' + _nbFailureReason(e));
@@ -17013,13 +17106,14 @@ let _nbSubTab = 'feed'; // inside Subscribed: 'feed' (who you follow) or 'liked'
 let _nbPubTab = 'published'; // inside Published: 'published' (every live note) or 'stories' (currently showing)
 let _nbCapsuleShown = false;
 let _nbPublishedShown = false;
+let _nbAlertsShown = false;
 let _nbSearchQ = '';
 // Subscribed (with its Liked tab) and Published (with its Stories tab) are both server-fed
 // card lists that share one loader, skeleton, empty states and paging; everything else is
 // local notes.
-function _nbIsFeedCat(c) { return c === 'Subscribed' || c === 'Published'; }
-// Which list the shared loader is on: 'stories', 'published', 'liked' or 'feed' (Subscribed).
-function _nbFeedKind() { return _nbActiveCat === 'Published' ? _nbPubTab : _nbSubTab; }
+function _nbIsFeedCat(c) { return c === 'Subscribed' || c === 'Published' || c === 'Alerts'; }
+// Which list the shared loader is on: 'stories', 'published', 'alerts', 'liked' or 'feed' (Subscribed).
+function _nbFeedKind() { return _nbActiveCat === 'Published' ? _nbPubTab : _nbActiveCat === 'Alerts' ? 'alerts' : _nbSubTab; }
 // Published capsule shows once signed in with at least one published note on this account
 // (a story is always also a published note), and stays while it's the open category (so
 // unpublishing the last one doesn't yank the screen away mid-browse).
@@ -17027,6 +17121,39 @@ function _nbShowPublishedCat() {
   return nbIsSignedIn() && (_nbActiveCat === 'Published' || nbVisibleNotes().some(n => n.publishedSlug));
 }
 function _nbRefreshPublishedCat() { if (_nbShowPublishedCat() !== _nbPublishedShown) buildCatBar(); }
+// Unread alerts (arrived since Alerts was last opened, tracked server-side so it follows the account
+// across devices): shown as a badge on the Alerts pill; opening Alerts clears it.
+let _nbAlertUnread = 0;
+let _nbAlertTotal = null; // alerts on the account (null until known): the Alerts pill only shows while there is at least one
+// Like Published and the Subscribed | Liked capsule: the Alerts pill appears with the first alert and goes
+// with the last, and stays while it's the open category (deleting the last one doesn't yank the screen away).
+function _nbShowAlertsCat() {
+  return nbIsSignedIn() && (_nbActiveCat === 'Alerts' || _nbAlertUnread > 0 || (_nbAlertTotal || 0) > 0);
+}
+function _nbRefreshAlertsCat() { if (_nbShowAlertsCat() !== _nbAlertsShown) buildCatBar(); }
+async function _nbFetchAlertUnread() {
+  if (!nbIsSignedIn()) { if (_nbAlertUnread || _nbAlertTotal !== null) { _nbAlertUnread = 0; _nbAlertTotal = null; buildCatBar(); } return; }
+  try {
+    const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/alerts/unread', { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } });
+    if (!res.ok) return;
+    const data = await res.json();
+    const n = Math.max(0, Number(data.count) || 0);
+    const total = typeof data.total === 'number' ? Math.max(0, data.total) : _nbAlertTotal; // absent from an older worker: the unread count alone decides
+    if (n !== _nbAlertUnread || total !== _nbAlertTotal) { _nbAlertUnread = n; _nbAlertTotal = total; buildCatBar(); }
+  } catch (e) { _nbLog('alerts unread', e); }
+}
+// upTo = created-at (ms) of the newest alert that was actually on screen. The server only marks alerts up to
+// that moment as seen, so one that lands after the list was fetched still counts as unread.
+function _nbMarkAlertsSeen(upTo) {
+  if (!nbIsSignedIn() || !(upTo > 0)) return;
+  _nbAlertUnread = 0;
+  _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/alerts/seen', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + nbSessionToken(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ upTo })
+  }).catch(e => _nbLog('alerts seen', e));
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) _nbFetchAlertUnread(); });
 function buildCatBar() {
   const bar = document.getElementById('feed-cats');
   if (!bar) return;
@@ -17041,11 +17168,13 @@ function buildCatBar() {
   // account has at least one subscription — see _nbSubscribedAuthors.
   _nbCapsuleShown = _nbShowSubCapsule();
   _nbPublishedShown = _nbShowPublishedCat();
-  // Order: All, Favorites, [Published], [Subscribed | Liked], Uncategorized, custom...
+  _nbAlertsShown = _nbShowAlertsCat();
+  // Order: All, Favorites, [Published], [Subscribed | Liked], [Alerts], Uncategorized, custom... (bracketed ones only once they have something)
   const withFeeds = [
     NB_BASE_CATS[0], NB_BASE_CATS[1],
     ...(_nbPublishedShown ? ['Published'] : []),
     ...(_nbCapsuleShown ? ['Subscribed'] : []),
+    ...(_nbAlertsShown ? ['Alerts'] : []),
     ...NB_BASE_CATS.slice(2)
   ];
   const allCats = [...withFeeds, ...customCats.values()];
@@ -17061,6 +17190,10 @@ function buildCatBar() {
       return `<span class="cat-capsule" role="group" aria-label="Published and Stories">`
         + `<button class="cat-pill${on && _nbPubTab === 'published' ? ' active' : ''}" onclick="selectCat('Published','published')">Published</button>`
         + `<button class="cat-pill${on && _nbPubTab === 'stories' ? ' active' : ''}" onclick="selectCat('Published','stories')">Stories</button></span>`;
+    }
+    if (c === 'Alerts') {
+      const badge = _nbAlertUnread > 0 && _nbActiveCat !== 'Alerts' ? `<span class="cat-badge" aria-label="${_nbAlertUnread} unread">${_nbAlertUnread > 9 ? '9+' : _nbAlertUnread}</span>` : '';
+      return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('Alerts')">Alerts${badge}</button>`;
     }
     return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')">${esc(c)}</button>`;
   }).join('');
@@ -17099,6 +17232,7 @@ function nbRefreshData() {
   const tasks = [];
   if (_nbActiveCat === 'All') tasks.push(Promise.resolve(nbRenderStoriesStrip()).catch(e => _nbLog('refresh: stories', e)));
   if (nbIsSignedIn()) tasks.push(Promise.resolve(nbSyncPullThenPush()).catch(e => _nbLog('refresh: sync', e)));
+  tasks.push(_nbFetchAlertUnread());
   return Promise.all(tasks);
 }
 // Shimmer, then the category. Notes are local, so the wait is a short minimum; fresh data
@@ -17700,6 +17834,7 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
   ov.classList.add('open');
 }
 buildCatBar();
+_nbFetchAlertUnread();
 nbRenderNotesScreen();
 nbRenderStoriesStrip();
 _nbFetchSubscriberCount(); // warm the cache at boot so the sign-out sheet doesn't flash blank the first time it's opened
