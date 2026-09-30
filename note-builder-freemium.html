@@ -17169,12 +17169,12 @@ function buildCatBar() {
   _nbCapsuleShown = _nbShowSubCapsule();
   _nbPublishedShown = _nbShowPublishedCat();
   _nbAlertsShown = _nbShowAlertsCat();
-  // Order: All, Favorites, [Published], [Subscribed | Liked], [Alerts], Uncategorized, custom... (bracketed ones only once they have something)
+  // Order: All, Favorites, [Alerts], [Published | Stories], [Subscribed | Liked], Uncategorized, custom... (bracketed ones only once they have something)
   const withFeeds = [
     NB_BASE_CATS[0], NB_BASE_CATS[1],
+    ...(_nbAlertsShown ? ['Alerts'] : []),
     ...(_nbPublishedShown ? ['Published'] : []),
     ...(_nbCapsuleShown ? ['Subscribed'] : []),
-    ...(_nbAlertsShown ? ['Alerts'] : []),
     ...NB_BASE_CATS.slice(2)
   ];
   const allCats = [...withFeeds, ...customCats.values()];
@@ -17549,6 +17549,9 @@ function _nbFilteredEmptyMessage() {
   const q = (document.getElementById('feed-search-input') || {}).value || '';
   if (q && _nbLooksLikeNoteLink(q)) {
     return { title: 'No matches', sub: lead + 'Tap GO to open this note link.' };
+  }
+  if (q && _nbActiveCat === 'Alerts') {
+    return { title: 'No matches', sub: lead + 'No alerts match \u201c' + q + '\u201d. Try a different search term instead.' };
   }
   if (q) {
     return { title: 'No matches', sub: lead + 'No notes match \u201c' + q + '\u201d. Try a different search term instead.' };
