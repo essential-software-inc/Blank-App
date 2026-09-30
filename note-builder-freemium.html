@@ -12327,6 +12327,24 @@ let _nbImgTooLarge = new Set(); // this session only: ids the server refused as 
 let _nbImgTooLargeNotified = false;
 let _nbImgCapNotified = false;
 let _nbImgCapHit = 0; // timestamp of the last time the account's backed-up image limit was hit (0 = not hit)
+let _nbImgCapLimit = 0; // the limit the server last reported (0 = unknown)
+const _nbImgAddWarned = new Set(); // image ids already warned about at add time
+function _nbImgCapMsg(inSync) {
+  return 'Image backup limit reached' + (_nbImgCapLimit ? ' (' + _nbImgCapLimit.toLocaleString() + ')' : '') +
+    (inSync ? '. New images stay on this device only. Delete unused notes to free space.' : '. This image stays on this device only.');
+}
+function _nbImgTooLargeMsg(n) {
+  const mb = Math.round(NB_SYNC_IMG_MAX_BYTES / 1048576);
+  return (n === 1 ? 'One image is' : n + ' images are') + ' over ' + mb + ' MB and can\u2019t be backed up. The rest still sync.';
+}
+// Called when a note's editor hands over an image, BEFORE it's stored: tells the
+// person right away, instead of a minute later during the background sync,
+// that this one won't be backed up. Signed-in only, once per image.
+function _nbWarnNewImage(id, data) {
+  if (!nbIsSignedIn() || _nbImgAddWarned.has(id) || _nbGetImage(id) || typeof data !== 'string') return;
+  if (data.length > NB_SYNC_IMG_MAX_BYTES) { _nbImgAddWarned.add(id); showToast(_nbImgTooLargeMsg(1)); }
+  else if (_nbImgCapHit) { _nbImgAddWarned.add(id); showToast(_nbImgCapMsg(false)); }
+}
 // Uploads whichever of `images` ({id: dataURL}) the server doesn't have yet.
 // Runs BEFORE the notes that reference them are pushed, so another device can
 // never pull a note whose images aren't there. Returns:
@@ -12334,15 +12352,25 @@ let _nbImgCapHit = 0; // timestamp of the last time the account's backed-up imag
 //   {ok:true, legacy:true}         worker predates image routes: caller should embed images in the backup as before
 //   {ok:false, reason:'session-expired'}
 // and throws on a network/server failure, same as the rest of nbSyncPush.
-async function _nbSyncUploadImages(images) {
+async function _nbSyncUploadImages(images, showFeedback) {
   const base = NB_PUBLISH_API.replace(/\/$/, '');
   const auth = { 'Authorization': 'Bearer ' + nbSessionToken() };
   const synced = _nbSyncedImgs();
   const todo = Object.keys(images).filter(id => !synced.has(id) && !_nbImgTooLarge.has(id));
   // After the account's image limit was hit, don't hammer the server every
   // minute: try again only every 10 minutes (e.g. after the person deleted notes).
-  if (_nbImgCapHit && Date.now() - _nbImgCapHit < 10 * 60 * 1000) return { ok: true };
-  if (!todo.length) return { ok: true };
+  // A manual sync skips the wait: the person may just have freed space.
+  if (_nbImgCapHit && !showFeedback && Date.now() - _nbImgCapHit < 10 * 60 * 1000) return { ok: true };
+  // Images the server refused as too big stay in the set for the session; count the ones still
+  // in use so the warning can repeat on a manual sync and re-arm once they're gone.
+  const stuckLarge = Object.keys(images).filter(id => _nbImgTooLarge.has(id)).length;
+  if (!stuckLarge) _nbImgTooLargeNotified = false;
+  let warned = false;
+  if (!todo.length) {
+    _nbImgCapHit = 0; _nbImgCapNotified = false; // nothing left waiting on the limit
+    if (stuckLarge && (showFeedback || !_nbImgTooLargeNotified)) { _nbImgTooLargeNotified = true; warned = true; showToast(_nbImgTooLargeMsg(stuckLarge)); }
+    return warned ? { ok: true, warned } : { ok: true };
+  }
   const missing = [];
   for (let i = 0; i < todo.length; i += 500) {
     const chunk = todo.slice(i, i + 500);
@@ -12365,20 +12393,23 @@ async function _nbSyncUploadImages(images) {
       const res = await fetch(base + '/sync/images/' + encodeURIComponent(id), { method: 'PUT', headers: auth, body: data });
       if (res.status === 401) return { ok: false, reason: 'session-expired' };
       if (res.status === 413) {
-        let msg = ''; try { msg = (await res.json()).error || ''; } catch (e) {}
-        if (/too many/i.test(msg)) { // the per-account image cap, not this image's size
+        let body = {}; try { body = (await res.json()) || {}; } catch (e) {}
+        if (/too many/i.test(body.error || '')) { // the per-account image cap, not this image's size
           _nbImgCapHit = Date.now();
-          if (!_nbImgCapNotified) { _nbImgCapNotified = true; showToast('Image backup limit reached. New images won\u2019t sync. Notes still do.'); }
+          if (Number(body.limit) > 0) _nbImgCapLimit = Number(body.limit);
+          if (showFeedback || !_nbImgCapNotified) { _nbImgCapNotified = true; warned = true; showToast(_nbImgCapMsg(true)); }
           break; // every further upload would be refused the same way
         }
         _nbImgTooLarge.add(id); tooLarge = true; continue;
       }
       if (!res.ok) throw new Error('image upload failed: ' + res.status);
       synced.add(id);
+      if (_nbImgCapHit) { _nbImgCapHit = 0; _nbImgCapNotified = false; } // an upload went through: space was freed, so a future hit is announced again
     }
   } finally { _nbSaveSyncedImgs(synced); } // keep progress even if we stop partway
-  if (tooLarge && !_nbImgTooLargeNotified) { _nbImgTooLargeNotified = true; showToast('One image is too large to back up. The rest still sync.'); }
-  return { ok: true };
+  const largeNow = Object.keys(images).filter(id => _nbImgTooLarge.has(id)).length;
+  if (!warned && (tooLarge || largeNow) && (showFeedback || !_nbImgTooLargeNotified)) { _nbImgTooLargeNotified = true; warned = true; showToast(_nbImgTooLargeMsg(largeNow || 1)); }
+  return warned ? { ok: true, warned } : { ok: true };
 }
 // After a pull: any image a visible note references that isn't on this device
 // gets downloaded from the account's backup. Runs in the background (a pull
@@ -12400,13 +12431,13 @@ async function _nbSyncFetchMissingImages() {
   _nbFetchingImgs = true;
   const base = NB_PUBLISH_API.replace(/\/$/, '');
   const synced = _nbSyncedImgs();
-  let got = 0, stop = false;
+  let got = 0, stop = false, gone = 0;
   const worker = async () => {
     while (ids.length && !stop) {
       const id = ids.shift();
       try {
         const res = await fetch(base + '/sync/images/' + encodeURIComponent(id), { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } });
-        if (res.status === 404) { _nbImgRemoteMiss.set(id, Date.now()); continue; }
+        if (res.status === 404) { if (_nbImgRemoteMiss.has(id)) gone++; _nbImgRemoteMiss.set(id, Date.now()); continue; } // missing twice = not just mid-upload
         if (res.status === 401) { stop = true; return; }
         if (!res.ok) { _nbImgRemoteMiss.set(id, Date.now()); continue; }
         await _nbSetImage(id, await res.text());
@@ -12418,8 +12449,11 @@ async function _nbSyncFetchMissingImages() {
   finally {
     _nbFetchingImgs = false;
     if (got) { _nbSaveSyncedImgs(synced); try { nbRenderNotesScreen(); } catch (e) {} }
+    if (gone && !_nbImgGoneNotified) { _nbImgGoneNotified = true; showToast('Some images aren\u2019t backed up, so they can\u2019t load on this device.'); }
+    else if (!gone && got) _nbImgGoneNotified = false;
   }
 }
+let _nbImgGoneNotified = false;
 // Fields that only mean something on this device, kept out of the backup.
 function _nbStripLocalSyncFields(n) {
   if (!n || n.syncBaseAt === undefined) return n;
@@ -12470,7 +12504,7 @@ async function nbSyncPush(showFeedback) {
   // worker is an older one without the image routes, fall back to embedding
   // them in the backup like before so sync keeps working during a rollout.
   let imgRes;
-  try { imgRes = await _nbSyncUploadImages(images); }
+  try { imgRes = await _nbSyncUploadImages(images, showFeedback); }
   catch (e) {
     _nbLog('sync images', e);
     const detail = _nbFailureReason(e);
@@ -12524,7 +12558,7 @@ async function nbSyncPush(showFeedback) {
     _nbSyncBaseline = _nbSyncEtag ? 'have' : null; // no ETag back = can't vouch for the next push; pull first
     _nbLastPushedPayload = _nbSyncEtag ? payload : null; _nbLastPushedEtag = _nbSyncEtag;
     _nbSyncTooLargeNotified = false; // back under the cap — a future overflow should be announced again
-    if (showFeedback) showToast('Synced to your account');
+    if (showFeedback && !imgRes.warned) showToast('Synced to your account'); // don't bury an image-limit warning
     return { ok: true };
   } catch (e) {
     _nbLog('sync push', e);
@@ -18802,7 +18836,7 @@ window.addEventListener('message', function (e) {
     const draftId = e.data.noteId;
     if (!draftId) return;
     const images = e.data.images || {};
-    Object.keys(images).forEach(id => { try { _nbSetImage(id, images[id]); } catch (err) {} });
+    Object.keys(images).forEach(id => { try { _nbWarnNewImage(id, images[id]); _nbSetImage(id, images[id]); } catch (err) {} });
     const prev = _nbLoadDraftUiState(draftId) || {};
     const next = Object.assign({}, prev, e.data.state || {});
     _nbSaveDraftUiState(draftId, next);
