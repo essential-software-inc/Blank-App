@@ -4444,14 +4444,9 @@ document.body.dataset.lockScrollY = window.scrollY;
         <div id="logout-profile-name-field-wrap">
           <input id="logout-profile-name-input" class="com-field" type="text" maxlength="30" placeholder="e.g. Jo" disabled oninput="_nbOnProfileNameInput(this.value)">
           <button id="logout-profile-name-edit-btn" type="button" onclick="_nbToggleProfileNameEdit()" aria-label="Edit display name" title="Edit display name">
-            <svg id="logout-profile-name-edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            <!-- Two separate fixes stacked on the pencil's own size/weight
-                 (16px, stroke-width 2): the circle gives it a closed
-                 silhouette instead of a bare floating line (shape), and
-                 sizing the whole glyph up a notch (18px/2.2) brings its
-                 visual weight back in line with the pencil's own multi-
-                 segment outline, which reads heavier at equal size (scale). -->
-            <svg id="logout-profile-name-save-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="9.5"/><polyline points="7.8 12.3 10.8 15.3 16.3 9.3"/></svg>
+            <svg id="logout-profile-name-edit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6"/><path d="M8 16l3.9-1.1 9-9-2.8-2.8-9 9Z"/></svg>
+            <!-- Edit and Save are a designed pair: the same rounded square, open at the top-right, with a pencil poking out of it (edit) or a tick crossing out of it (save). Same 18px box and 2px round stroke, so the button swaps glyphs without changing weight or size. -->
+            <svg id="logout-profile-name-save-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M11 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6"/><path d="m8.5 11.5 3.5 3.5 9.5-9.5"/></svg>
           </button>
         </div>
         <div id="logout-profile-name-status"></div>
