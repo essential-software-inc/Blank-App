@@ -2017,28 +2017,30 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
   font-weight: 600
 }
 #logout-profile-name-field-wrap {
-  display: flex;
-  align-items: center;
-  gap: .4rem
+  position: relative;
+  display: block
 }
 #logout-profile-name-input {
-  flex: 1;
+  display: block;
+  width: 100%;
   min-width: 0;
   font-size: .82rem;
-  padding: .5rem .7rem
+  padding: .5rem 2.4rem .5rem .7rem
 }
 #logout-profile-name-input:disabled {
   opacity: .65;
   cursor: default
 }
 #logout-profile-name-edit-btn {
-  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  right: .3rem;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  margin-right: -8px;
   border: none;
   border-radius: 50%;
   background: none;
