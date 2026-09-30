@@ -4493,11 +4493,11 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>In-app purchases</h3>
       <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on Essential Software's behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID. Before you sign in, that's an anonymous ID RevenueCat generates for your install, and once you sign in, it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through Essential Software's own servers. Ad view-credits do involve Essential Software's servers, which receive confirmation from RevenueCat, not from Google directly, and credit the views to your account. Essential Software never receives your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
-      <p>Publishing is optional. It only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, Essential Software links the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
+      <p>Publishing is optional. It only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to Essential Software and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, Essential Software links the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. Essential Software also gives you a private token for that page. It's stored on your device, not kept as-is on Essential Software's side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for up to 30 days afterward in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). If Essential Software removes a page for a takedown request or abuse report, its address is reserved permanently, and the small record that keeps it reserved is kept indefinitely: the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID. This record is not removed when the copy is deleted or the account is deleted. Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
       <h3>Publishing as an ad</h3>
       <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create, not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, Essential Software credits the corresponding number of views to your account. Essential Software also stores how many views an ad has used and its current status (running, used up, or taken down). To also report how many unique viewers an ad has reached, alongside its total view count, Essential Software stores an anonymous identifier generated and kept on each device, sent whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and is used to tell whether a repeat view of a given ad came from a device already counted toward that ad, and for the activity counts described under "Activity counts" below; see also "Analytics" below. Unpublishing an ad removes it from Create immediately and forfeits any views it had left. That balance is not restored to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched. Ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
       <h3>Reporting a published page</h3>
-      <p>Anyone can report a published page from its public link. Reporting counts requests from the reporter's IP address for about a minute, just to stop spam. The address sits in a short-lived counter that expires on its own, and it's never stored as part of the report itself. Essential Software keeps only the reason and details submitted, along with which page it's about and when. A report doesn't record who sent it. A report stays on file until it's reviewed, even if the page is unpublished or its author's account is deleted in the meantime. Once handled, it's deleted, except reports of child sexual abuse material, which are kept for 18 months after they are handled, along with a copy of the reported page. A notification with the page's address, the reason, and the details may also be forwarded to Essential Software's private alerting channel. Reports of child sexual abuse material are handled as the law requires, including being passed to the proper authority.</p>
+      <p>Anyone can report a published page from its public link. Reporting counts requests from the reporter's IP address for about a minute, just to stop spam. The address sits in a short-lived counter that expires on its own, and it's never stored as part of the report itself. Essential Software keeps only the reason and details submitted, along with which page it's about and when. A report doesn't record who sent it. A report stays on file until it's reviewed, even if the page is unpublished or its author's account is deleted in the meantime. Once handled, it's deleted, except reports of child sexual abuse material, which are kept for 18 months, along with a copy of the reported page. The report's 18 months run from when it is closed; the page copy's run from when it was reported. A notification with the page's address, the reason, and the details may also be forwarded to Essential Software's private alerting channel. Reports of child sexual abuse material are handled as the law requires, including being passed to the proper authority. Moderation actions Essential Software takes (such as a takedown, a dismissed report, or a restored page) are logged with the action, the page's address, and the time, for about 13 months.</p>
       <p>This applies the same way to pages currently running as ads. An ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
       <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Create screen. To find it, save the ad without adding anything new to it, then open the Publish sheet for that note, which fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
       <h3>External images &amp; embeds</h3>
@@ -4515,7 +4515,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Analytics</h3>
       <p>Essential Software does not collect analytics, telemetry, or crash reports from this app, and does not track what you do inside it. The only usage figures it keeps are the two uses of the anonymous per-device identifier described above: counting an ad's unique viewers (see "Publishing as an ad"), and the activity counts (see "Activity counts").</p>
       <h3>Contact</h3>
-      <p>Questions about this policy can be sent to <a href="mailto:contactrhudio@gmail.com">contactrhudio@gmail.com</a>.</p>
+      <p>Questions about this policy can be sent to <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
     </div>
   </div>
 </div>
@@ -4541,7 +4541,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing (processed on Essential Software's behalf by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons. No images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own Add media and Add post tools. YouTube, Instagram, and Spotify are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. Essential Software checks eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. Essential Software does not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
       <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it's shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance. Views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad's view count, for information only. It's derived from an anonymous identifier generated and stored on each device, used to tell whether a device has already been counted once for a given ad (and, separately, for the activity counts described in the Privacy Policy); it isn't tied to a Google account or any other identity, and is sent whether or not you're signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
-      <p>Purchased views are a consumable purchase through Google Play. Refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:contactrhudio@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
+      <p>Purchased views are a consumable purchase through Google Play. Refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if Essential Software fails to deliver a view-credit balance you paid for, or takes down an ad in error after it was approved, <a href="mailto:essentialsoftware.support@gmail.com">contact Essential Software</a> and it will, at its discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown and forfeits any views it had left; those views are not restored to your account or transferable to another ad, and any unspent view-credit balance is forfeited the same way if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
       <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags, and preview images, and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description, and tags, the same way you're responsible for anything else you publish, and the Responsible Use section above applies. Essential Software may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons it can act on any other published content. An optional display name and profile picture shown on your stories and to your subscribers don't need to be your real name or photo, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
       <p>A signed-in account can also like a published note. Likes are a simple sign of appreciation. Each note's own like count is visible on its card to you as its author in your Published and Stories tabs, and to anyone who sees the note in their Subscribed feed or Liked tab, but never who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. You agree not to use likes abusively, such as by using multiple accounts or automated means to inflate or suppress a note's count. Essential Software may remove likes, or suspend your ability to like, for the same reasons it can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what is recorded about likes.</p>
@@ -4552,7 +4552,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Changes to These Terms</h3>
       <p>Essential Software may update these terms from time to time. Continued use of the app after changes are posted constitutes acceptance of the revised terms.</p>
       <h3>Contact</h3>
-      <p>Questions about these terms can be sent to <a href="mailto:contactrhudio@gmail.com">contactrhudio@gmail.com</a>.</p>
+      <p>Questions about these terms can be sent to <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
     </div>
   </div>
 </div>
@@ -15784,10 +15784,13 @@ function _nbLoadCachedProfileName() {
 // Skipped while offline/signed-out (same guards as everywhere else),
 // and never overwrites what the person is actively typing.
 let _nbProfileNameSeq = 0; // bumped when a name save starts/finishes, so an older GET can't land over it
-async function _nbFetchProfileName() {
+// Resolves true when the answer is settled (applied, superseded, or nothing to do)
+// and false when it couldn't be fetched, so the reconnect retry knows to try again.
+// `silent` skips the failure toast for those background retries.
+async function _nbFetchProfileName(silent) {
   const nameInput = document.getElementById('logout-profile-name-input');
-  if (!nbIsSignedIn()) return;
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  if (!nbIsSignedIn()) return true;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
   const seq = _nbProfileNameSeq;
   const acctSub = (nbAccount() || {}).sub;
   try {
@@ -15797,13 +15800,14 @@ async function _nbFetchProfileName() {
     if (!res.ok) throw new Error('profile name fetch failed: ' + res.status);
     const data = await res.json();
     const name = (data && data.profileName) || '';
-    if (!nbIsSignedIn() || (nbAccount() || {}).sub !== acctSub) return; // signed out / switched account mid-flight
+    if (!nbIsSignedIn() || (nbAccount() || {}).sub !== acctSub) return true; // signed out / switched account mid-flight
     if (data && data.authorId) { const cur = nbAccount(); if (cur && !cur.authorId) { cur.authorId = data.authorId; try { localStorage.setItem(NB_ACCOUNT_KEY, JSON.stringify(cur)); } catch (e) {} } }
-    if (seq !== _nbProfileNameSeq) return; // a save started/finished meanwhile — this answer predates it
+    if (seq !== _nbProfileNameSeq) return true; // a save started/finished meanwhile — this answer predates it
     const key = _nbProfileNameCacheKey();
     if (key) { try { localStorage.setItem(key, name); } catch (e) {} }
-    if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
-  } catch (e) { _nbLog('profile name fetch', e); showToast('Couldn\u2019t refresh your name'); }
+    if (nameInput && document.activeElement !== nameInput && nameInput.disabled) nameInput.value = name; // never clobber an edit in progress
+    return true;
+  } catch (e) { _nbLog('profile name fetch', e); if (!silent) showToast('Couldn\u2019t refresh your name'); return false; }
 }
 function _nbSubscriberCountCacheKey() { const acct = nbAccount(); return acct ? 'nb_subscriber_count_v1:' + acct.sub : null; }
 // Snappy first paint for the dialog, same role _nbLoadCachedProfileName
@@ -15824,10 +15828,10 @@ function _nbLoadCachedSubscriberCount() {
 let _nbCountFetchSeq = 0;
 async function _nbFetchSubscriberCount() {
   const el = document.getElementById('logout-subscriber-count');
-  if (!el) return;
+  if (!el) return true;
   const key = _nbSubscriberCountCacheKey();
-  if (!nbIsSignedIn()) { el.textContent = ''; if (key) { try { localStorage.removeItem(key); } catch (e) {} } return; }
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  if (!nbIsSignedIn()) { el.textContent = ''; if (key) { try { localStorage.removeItem(key); } catch (e) {} } return true; }
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
   const reqId = ++_nbCountFetchSeq; // only the newest request may write
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/subscriber-count', {
@@ -15837,7 +15841,7 @@ async function _nbFetchSubscriberCount() {
     const data = await res.json();
     // Superseded by a newer fetch, or the account changed/signed out meanwhile:
     // don't repaint the line or write the cache with another moment's answer.
-    if (reqId !== _nbCountFetchSeq || !nbIsSignedIn() || _nbSubscriberCountCacheKey() !== key) return;
+    if (reqId !== _nbCountFetchSeq || !nbIsSignedIn() || _nbSubscriberCountCacheKey() !== key) return true;
     const count = (data && data.count) || 0;
     let text = count === 1 ? '1 subscriber' : count + ' subscribers';
     // Total likes across the author's published notes, from the same response
@@ -15847,7 +15851,8 @@ async function _nbFetchSubscriberCount() {
     }
     el.textContent = text;
     if (key) { try { localStorage.setItem(key, text); } catch (e) {} }
-  } catch (e) { _nbLog('subscriber count fetch', e); }
+    return true;
+  } catch (e) { _nbLog('subscriber count fetch', e); return false; }
 }
 // Field is disabled until Edit is tapped; tapping it again (now labeled
 // Save) syncs to the server right away rather than on a debounce — see
@@ -15961,7 +15966,7 @@ async function _nbSaveProfileName(raw) {
     // Connection dropped between the pre-check above and the response —
     // treat it the same as being offline from the start (see
     // _pubRefreshAdTab's matching comment on its ads/mine fetch).
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) _nbProfileNameOfflinePending = true;
+    if (_nbIsNetworkFailure(e)) _nbProfileNameOfflinePending = true;
     if (statusEl) statusEl.textContent = 'Could not save' + _nbFailureReason(e);
     return false;
   }
@@ -16032,20 +16037,11 @@ async function _nbRemoveProfileImage() {
   // round-trip — same reasoning as the preview in _nbOnProfileImageChosen.
   // Snapshot first so a failed removal can put the old picture back.
   const prevAvatar = _nbSnapshotAvatar();
+  const op = ++_nbProfileImageOpSeq;
+  const acctSub = (nbAccount() || {}).sub;
   _nbPreviewAvatarRemoved();
   const ok = await _nbSaveProfileImage(null);
-  if (ok) {
-    if (statusEl) statusEl.textContent = '';
-    // Any live story ring currently showing this account's now-removed
-    // picture would otherwise keep displaying the browser's cached copy
-    // until the strip's next scheduled refetch. Bump the cache-busting
-    // version and repaint immediately so those rings drop straight to
-    // the fallback chain (note image, then initial letter) right away.
-    _nbProfileImageVersion = Date.now();
-    _nbPaintStoriesStrip();
-  } else {
-    _nbRestoreAvatar(prevAvatar);
-  }
+  _nbApplyProfileImageResult(ok, null, prevAvatar, op, acctSub);
 }
 // Fires once a file's actually been chosen from the OS picker. Resets
 // the input's value first so picking the exact same file again still
@@ -16064,22 +16060,52 @@ function _nbOnProfileImageChosen(file) {
   // Snapshot the avatar as it looked before this pick, so a failed upload
   // can be put back exactly as it was.
   const prevAvatar = _nbSnapshotAvatar();
+  const op = ++_nbProfileImageOpSeq;
+  const acctSub = (nbAccount() || {}).sub;
   _nbDownscaleImageForAvatar(file, async function(dataUrl) {
     // Show the picked image right away — the downscale is instant and
     // local, so there's no reason to leave the old avatar (or the blank
     // fallback) up for the whole upload round-trip.
     _nbPreviewAvatar(dataUrl);
     const ok = await _nbSaveProfileImage(dataUrl);
-    if (ok) {
-      if (statusEl) statusEl.textContent = '';
-      _nbProfileImageVersion = Date.now();
-      _nbPaintStoriesStrip();
-    } else {
-      _nbRestoreAvatar(prevAvatar);
-    }
+    _nbApplyProfileImageResult(ok, dataUrl, prevAvatar, op, acctSub);
   }, function() {
     if (statusEl) statusEl.textContent = "Couldn\u2019t process that image";
   });
+}
+// Bumped at the start of every picture change (pick, remove, reconnect
+// retry) so a slow/older one finishing late can't repaint over a newer one.
+let _nbProfileImageOpSeq = 0;
+// Uploads/removals currently on the wire — the reconnect refresh leaves the
+// avatar alone while one runs (its own result handler sets the final state).
+let _nbProfileImageSaving = 0;
+// A fetch() that never got an answer (dropped/blocked connection) rejects with
+// a TypeError; an HTTP error (bad status) doesn't. Only the former is worth
+// re-arming for the reconnect retry — 'online' can fire before requests work.
+function _nbIsNetworkFailure(e) {
+  return (typeof navigator !== 'undefined' && navigator.onLine === false) || (e instanceof TypeError);
+}
+// The one place a picture save's outcome touches the UI, shared by the
+// pick, remove and reconnect-retry paths so they can't drift apart again.
+// Success re-asserts the final avatar state itself (rather than trusting
+// that an earlier optimistic preview is still on screen — an offline
+// failure rolls it back, and the sheet may have been closed/reopened
+// mid-flight) and refreshes the story rings; failure restores the snapshot.
+// Skipped when superseded by a newer change or the account changed.
+function _nbApplyProfileImageResult(ok, dataUrl, prevAvatar, op, acctSub) {
+  if (op !== _nbProfileImageOpSeq) return;
+  if (!nbIsSignedIn() || (nbAccount() || {}).sub !== acctSub) return;
+  const statusEl = document.getElementById('logout-avatar-status');
+  if (ok) {
+    if (statusEl) statusEl.textContent = '';
+    if (dataUrl) _nbPreviewAvatar(dataUrl); else _nbPreviewAvatarRemoved();
+    // Bump the cache-busting version and repaint so rings show the new
+    // picture (or drop to the note image / initial after a removal) now.
+    _nbProfileImageVersion = Date.now();
+    _nbPaintStoriesStrip();
+  } else {
+    _nbRestoreAvatar(prevAvatar);
+  }
 }
 // POST /account/profile-image — mirrors _nbSaveProfileName's shape
 // (immediate save, no debounce, same offline/failure handling).
@@ -16093,6 +16119,7 @@ async function _nbSaveProfileImage(dataUrl) {
     if (statusEl) statusEl.textContent = 'No internet connection. Not saved';
     return false;
   }
+  _nbProfileImageSaving++;
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image', {
       method: 'POST',
@@ -16106,12 +16133,14 @@ async function _nbSaveProfileImage(dataUrl) {
     // Connection dropped between the pre-check above and the response —
     // treat it the same as being offline from the start, same as the
     // matching branch in _nbSaveProfileName.
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    if (_nbIsNetworkFailure(e)) {
       _nbProfileImageOfflinePending = true;
       _nbProfileImagePendingDataUrl = dataUrl;
     }
     if (statusEl) statusEl.textContent = 'Could not save' + _nbFailureReason(e);
     return false;
+  } finally {
+    _nbProfileImageSaving--;
   }
 }
 // Silently re-runs whichever Account-sheet save(s) didn't complete because
@@ -16119,43 +16148,75 @@ async function _nbSaveProfileImage(dataUrl) {
 // pattern for the Publish sheet. Only fires if the dialog is still open —
 // someone who closed it (closeLogoutConfirm resets both flags) shouldn't
 // get a stale save re-fire on them.
-window.addEventListener('online', () => {
-  const overlay = document.getElementById('account-overlay');
-  if (!overlay || !overlay.classList.contains('open')) return;
+// Re-runs whichever Account-sheet save(s) are still pending (name, picture).
+async function _nbRetryPendingProfileSaves() {
   if (_nbProfileNameOfflinePending) {
     const input = document.getElementById('logout-profile-name-input');
     if (input) {
       const statusEl = document.getElementById('logout-profile-name-status');
       if (statusEl) statusEl.textContent = 'Saving\u2026';
-      _nbSaveProfileName(input.value).then(function(ok) {
-        // Mirrors _nbToggleProfileNameEdit's own success handling, since
-        // this retry runs outside that click handler.
-        if (ok) {
-          input.setSelectionRange(input.value.length, input.value.length);
-          input.disabled = true;
-          _nbSetProfileNameBtnMode('edit');
-        }
-      });
+      const ok = await _nbSaveProfileName(input.value);
+      // Mirrors _nbToggleProfileNameEdit's own success handling, since
+      // this retry runs outside that click handler.
+      if (ok) {
+        input.setSelectionRange(input.value.length, input.value.length);
+        input.disabled = true;
+        _nbSetProfileNameBtnMode('edit');
+      }
     }
   }
   if (_nbProfileImageOfflinePending) {
     const statusEl = document.getElementById('logout-avatar-status');
     if (statusEl) statusEl.textContent = _nbProfileImagePendingDataUrl ? 'Uploading\u2026' : 'Removing\u2026';
-    // The avatar is already showing the pending picture/removal from when
-    // it was first picked (see _nbOnProfileImageChosen/_nbRemoveProfileImage),
-    // so success needs no visual change here — only a failure needs to put
-    // it back, mirroring those two functions' own revert.
+    // The avatar does NOT still show the pending picture/removal: the
+    // offline attempt failed, so _nbOnProfileImageChosen/_nbRemoveProfileImage
+    // already rolled their optimistic preview back. Re-apply it now (same as
+    // a fresh pick) so the retry behaves like the original attempt on both
+    // outcomes — success keeps it, failure puts the pre-retry avatar back.
+    const pendingDataUrl = _nbProfileImagePendingDataUrl;
     const prevAvatar = _nbSnapshotAvatar();
-    _nbSaveProfileImage(_nbProfileImagePendingDataUrl).then(function(ok) {
-      if (ok) {
-        if (statusEl) statusEl.textContent = '';
-        _nbProfileImageVersion = Date.now();
-        _nbPaintStoriesStrip();
-      } else {
-        _nbRestoreAvatar(prevAvatar);
-      }
-    });
+    const op = ++_nbProfileImageOpSeq;
+    const acctSub = (nbAccount() || {}).sub;
+    if (pendingDataUrl) _nbPreviewAvatar(pendingDataUrl); else _nbPreviewAvatarRemoved();
+    const ok = await _nbSaveProfileImage(pendingDataUrl);
+    _nbApplyProfileImageResult(ok, pendingDataUrl, prevAvatar, op, acctSub);
   }
+}
+// Back online with the Account sheet open: first finish any save that couldn't
+// go through, then refresh what the sheet shows (name, subscriber/like line,
+// picture) — these are otherwise only fetched when the sheet opens, so a sheet
+// opened offline (or left open across a drop) kept showing stale values.
+// 'online' can fire before requests actually go through (same caveat as the
+// stories strip's own listener), so unfinished work is retried with a growing
+// delay; a newer 'online' event supersedes a chain still waiting, and closing
+// the sheet ends it.
+let _nbAcctOnlineToken = 0;
+window.addEventListener('online', () => {
+  const token = ++_nbAcctOnlineToken;
+  const delays = [0, 2000, 5000, 10000];
+  let nameOk = false, countOk = false, avatarOk = false;
+  (function attempt(i) {
+    setTimeout(async () => {
+      if (token !== _nbAcctOnlineToken) return;
+      const overlay = document.getElementById('account-overlay');
+      if (!overlay || !overlay.classList.contains('open')) return;
+      let more = false;
+      try {
+        await _nbRetryPendingProfileSaves();
+        if (_nbProfileNameOfflinePending || _nbProfileImageOfflinePending) {
+          more = true; // still failing for connectivity reasons — reads would only fail too
+        } else {
+          const nameInput = document.getElementById('logout-profile-name-input');
+          if (!nameOk) nameOk = (nameInput && !nameInput.disabled) ? true : await _nbFetchProfileName(true); // leave an edit in progress alone
+          if (!countOk) countOk = await _nbFetchSubscriberCount();
+          if (!avatarOk) avatarOk = _nbProfileImageSaving > 0 ? true : await _nbRefreshProfileAvatar();
+          more = !(nameOk && countOk && avatarOk);
+        }
+      } catch (e) { _nbLog('account sheet: online refresh', e); more = true; }
+      if (token !== _nbAcctOnlineToken) return;
+      if (more && i + 1 < delays.length) attempt(i + 1);
+    }, delays[i]);
+  })(0);
 });
 // Single letter shown in the Log Out dialog avatar until (or unless) an
 // actual picture loads: the cached display name's initial if there is
@@ -16173,7 +16234,7 @@ function _nbSnapshotAvatar() {
   const img = document.getElementById('logout-avatar-img');
   const fallback = document.getElementById('logout-avatar-fallback');
   if (!img || !fallback) return null;
-  return { src: img.src, imgDisplay: img.style.display, fallbackDisplay: fallback.style.display };
+  return { src: img.src, imgDisplay: img.style.display, fallbackDisplay: fallback.style.display, acct: img._nbAcct || null };
 }
 function _nbRestoreAvatar(snap) {
   if (!snap) return;
@@ -16181,6 +16242,7 @@ function _nbRestoreAvatar(snap) {
   const fallback = document.getElementById('logout-avatar-fallback');
   if (!img || !fallback) return;
   img.src = snap.src;
+  img._nbAcct = snap.acct || null;
   img.style.display = snap.imgDisplay;
   fallback.style.display = snap.fallbackDisplay;
 }
@@ -16192,6 +16254,7 @@ function _nbPreviewAvatar(dataUrl) {
   const fallback = document.getElementById('logout-avatar-fallback');
   if (!img || !fallback) return;
   img.onerror = null; img.onload = null;
+  img._nbAcct = (nbAccount() || {}).sub || null;
   img.src = dataUrl;
   img.style.display = '';
   fallback.style.display = 'none';
@@ -16202,6 +16265,7 @@ function _nbPreviewAvatarRemoved() {
   const img = document.getElementById('logout-avatar-img');
   const fallback = document.getElementById('logout-avatar-fallback');
   if (!img || !fallback) return;
+  img._nbAcct = null;
   img.style.display = 'none';
   fallback.style.display = '';
 }
@@ -16210,31 +16274,42 @@ function _nbPreviewAvatarRemoved() {
 // a just-uploaded picture shows immediately) and lets its onload/onerror
 // pair decide whether the image or the letter fallback ends up visible
 // — same img-first-then-fallback pattern as the story ring avatars.
+// Resolves true when the picture's state is settled (shown, or the server says
+// there isn't one) and false on a network failure — in which case whatever this
+// same account was already showing is left in place instead of dropping to the
+// letter, so opening the sheet offline no longer hides an existing picture.
 function _nbRefreshProfileAvatar() {
   const acct = nbAccount();
   const img = document.getElementById('logout-avatar-img');
   const fallback = document.getElementById('logout-avatar-fallback');
-  if (!img || !fallback) return;
+  if (!img || !fallback) return Promise.resolve(true);
   fallback.textContent = _nbAvatarFallbackLetter();
-  if (!acct || !acct.sub) { img.style.display = 'none'; fallback.style.display = ''; return; }
+  const showFallback = function() { img._nbAcct = null; img.style.display = 'none'; fallback.style.display = ''; };
+  if (!acct || !acct.sub) { showFallback(); return Promise.resolve(true); }
   // The worker only serves a picture to the public while its owner has a live
   // story, but always to the owner — who proves it with their session token. An
   // <img src> can't send that header, so fetch it and show it as a blob.
   const token = nbSessionToken();
-  const showFallback = function() { img.style.display = 'none'; fallback.style.display = ''; };
-  if (!token) { showFallback(); return; }
-  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(acct.authorId || acct.sub) + '?v=' + Date.now(), {
+  if (!token) { showFallback(); return Promise.resolve(true); }
+  return fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(acct.authorId || acct.sub) + '?v=' + Date.now(), {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function(res) {
-    if (!res.ok) throw new Error('no picture');
+    if (!res.ok) { const err = new Error('no picture'); err.noPicture = res.status >= 400 && res.status < 500; throw err; }
     return res.blob();
   }).then(function(blob) {
+    if ((nbAccount() || {}).sub !== acct.sub) return true; // switched account mid-flight
     if (img._nbBlobUrl) { try { URL.revokeObjectURL(img._nbBlobUrl); } catch (e) {} }
     img._nbBlobUrl = URL.createObjectURL(blob);
+    img._nbAcct = acct.sub;
     img.onerror = showFallback;
     img.onload = function() { img.style.display = ''; fallback.style.display = 'none'; };
     img.src = img._nbBlobUrl;
-  }).catch(showFallback);
+    return true;
+  }).catch(function(e) {
+    if (e && e.noPicture) { showFallback(); return true; } // server answered: no picture set
+    if (img._nbAcct !== acct.sub) showFallback();          // never keep another account's picture up
+    return false;
+  });
 }
 
 // Shared by nbUnpublishNote's own confirm flow and nbDeleteNote's
