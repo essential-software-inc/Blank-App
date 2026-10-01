@@ -471,6 +471,12 @@ body.pink .rdlg-more-toggle svg {
   line-height: 1.45
 }
 
+#_wptoast .toast-row {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap
+}
+
 /* Dismiss button on persistent toasts (the toast itself is the same dark pill in every theme) */
 #_wptoast .toast-ok {
   margin-left: .7rem;
@@ -11300,14 +11306,16 @@ function showToast(msg, opts) {
     const ok = document.createElement('button'); ok.type = 'button'; ok.textContent = 'OK';
     ok.className = 'toast-ok';
     ok.onclick = () => _nbHideToastEl(t);
-    t.appendChild(txt); t.appendChild(ok);
+    const row = document.createElement('span'); row.className = 'toast-row';
+    row.appendChild(txt); row.appendChild(ok); t.appendChild(row);
   } else {
     t.textContent = msg;
   }
   t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
   // sticky = stays until hideStickyToast(msg), the OK tap, or until any other toast replaces it
-  if (t._sticky) return;
+  if (t._sticky) { t._until = 0; return; }
   const dur = Math.min(7000, Math.max(3000, 1500 + msg.length * 40));
+  t._until = Date.now() + dur; // when this toast fades — lets the syncing notice wait its turn
   t._timer = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(1.2rem)'; }, dur);
 }
 
@@ -12964,10 +12972,17 @@ async function _nbRelinkOrphanPages() {
 const NB_SYNCING_MSG = 'Syncing your notes\u2026';
 async function _nbPullWithNotice() {
   const full = !(_nbSyncEtag && _nbSyncBaseline === 'have');
-  let timer = null, shown = false;
-  if (full && nbIsSignedIn()) timer = setTimeout(() => { shown = true; showToast(NB_SYNCING_MSG, { sticky: true }); }, 700);
+  let timer = null, shown = false, done = false;
+  const show = () => {
+    if (done) return;
+    const t = document.getElementById('_wptoast');
+    const left = (t && !t._sticky && t._until) ? t._until - Date.now() : 0;
+    if (left > 0) { timer = setTimeout(show, left + 250); return; } // another toast (e.g. "Signed in as…") is still showing: let it finish first
+    shown = true; showToast(NB_SYNCING_MSG, { sticky: true });
+  };
+  if (full && nbIsSignedIn()) timer = setTimeout(show, 700);
   try { return await nbSyncPull(false); }
-  finally { clearTimeout(timer); if (shown) hideStickyToast(NB_SYNCING_MSG); }
+  finally { done = true; clearTimeout(timer); if (shown) hideStickyToast(NB_SYNCING_MSG); }
 }
 async function _nbSyncPullThenPushOnce() {
   let pull = await _nbPullWithNotice();
