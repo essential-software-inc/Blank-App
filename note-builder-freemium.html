@@ -12030,7 +12030,7 @@ async function nbSignInWithGoogle() {
           ? 'Couldn\u2019t reach the sign-in server, but your connection is otherwise fine. Try again shortly.'
           : 'No internet connection. Try again once you\u2019re back online.');
       } else {
-        showToast('Sign-in failed. Try again.');
+        showToast('Sign-in failed' + (_nbFailureReason(e) || '. Try again.'));
       }
     }
   } finally {
@@ -12870,7 +12870,7 @@ async function _nbRelinkOrphanPages() {
         const many = ordered.length > 1;
         const edited = c.updatedAt ? new Date(c.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
         const ok = await _nbAskConfirm('Reconnect published page?',
-          '\u201c' + (c.title || 'Untitled') + '\u201d' + (many && edited ? ' (last edited ' + edited + ')' : '') + ' looks like your page at /@' + p.slug + ', which is online but not linked to any note here.' + (many ? ' You have more than one note with this title, so check this is the right one.' : '') + ' Reconnect them so you can edit it? This creates a new private key for the page, and the old one stops working.',
+          '\u201c' + (c.title || 'Untitled') + '\u201d' + (many && edited ? ' (last edited ' + edited + ')' : '') + ' looks like your page at /@' + p.slug + ', which is online but not linked to any note here.' + (many ? ' You have more than one note with this title, so check this is the right one.' : '') + ' Reconnect them so you can edit it?' + (many ? '' : ' If you choose Not now, we\u2019ll ask again next time you open the app.'),
           'Reconnect', many ? 'Not this one' : 'Not now');
         if (ok) { chosen = c; break; }
       }
@@ -15084,7 +15084,7 @@ function _nbCheckStoryReachable(slug) {
       // to a different one, or closing the viewer, retires this check.
       if (_nbCurrentStorySlug !== slug || !document.getElementById('story-viewer-overlay').classList.contains('open')) return;
       if (res.status === 404) { showToast('Couldn\u2019t load that note. It isn\u2019t available anymore.'); return; }
-      if (!res.ok) { showToast('Couldn\u2019t load that note. Server error (' + res.status + ')'); return; }
+      if (!res.ok) { showToast('Couldn\u2019t load that note' + (_nbFailureReason(new Error('load failed: ' + res.status)) || '. Try again later.')); return; }
       return res.json().then(data => {
         if (_nbCurrentStorySlug !== slug) return;
         if (!data || !data.found) showToast('Couldn\u2019t load that note. It isn\u2019t available anymore.');
@@ -16044,7 +16044,7 @@ async function _nbFetchProfileName(silent) {
     if (key) { try { localStorage.setItem(key, name); } catch (e) {} }
     if (nameInput && document.activeElement !== nameInput && nameInput.disabled) nameInput.value = name; // never clobber an edit in progress
     return true;
-  } catch (e) { _nbLog('profile name fetch', e); if (!silent) showToast('Couldn\u2019t refresh your name'); return false; }
+  } catch (e) { _nbLog('profile name fetch', e); if (!silent) showToast('Couldn\u2019t refresh your name' + _nbFailureReason(e)); return false; }
 }
 function _nbSubscriberCountCacheKey() { const acct = nbAccount(); return acct ? 'nb_subscriber_count_v1:' + acct.sub : null; }
 // Snappy first paint for the dialog, same role _nbLoadCachedProfileName
@@ -16925,7 +16925,7 @@ async function _pubRenderAdPackages(eligible) {
       const offerings = await Purchases.getOfferings();
       const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
       packages = offering && offering.availablePackages;
-    } catch (e) { _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages'); }
+    } catch (e) { _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
   }
   if (myToken !== _pubAdPkgsToken) return; // a newer call has since started; let it own the DOM
   wrap.innerHTML = '';
