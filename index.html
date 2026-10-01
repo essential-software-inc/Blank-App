@@ -776,7 +776,7 @@ body.pink #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active
   width: 100%
 }
 /* Subscribed-feed note cards get the author's profile name shown before
-   the title (plan: cosmetic display name, not the real identity). */
+   the title (cosmetic display name, not the real identity). */
 .gc-author-name {
   font-size: .68rem;
   color: #7d858c;
@@ -2004,8 +2004,7 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
   animation: acct-sync-spin .8s linear infinite
 }
 
-/* Cosmetic display-name field in the Log Out dialog (plan: Stories
-   feature) — shown on Subscribed-feed note cards before the title. */
+/* Cosmetic display-name field in the Log Out dialog — shown on Subscribed-feed note cards before the title. */
 #logout-profile-name-row {
   margin-top: .7rem
 }
@@ -4494,7 +4493,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p>Signing in is entirely optional, and Google handles it, so we never see your Google password. We receive your Google account identifier and email address, and keep them with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a session token that keeps you signed in (a session lasts up to 30 days). While signed in, your notes (including embedded images), along with which notes you've marked as favorites and your theme choice, are backed up to our servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance (see "In-app purchases" below) are linked to your account so they carry over too. Signing out stops further syncing. Your backup stays in place so you can pick it up again when you sign back in, and deleting your account removes it, as described below. Images in your backup that no note references any more (for example after you delete a note or replace an image) are deleted by the nightly clean-up once they are more than 14 days old.</p>
       <p>Your account is yours to keep or remove: you can delete it at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs this device out and schedules your account for deletion in 30 days. The deletion runs as part of a nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes and images, profile name and picture, subscriptions (both ones you made and ones to you), story-seen, like and follow records (including the timestamps kept for them), running ads and their view statistics, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance, and take down every page you published (a copy of each page, along with its record, is then kept for about 30 more days, as described under "Publishing a page"). Until then your published pages and stories stay online. Changed your mind? Signing back in with the same Google account during the 30 days cancels the deletion and restores full access. Every device where you're signed in is signed out as part of the deletion (each one finds out the next time the app contacts the server, usually within about a minute). Deleting your account does not delete anything held by Google or RevenueCat, which is governed by their own policies.</p>
       <h3>In-app purchases</h3>
-      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on our behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID. Before you sign in, that's an anonymous ID RevenueCat generates for your install, and once you sign in, it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself each time, not through our own servers. Ad view-credits do involve our servers, which receive confirmation from RevenueCat, not from Google directly, and credit the views to your account. We never receive your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
+      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on our behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID. Before you sign in, that's an anonymous ID RevenueCat generates for your install, and once you sign in, it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself, not through our own servers. The app keeps a cached copy of that result on your device and refreshes it from RevenueCat on launch and after a purchase or restore. Ad view-credits do involve our servers, which receive confirmation from RevenueCat, not from Google directly, and credit the views to your account. We never receive your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
       <p>Publishing is always your choice, and it only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to us and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for that page. It's stored on your device, not kept as-is on our side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for about 30 days afterward (our clean-up runs nightly) in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). The page's own record is kept for the same period and then deleted. It holds the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID, which is why it stays even after the account itself has been deleted. If we remove a page for a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as that address stays reserved: the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID. This record stays even after the copy or the account is deleted, since removing it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
       <h3>Publishing as an ad</h3>
@@ -4732,12 +4731,10 @@ document.body.dataset.lockScrollY = window.scrollY;
 
 // Hoisted above NB_PRISTINE_TEMPLATE (and everything else in this
 // script) so these bindings are always initialized before any code
-// that references them can run. They used to be declared much later,
-// near their primary usage sites, which is fine for calls that only
-// happen after the whole script has finished its own top-to-bottom
-// run — but any earlier synchronous call into code that touches one
-// of these (which persisted state from a previous session can trigger
-// on the very next load) hit it while still in its TDZ, throwing
+// that references them can run. Declared later, they would break any
+// earlier synchronous call into code that touches one of these (which
+// persisted state from a previous session can trigger on the very next
+// load): it would hit the binding while still in its TDZ and throw
 // "Cannot access '<name>' before initialization".
 let _nbFavorites = (function () {
   try { return new Set(JSON.parse(localStorage.getItem('nb_favorites_v1') || '[]')); } catch (e) { return new Set(); }
@@ -4834,8 +4831,8 @@ const _NB_NOTE_UI_STATE_SCRIPT = `<script data-noteinfra="1">(function(){
         st.full = html; st.imgRefs = Object.keys(images);
         // Report "default background" explicitly (empty string) instead of leaving pageBg out. An omitted
         // key can't be told apart from "never touched", so the stale value from the previous snapshot
-        // (Object.assign in the 'markup-ui-state' handler) or the note's old background used to win on
-        // save — picking the default color looked like it reverted. Only done alongside st.full, since
+        // (Object.assign in the 'markup-ui-state' handler) or the note's old background would win on
+        // save, making a pick of the default color look like it reverted. Only done alongside st.full, since
         // nbRestoreState only re-applies the saved background when it restores from st.full.
         if (st.pageBg === undefined) { st.pageBg = ''; st.pageBgCustom = ''; }
       }
@@ -4936,10 +4933,9 @@ body{margin:0}
 
 .cv-canvas{padding:1.5rem 1.1rem 4rem;min-height:200px;display:flex;flex-wrap:wrap;align-items:flex-start}
 
-/* Below 760px every layout falls back to single-column Classic (see the
-   "structural layouts" block further down) so editing always looks and
-   behaves the same on a phone. The toggle button lets someone preview
-   the actual chosen layout on a small screen anyway: forcing it on
+/* Classic is the only arrangement, and below 760px its canvas fits the
+   phone's width. The toggle button lets someone preview the wider
+   desktop-width canvas on a small screen anyway: forcing it on
    widens .cv-canvas past the viewport inside this dedicated scroll
    container, which pans via touch-action. Pinch is handled in JS (see
    the canvas-zoom script below) rather than left to the browser, since
@@ -4979,15 +4975,11 @@ body{margin:0}
 .blk{position:relative;border-radius:10px;padding:.6rem .75rem;margin-bottom:.2rem;transition:background .15s,box-shadow .15s,opacity .15s,transform .2s cubic-bezier(.22,.8,.24,1);flex:1 1 100%;--blk-custom:#5b5bd6}
 .blk:hover,.blk:focus-within{background:rgba(91,91,214,.055)}
 .blk.dragging{background:#fff;box-shadow:0 14px 30px rgba(20,20,20,.16),0 1px 2px rgba(20,20,20,.06);opacity:.96;cursor:grabbing}
-/* Classic-only rotate-in-place (see .blk-rotate-btn / wireBlockRotate()
-   below). Lives on the same --blk-rotate custom property in every
-   layout so a rotation picked in Classic is preserved if the person
-   later switches layouts, but the CSS transform is only ever applied
-   here — Classic is the plain document-flow layout ("Free" in the
-   layout picker), where a tilted block doesn't fight a grid/column
-   layout's alignment the way it would in Sidebar/Mosaic/etc. Extra
-   margin keeps a tilted block from visually clipping into its
-   neighbors, since transform doesn't reserve space in normal flow.
+/* Rotate-in-place (see .blk-rotate-btn / wireBlockRotate() below). The
+   tilt lives on the --blk-rotate custom property and is applied by the
+   transform below. Extra margin keeps a tilted block from visually
+   clipping into its neighbors, since transform doesn't reserve space in
+   normal flow.
    wireDrag() sets its own inline style.transform (translate) while
    actively dragging a block, which temporarily overrides this rule —
    the tilt reappears once the drag ends and the inline style clears. */
@@ -5024,10 +5016,8 @@ body{margin:0}
 .blk-bg-btn{cursor:pointer;transition:color .12s,border-color .12s,background .12s}
 .blk-bg-btn svg{width:13px;height:13px}
 .blk-bg-btn:hover,.blk-bg-btn:active{color:#5b5bd6;border-color:#c9c9f5;background:#f3f3fd}
-/* Classic-only rotate-in-place handle — see wireBlockRotate(). Hidden
-   in every other layout (see the .cv-page:not(...) gate on the
-   .blk[data-rotate] transform rule above) since it'd have no visible
-   effect there. */
+/* Rotate-in-place handle — see wireBlockRotate(). Hidden by default and
+   shown inside .cv-page (see the .cv-page .blk-rotate-btn rule below). */
 .blk-rotate-btn{cursor:pointer;transition:color .12s,border-color .12s,background .12s;display:none}
 .blk-rotate-btn svg{width:13px;height:13px}
 .blk-rotate-btn:hover,.blk-rotate-btn:active{color:#5b5bd6;border-color:#c9c9f5;background:#f3f3fd}
@@ -5045,10 +5035,8 @@ body{margin:0}
    wireResize() (see the drag-and-drop script) rather than baked into the
    <template> markup, so every block type picks it up from one place.
    Dragging it left/right steps data-w through 25/33/50/66/75/100 (%),
-   which the width rules below (and the per-layout ones inside the
-   structural-layouts media query) key off of. Works in Classic too, not
-   just the desktop layouts, since narrowing/centering a block is useful
-   even in the plain single-column view. */
+   which the width rules below key off of (layoutClassicCanvas() maps the
+   same steps onto the 12-column grid). */
 .blk-resize{cursor:ew-resize;touch-action:none;-webkit-user-select:none;user-select:none;transition:color .12s,border-color .12s,background .12s}
 .blk-resize svg{width:13px;height:13px}
 .blk-resize:hover,.blk-resize:active,.blk-resize.resizing{color:#5b5bd6;border-color:#c9c9f5;background:#f3f3fd}
@@ -5058,10 +5046,9 @@ body{margin:0}
    needs to center itself when it's alone on its line, and auto margins
    would otherwise fight the row placement. */
 .cv-page .blk[data-w]{margin-left:0;margin-right:0}
-/* Once a block has been resized, its explicit width (below) becomes the
-   flex-basis instead of the full-row default above, so it stops claiming
-   the whole line and can share a row with whatever's dragged in beside
-   it. */
+/* Once a block has been resized, its explicit width (below) replaces the
+   full-row default, so it stops claiming the whole line and can share a
+   row with whatever's dragged in beside it. */
 .blk[data-w]{flex:0 0 auto}
 .blk[data-w="25"]{width:25%}
 .blk[data-w="33"]{width:33.333%}
@@ -5088,16 +5075,9 @@ body{margin:0}
 
 .blk-resize-badge{position:fixed;z-index:9999;background:rgba(20,20,18,.85);color:#fff;font:600 .72rem/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:.3rem .55rem;border-radius:6px;pointer-events:none;transform:translate(-50%,-135%);white-space:nowrap}
 
-/* Drop feedback for section-aware dragging (Split l/r, Sidebar rail/main):
-   a valid target gets the usual accent outline; a target that the dragged
-   block type doesn't fit (e.g. a table dropped on the sidebar rail) gets a
-   muted red one instead and the drop is ignored, rather than silently
-   doing nothing. */
-
-/* Toolbar "add block" layout-variant chooser: appears in place of a plain
-   insert when adding a block type that this layout gives a specially
-   designed treatment to (e.g. the circular rail image/heading in
-   Profile). Reuses the same .img-pick-* sheet chrome (overlay, box, drag
+/* Toolbar "add block" style chooser: appears in place of a plain insert
+   so the person can pick a block's font/size/style/color (or an image or
+   media frame style) up front. Reuses the same .img-pick-* sheet chrome (overlay, box, drag
    handle, title, cancel) as the Add Image / Add YouTube pickers below —
    see askVariant() in the drag-and-drop script — so all three bottom
    sheets share one visual and gestural language. Only the two-line
@@ -5136,11 +5116,10 @@ body{margin:0}
 /* Scroll shell for the tabbed variant sheet (askTabbedVariant): the
    sheet itself is capped to a height that always leaves the color
    swatches/confirm/cancel on screen, and only the option list in the
-   middle scrolls to reach whatever's cut off — same idea as the
-   layout picker's sticky header/scrolling grid/sticky footer
-   (.cv-layout-header/-grid/-footer above), just built with flex
-   instead since this sheet's height also needs to shrink-to-fit on
-   the short flat/color-only sheets that reuse the same node. */
+   middle scrolls to reach whatever's cut off — a sticky header,
+   scrolling body and sticky footer built with flex, since this sheet's
+   height also needs to shrink-to-fit on the short flat/color-only sheets
+   that reuse the same node. */
 .img-pick-box.blk-variant-box{display:flex;flex-direction:column;max-height:80vh}
 .blk-variant-head{flex:0 0 auto}
 .blk-variant-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -.1rem;padding:0 .1rem}
@@ -5814,9 +5793,9 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
 
   // Links inside a contenteditable region don't reliably navigate on
   // click (browsers generally place the cursor instead, editable or
-  // not, unless it's a modifier-click) — and even if they did, this
-  // canvas lives inside a sandboxed iframe with no top-level navigation
-  // allowed. So intercept clicks on .cv-fmt-link ourselves and show the
+  // not, unless it's a modifier-click) — and even if they did, a link
+  // tapped inside this iframe wouldn't reliably go anywhere in the app's
+  // WebView (see _nbOpenExternalLink in the parent app). So intercept clicks on .cv-fmt-link ourselves and show the
   // address in the linkInfoSheet bottom sheet (defined below) instead of
   // navigating anywhere. Capturing on canvas rather than per-link, same
   // reasoning as the rest of this file's delegated listeners: links get
@@ -5839,7 +5818,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   });
 
   /* --- Link info sheet: shown on tapping a link in preview mode ---
-     Replaces the old web-preview iframe screen. Same .img-pick-* bottom
+     Same .img-pick-* bottom
      sheet chrome (overlay, box, drag handle) as the other pickers in
      this file (askBlockColor, mediaPicker, etc.) — just displays the
      address as plain text with a close (X) button and a Copy button
@@ -5852,8 +5831,8 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     var CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
     // Sandboxed note iframe has no explicit clipboard-write permission
-    // granted from its parent (see #markup-iframe's allow list in the
-    // outer shell), so navigator.clipboard can silently reject here even
+    // granted from its parent (#markup-iframe in the outer shell sets
+    // sandbox but no allow="clipboard-write"), so navigator.clipboard can silently reject here even
     // though it exists; always fall back to the legacy execCommand path
     // rather than leaving the button looking like it did nothing.
     function legacyCopy(text) {
@@ -6038,7 +6017,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // Extra webfont choices layered onto the Typography tab of every
   // text-bearing block type below (heading/subheading/text/quote all
   // concat this same list onto their own short flat/system-stack lists,
-  // rather than repeating 22 near-identical entries four times). Each
+  // rather than repeating the same entries four times). Each
   // style key has a matching @font-face (see <style> near the top of
   // the document) and FONTS loader entry so it renders and caches
   // offline the same way Inter Variable/Quicksand already do.
@@ -6059,17 +6038,12 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   ];
   // The 6 system-stack base options, shared by every typography sheet
   // below (heading/subheading/text/quote's Add-component sheets, and the
-  // format toolbar's inline Text font picker) instead of each block type
-  // defining its own short list of 4. They used to differ per type
-  // (e.g. Text offered Serif/Large but not Sans/Bold, Heading the
-  // reverse) since each list was hand-picked around that type's default
-  // look — but that made the same picker show different options
-  // depending on which block you opened it from, for no reason a person
-  // could predict. One shared list trades a little of that per-type
-  // nuance (Serif looks close to Heading's already-serif Default; Sans
-  // looks close to Text's already-sans-inherited Default) for every
-  // typography sheet in the app always showing the exact same 18 options
-  // in the exact same order.
+  // format toolbar's inline Text font picker) rather than each block type
+  // defining its own list. One shared list keeps the picker identical
+  // wherever it's opened from, at the cost of a little per-type nuance
+  // (Serif looks close to Heading's already-serif Default; Sans looks
+  // close to Text's already-sans-inherited Default), so every typography
+  // sheet in the app shows the exact same 10 options in the same order.
   var TYPOGRAPHY_BASE_OPTIONS = [
     { label: 'Default', desc: 'Plain, default style.', style: '' },
     { label: 'Sans', desc: 'Clean sans-serif.', style: 'sans' },
@@ -6125,7 +6099,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     { label: 'Space Mono', desc: 'Retro geometric mono.', style: 'spacemono' }
   ];
   var BLOCK_STYLE_OPTIONS = {
-    // Heading, Subheading, and Text each get a color tab too, same
+    // Heading, Subheading, and Text each get a color axis too, same
     // reasoning as Table/Divider below: the text itself is the one
     // obvious thing a color choice would recolor, so "typography" (the
     // old flat list, renamed to a tab) plus "color" is enough — no
@@ -6541,11 +6515,11 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     });
     if (rowBlocks.length === 1) singleRowGroups.push(rowBlocks[0]);
     // A row that only ended up holding one block reads as flush-left
-    // rather than centered, unlike the old flex-wrap look it's replacing.
-    // Nudge its start column to floor((cols-span)/2) instead. Rows with
-    // more than one block keep their original left-packed positions
-    // untouched, so migrated multi-block rows still look exactly like
-    // they used to.
+    // rather than centered, unlike the flex-wrap layout these notes were
+    // saved with. Nudge its start column to floor((cols-span)/2) instead.
+    // Rows with more than one block keep their original left-packed
+    // positions untouched, so migrated multi-block rows keep the look they
+    // were saved with.
     singleRowGroups.forEach(function(b) {
       var span = classicColSpan(b);
       b.dataset.col = String(Math.floor((CLASSIC_COLS - span) / 2));
@@ -6621,7 +6595,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
 
   // Converts a viewport point (e.g. the dragged block's own current
   // center) into the canvas's unscaled content-local coordinate system —
-  // the same one layoutClassicCanvas() used to set top/left — so it can
+  // the same one layoutClassicCanvas() sets top/left in — so it can
   // be compared directly against the cached row bands regardless of the
   // canvas's current zoom transform.
   function classicLocalPoint(x, y) {
@@ -6786,8 +6760,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   }
 
   // Where a freshly inserted block should land: a new row below
-  // everything currently on the canvas, full width — matching what
-  // appending used to do implicitly under flex-wrap.
+  // everything currently on the canvas, full width.
   function classicNextRow() {
     var rows = canvas._classicRows;
     if (rows && rows.length) return rows[rows.length - 1].row + 1;
@@ -7258,9 +7231,9 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
         // Downscale/recompress before embedding (see downscaleImageForEmbed
         // above): an un-resized phone photo can be several MB of base64,
         // which is most of what actually drives R2/D1 storage growth for
-        // this app (see publish-feature-plan.md §6 / MAX_HTML_BYTES on the
-        // worker) — shrinking it here, once, at the source, is far cheaper
-        // than trying to claw the bytes back later.
+        // this app (the worker caps pages at MAX_HTML_BYTES) — shrinking it
+        // here, once, at the source, is far cheaper than trying to claw the
+        // bytes back later.
         downscaleImageForEmbed(file, function(dataUrl) {
           setSrc(dataUrl);
           close();
@@ -7746,9 +7719,9 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   }
 
   // (Re)renders a resolved id/url into container from scratch — always
-  // clearing first for consistency with how this used to also handle a
-  // second platform. Cheap enough to redo on every wireSocial() call
-  // (insert, note reopen, layout switch).
+  // clearing first so a re-render never leaves a previous embed behind.
+  // Cheap enough to redo on every wireSocial() call
+  // (insert, note reopen).
   function renderSocialEmbed(container, platform, id, sourceUrl) {
     container.innerHTML = '';
     _markEmbedRetryPending(container);
@@ -8135,8 +8108,8 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       wrap.classList.toggle('blk-social-empty', !has);
       // renderSocialEmbed always rebuilds from scratch (see its own
       // comment above) rather than trying to detect "already rendered",
-      // so it's cheap and safe to call on every sync — insert, note
-      // reopen, or layout switch all route through here.
+      // so it's cheap and safe to call on every sync — insert and note
+      // reopen both route through here.
       if (has) renderSocialEmbed(embedEl, wrap.dataset.socialPlatform, wrap.dataset.socialId, wrap.dataset.socialUrl);
     }
     wrap.addEventListener('blank-social-change', sync);
@@ -8486,8 +8459,8 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // Resolves with the chosen option object itself (so callers can read
   // whatever fields they attached, e.g. sec/imgStyle), or null if
   // cancelled. Renders one .blk-variant-opt button per entry — works for
-  // the old 2-option layout-variant case and the 4-option image-style
-  // case the same way.
+  // the image-style (5 options) and media-style (4 options) lists
+  // the same way.
   function askVariant(typeLabel, options) {
     if (!variantOverlay) buildVariantOverlay();
     variantSheet.setAttribute('aria-label', 'Add ' + typeLabel);
@@ -8515,8 +8488,10 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   }
 
   // A BLOCK_STYLE_OPTIONS entry is "tabbed" when it's a plain object
-  // keyed by tab name (quote, checklist, table, divider) rather than the usual flat
-  // array of options (heading, text, code, ...).
+  // keyed by axis name (typography/design/color) rather than a flat array
+  // of options. Every type in BLOCK_STYLE_OPTIONS is tabbed now (heading,
+  // subheading, text, quote, code, checklist, table, divider); flat arrays
+  // remain only for IMAGE_STYLE_OPTIONS and MEDIA_STYLE_OPTIONS.
   function isTabbedOptions(o) { return !!o && !Array.isArray(o) && typeof o === 'object'; }
 
   // Tab order/labels are fixed and shared by every tabbed type — a type
@@ -8828,7 +8803,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // .blk-variant-opt[data-style="..."] CSS rules — no separate preview
   // logic needed here). Uses the same shared TYPOGRAPHY_OPTIONS list as
   // every block-level Typography tab (see its definition above), so this
-  // picker and every "Add [Type]" sheet always show the same 18 choices
+  // picker and every "Add [Type]" sheet always show the same 10 choices
   // in the same order. Resolves with the chosen style key ('' for
   // Default, i.e. clear), or null if dismissed without a choice.
   //
@@ -8843,7 +8818,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     variantSheet.setAttribute('aria-label', 'Text font');
     variantSheet.querySelectorAll(VARIANT_SHEET_CLEANUP_SELECTOR).forEach(function(el) { el.remove(); });
     // .blk-variant-head/-body/-foot — same three-piece scrolling structure
-    // askTabbedVariant() uses for its own Typography tab: with 18 fonts
+    // askTabbedVariant() uses for its own Typography tab: with 10 fonts
     // in TYPOGRAPHY_OPTIONS, the option list needs to scroll inside the
     // sheet's capped height (see .blk-variant-box in the <style> block)
     // rather than pushing Cancel off the bottom of the screen or
@@ -9171,17 +9146,11 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // app reloads) so reopening it starts from where the person left off
   // instead of always resetting to the default indigo. Scoped by picker
   // (askTabbedVariant's color row, askBlockColor, askTextColor each
-  // remember their own last custom color independently). This used to
-  // also scope by signed-in handle, carried over from Blank's version of
-  // this same picker (Blank has multiple handles per device; a handle
-  // switch there shouldn't leak one person's last color into another's)
-  // via a _comHandleScope() helper -- but Bluebook has no handle
-  // concept at all, and that helper was never ported over, so every call
-  // here threw (silently, into the catch below) and the picker never
-  // actually remembered anything. Dropped the handle scoping since it
-  // doesn't apply to this app. Wrapped in try/catch like the app's other
-  // localStorage reads/writes, since it's a nice-to-have, not something
-  // that should ever break the picker if storage is unavailable.
+  // remember their own last custom color independently). There is no
+  // per-account scoping, since this app has no handle concept. Wrapped in
+  // try/catch like the app's other localStorage reads/writes, since it's a
+  // nice-to-have, not something that should ever break the picker if
+  // storage is unavailable.
   var CCW_LAST_COLOR_KEY = 'blk_last_custom_color';
   function _ccwLastColorKey(scope) { return CCW_LAST_COLOR_KEY + '_' + scope; }
   function ccwGetLastColor(scope) {
@@ -9192,8 +9161,8 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   }
   // Fill for a Custom swatch at render time, shared by every color-swatch
   // set (askTabbedVariant's color row, askBlockColor, askTextColor): shows
-  // that picker's own last-picked color for the currently signed-in
-  // handle, so reopening it surfaces it immediately instead of always
+  // that picker's own last-picked color, so reopening it surfaces it
+  // immediately instead of always
   // starting from the plain rainbow icon. Falls back to the rainbow
   // render when nothing's been picked yet for this scope.
   function ccwSwatchFillAttr(scope) {
@@ -9799,13 +9768,12 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     viewToggleBtn.setAttribute('aria-pressed', startedInDesktopView ? 'true' : 'false');
     viewToggleBtn.setAttribute('aria-label', startedInDesktopView ? 'Switch to mobile view' : 'Switch to desktop view');
     // A note reopened straight into desktop view (see snapshot()'s
-    // st.desktopView / nbRestoreState's cv-force-desktop above) used to
-    // land at 1:1 zoom, showing only whatever cropped slice of the wider
-    // 900px canvas the scroll container's top-left happened to frame —
-    // the same "fit the whole canvas" overview a pinch-zoom-out reaches
-    // is what's actually useful the moment desktop view comes back, so
-    // apply it automatically here instead of making the person pinch it
-    // out by hand every time. setActiveZoom/desktopZoomFloor are defined
+    // st.desktopView / nbRestoreState's cv-force-desktop above) starts at
+    // the "fit the whole canvas" zoom that a pinch-zoom-out reaches, rather
+    // than at 1:1, which would show only whatever cropped slice of the
+    // wider 900px canvas the scroll container's top-left happened to
+    // frame. It's applied automatically so the person doesn't have to
+    // pinch it out by hand every time. setActiveZoom/desktopZoomFloor are defined
     // further down but hoisted, so they're callable here. Deferred a
     // frame because nbRestoreState only just applied the cv-force-desktop
     // class moments ago (or it was already in the initial HTML, but
@@ -9820,7 +9788,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   }
 
   // Pinch-to-zoom, scoped to just the canvas. Native pinch is disabled in
-  // the CSS (touch-action no longer includes pinch-zoom) because it zooms
+  // the CSS (touch-action excludes pinch-zoom) because it zooms
   // the whole visual viewport — toolbar, FAB, everything — rather than
   // just the note content. This tracks two touch pointers by hand and
   // scales #cv-canvas alone, so only the layout being edited zooms; the
@@ -9920,7 +9888,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // the canvas's actual content later grows or shrinks. Anything that
   // changes how tall the canvas is while zoomed out — adding or deleting a
   // block, adding a checklist item or table row, an image finishing its
-  // load, switching layouts — needs that wrap re-measured or new content
+  // load, toggling desktop/mobile view — needs that wrap re-measured or new content
   // simply gets clipped at the old boundary (or leaves dead space if
   // content shrank). Rather than re-deriving that call at every one of
   // those sites, a single ResizeObserver on the canvas itself catches all
@@ -10093,8 +10061,8 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // reads this state from the *live* iframe before cloning, then pushes
   // it into the *clone* via _cvSetViewState after the clone's own init
   // has already run (and already clobbered its own copy) but before the
-  // screenshot is taken — so the reset happens exactly the same as
-  // always, it's just no longer the last thing to touch the clone's zoom.
+  // screenshot is taken — so the clone's own reset still runs as
+  // usual but is no longer the last thing to touch its zoom.
   window._cvGetViewState = function() {
     return { desktop: isDesktopView(), zoom: activeZoom() };
   };
@@ -10217,13 +10185,11 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       while (el.firstChild) parent.insertBefore(el.firstChild, el);
       parent.removeChild(el);
     }
-    // Safety net for the empty-wrapper artifact splitInlineSpanOutsideRange
-    // used to be able to leave behind (a zero-length before/after fragment
-    // still got wrapped and inserted) — fixed at the source now, but this
-    // stays as cheap insurance against any other path (native undo/redo
-    // replaying our surroundContents() calls only partially, browser
-    // autocorrect, etc.) leaving a content-less .cv-fmt-* element sitting
-    // in the DOM. An empty one is invisible to the user's cursor and
+    // Safety net against a content-less .cv-fmt-* element sitting in the
+    // DOM, whatever path left it behind (a zero-length before/after
+    // fragment that got wrapped and inserted, native undo/redo replaying
+    // our surroundContents() calls only partially, browser autocorrect,
+    // etc.). An empty one is invisible to the user's cursor and
     // selection (nothing inside to select or arrow into) but still
     // occupies its own box-model padding, which is exactly what reads as
     // a stray sliver of highlight color with no way to reach or remove it.
@@ -10364,13 +10330,9 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     // Partial-overlap-preserving split, generalized to any tag/class/inline
     // style rather than hardcoding color or font-family — shared by
     // applyTextColor(), applyTextFont(), the highlight/code toggle, and the
-    // size wrapper below. Originally applyTextColor() and applyTextFont()
-    // each had their own copy (hardcoding .cv-fmt-color/color and
-    // .cv-fmt-font/fontFamily+fontWeight respectively) so the color fix
-    // wouldn't risk touching working font code — this version captures the
-    // element's full className and cssText instead of specific properties,
-    // so it's a strict superset of both and there's no longer a reason to
-    // keep three near-identical copies around.
+    // size wrapper below. It captures the element's full className and
+    // cssText instead of specific properties, so one copy serves color,
+    // font, highlight/code and size alike.
     function splitInlineSpanOutsideRange(el, markedRange) {
       var startCmp = markedRange.comparePoint(el, 0);
       var endCmp = markedRange.comparePoint(el, el.childNodes.length);
@@ -10434,11 +10396,9 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       return found;
     }
     // Same bookmark-marker + host-wide split structure as applyTextColor()
-    // / applyTextFont() above — fixes the same "editing part of a word
-    // clobbers the rest of it" bug for Highlight and Code, which still had
-    // the old behavior of unwrapping the entire enclosing mark whenever
-    // the selection's start/end shared one, even when the selection only
-    // covered part of it.
+    // / applyTextFont() above, so editing part of a word doesn't clobber
+    // the rest of it: Highlight and Code unwrap only the part of an
+    // enclosing mark that the selection covers, not the entire mark.
     function toggleMark(range, cls, tag, styleProps) {
       var host = range.commonAncestorContainer;
       if (host.nodeType === 3) host = host.parentElement;
@@ -10499,10 +10459,9 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       reselectNode(el);
     }
     // Same bookmark-marker + host-wide split structure again, for the
-    // format toolbar's Size Up/Down buttons. Previously this had no
-    // overlap handling at all: resizing part of an already-resized word
-    // would nest a new font-size span inside the old one, compounding the
-    // two em values instead of replacing. Splitting first means any
+    // format toolbar's Size Up/Down buttons. Without it, resizing part of
+    // an already-resized word would nest a new font-size span inside the
+    // old one, compounding the two em values instead of replacing. Splitting first means any
     // existing size span fully covered by the new selection is unwrapped
     // outright (so the new size replaces it rather than stacking), while
     // a span only partially covered keeps its original size on the part
@@ -10703,9 +10662,12 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     }
     // Same structure as applyHighlight() above, for the format toolbar's
     // Link button — an <a class="cv-fmt-link"> wrap instead of <mark>,
-    // and an href instead of a background color. target/rel are set so
-    // a tap on the finished link in preview/reading mode opens it in a
-    // new tab rather than navigating the note away.
+    // and an href instead of a background color. target/rel only take
+    // effect once the note is published or exported (a tap then opens the
+    // link in a new tab, or in an external browser from the in-app story
+    // viewer via the nb-link-tap relay). In the editor's own preview, the
+    // canvas click handler intercepts the tap and shows the address in
+    // linkInfoSheet instead, so the link never actually opens.
     function applyLink(range, url) {
       var host = range.commonAncestorContainer;
       if (host.nodeType === 3) host = host.parentElement;
@@ -10978,8 +10940,8 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
         }
         // Commit this action as its own undo entry right away instead of
         // waiting for the block to blur. toolbarFmt's mousedown handler
-        // keeps the field focused across clicks, so previously bold,
-        // align, size, etc. all piled up into whatever the block looked
+        // keeps the field focused across clicks, so without this bold,
+        // align, size, etc. would all pile up into whatever the block looked
         // like by the time it finally blurred — one undo entry for a
         // whole run of unrelated edits. The async sheet cases above
         // (color/font/highlight/link) already take over their own commit
@@ -11433,10 +11395,10 @@ function acceptTerms() {
 // Free-tier note cap. Checked at every place a new note could be added —
 // starting a fresh canvas, saving a brand-new note, and restoring notes
 // from a backup file — never at edits to a note that already exists, since
-// those don't grow the count. NB_FREE_NOTE_LIMIT names the same number
-// the paywall dialog's copy assumes; keep both in sync if it ever changes.
+// those don't grow the count. The paywall dialog's copy names no number
+// ("unlimited notes"), so this constant is the only place to change it.
 const NB_FREE_NOTE_LIMIT = 5;
-// RevenueCat dashboard values — fill these in before shipping a build:
+// RevenueCat dashboard values (where each one comes from):
 // - NB_REVENUECAT_API_KEY: Project Settings → API Keys → the public
 //   (App-specific) SDK key for Android, not a secret key.
 // - NB_PRO_ENTITLEMENT_ID: Entitlements → the identifier attached to the
@@ -11604,7 +11566,7 @@ async function nbRestorePurchases() {
   }
 }
 /* ===================== Google Sign-In + Account Sync ===================== */
-// Fill these in before shipping a build:
+// Where this value comes from:
 // - NB_GOOGLE_WEB_CLIENT_ID: Google Cloud Console → APIs & Services →
 //   Credentials → the OAuth "Web application" client's Client ID. This is
 //   the one used both by the native GoogleAuth plugin's `serverClientId`
@@ -11682,14 +11644,15 @@ function _nbRecordDeletedId(id) {
 function nbSessionToken() {
   try { return localStorage.getItem(NB_SESSION_KEY) || null; } catch (e) { return null; }
 }
-// A random ID persisted on this device, used only so the worker can tell
+// A random ID persisted on this device, used so the worker can tell
 // "same device viewed this ad twice" from "two different people viewed
-// it" for the unique-viewer count shown in the Publish as Ad tab. It's a
-// reporting signal, not an identity: unrelated to sign-in, sent whether or
-// not the person is signed in, and it resets on reinstall/cleared storage
-// or differs across a person's own devices — so unique-viewer counts are
-// a reasonable estimate, not an exact head-count. Never sent anywhere
-// except this one call.
+// it" for the unique-viewer count shown in the Publish as Ad tab, and for
+// the aggregate activity counts (the /presence beacon). It's a reporting
+// signal, not an identity: unrelated to sign-in, sent whether or not the
+// person is signed in, and it resets on reinstall/cleared storage or
+// differs across a person's own devices — so unique-viewer counts are a
+// reasonable estimate, not an exact head-count. It is sent only to the
+// view-count and presence calls, never to a third party.
 function _nbDeviceId() {
   try {
     let id = localStorage.getItem('nb_device_id');
@@ -11737,16 +11700,16 @@ function _nbBrowserPlugin() {
   const cap = window.Capacitor && window.Capacitor.Plugins;
   return (cap && cap.InAppBrowser) || null;
 }
-// Opens a URL outside the app — the actual work behind _nbBrowserPlugin()
-// above. window.open only works here when this file is opened directly in
+// Opens a URL outside the app, via the plugin that _nbBrowserPlugin()
+// above looks up. window.open only works here when this file is opened directly in
 // a desktop browser (no Capacitor bridge at all); inside the native
 // WebView it's a silent no-op unless something claims onCreateWindow,
 // which this app doesn't implement, and there is no plugin-free way to
 // hand a URL to the system browser (Capacitor's WebView does not
 // special-case a '_system' target the way Cordova's InAppBrowser did —
 // that's a different, unrelated framework). The clipboard fallback below
-// is only a safety net for the plugin somehow not being registered
-// on-device (e.g. not yet cap sync'd into a build) — normally
+// is only a safety net for any Capacitor environment where the plugin
+// isn't registered (e.g. not yet cap sync'd into a build) — normally
 // openInExternalBrowser handles this.
 function _nbOpenExternalLink(url) {
   if (!url) return;
@@ -11775,7 +11738,7 @@ function _nbAppPlugin() {
 // Activity stacked on top of this one — closing it (especially on a
 // failed/cancelled sign-in) can leave the WebView's Activity visually
 // dimmed and unresponsive to touch until its lifecycle cycles again
-// (what tapping the hardware Back button used to force). Toggling
+// (tapping the hardware Back button forces one). Toggling
 // display off and back on forces the WebView to fully repaint and
 // re-establish input handling without needing that manual nudge.
 function _nbNudgeWebViewRepaint() {
@@ -11848,8 +11811,8 @@ function _nbBindAppResumeListener() {
 // purchases, publish/update/unpublish), swallow it instead of exiting
 // mid-flow — every one of those has a native call, a stacked native
 // Activity (billing sheet, account picker), or a network request that'd
-// be orphaned under an app that's already gone, same failure mode
-// originally described here for sign-in alone. _nbBusyBtnCount is the
+// be orphaned under an app that's already gone, the same failure mode
+// as sign-in. _nbBusyBtnCount is the
 // single shared counter (see _pubSetBtnLoading) so this doesn't need its
 // own per-action list — anything that already shows a spinner is already
 // covered.
@@ -12199,7 +12162,7 @@ async function nbSignOut() {
   const Purchases = _nbRcPlugin();
   // Same _nbWithTimeout reasoning as nbRefreshProStatus() above: these are
   // native calls with a network round trip, and offline they can sit
-  // forever instead of rejecting — which used to hang this whole function,
+  // forever instead of rejecting — which would hang this whole function,
   // leaving nbSignOutFromAccountScreen()'s button (and, via _nbBusyBtnCount,
   // the back button) stuck disabled/unresponsive with no way out.
   if (Purchases) { try { await _nbWithTimeout(Purchases.logOut(), 8000, 'RevenueCat logOut timed out'); } catch (e) { _nbLog('RevenueCat logOut', e); } }
@@ -12245,8 +12208,7 @@ function _nbGatherNotesAndImages() {
   return { notes, images };
 }
 // ---- Cross-device favorites + theme -------------------------------------
-// Both used to live only on the device. They now ride in the same account
-// backup as the notes (extra `favorites` / `settings` fields; the worker
+// Both ride in the same account backup as the notes (extra `favorites` / `settings` fields; the worker
 // stores the blob as-is), merged per item by timestamp so an unfavorite on
 // one device isn't undone by a stale copy on another.
 const NB_FAV_META_KEY = 'nb_favorites_meta_v1'; // { [noteId]: { f: 0|1, t: ms } }
@@ -12300,8 +12262,8 @@ function _nbSchedulePullThenPush() {
   clearTimeout(_nbPushSoonTimer);
   _nbPushSoonTimer = setTimeout(() => { nbSyncPullThenPush().catch(e => _nbLog('sync after setting change', e)); }, 1500);
 }
-// The backup is one blob with an 8 MB cap. Past it, background pushes used to
-// fail without a word. Say so once per session (and on every manual sync).
+// The backup is one blob with an 8 MB cap. Past it, a background push would
+// fail without a word, so say so once per session (and on every manual sync).
 let _nbSyncTooLargeNotified = false;
 const NB_SYNC_TOO_LARGE_MSG = 'Too much to sync. Auto-backup is paused. Try removing large images.';
 function _nbSyncTooLarge(showFeedback) {
@@ -12330,7 +12292,7 @@ function _nbSaveSyncedImgs(set) {
   if (!k) return;
   try { localStorage.setItem(k, JSON.stringify([...set])); } catch (e) {}
 }
-let _nbImgTooLarge = new Set(); // this session only: ids the server refused as too big, so we don't retry them every minute
+let _nbImgTooLarge = new Set(); // this session only: ids the server refused as too big, so we don't retry them on every sync
 let _nbImgTooLargeNotified = false;
 let _nbImgCapNotified = false;
 let _nbImgCapHit = 0; // timestamp of the last time the account's backed-up image limit was hit (0 = not hit)
@@ -12345,7 +12307,7 @@ function _nbImgTooLargeMsg(n) {
   return (n === 1 ? 'One image is' : n + ' images are') + ' over ' + mb + ' MB and can\u2019t be backed up. The rest still sync.';
 }
 // Called when a note's editor hands over an image, BEFORE it's stored: tells the
-// person right away, instead of a minute later during the background sync,
+// person right away, instead of later during the background sync,
 // that this one won't be backed up. Signed-in only, once per image.
 function _nbWarnNewImage(id, data) {
   if (!nbIsSignedIn() || _nbImgAddWarned.has(id) || _nbGetImage(id) || typeof data !== 'string') return;
@@ -12364,8 +12326,8 @@ async function _nbSyncUploadImages(images, showFeedback) {
   const auth = { 'Authorization': 'Bearer ' + nbSessionToken() };
   const synced = _nbSyncedImgs();
   const todo = Object.keys(images).filter(id => !synced.has(id) && !_nbImgTooLarge.has(id));
-  // After the account's image limit was hit, don't hammer the server every
-  // minute: try again only every 10 minutes (e.g. after the person deleted notes).
+  // After the account's image limit was hit, don't hammer the server on
+  // every sync: try again only every 10 minutes (e.g. after the person deleted notes).
   // A manual sync skips the wait: the person may just have freed space.
   if (_nbImgCapHit && !showFeedback && Date.now() - _nbImgCapHit < 10 * 60 * 1000) return { ok: true };
   // Images the server refused as too big stay in the set for the session; count the ones still
@@ -12819,9 +12781,9 @@ async function nbSyncPull(showFeedback) {
 // "Sync now" button doesn't use this: it wants both results separately
 // to report on, and staying signed in un-syncable until the next retry
 // isn't a risk worth caring about there since the user's watching.
-// Only one sync operation at a time. Poll, foreground, online, screen changes
-// and Sync now used to overlap, and an older response could land after a newer
-// one. A call made while a run is queued (not started) shares that run.
+// Only one sync operation at a time. Without this, poll, foreground, online,
+// screen changes and Sync now could overlap, and an older response could land
+// after a newer one. A call made while a run is queued (not started) shares that run.
 let _nbSyncLock = Promise.resolve();
 function _nbWithSyncLock(fn) { const run = _nbSyncLock.then(fn, fn); _nbSyncLock = run.catch(() => {}); return run; }
 let _nbSyncQueued = null;
@@ -13132,11 +13094,11 @@ function toggleLogoutMore() {
   document.getElementById('logout-more-label').textContent = show ? 'Show less' : 'Show more';
 }
 // Ignores taps that land while Sign out is still in flight. confirmLogout
-// disables logout-dialog-confirm for the duration but never taught this
-// button (or the overlay's own background-click-to-close, which calls
-// this same function) to check that — so Cancel used to just hide the
-// dialog while nbSignOut() kept running underneath, then confirmLogout's
-// own closeLogoutConfirm()/openAccountScreen() calls would fire once it
+// disables logout-dialog-confirm for the duration, and this button (and the
+// overlay's own background-click-to-close, which calls this same function)
+// must check too. Otherwise Cancel would just hide the dialog while
+// nbSignOut() kept running underneath, then confirmLogout's own
+// closeLogoutConfirm()/openAccountScreen() calls would fire once it
 // resolved, silently signing the person out and swapping the screen right
 // after what looked like a successful Cancel.
 function closeLogoutConfirm() {
@@ -13298,8 +13260,8 @@ async function hideSplash() {
   // Image cache load is intentionally NOT awaited here — it runs in the
   // background and must never be able to block boot. IndexedDB opening
   // can hang indefinitely on some devices (no onblocked handler, no
-  // timeout in _idbOpen), and an await on that from here previously
-  // froze the splash bar right after its first tick.
+  // timeout in _idbOpen), and an await on that from here would
+  // freeze the splash bar right after its first tick.
   _nbImgCacheInitPromise = _nbInitImageCache();
   // Fallback for the case the bounded wait in hideSplash() below still
   // times out on an unusually slow/cold IndexedDB open: once the cache
@@ -13333,7 +13295,7 @@ async function hideSplash() {
   setTimeout(hideSplash, isResume ? 0 : 200);
 })();
 
-/* ===================== Notes data layer (stub — filled in on the Notes/Save build stage) ===================== */
+/* ===================== Notes data layer ===================== */
 const NB_NOTES_KEY = 'nb_notes_v1';
 // Hoisted up from their original homes further down this file (Silent
 // error log / Note image store / Bluebook canvas sections) because
@@ -13348,21 +13310,14 @@ let _nbImgCacheReady = false;
 const NB_DRAFT_ID_KEY = 'nb_draft_id_v1';
 const NB_EDITING_ID_KEY = 'nb_editing_note_id_v1';
 // One built-in note ships with a brand-new install so the Notes screen
-// isn't empty on first open. Originally gated on a single boolean flag
-// (seed once ever, the first time nbLoadNotes() ran against a device
-// with no nb_notes_v1 key at all) — but that meant the flag, once set,
-// blocked EVERY future demo note from ever appearing again, including
-// on devices that already had that flag set from testing an earlier
-// build (or, for real installs, anyone who already had the app open —
-// and therefore already had a nb_notes_v1 key of their own — before
-// this particular demo note was added). That's exactly the "only shows
-// up after clearing storage" bug: clearing storage was the only way to
-// unset a flag that should never have blocked THIS note in the first
-// place. Fixed by tracking which demo note ids have been offered
-// before, not whether seeding has ever happened at all — a demo note
-// not yet in that list gets added once, even to a device with existing
-// notes; one already in the list is never re-added, so deleting it still
-// works exactly as before.
+// isn't empty on first open. Seeding is tracked per demo note id (the ids
+// that have been offered before), not by a single "seeded once" flag: a
+// single flag would block every future demo note from ever appearing on
+// devices that already had it set, including existing installs that
+// already had a nb_notes_v1 key before a given demo note was added. A demo
+// note not yet in that list gets added once, even to a device with
+// existing notes; one already in the list is never re-added, so deleting
+// it sticks.
 const NB_SEEDED_IDS_KEY = 'nb_seeded_ids_v1';
 function _nbDefaultNotes() {
   return [{
@@ -13746,9 +13701,9 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
   // Only a page actually being published gets a report link — a plain
   // local download (nbExportNoteWebsite, no publishSlug) isn't reachable by
   // anyone but the person who saved it, so there's nothing to report.
-  // Built from day one per plan §5.1: CSAM is its own reason category
-  // because it needs a different response path (NCMEC CyberTipline,
-  // content preserved) than everything else (spam/copyright/abuse/other).
+  // CSAM is its own reason category because it needs a different response
+  // path (NCMEC CyberTipline, content preserved) than everything else
+  // (spam/copyright/abuse/other).
   const reportFooter = publishSlug ? `
   <div id="nb-report-footer" style="padding:1rem .7rem 1.3rem;font:11px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-align:center">
     <a href="#" id="nb-report-link" style="color:${_nbReportLinkColor(note)};text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px">Report an issue</a>
@@ -14343,11 +14298,10 @@ function nbOpenPublishSheet(id, keepTab) {
     liveFooter.style.display = '';
     document.getElementById('pub-live-url').textContent = _pubUrlFor(note.publishedSlug);
     document.getElementById('pub-stories-switch').checked = !!note.showInStories;
-    // Previously only came out right if you'd happened to open the note in
-    // the editor first — nothing here ever actually compared current
-    // content against what's live, so the button just sat at whatever its
-    // last state happened to be (enabled, by default markup, the rest of
-    // the time). Rebuild the same static HTML a real Save would send and
+    // Decide the Save button's state by comparing current content against
+    // what's live: without a comparison the button would just sit at
+    // whatever its last state happened to be (enabled, by default markup).
+    // Rebuild the same static HTML a real Save would send and
     // hash it (_hashStr, same helper the image cache already uses) — cheap
     // enough to redo on every open, and works whether or not the note was
     // ever opened in the editor this session, since it reads straight from
@@ -14807,11 +14761,10 @@ let _nbStoriesCache = [];
 // bump this and immediately repaint so a removal is reflected right
 // away rather than waiting for the strip's next scheduled refetch.
 let _nbProfileImageVersion = 0;
-// Authors this account follows, cached locally (see the comment on
-// nbToggleStorySubscribe for why: the backend has no "list my
-// subscriptions" endpoint, only the feed join, so this is the local
-// source of truth for the Subscribe/Subscribed button and for whether
-// the "Subscribed" category shows at all).
+// Authors this account follows, cached locally for a snappy first paint of
+// the Subscribe/Subscribed button and for whether the "Subscribed" category
+// shows at all. The worker's GET /subscriptions is the source of truth;
+// _nbReconcileSubscriptions keeps this cache in step with it.
 // Kept per account (like the liked-slugs cache) so one account's follows can
 // never show up under, or be written into, another's.
 const NB_SUBSCRIBED_LEGACY_KEY = 'nb_subscribed_authors_v1'; // pre-per-account list, migrated once below
@@ -15154,7 +15107,7 @@ function nbCloseStory() {
 // Per-account like on a published note (by slug). Not Favorites — that's a
 // private on-device bookmark; this is public and counts toward the author's
 // "likes" total on their Account sheet.
-// Worker contract (expected): GET /likes/:slug -> { liked: boolean }
+// Worker contract: GET /likes/:slug -> { liked: boolean }
 // (Authorization optional; absent = liked:false); POST /likes/:slug and
 // DELETE /likes/:slug (Authorization required) like / unlike, idempotent.
 const NB_LIKE_ICON = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
@@ -15547,7 +15500,7 @@ async function nbToggleStorySubscribe() {
     });
     // A bare status-code throw only ever surfaces as the generic bucket
     // in _nbFailureReason (e.g. any unrecognized 4xx becomes "request
-    // error"), same as the pre-fix publish flow used to. Read the body's
+    // error"). Read the body's
     // `error` field first, same as the publish 403 handling above, so a
     // specific server-given reason (already-subscribed, blocked author,
     // etc.) reaches the toast instead of that generic fallback.
@@ -16776,7 +16729,7 @@ function nbAdCopyAttribution() {
     .catch(() => {});
 }
 
-// RevenueCat offering/packages for view credits — see setup guide §5c.
+// RevenueCat offering/packages for view credits.
 // Views-per-package is display-only here; the server (AD_VIEW_PACKAGES in
 // the worker) is the actual source of truth for what a given product ID
 // grants, keyed off the RevenueCat webhook's product_id, not this map.
@@ -17290,7 +17243,7 @@ function nbImportNotes(e) {
   reader.readAsText(file);
 }
 
-/* ===================== Category pills + search (wired to real note data once Save exists) ===================== */
+/* ===================== Category pills + search ===================== */
 const NB_BASE_CATS = ['All', 'Favorites', 'Uncategorized'];
 let _nbActiveCat = 'All';
 let _nbSubTab = 'feed'; // inside Subscribed: 'feed' (who you follow) or 'liked' (notes you liked)
@@ -17573,10 +17526,10 @@ function nbSearchInputChanged(value) {
 // the slug, so this needs its own lookup by slug. check-slug can't serve
 // that (it only ever answers "is this taken", never who owns it or what
 // it's called) — this calls a sibling GET /meta/:slug on the same
-// publish worker instead, expected to respond with
+// publish worker instead, which responds with
 // { found: true, slug, title, authorSub } for a live published note, or
-// { found: false } (or a plain 404) otherwise. That endpoint has to exist
-// server-side for this to work; nothing in this file stands it up.
+// { found: false } with a 404 otherwise (unpublished, never existed, or
+// taken down). The route is handled by handleMeta in the worker.
 async function nbGoToNoteLink() {
   const input = document.getElementById('feed-search-input');
   const goBtn = document.getElementById('feed-search-go');
@@ -17937,11 +17890,9 @@ function nbDeleteNote(id) {
 function _nbShowDeleteConfirmDialog(id) {
   const ov = document.getElementById('delete-overlay');
   // Rewrites this dialog's title/body/confirm-button text and state
-  // every time it's opened, since it used to be shared with the gallery
-  // image delete flow and could come up still showing "Delete image?"
-  // (or mid-delete "Deleting…", disabled) left over from that. Gallery's
-  // gone now, but nothing else resets this dialog between uses either,
-  // so keeping the reset is still the safe thing to do.
+  // every time it's opened, since nothing else resets it between uses and
+  // it could otherwise come up still showing text (or a disabled
+  // "Deleting…" state) left over from the previous use.
   const titleEl = document.querySelector('#delete-dialog .rdlg-title');
   const bodyEl = document.querySelector('#delete-dialog .rdlg-body');
   const cancelBtn = document.getElementById('delete-dialog-cancel');
@@ -18293,7 +18244,7 @@ function nbGoScreen(name) {
   // look at their notes or just finished changing one, so it's worth
   // catching up with the server right then rather than waiting up to
   // NB_SYNC_POLL_MS for the poll loop to get to it. Pull-then-push (see
-  // nbSyncPullThenPush) rather than the push-only call this used to be:
+  // nbSyncPullThenPush), not push-only:
   // leaving the editor should also pick up anything backed up from
   // another device, not just push this device's own edit. Silent (no
   // toast) since this is a background convenience, not a user-initiated
@@ -18341,9 +18292,10 @@ function closeBackupSheet() {
 
 /* ===================== Bottom sheets: drag-to-close ===================== */
 // Same touchstart/move/end drag pattern the original uses across its
-// bottom sheets. Covers both bottom-sheet-style overlays in this app —
-// backup-sheet and edit-dialog (the Save/Edit-details dialog, converted
-// from a centered modal to match backup-sheet's presentation).
+// bottom sheets. Covers the bottom-sheet-style overlays listed in SHEETS
+// below: backup-sheet, edit-dialog (the Save/Edit-details dialog, converted
+// from a centered modal to match backup-sheet's presentation),
+// publish-sheet and account-dialog.
 (function initSheetDrag() {
   const SHEETS = [
     { overlayId: 'backup-overlay', sheetId: 'backup-sheet', close: closeBackupSheet },
@@ -18603,7 +18555,10 @@ function closeBackupSheet() {
   }, { passive: true });
 })();
 
-/* ===================== Reader header placeholders (wired up in the Bluebook editor stage) ===================== */
+/* ===================== Reader header no-op stubs =====================
+   The shell markup's header buttons (#back-btn, #reader-infobar-btn, #hdr-edit-btn,
+   #reader-hdr-handle) still carry these inline handlers, but the Bluebook has no
+   reader header, so they stay hidden and the functions do nothing. */
 function navBack() {}
 function toggleReaderHeader() {}
 function toggleReaderInfoBar() {}
@@ -18763,17 +18718,14 @@ function _nbFragmentTemplate(htmlSrc) {
 // #cv-canvas isn't found at all (already a bare fragment, e.g. a note
 // saved under the new format), the input is returned unchanged.
 //
-// This used to look for '<div class="cv-canvas" id="cv-canvas">' and a
-// literal '  </div>\n  </div>\n\n  <button class="cv-fab" id="cv-fab"'
-// anchor by string index. A note saved under a different app version —
-// different indentation, an extra element between the canvas and the
-// FAB button, anything — wouldn't match that exact string, and the
-// silent fallback was to return htmlSrc completely unmigrated: the
-// *entire* old document. nbRestoreState() then spliced that whole blob
-// into the current template's own #cv-canvas, nesting a second full
-// copy of the toolbar and every block's controls inside the real
-// canvas — the doubled toolbar/controls bug. Finding #cv-canvas by id
-// in an actual parsed fragment isn't sensitive to any of that drift.
+// #cv-canvas is found by id in an actual parsed fragment, not by matching
+// literal markup around it, so it isn't sensitive to differences between
+// app versions (different indentation, an extra element between the
+// canvas and the FAB button, anything). A string-index anchor would
+// silently fail to match and return htmlSrc completely unmigrated: the
+// *entire* old document, which nbRestoreState() would then splice into the
+// current template's own #cv-canvas, nesting a second full copy of the
+// toolbar and every block's controls inside the real canvas.
 function _nbExtractCanvasFragment(htmlSrc) {
   if (typeof htmlSrc !== 'string') return '';
   var tpl;
@@ -18781,8 +18733,8 @@ function _nbExtractCanvasFragment(htmlSrc) {
   var canvasEl = tpl.content.querySelector('#cv-canvas');
   if (!canvasEl) return htmlSrc;
   var inner = canvasEl.innerHTML;
-  // Defense in depth: a note that already got stuck in the nested-copy
-  // state by a past run of the bug above has a second #cv-canvas nested
+  // Defense in depth: a note saved in the nested-copy state (a whole second
+  // document spliced inside the canvas) has a second #cv-canvas nested
   // inside this one. Keep unwrapping until none remains, so a note
   // that's already broken gets cleaned up the next time it loads
   // instead of staying broken (or nesting a third copy) forever.
@@ -18840,15 +18792,12 @@ function nbRestoreState(htmlSrc, uiState) {
 
 function nbBuildSafeHtml(htmlSrc, uiState, draftId) {
   htmlSrc = nbRestoreState(htmlSrc, uiState);
-  // A separate image-retry script used to be injected here, listening
-  // only for 'online' and reloading anything that had ever fired an
-  // 'error'. That duplicated (with a weaker, one-shot version of) the
-  // retry logic wireImage()/_retryPendingEmbeds() now handle directly —
-  // htmlSrc already carries that full script baked in from
-  // NB_PRISTINE_TEMPLATE, and it runs in this exact same document
-  // (there's no separate "read-only markup" context to cover), so
-  // images now get the same automatic + tap-to-retry behavior as video
-  // and social embeds with one retry path instead of two.
+  // No separate image-retry script is injected here: htmlSrc already
+  // carries the full retry logic (wireImage()/_retryPendingEmbeds()) baked
+  // in from NB_PRISTINE_TEMPLATE, and it runs in this exact same document
+  // (there's no separate "read-only markup" context to cover), so images
+  // get the same automatic + tap-to-retry behavior as video and social
+  // embeds through one retry path.
   const _uiStateGlobals = `<script data-noteinfra="1">window.__savedNoteUiState=${JSON.stringify(uiState || null).replace(/</g, '\\u003c')};window.__noteId=${JSON.stringify(draftId || null).replace(/</g, '\\u003c')};<\/script>`;
   const _noScrollbarCss = '<style data-noteinfra="1">html,body{scrollbar-width:none;-ms-overflow-style:none}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none}</style>';
   const _errRelay = `<script data-noteinfra="1">window.onerror=function(msg,src,line,col,err){parent.postMessage({type:'markup-error',msg:msg+(line?(' (line '+line+')'):'')},location.origin||'*');return true};<\/script>`;
@@ -18974,7 +18923,7 @@ function _nbCurrentBase() {
   // _nbPendingAdFragment (see nbCreateNew) stands in for a fresh draft's
   // usual blank start, the same way an existing note's own savedFragment
   // does above — cleared the moment this draft actually gets its own
-  // in-session ui-state (first edit), same guard nbCreateNew used to
+  // in-session ui-state (first edit), same guard nbCreateNew uses to
   // decide whether to fetch it in the first place. Only ever handed out for
   // the exact draft it was fetched for (_nbPendingAdDraftId) — a fragment
   // left over from a since-abandoned draft is not this draft's content.
@@ -19354,8 +19303,8 @@ function resetEditToOriginal() {
 // draft state is only scratch storage keyed by draftId — it never
 // touches the actual note record in the notes array until something
 // calls nbConfirmSave (Save/Update from the bottom sheet). Leaving the
-// editor any other way used to skip that step entirely, so the card
-// grid kept showing the note's last-saved content (and background)
+// editor any other way would skip that step entirely, so the card
+// grid would keep showing the note's last-saved content (and background)
 // instead of what was just edited. Commit the draft onto its existing
 // note here too, so navigating away is actually equivalent to the
 // toast's claim.
@@ -19417,7 +19366,7 @@ function nbNewFromEditor() {
   // any sense they'd recognize, so the toast would just be noise there.
   // _nbCommitDraftToNote actually writes the outgoing note's in-session
   // edits into the notes array (same as leaving via the Notes nav) —
-  // without it, tapping "+" mid-edit reset editingId and quietly dropped
+  // without it, tapping "+" mid-edit would reset editingId and quietly drop
   // whatever was just changed while still claiming it was saved.
   if (_nbGetEditingId()) {
     if (_nbCommitDraftToNote()) showToast('Changes saved automatically');
@@ -19660,12 +19609,11 @@ nbRenderCanvas();
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Reusable spinning-mark 3D flourish. Originally wired directly to the
-// splash screen's own canvas/svg trio; factored out to window.nbStart3DMark
-// so the Account screen (see _nbStartAcctSplash3D near nbAccountBtnClick)
-// can run its own independent instance against a second canvas/svg trio,
-// starting and stopping on its own schedule instead of the splash's
-// once-at-boot one. Returns a {stop} controller, or null if the flourish
+// Reusable spinning-mark 3D flourish, exposed as window.nbStart3DMark so
+// the splash screen (once at boot) and the Account screen (see
+// _nbStartAcctSplash3D near nbAccountBtnClick) can each run an independent
+// instance against their own canvas/svg trio, starting and stopping on
+// their own schedule. Returns a {stop} controller, or null if the flourish
 // couldn't start (reduced-motion, no THREE, no WebGL, missing elements) —
 // callers should treat null as "the flat SVG/CSS mark stays as-is".
 window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
