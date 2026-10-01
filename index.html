@@ -4359,6 +4359,9 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button class="rdlg-cancel" id="delete-dialog-cancel">Cancel</button>
       <button class="rdlg-ok" id="delete-dialog-confirm">Delete</button>
     </div>
+    <div class="rdlg-btns">
+      <button class="rdlg-cancel" id="delete-dialog-never" style="display:none;margin-top:.5rem"></button>
+    </div>
   </div>
 </div>
 
@@ -12826,6 +12829,9 @@ async function _nbReconcileStoriesFlags() {
 // it's showing in stories. Match = the note's creation time the page was published with, else a unique
 // title. Nothing is guessed when it's ambiguous.
 let _nbRelinkAt = 0;
+const NB_RELINK_NEVER_KEY = 'nb_relink_never'; // page slugs (this device only) the person said to stop asking about
+const _nbRelinkNever = (function () { try { return new Set(JSON.parse(localStorage.getItem(NB_RELINK_NEVER_KEY) || '[]')); } catch (e) { return new Set(); } })();
+function _nbRelinkNeverAdd(slug) { _nbRelinkNever.add(slug); try { localStorage.setItem(NB_RELINK_NEVER_KEY, JSON.stringify([..._nbRelinkNever])); } catch (e) {} }
 const _nbRelinkDeclined = new Set(); // slugs the person said no to this session; asked again next launch
 async function _nbRelinkOrphanPages() {
   if (!nbIsSignedIn() || Date.now() - _nbRelinkAt < 2 * 60 * 1000) return;
@@ -12849,7 +12855,7 @@ async function _nbRelinkOrphanPages() {
         hit = t ? free.filter(n => String(n.title || '').trim().toLowerCase() === t) : [];
       }
       if (!hit.length) continue;
-      if (_nbRelinkDeclined.has(p.slug)) continue;
+      if (_nbRelinkDeclined.has(p.slug) || _nbRelinkNever.has(p.slug)) continue;
       // Never interrupt typing or another dialog: try again on the next sync instead.
       const busy = document.getElementById('delete-overlay').classList.contains('open')
         || document.getElementById('screen-create').classList.contains('active');
@@ -12861,19 +12867,22 @@ async function _nbRelinkOrphanPages() {
       if (ordered.length > 1) {
         const go = await _nbAskConfirm('Reconnect published page?',
           'Your page at /@' + p.slug + ' is online but not linked to any note here, and ' + ordered.length + ' of your notes could be it. Go through them to find the right one?',
-          'Review', 'Skip');
+          'Review', 'Skip', 'Stop asking');
+        if (go === 'never') { _nbRelinkNeverAdd(p.slug); continue; }
         if (!go) { _nbRelinkDeclined.add(p.slug); continue; }
       }
-      let chosen = null;
+      let chosen = null, neverAsk = false;
       for (const c of ordered) {
         claimed.add(c.id);
         const many = ordered.length > 1;
         const edited = c.updatedAt ? new Date(c.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
         const ok = await _nbAskConfirm('Reconnect published page?',
           '\u201c' + (c.title || 'Untitled') + '\u201d' + (many && edited ? ' (last edited ' + edited + ')' : '') + ' looks like your page at /@' + p.slug + ', which is online but not linked to any note here.' + (many ? ' You have more than one note with this title, so check this is the right one.' : '') + ' Reconnect them so you can edit it?' + (many ? '' : ' If you choose Not now, we\u2019ll ask again next time you open the app.'),
-          'Reconnect', many ? 'Not this one' : 'Not now');
+          'Reconnect', many ? 'Not this one' : 'Not now', 'Stop asking');
+        if (ok === 'never') { neverAsk = true; break; }
         if (ok) { chosen = c; break; }
       }
+      if (neverAsk) { _nbRelinkNeverAdd(p.slug); continue; }
       if (!chosen) { _nbRelinkDeclined.add(p.slug); continue; }
       const r = await _nbApiFetch(base + '/publish/' + encodeURIComponent(p.slug) + '/relink', {
         method: 'POST', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
@@ -12888,6 +12897,7 @@ async function _nbRelinkOrphanPages() {
         publishedSlug: p.slug, publishToken: d.token,
         publishedAt: d.createdAt || Date.now(), lastPublishedAt: d.updatedAt || Date.now(),
         publishedContentHash: null, showInStories: !!d.showInStories,
+        createdAt: (p.noteCreatedAt != null ? p.noteCreatedAt : arr[idx].createdAt), // the note's original written date/time
         updatedAt: Date.now()
       });
       if (arr[idx].seedProvisional) arr[idx].seedProvisional = false;
@@ -14579,19 +14589,24 @@ function _nbAskResurfaceStories() {
 }
 // Generic yes/no on the same shared dialog, so it follows the Light/Night/Pink theme like every other
 // confirm. Resolves true only on the confirm button; backdrop or Cancel = false. Never rejects.
-function _nbAskConfirm(title, body, okLabel, cancelLabel) {
+function _nbAskConfirm(title, body, okLabel, cancelLabel, neverLabel) {
   return new Promise(resolve => {
     const ov = document.getElementById('delete-overlay');
     const titleEl = document.querySelector('#delete-dialog .rdlg-title');
     const bodyEl = document.querySelector('#delete-dialog .rdlg-body');
     const cancelBtn = document.getElementById('delete-dialog-cancel');
     const confirmBtn = document.getElementById('delete-dialog-confirm');
+    const neverBtn = document.getElementById('delete-dialog-never');
     titleEl.textContent = title;
     bodyEl.textContent = body;
     cancelBtn.textContent = cancelLabel || 'Cancel';
     confirmBtn.textContent = okLabel;
     confirmBtn.disabled = false;
-    const done = (val) => { ov.classList.remove('open'); cancelBtn.textContent = 'Cancel'; resolve(val); };
+    // Optional third choice: resolves 'never' (truthy, so only pass neverLabel from callers that check for it).
+    neverBtn.style.display = neverLabel ? '' : 'none';
+    neverBtn.textContent = neverLabel || '';
+    neverBtn.onclick = neverLabel ? () => done('never') : null;
+    const done = (val) => { ov.classList.remove('open'); cancelBtn.textContent = 'Cancel'; neverBtn.style.display = 'none'; resolve(val); };
     cancelBtn.onclick = () => done(false);
     ov.onclick = (e) => { if (e.target === ov) done(false); };
     confirmBtn.onclick = () => done(true);
