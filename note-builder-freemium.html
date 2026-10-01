@@ -12873,26 +12873,46 @@ async function _nbRelinkOrphanPages() {
     const res = await _nbApiFetch(base + '/my/pages', { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } });
     if (!res.ok) return;
     const pages = ((await res.json()) || {}).pages || [];
+    // A note is offered to at most one page per run. Title matches are always confirmed by the
+    // person, so pages that share a title are still offered.
+    const claimed = new Set();
     for (const p of pages) {
       if (!p || !p.slug) continue;
       const notes = nbVisibleNotes();
       if (notes.some(n => n.publishedSlug === p.slug)) continue; // already linked
-      const free = notes.filter(n => !n.publishedSlug);
+      const free = notes.filter(n => !n.publishedSlug && !claimed.has(n.id));
       let hit = (p.noteCreatedAt != null) ? free.filter(n => n.createdAt === p.noteCreatedAt) : [];
       if (hit.length !== 1) {
         const t = String(p.title || '').trim().toLowerCase();
         hit = t ? free.filter(n => String(n.title || '').trim().toLowerCase() === t) : [];
       }
-      if (hit.length !== 1) continue;
+      if (!hit.length) continue;
       if (_nbRelinkDeclined.has(p.slug)) continue;
       // Never interrupt typing or another dialog: try again on the next sync instead.
       const busy = document.getElementById('delete-overlay').classList.contains('open')
         || document.getElementById('screen-create').classList.contains('active');
       if (busy) { _nbRelinkAt = 0; return; }
-      const ok = await _nbAskConfirm('Reconnect published page?',
-        '\u201c' + (hit[0].title || 'Untitled') + '\u201d looks like your page at /@' + p.slug + ', which is online but not linked to any note here. Reconnect them so you can edit it? This creates a new private key for the page, and the old one stops working.',
-        'Reconnect', 'Not now');
-      if (!ok) { _nbRelinkDeclined.add(p.slug); continue; }
+      // Several notes can fit (same title): ask about each, most recently edited first, with its
+      // edit date to tell them apart. The first yes wins; every one asked about is off the table
+      // for the pages that follow.
+      const ordered = hit.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      if (ordered.length > 1) {
+        const go = await _nbAskConfirm('Reconnect published page?',
+          'Your page at /@' + p.slug + ' is online but not linked to any note here, and ' + ordered.length + ' of your notes could be it. Go through them to find the right one?',
+          'Review', 'Skip');
+        if (!go) { _nbRelinkDeclined.add(p.slug); continue; }
+      }
+      let chosen = null;
+      for (const c of ordered) {
+        claimed.add(c.id);
+        const many = ordered.length > 1;
+        const edited = c.updatedAt ? new Date(c.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        const ok = await _nbAskConfirm('Reconnect published page?',
+          '\u201c' + (c.title || 'Untitled') + '\u201d' + (many && edited ? ' (last edited ' + edited + ')' : '') + ' looks like your page at /@' + p.slug + ', which is online but not linked to any note here.' + (many ? ' You have more than one note with this title, so check this is the right one.' : '') + ' Reconnect them so you can edit it? This creates a new private key for the page, and the old one stops working.',
+          'Reconnect', many ? 'Not this one' : 'Not now');
+        if (ok) { chosen = c; break; }
+      }
+      if (!chosen) { _nbRelinkDeclined.add(p.slug); continue; }
       const r = await _nbApiFetch(base + '/publish/' + encodeURIComponent(p.slug) + '/relink', {
         method: 'POST', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
       });
@@ -12900,7 +12920,7 @@ async function _nbRelinkOrphanPages() {
       const d = await r.json();
       if (!d || !d.token) continue;
       const arr = nbLoadNotes();
-      const idx = arr.findIndex(n => n.id === hit[0].id && !n.publishedSlug);
+      const idx = arr.findIndex(n => n.id === chosen.id && !n.publishedSlug);
       if (idx === -1) continue;
       Object.assign(arr[idx], {
         publishedSlug: p.slug, publishToken: d.token,
