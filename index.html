@@ -12953,7 +12953,7 @@ async function _nbRelinkOrphanPages() {
       if (idx === -1) continue;
       Object.assign(arr[idx], {
         publishedSlug: p.slug, publishToken: d.token,
-        publishedAt: d.createdAt || Date.now(), lastPublishedAt: d.updatedAt || Date.now(),
+        publishedAt: d.createdAt || p.createdAt || p.publishedAt || Date.now(), lastPublishedAt: d.updatedAt || p.updatedAt || p.lastPublishedAt || Date.now(), // the page's real publish times; only fall back to "now" if the server sent none
         publishedContentHash: null, showInStories: !!d.showInStories,
         createdAt: (p.noteCreatedAt != null ? p.noteCreatedAt : arr[idx].createdAt), // the note's original written date/time
         updatedAt: Date.now()
@@ -12975,6 +12975,7 @@ async function _nbPullWithNotice() {
   let timer = null, shown = false, done = false;
   const show = () => {
     if (done) return;
+    if (document.getElementById('splash')) { timer = setTimeout(show, 300); return; } // splash still up (it removes itself after fading): the toast would sit on top of it
     const t = document.getElementById('_wptoast');
     const left = (t && !t._sticky && t._until) ? t._until - Date.now() : 0;
     if (left > 0) { timer = setTimeout(show, left + 250); return; } // another toast (e.g. "Signed in as…") is still showing: let it finish first
