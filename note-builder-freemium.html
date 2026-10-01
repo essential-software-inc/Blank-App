@@ -12925,7 +12925,7 @@ async function _nbRelinkOrphanPages() {
       if (ordered.length > 1) {
         const go = await _nbAskConfirm('Reconnect published page?',
           'Your page at /@' + p.slug + ' is online but not linked to any note here, and ' + ordered.length + ' of your notes could be it. Go through them to find the right one?',
-          'Review', 'Skip', 'Stop asking');
+          'Review', 'Skip', 'Stop asking', true);
         if (go === 'never') { _nbRelinkNeverAdd(p.slug); continue; }
         if (!go) { _nbRelinkDeclined.add(p.slug); continue; }
       }
@@ -12936,7 +12936,7 @@ async function _nbRelinkOrphanPages() {
         const edited = c.updatedAt ? new Date(c.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
         const ok = await _nbAskConfirm('Reconnect published page?',
           '\u201c' + (c.title || 'Untitled') + '\u201d' + (many && edited ? ' (last edited ' + edited + ')' : '') + ' looks like your page at /@' + p.slug + ', which is online but not linked to any note here.' + (many ? ' You have more than one note with this title, so check this is the right one.' : '') + ' Reconnect them so you can edit it?' + (many ? '' : ' If you choose Not now, we\u2019ll ask again next time you open the app.'),
-          'Reconnect', many ? 'Not this one' : 'Not now', 'Stop asking');
+          'Reconnect', many ? 'Not this one' : 'Not now', 'Stop asking', true);
         if (ok === 'never') { neverAsk = true; break; }
         if (ok) { chosen = c; break; }
       }
@@ -14666,7 +14666,7 @@ function _nbAskResurfaceStories() {
 }
 // Generic yes/no on the same shared dialog, so it follows the Light/Night/Pink theme like every other
 // confirm. Resolves true only on the confirm button; backdrop or Cancel = false. Never rejects.
-function _nbAskConfirm(title, body, okLabel, cancelLabel, neverLabel) {
+function _nbAskConfirm(title, body, okLabel, cancelLabel, neverLabel, lockBackdrop) {
   return new Promise(resolve => {
     const ov = document.getElementById('delete-overlay');
     const titleEl = document.querySelector('#delete-dialog .rdlg-title');
@@ -14692,7 +14692,7 @@ function _nbAskConfirm(title, body, okLabel, cancelLabel, neverLabel) {
       resolve(val);
     };
     cancelBtn.onclick = () => done(false);
-    ov.onclick = (e) => { if (e.target === ov) done(false); };
+    ov.onclick = lockBackdrop ? null : (e) => { if (e.target === ov) done(false); }; // lockBackdrop: a choice is required, tapping outside does nothing
     confirmBtn.onclick = () => done(true);
     ov.classList.add('open');
   });
