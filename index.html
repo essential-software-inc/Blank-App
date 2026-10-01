@@ -471,6 +471,31 @@ body.pink .rdlg-more-toggle svg {
   line-height: 1.45
 }
 
+/* Dismiss button on persistent toasts (the toast itself is the same dark pill in every theme) */
+#_wptoast .toast-ok {
+  margin-left: .7rem;
+  padding: .08rem .55rem;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, .45);
+  border-radius: 8px;
+  color: #fff;
+  font-family: inherit;
+  font-size: .72rem;
+  line-height: 1.4;
+  cursor: pointer;
+  pointer-events: auto
+}
+
+body.night #_wptoast .toast-ok {
+  border-color: #787878;
+  color: #e8e8e8
+}
+
+body.pink #_wptoast .toast-ok {
+  border-color: #ff8fb3;
+  color: #ffc2d6
+}
+
 .rdlg-btns {
   display: flex;
   flex-wrap: wrap;
@@ -4355,13 +4380,12 @@ document.body.dataset.lockScrollY = window.scrollY;
   <div id="delete-dialog" style="z-index:501">
     <div class="rdlg-title">Delete page?</div>
     <div class="rdlg-body">This page will be permanently removed. This can&rsquo;t be undone.</div>
-    <div class="rdlg-btns">
+    <div class="rdlg-btns" id="delete-dialog-row1">
       <button class="rdlg-cancel" id="delete-dialog-cancel">Cancel</button>
+      <button class="rdlg-cancel" id="delete-dialog-never" style="display:none"></button>
       <button class="rdlg-ok" id="delete-dialog-confirm">Delete</button>
     </div>
-    <div class="rdlg-btns">
-      <button class="rdlg-cancel" id="delete-dialog-never" style="display:none;margin-top:.5rem"></button>
-    </div>
+    <div class="rdlg-btns" id="delete-dialog-row2"></div>
   </div>
 </div>
 
@@ -11258,7 +11282,7 @@ function unlockScroll() {
   }
 }
 
-function showToast(msg) {
+function showToast(msg, opts) {
   let t = document.getElementById('_wptoast');
   if (!t) {
     t = document.createElement('div');
@@ -11267,10 +11291,36 @@ function showToast(msg) {
     document.body.appendChild(t);
   }
   clearTimeout(t._timer);
-  t.textContent = msg;
+  t._msg = msg;
+  t._sticky = !!(opts && opts.sticky);
+  if (t._sticky) {
+    // Sticky toasts carry a tiny OK so the person can dismiss them (the toast itself ignores taps).
+    t.textContent = '';
+    const txt = document.createElement('span'); txt.textContent = msg;
+    const ok = document.createElement('button'); ok.type = 'button'; ok.textContent = 'OK';
+    ok.className = 'toast-ok';
+    ok.onclick = () => _nbHideToastEl(t);
+    t.appendChild(txt); t.appendChild(ok);
+  } else {
+    t.textContent = msg;
+  }
   t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+  // sticky = stays until hideStickyToast(msg), the OK tap, or until any other toast replaces it
+  if (t._sticky) return;
   const dur = Math.min(7000, Math.max(3000, 1500 + msg.length * 40));
   t._timer = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(1.2rem)'; }, dur);
+}
+
+// Fade a sticky toast out, then drop its OK button so an invisible one can't catch taps.
+function _nbHideToastEl(t) {
+  t._sticky = false;
+  t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(1.2rem)';
+  setTimeout(() => { if (!t._sticky && t.style.opacity === '0') { const b = t.querySelector('button'); if (b) b.remove(); } }, 250);
+}
+function hideStickyToast(msg) {
+  const t = document.getElementById('_wptoast');
+  if (!t || !t._sticky || t._msg !== msg) return; // a newer toast took over — leave it alone
+  _nbHideToastEl(t);
 }
 
 // Lets the person know every time the connection returns, so a sheet or
@@ -12908,8 +12958,19 @@ async function _nbRelinkOrphanPages() {
     }
   } catch (e) { _nbLog('relink orphan pages', e); }
 }
+// A full pull (no usable ETag: app start, right after sign-in) can take a while on a slow connection and is
+// the one that brings notes back, so say so instead of leaving an apparently empty list unexplained.
+// Shown only if it's still running after a short delay, so quick pulls and the 20s poll don't flash it.
+const NB_SYNCING_MSG = 'Syncing your notes\u2026';
+async function _nbPullWithNotice() {
+  const full = !(_nbSyncEtag && _nbSyncBaseline === 'have');
+  let timer = null, shown = false;
+  if (full && nbIsSignedIn()) timer = setTimeout(() => { shown = true; showToast(NB_SYNCING_MSG, { sticky: true }); }, 700);
+  try { return await nbSyncPull(false); }
+  finally { clearTimeout(timer); if (shown) hideStickyToast(NB_SYNCING_MSG); }
+}
 async function _nbSyncPullThenPushOnce() {
-  let pull = await nbSyncPull(false);
+  let pull = await _nbPullWithNotice();
   if (pull.ok || pull.reason === 'not-found') {
     let push = await nbSyncPush(false);
     // Another device pushed between our pull and push: take its changes in
@@ -14603,10 +14664,17 @@ function _nbAskConfirm(title, body, okLabel, cancelLabel, neverLabel) {
     confirmBtn.textContent = okLabel;
     confirmBtn.disabled = false;
     // Optional third choice: resolves 'never' (truthy, so only pass neverLabel from callers that check for it).
+    // With the third choice, the two dismissals sit together on the first row and the confirm drops to a row below.
+    const row1 = document.getElementById('delete-dialog-row1'), row2 = document.getElementById('delete-dialog-row2');
     neverBtn.style.display = neverLabel ? '' : 'none';
     neverBtn.textContent = neverLabel || '';
     neverBtn.onclick = neverLabel ? () => done('never') : null;
-    const done = (val) => { ov.classList.remove('open'); cancelBtn.textContent = 'Cancel'; neverBtn.style.display = 'none'; resolve(val); };
+    if (neverLabel) { confirmBtn.style.marginTop = '.5rem'; row2.appendChild(confirmBtn); }
+    const done = (val) => {
+      ov.classList.remove('open'); cancelBtn.textContent = 'Cancel'; neverBtn.style.display = 'none';
+      confirmBtn.style.marginTop = ''; row1.appendChild(confirmBtn);
+      resolve(val);
+    };
     cancelBtn.onclick = () => done(false);
     ov.onclick = (e) => { if (e.target === ov) done(false); };
     confirmBtn.onclick = () => done(true);
