@@ -653,11 +653,51 @@ body.pink #_wptoast .toast-ok {
 body.night #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active) { border-left-color: #2a2a2c }
 body.pink #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active) { border-left-color: #f5b8cf }
 
-.cat-badge { display: inline-block; min-width: 1.05em; margin-left: .3rem; padding: 0 .3em; border-radius: 99px; background: #d33; color: #fff; font-size: .62rem; font-weight: bold; line-height: 1.5; text-align: center; vertical-align: 1px }
+.cat-badge { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; flex-shrink: 0; min-width: 1.5em; height: 1.5em; margin-left: .3rem; padding: 0 .38em; border-radius: 99px; background: #d33; color: #fff; font-size: .62rem; font-weight: bold; line-height: 1; text-align: center; vertical-align: 1px }
 /* Alerts: read-only cards (no open action) — message, time-ago, delete. */
-.alert-card { cursor: default }
+.alert-card { cursor: default; --alert-md-bleed: .9rem }
 .alert-card .gc-desc-text { display: block; -webkit-line-clamp: unset; overflow: visible }
 .alert-card .gc-desc-time { display: inline; margin: 0; text-align: left }
+.alert-card .gc-desc-text { overflow-wrap: anywhere }
+.alert-link { color: #3366cc; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent }
+body.night .alert-link { color: #7da7f0 }
+body.pink .alert-link { color: #bd2856 }
+.alert-md > * + * { margin-top: .45em }
+.alert-md li > * + * { margin-top: .35em }
+.alert-md-h { font-weight: 700; line-height: 1.3 }
+.alert-md-h1 { font-size: 1.15em }
+.alert-md-h2 { font-size: 1.08em }
+.alert-md-h3, .alert-md-h4 { font-size: 1em }
+.alert-md-h5, .alert-md-h6 { font-size: .95em; opacity: .85 }
+.alert-md-list { margin: 0; padding-left: 1.25em }
+ol.alert-md-list { padding-left: 1.6em }
+.alert-md-list .alert-md-list { margin-top: .15em }
+ul.alert-md-list ul.alert-md-list { list-style: circle }
+ul.alert-md-list ul.alert-md-list ul.alert-md-list { list-style: square }
+.alert-md-list li + li { margin-top: .15em }
+.alert-md-task-li { list-style: none; margin-left: -1.25em }
+.alert-md-task { display: inline-block; box-sizing: border-box; width: 1em; height: 1em; margin-right: .45em; border: 1.5px solid currentColor; border-radius: 3px; opacity: .6; vertical-align: -.12em; position: relative }
+.alert-md-task.on { background: #3366cc; border-color: #3366cc; opacity: 1 }
+.alert-md-task.on::after { content: ""; position: absolute; left: 28%; top: 6%; width: 28%; height: 56%; border: solid #fff; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg) }
+body.night .alert-md-task.on { background: #7da7f0; border-color: #7da7f0 }
+body.night .alert-md-task.on::after { border-color: #1c1c1e }
+body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
+.alert-md-quote { margin: 0; padding-left: .7em; border-left: 3px solid rgba(128,128,128,.45) }
+.alert-md-quote > * + * { margin-top: .35em }
+.alert-md-ic { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; padding: .05em .3em; border-radius: 4px; background: rgba(128,128,128,.18) }
+.alert-md-code { margin: 0; padding: .5em .65em; border-radius: 8px; background: rgba(128,128,128,.14); overflow-x: auto; white-space: pre; -webkit-overflow-scrolling: touch }
+.alert-md-code code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; background: none; padding: 0; border: 0; border-radius: 0; box-shadow: none }
+.alert-md-hr { border: none; border-top: 1px solid rgba(128,128,128,.35); margin: .5em 0 }
+.alert-md del { opacity: .75 }
+.alert-md-img { display: block; max-width: 100%; height: auto; margin: .15em 0; border-radius: 8px }
+.alert-md-full { display: block; width: calc(100% + 2 * var(--alert-md-bleed, 0px)); max-width: none; height: auto; margin: .15em calc(-1 * var(--alert-md-bleed, 0px)) }
+.alert-md-car { margin: .3em 0 }
+.alert-md-car-full { margin: .3em calc(-1 * var(--alert-md-bleed, 0px)) }
+.alert-md-car-full .nb-carousel-viewport { border-radius: 0; box-shadow: none }
+.alert-md-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch }
+.alert-md-table { border-collapse: collapse; font-size: .95em }
+.alert-md-table th, .alert-md-table td { border: 1px solid rgba(128,128,128,.35); padding: .25em .55em; text-align: left; vertical-align: top }
+.alert-md-table th { font-weight: 700; background: rgba(128,128,128,.12) }
 
 /* ===================== Stories strip + viewer ===================== */
 #nb-stories-strip {
@@ -4518,7 +4558,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 2 October 2026</em></p>
+      <p><em>Effective 3 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, preferences, and UI state all live on your device, with one exception: when you're signed in, which stories you've opened is tracked on our servers, against your account, instead of on your device (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy), a short queue of any likes or follows you tapped while offline that haven't been sent yet, and a small number recording how far your device's clock is off from our servers, so those taps are time-stamped correctly. If you sign in with Google, your notes, along with your favorites and theme choice, are additionally backed up to our servers (see below).</p>
@@ -4536,7 +4576,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <p>This applies the same way to pages currently running as ads. An ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
       <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Create screen. To find it, save the ad without adding anything new to it, then open the Publish sheet for that note, which fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
       <h3>Alerts</h3>
-      <p>We want you to know what's going on with your account and the app. When one of your pages is reported, or we remove or pause something of yours or change your account's status, you'll get an automatic message (an alert) stating the reason. We may also send an alert with information about the app, such as a new feature or a change to this policy, to all accounts or to specific ones. These informational alerts are stored, shown, and deleted exactly like the others. Alerts appear under Alerts in your library, which only shows once your account has at least one. A count on it shows how many have arrived since you last viewed the list, and the list's own title shows how many you have in total. We store the text of each alert (which can name the page or item concerned), when it was sent, and when you deleted it, plus a single timestamp against your account marking the newest alert you've been shown, which is what lets that count follow you across your devices. Deleting an alert removes it from your list only; we keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes the reporter's identity or the details they wrote, which we don't pass on. If you delete your account, your alerts and that timestamp are deleted with it.</p>
+      <p>We want you to know what's going on with your account and the app. When one of your pages is reported, or we remove or pause something of yours or change your account's status, you'll get an automatic message (an alert) stating the reason. We also use alerts to share news and good things with you, like announcements, new features, planned maintenance, safety tips, or a change to this policy or our terms. These can go to all accounts or to specific ones, and they're stored, shown, and deleted exactly like the others. Alerts appear under Alerts in your library, which only shows once your account has at least one. A count on it shows how many have arrived since you last viewed the list, and the list's own title shows how many you have in total. We store the text of each alert (which can name the page or item concerned), when it was sent, and when you deleted it, plus a single timestamp against your account marking the newest alert you've been shown, which is what lets that count follow you across your devices. Deleting an alert removes it from your list only; we keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes the reporter's identity or the details they wrote, which we don't pass on. If you delete your account, your alerts and that timestamp are deleted with it.</p>
       <h3>External images &amp; embeds</h3>
       <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. We have no involvement with these third-party hosts. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device. This is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
@@ -4564,7 +4604,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 30 September 2026</em></p>
+      <p><em>Effective 3 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language, and you're welcome to reach out anytime with questions.</p>
       <h3>Responsible Use</h3>
       <p>Please use Bluebook kindly and lawfully. You agree to use it for lawful purposes only, and not to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish (see below).</p>
@@ -4575,7 +4615,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Published Content</h3>
       <p>A published page is stored on our servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. We may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. A page you publish while signed out isn't tied to an account; if you later sign in and use its private token to show it in stories or save an update, it becomes part of your account, counts toward your account's page limit, and is taken down if you delete your account. Unpublish it yourself and its address frees up right away for reuse. If we remove it instead, for a takedown or abuse report, the address stays permanently reserved and can't be reclaimed or republished.</p>
       <h3>Reports, Alerts &amp; Suspension</h3>
-      <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad) or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages appear under Alerts in your library. A profile picture that appears to impersonate someone else may be removed. <strong>To keep the app safe for everyone, multiple reports against your content, or repeated violations of these terms, can lead to your account being suspended.</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, to run and moderate the service.</p>
+      <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad) or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages appear under Alerts in your library. We may also use Alerts to share announcements and updates about the app, such as new features, maintenance, or changes to these terms. A profile picture that appears to impersonate someone else may be removed. <strong>To keep the app safe for everyone, multiple reports against your content, or repeated violations of these terms, can lead to your account being suspended.</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, to run and moderate the service.</p>
       <h3>Advertising (Publish as Ad)</h3>
       <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing (processed on our behalf by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons. No images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own Add media and Add post tools. YouTube, Instagram, and Spotify are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. We check eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. We do not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
@@ -15708,7 +15748,7 @@ async function nbRenderSubscribedFeed() {
     emptySub.textContent = NB_SUB_EMPTY_LEAD + (_nbActiveCat === 'Published'
       ? 'Stories and published notes are tied to your account, so this needs you to be signed in.'
       : _nbActiveCat === 'Alerts'
-        ? 'Alerts are messages about your account, so this needs you to be signed in.'
+        ? 'Alerts bring you announcements and messages about your account, so this needs you to be signed in.'
         : 'The Subscribed feed follows accounts, so it needs you to be signed in.');
     _nbSubCarousel(true);
     return;
@@ -15778,12 +15818,525 @@ function _nbSubCardHtml(s) {
   _nbSubCardCache.set(s.slug, html);
   return html;
 }
+function _nbMdEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+// Alerts render full Markdown (CommonMark plus the GitHub extensions: tables, task lists, strikethrough, bare-link
+// autolinks, plus reference links, images, nested lists, quotes, code blocks, setext headings, hard breaks).
+// The one deliberate exception is raw HTML: it is shown as plain text, never inserted. Every piece of output is
+// escaped, and only http(s) and mailto links, and http(s) images, are ever made live.
+const _NB_MD_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00a0', copy: '\u00a9', reg: '\u00ae', trade: '\u2122',
+  hellip: '\u2026', mdash: '\u2014', ndash: '\u2013', lsquo: '\u2018', rsquo: '\u2019', ldquo: '\u201c', rdquo: '\u201d', bull: '\u2022',
+  middot: '\u00b7', times: '\u00d7', divide: '\u00f7', deg: '\u00b0', plusmn: '\u00b1', euro: '\u20ac', pound: '\u00a3', yen: '\u00a5',
+  cent: '\u00a2', sect: '\u00a7', para: '\u00b6', larr: '\u2190', rarr: '\u2192', uarr: '\u2191', darr: '\u2193', hearts: '\u2665' };
+function _nbMdDecode(s) {
+  return String(s).replace(/&(#\d{1,7}|#[xX][0-9a-fA-F]{1,6}|[A-Za-z][A-Za-z0-9]{1,31});/g, (m, g) => {
+    if (g[0] === '#') {
+      const cp = (g[1] === 'x' || g[1] === 'X') ? parseInt(g.slice(2), 16) : parseInt(g.slice(1), 10);
+      return (!cp || cp > 0x10FFFF || (cp >= 0xD800 && cp <= 0xDFFF)) ? '\uFFFD' : String.fromCodePoint(cp);
+    }
+    return Object.prototype.hasOwnProperty.call(_NB_MD_ENTITIES, g) ? _NB_MD_ENTITIES[g] : m;
+  });
+}
+function _nbMdText(s) { return _nbMdEsc(_nbMdDecode(s)); }
+function _nbMdUnescape(s) { return _nbMdDecode(String(s).replace(/\\([!-\/:-@\[-`{-~])/g, '$1')); }
+function _nbMdSafeHref(dest) {
+  const d = String(dest || '').trim();
+  if (!d || /[\s\u0000-\u001f]/.test(d)) return '';
+  const enc = u => u.replace(/["<>`]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  if (/^https?:\/\//i.test(d) || /^mailto:/i.test(d)) return enc(d);
+  if (/^www\./i.test(d)) return 'https://' + enc(d);
+  return '';
+}
+function _nbMdSafeImg(dest) {
+  const d = String(dest || '').trim();
+  return (d && !/[\s\u0000-\u001f]/.test(d) && /^https?:\/\//i.test(d)) ? d.replace(/["<>`]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase()) : '';
+}
+function _nbMdAnchor(href, innerHtml, title) {
+  return `<a class="alert-link" href="${_nbMdEsc(href)}"${title ? ` title="${_nbMdEsc(title)}"` : ''} target="_blank" rel="noopener noreferrer" onclick="return _nbAlertLinkTap(this,event)">${innerHtml}</a>`;
+}
+// Same hand-off to the system browser a story's link tap uses (the WebView ignores target=_blank on its own).
+function _nbAlertLinkTap(a, e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  _nbOpenExternalLink(a.getAttribute('href') || '');
+  return false;
+}
+function _nbAlertImgFail(img) {
+  if (!img || !img.parentNode) return;
+  const slide = img.closest && img.closest('.nb-carousel-slide');
+  if (slide) { const car = slide.closest('.alert-md-car'); slide.remove(); if (car) _nbMdCarSync(car); return; }
+  if (img.alt) img.replaceWith(document.createTextNode(img.alt)); else img.remove();
+}
+let _nbMdRefs = {};
+function _nbMdRefKey(s) { return String(s).trim().replace(/\s+/g, ' ').toLowerCase(); }
+
+const _NB_MD_PUNCT = /[\p{P}\p{S}]/u;
+const _nbMdIsSpace = ch => ch === undefined || /\s/.test(ch);
+const _nbMdIsPunct = ch => ch !== undefined && _NB_MD_PUNCT.test(ch);
+function _nbMdSerialize(nodes) { return nodes.map(x => x.t === 'd' ? _nbMdEsc(x.ch.repeat(Math.max(0, x.n))) : x.h).join(''); }
+// CommonMark's delimiter-stack pass for * _ and the GFM ~ strikethrough.
+function _nbMdEmphasis(nodes) {
+  for (let ci = 0; ci < nodes.length; ci++) {
+    const cl = nodes[ci];
+    if (cl.t !== 'd' || !cl.close || cl.n <= 0) continue;
+    let found = -1;
+    for (let oi = ci - 1; oi >= 0; oi--) {
+      const op = nodes[oi];
+      if (op.t !== 'd' || op.ch !== cl.ch || !op.open || op.n <= 0) continue;
+      if (cl.ch === '~') { if (op.n !== cl.n) continue; }
+      else if ((cl.open || op.close) && (op.o + cl.o) % 3 === 0 && !(op.o % 3 === 0 && cl.o % 3 === 0)) continue;
+      found = oi; break;
+    }
+    if (found < 0) continue;
+    const op = nodes[found];
+    const use = cl.ch === '~' ? cl.n : (op.n >= 2 && cl.n >= 2 ? 2 : 1);
+    const inner = _nbMdSerialize(nodes.slice(found + 1, ci));
+    const tag = cl.ch === '~' ? 'del' : use === 2 ? 'strong' : 'em';
+    op.n -= use; cl.n -= use;
+    nodes.splice(found + 1, ci - found - 1, { t: 'h', h: `<${tag}>${inner}</${tag}>` });
+    ci = found + 1; // the closer now sits at found + 2; the loop increment lands on it again
+  }
+}
+// Finds the ] that closes the [ at `start` (nesting, escapes and code spans respected); -1 if none.
+function _nbMdMatchBracket(src, start) {
+  let depth = 0;
+  for (let k = start; k < src.length; k++) {
+    const c = src[k];
+    if (c === '\\') { k++; continue; }
+    if (c === '`') {
+      let r = k; while (src[r] === '`') r++;
+      const run = src.slice(k, r);
+      const close = src.indexOf(run, r);
+      if (close !== -1) { k = close + run.length - 1; continue; }
+      k = r - 1; continue;
+    }
+    if (c === '[') depth++;
+    else if (c === ']') { depth--; if (depth === 0) return k; }
+  }
+  return -1;
+}
+const _NB_MD_DEST_RE = /^\(\s*(<(?:[^<>\n\\]|\\.)*>|(?:[^\s()\\]|\\.|\((?:[^\s()\\]|\\.)*\))*)(?:\s+("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\((?:[^()\\]|\\.)*\)))?\s*\)/;
+// After a label ends at index e: resolve the destination as inline (url "title"), [ref], [] or a bare shortcut.
+function _nbMdResolveLink(src, label, e) {
+  const rest = src.slice(e + 1);
+  let m = rest.match(_NB_MD_DEST_RE);
+  if (m) {
+    let dest = m[1];
+    const angle = dest[0] === '<' && dest[dest.length - 1] === '>';
+    if (angle) dest = dest.slice(1, -1);
+    const title = m[2] ? _nbMdUnescape(m[2].slice(1, -1)) : '';
+    return { href: _nbMdUnescape(angle ? dest.replace(/ /g, '%20') : dest), title, end: e + 1 + m[0].length };
+  }
+  m = rest.match(/^\[([^\[\]]*)\]/);
+  if (m) {
+    const ref = _nbMdRefs[_nbMdRefKey(m[1] || label)];
+    if (ref) return { href: ref.href, title: ref.title, end: e + 1 + m[0].length };
+    return null;
+  }
+  const ref = _nbMdRefs[_nbMdRefKey(label)];
+  return ref ? { href: ref.href, title: ref.title, end: e + 1 } : null;
+}
+function _nbMdInline(src, inLink) {
+  const nodes = [];
+  let buf = '';
+  const flush = () => { if (buf) { nodes.push({ t: 'h', h: _nbMdText(buf) }); buf = ''; } };
+  const push = h => { flush(); nodes.push({ t: 'h', h }); };
+  const n = src.length;
+  let i = 0;
+  while (i < n) {
+    const c = src[i];
+    if (c === '\\') {
+      const nx = src[i + 1];
+      if (nx === '\n') { buf = buf.replace(/ +$/, ''); push('<br>'); i += 2; continue; }
+      if (nx && /[!-\/:-@\[-`{-~]/.test(nx)) { push(_nbMdEsc(nx)); i += 2; continue; }
+      buf += c; i++; continue;
+    }
+    if (c === '`') {
+      let r = i; while (src[r] === '`') r++;
+      const run = src.slice(i, r);
+      let close = r;
+      for (;;) { close = src.indexOf(run, close); if (close === -1 || (src[close + run.length] !== '`' && src[close - 1] !== '`')) break; close += 1; }
+      if (close === -1) { buf += run; i = r; continue; }
+      let code = src.slice(r, close).replace(/\n/g, ' ');
+      if (code.length > 2 && code[0] === ' ' && code[code.length - 1] === ' ' && /[^ ]/.test(code)) code = code.slice(1, -1);
+      push(`<code class="alert-md-ic">${_nbMdEsc(code)}</code>`);
+      i = close + run.length; continue;
+    }
+    if (c === '!' && src[i + 1] === '[') {
+      const e = _nbMdMatchBracket(src, i + 1);
+      const res = e === -1 ? null : _nbMdResolveLink(src, src.slice(i + 2, e), e);
+      if (res) {
+        const alt = _nbMdInline(src.slice(i + 2, e), true).replace(/<[^>]*>/g, '');
+        const sUrl = _nbMdSafeImg(res.href);
+        push(sUrl ? `<img class="alert-md-img" src="${_nbMdEsc(sUrl)}" alt="${alt}"${res.title ? ` title="${_nbMdEsc(res.title)}"` : ''} loading="lazy" onerror="_nbAlertImgFail(this)">` : alt);
+        i = res.end; continue;
+      }
+      buf += c; i++; continue;
+    }
+    if (c === '[' && !inLink) {
+      const e = _nbMdMatchBracket(src, i);
+      const res = e === -1 ? null : _nbMdResolveLink(src, src.slice(i + 1, e), e);
+      if (res) {
+        const label = _nbMdInline(src.slice(i + 1, e), true);
+        const href = _nbMdSafeHref(res.href);
+        // An image is never a tap target: a link whose label holds an image shows just the image, not linked.
+        push(href && !/<img\b/.test(label) ? _nbMdAnchor(href, label, res.title) : label);
+        i = res.end; continue;
+      }
+      buf += c; i++; continue;
+    }
+    if (c === '<') {
+      let m = src.slice(i).match(/^<([A-Za-z][A-Za-z0-9+.\-]{1,31}:[^\s<>]*)>/);
+      if (m) {
+        const href = _nbMdSafeHref(m[1]);
+        push(href && !inLink ? _nbMdAnchor(href, _nbMdEsc(m[1].replace(/^mailto:/i, ''))) : _nbMdEsc(m[1]));
+        i += m[0].length; continue;
+      }
+      m = src.slice(i).match(/^<([A-Za-z0-9.!#$%&'*+\/=?^_`{|}~\-]+@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*)>/);
+      if (m) {
+        push(inLink ? _nbMdEsc(m[1]) : _nbMdAnchor('mailto:' + m[1], _nbMdEsc(m[1])));
+        i += m[0].length; continue;
+      }
+      buf += c; i++; continue;
+    }
+    const prev = src[i - 1];
+    if (/[hHwW]/.test(c) && (prev === undefined || /\s/.test(prev) || '*_~('.includes(prev))) {
+      const m = src.slice(i).match(/^(?:https?:\/\/[^\s<]+|www\.[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)+[^\s<]*)/i);
+      if (m) {
+        let url = m[0];
+        const pairs = { ')': '(', ']': '[', '}': '{' };
+        const count = (str, ch) => str.split(ch).length - 1;
+        while (url && /[.,;:!?'"*_~)\]}]$/.test(url)) { // trailing punctuation stays outside; a closing bracket stays only if the URL opened it
+          const ch = url[url.length - 1];
+          if (pairs[ch] && count(url, ch) <= count(url, pairs[ch])) break;
+          url = url.slice(0, -1);
+        }
+        if (url && /^(https?:\/\/[^\s<]|www\.)/i.test(url)) {
+          push(inLink ? _nbMdEsc(url) : _nbMdAnchor(_nbMdSafeHref(url), _nbMdEsc(url)));
+          i += url.length; continue;
+        }
+      }
+    }
+    if (/[A-Za-z0-9]/.test(c) && !(prev && /[A-Za-z0-9._%+\-]/.test(prev))) {
+      const m = src.slice(i).match(/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)+/);
+      if (m && /[A-Za-z0-9]$/.test(m[0])) {
+        push(inLink ? _nbMdEsc(m[0]) : _nbMdAnchor('mailto:' + m[0], _nbMdEsc(m[0])));
+        i += m[0].length; continue;
+      }
+    }
+    if (c === '*' || c === '_' || c === '~') {
+      let r = i; while (src[r] === c) r++;
+      const k = r - i;
+      if (c === '~' && k > 2) { buf += src.slice(i, r); i = r; continue; }
+      const nx = src[r];
+      const nextSpace = _nbMdIsSpace(nx), prevSpace = _nbMdIsSpace(prev);
+      const nextPunct = _nbMdIsPunct(nx), prevPunct = _nbMdIsPunct(prev);
+      const left = !nextSpace && (!nextPunct || prevSpace || prevPunct);
+      const right = !prevSpace && (!prevPunct || nextSpace || nextPunct);
+      const open = c === '_' ? (left && (!right || prevPunct)) : left;
+      const close = c === '_' ? (right && (!left || nextPunct)) : right;
+      flush();
+      nodes.push({ t: 'd', ch: c, n: k, o: k, open, close });
+      i = r; continue;
+    }
+    if (c === '\n') {
+      buf = buf.replace(/ +$/, '');
+      push('<br>'); i++; continue;
+    }
+    buf += c; i++;
+  }
+  flush();
+  _nbMdEmphasis(nodes);
+  return _nbMdSerialize(nodes);
+}
+
+// ---- blocks ----
+const _NB_MD = {
+  fence: /^( {0,3})(`{3,}|~{3,})\s*(.*)$/,
+  head: /^ {0,3}(#{1,6})(?=[ \t]|$)[ \t]*(.*?)[ \t]*$/,
+  hr: /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/,
+  quote: /^ {0,3}>/,
+  list: /^( {0,3})([-*+]|\d{1,9}[.)])( +|$)(.*)$/,
+  setext: /^ {0,3}(=+|-+)[ \t]*$/,
+  delim: /^ {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*$/,
+  def: /^ {0,3}\[([^\[\]]+)\]:[ \t]*(<[^<>\n]*>|\S+)(?:[ \t]+("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\((?:[^()\\]|\\.)*\)))?[ \t]*$/
+};
+function _nbMdSplitRow(line) {
+  let s = line.trim();
+  if (s[0] === '|') s = s.slice(1);
+  if (s.length && s[s.length - 1] === '|' && s[s.length - 2] !== '\\') s = s.slice(0, -1);
+  const cells = []; let cur = '';
+  for (let k = 0; k < s.length; k++) {
+    if (s[k] === '\\' && s[k + 1] === '|') { cur += '|'; k++; }
+    else if (s[k] === '|') { cells.push(cur.trim()); cur = ''; }
+    else cur += s[k];
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+function _nbMdTableAt(lines, i) {
+  if (i + 1 >= lines.length || lines[i].indexOf('|') === -1 || !_NB_MD.delim.test(lines[i + 1]) || lines[i + 1].indexOf('-') === -1) return null;
+  if (lines[i + 1].indexOf('|') === -1 && lines[i].indexOf('|') === -1) return null;
+  const head = _nbMdSplitRow(lines[i]), dl = _nbMdSplitRow(lines[i + 1]);
+  if (head.length !== dl.length) return null;
+  return { head, aligns: dl.map(d => d[0] === ':' && d[d.length - 1] === ':' ? 'center' : d[d.length - 1] === ':' ? 'right' : d[0] === ':' ? 'left' : '') };
+}
+function _nbMdBlockStart(lines, i, inPara) {
+  const l = lines[i];
+  if (_NB_MD.fence.test(l) && !(_NB_MD.fence.exec(l)[2][0] === '`' && _NB_MD.fence.exec(l)[3].indexOf('`') !== -1)) return true;
+  if (_NB_MD.head.test(l) || _NB_MD.hr.test(l) || _NB_MD.quote.test(l)) return true;
+  const m = l.match(_NB_MD.list);
+  if (m && (!inPara || (m[4].trim() && (/^[-*+]$/.test(m[2]) || /^1[.)]$/.test(m[2]))))) return true;
+  return false;
+}
+function _nbMdParse(lines) {
+  const out = [];
+  const n = lines.length;
+  let i = 0;
+  while (i < n) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    if (/^ {4}/.test(line)) { // indented code
+      const buf = [];
+      while (i < n && (/^ {4}/.test(lines[i]) || (!lines[i].trim() && i + 1 < n && (/^ {4}/.test(lines[i + 1]) || !lines[i + 1].trim())))) { buf.push(lines[i].slice(4)); i++; }
+      while (buf.length && !buf[buf.length - 1].trim()) buf.pop();
+      out.push({ k: 'code', text: buf.join('\n') });
+      continue;
+    }
+    const f = line.match(_NB_MD.fence);
+    if (f && !(f[2][0] === '`' && f[3].indexOf('`') !== -1)) {
+      const ind = f[1].length, ch = f[2][0], len = f[2].length, buf = [];
+      i++;
+      const closeRe = new RegExp('^ {0,3}' + (ch === '`' ? '`' : '~') + '{' + len + ',}[ \\t]*$');
+      while (i < n && !closeRe.test(lines[i])) { buf.push(lines[i].replace(new RegExp('^ {0,' + ind + '}'), '')); i++; }
+      i++;
+      out.push({ k: 'code', text: buf.join('\n') });
+      continue;
+    }
+    const h = line.match(_NB_MD.head);
+    if (h) { out.push({ k: 'h', lvl: h[1].length, text: h[2].replace(/(^|[ \t]+)#+$/, '') }); i++; continue; }
+    if (_NB_MD.hr.test(line)) { out.push({ k: 'hr' }); i++; continue; }
+    if (_NB_MD.quote.test(line)) {
+      const buf = [];
+      while (i < n) {
+        if (_NB_MD.quote.test(lines[i])) { buf.push(lines[i].replace(/^ {0,3}> ?/, '')); i++; }
+        else if (lines[i].trim() && buf.length && buf[buf.length - 1].trim() && !_nbMdBlockStart(lines, i, true)) { buf.push(lines[i]); i++; } // lazy continuation
+        else break;
+      }
+      out.push({ k: 'quote', kids: _nbMdParse(buf) });
+      continue;
+    }
+    const lm = line.match(_NB_MD.list);
+    if (lm) { i = _nbMdList(lines, i, out); continue; }
+    const tb = _nbMdTableAt(lines, i);
+    if (tb) {
+      i += 2;
+      const rows = [];
+      while (i < n && lines[i].trim() && !_nbMdBlockStart(lines, i, false)) {
+        const cells = _nbMdSplitRow(lines[i]);
+        while (cells.length < tb.head.length) cells.push('');
+        rows.push(cells.slice(0, tb.head.length));
+        i++;
+      }
+      out.push({ k: 'table', head: tb.head, aligns: tb.aligns, rows });
+      continue;
+    }
+    const buf = [line.replace(/^ +/, '')]; i++;
+    let done = false;
+    while (i < n && lines[i].trim()) {
+      const su = lines[i].match(_NB_MD.setext);
+      if (su) { out.push({ k: 'h', lvl: su[1][0] === '=' ? 1 : 2, text: buf.join('\n').replace(/\s+$/, '') }); i++; done = true; break; }
+      if (_nbMdBlockStart(lines, i, true) || _nbMdTableAt(lines, i)) break;
+      buf.push(lines[i].replace(/^ +/, '')); i++;
+    }
+    if (!done) out.push({ k: 'p', text: buf.join('\n').replace(/\s+$/, '') });
+  }
+  return out;
+}
+function _nbMdList(lines, i, out) {
+  const n = lines.length;
+  const first = lines[i].match(_NB_MD.list);
+  const ordered = /\d/.test(first[2][0]);
+  const markerType = ordered ? first[2].slice(-1) : first[2];
+  const start = ordered ? parseInt(first[2], 10) : 1;
+  const sameType = m => m && (ordered ? (/\d/.test(m[2][0]) && m[2].slice(-1) === markerType) : m[2] === markerType);
+  const items = [];
+  let loose = false;
+  while (i < n) {
+    const m = lines[i].match(_NB_MD.list);
+    if (!sameType(m) || _NB_MD.hr.test(lines[i])) break;
+    const blankAfter = m[3].length === 0 || !m[4].trim();
+    const spaces = blankAfter ? 1 : (m[3].length > 4 ? 1 : m[3].length);
+    const w = m[1].length + m[2].length + spaces;
+    const body = [blankAfter ? '' : (m[3].length > 4 ? ' '.repeat(m[3].length - 1) : '') + m[4]];
+    i++;
+    let sawBlank = false, sibling = false;
+    while (i < n) {
+      const l = lines[i];
+      if (!l.trim()) {
+        let k = i; while (k < n && !lines[k].trim()) k++;
+        if (k >= n) { i = k; break; }
+        const ind = lines[k].match(/^ */)[0].length;
+        if (ind >= w) { for (; i < k; i++) body.push(''); sawBlank = true; continue; }
+        if (sameType(lines[k].match(_NB_MD.list)) && !_NB_MD.hr.test(lines[k])) { loose = true; i = k; sibling = true; }
+        else i = k;
+        break;
+      }
+      const ind = l.match(/^ */)[0].length;
+      if (ind >= w) { body.push(l.slice(w)); i++; continue; }
+      const lm = l.match(_NB_MD.list);
+      if (lm && !_NB_MD.hr.test(l)) { if (sameType(lm)) sibling = true; break; }
+      if (_nbMdBlockStart(lines, i, true) || !body[body.length - 1].trim()) break;
+      body.push(l.trim()); i++; // lazy paragraph continuation
+    }
+    while (body.length && !body[body.length - 1].trim()) body.pop();
+    const kids = _nbMdParse(body);
+    if (sawBlank && kids.length > 1) loose = true;
+    let task = null;
+    if (kids.length && kids[0].k === 'p') {
+      const tm = kids[0].text.match(/^\[([ xX])\](?:[ \t]+|$)/);
+      if (tm) { task = tm[1] === ' ' ? 'off' : 'on'; kids[0] = { k: 'p', text: kids[0].text.slice(tm[0].length) }; }
+    }
+    items.push({ kids, task });
+    if (!sibling) break;
+  }
+  out.push({ k: 'list', ordered, start, loose, items });
+  return i;
+}
+// Two or more images in a row (only spaces or line breaks between them) become a swipeable carousel, built from the
+// onboarding carousel's classes. A single image at the top level of the alert fills the card edge to edge. Images deeper
+// down (lists, quotes) and in headings keep the inline style. Images are never links or tap targets.
+const _NB_MD_IMG_TAG = '<img class="alert-md-img"[^>]*>';
+const _NB_MD_IMG_RUN = new RegExp('(?:' + _NB_MD_IMG_TAG + '(?:\\s|<br>)*){2,}', 'g');
+const _NB_MD_IMG_ONE = new RegExp(_NB_MD_IMG_TAG, 'g');
+function _nbMdMedia(html, top) {
+  if (html.indexOf('<img ') === -1) return html;
+  html = html.replace(_NB_MD_IMG_RUN, run => {
+    const imgs = run.match(_NB_MD_IMG_ONE);
+    return '<div class="alert-md-car' + (top ? ' alert-md-car-full' : '') + '" data-i="0" role="group" aria-label="Images">'
+      + '<div class="nb-carousel-viewport"><div class="nb-carousel-track">'
+      + imgs.map(t => '<div class="nb-carousel-slide">' + t.replace(' class="alert-md-img"', '') + '</div>').join('')
+      + '</div></div><div class="nb-carousel-dots">'
+      + imgs.map((t, i) => '<button type="button" class="nb-carousel-dot' + (i ? '' : ' active') + '" aria-label="Image ' + (i + 1) + '"></button>').join('')
+      + '</div></div>';
+  });
+  return top ? html.replace(/<img class="alert-md-img"/g, '<img class="alert-md-full"') : html;
+}
+function _nbMdRenderBlocks(blocks, tight, top) {
+  return blocks.map(b => {
+    switch (b.k) {
+      case 'p': return tight ? _nbMdMedia(_nbMdInline(b.text)) : `<div class="alert-md-p">${_nbMdMedia(_nbMdInline(b.text), top)}</div>`;
+      case 'h': return `<div class="alert-md-h alert-md-h${b.lvl}">${_nbMdInline(b.text)}</div>`;
+      case 'hr': return '<hr class="alert-md-hr">';
+      case 'code': return `<pre class="alert-md-code"><code>${_nbMdEsc(b.text)}</code></pre>`;
+      case 'quote': return `<blockquote class="alert-md-quote">${_nbMdRenderBlocks(b.kids, false)}</blockquote>`;
+      case 'list': {
+        const tag = b.ordered ? 'ol' : 'ul';
+        const startAttr = b.ordered && b.start !== 1 ? ` start="${b.start}"` : '';
+        return `<${tag} class="alert-md-list"${startAttr}>` + b.items.map(it => {
+          const box = it.task ? `<span class="alert-md-task${it.task === 'on' ? ' on' : ''}" role="checkbox" aria-checked="${it.task === 'on'}" aria-disabled="true"></span>` : '';
+          return `<li${it.task ? ' class="alert-md-task-li"' : ''}>${box}${_nbMdRenderBlocks(it.kids, !b.loose)}</li>`;
+        }).join('') + `</${tag}>`;
+      }
+      case 'table': {
+        const al = i => b.aligns[i] ? ` style="text-align:${b.aligns[i]}"` : '';
+        return '<div class="alert-md-tablewrap"><table class="alert-md-table"><thead><tr>'
+          + b.head.map((c, i) => `<th${al(i)}>${_nbMdInline(c)}</th>`).join('') + '</tr></thead>'
+          + (b.rows.length ? '<tbody>' + b.rows.map(r => '<tr>' + r.map((c, i) => `<td${al(i)}>${_nbMdInline(c)}</td>`).join('') + '</tr>').join('') + '</tbody>' : '')
+          + '</table></div>';
+      }
+    }
+    return '';
+  }).join('');
+}
+function _nbMdRender(text) {
+  const lines = String(text == null ? '' : text).replace(/\r\n?/g, '\n').split('\n')
+    .map(l => l.replace(/^[ \t]+/, w => w.replace(/\t/g, '    ')));
+  // reference definitions ([ref]: url "title") are collected, then removed from the text
+  const refs = {}, kept = [];
+  let inFence = false;
+  for (let k = 0; k < lines.length; k++) {
+    const l = lines[k];
+    if (_NB_MD.fence.test(l)) inFence = !inFence;
+    const d = !inFence && l.match(_NB_MD.def);
+    if (d && (k === 0 || !lines[k - 1].trim() || _NB_MD.def.test(lines[k - 1]))) {
+      const key = _nbMdRefKey(d[1]);
+      let dest = d[2]; if (dest[0] === '<' && dest[dest.length - 1] === '>') dest = dest.slice(1, -1);
+      if (!refs[key]) refs[key] = { href: _nbMdUnescape(dest), title: d[3] ? _nbMdUnescape(d[3].slice(1, -1)) : '' };
+      continue;
+    }
+    kept.push(l);
+  }
+  _nbMdRefs = refs;
+  try { return _nbMdRenderBlocks(_nbMdParse(kept), false, true); }
+  finally { _nbMdRefs = {}; }
+}
+
+// ---- image carousel inside alerts ----
+// The same swipe carousel as the onboarding one (translateX track, drag with an 18% threshold, hard stop at the ends, dots),
+// without autoplay. One delegated set of listeners, so alert cards can be re-rendered freely with no per-card setup.
+// The position lives on the carousel element (data-i). The markup comes from _nbMdMedia.
+let _nbMdCarDrag = null;
+function _nbMdCarGo(car, i) {
+  const track = car.querySelector('.nb-carousel-track');
+  const count = track ? track.children.length : 0;
+  if (!count) return;
+  const idx = Math.max(0, Math.min(count - 1, i));
+  car.dataset.i = String(idx);
+  track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+  car.querySelectorAll('.nb-carousel-dot').forEach((d, k) => d.classList.toggle('active', k === idx));
+}
+// After a slide's image fails to load: drop that slide, keep the dots in step, and remove the carousel if nothing is left.
+function _nbMdCarSync(car) {
+  const track = car.querySelector('.nb-carousel-track');
+  const dots = car.querySelector('.nb-carousel-dots');
+  const count = track ? track.children.length : 0;
+  if (!count) { car.remove(); return; }
+  if (dots) {
+    while (dots.children.length > count) dots.lastElementChild.remove();
+    dots.style.display = count < 2 ? 'none' : '';
+  }
+  _nbMdCarGo(car, parseInt(car.dataset.i, 10) || 0);
+}
+document.addEventListener('pointerdown', e => {
+  const vp = e.target && e.target.closest ? e.target.closest('.alert-md-car .nb-carousel-viewport') : null;
+  if (!vp) return;
+  const car = vp.closest('.alert-md-car'), track = vp.querySelector('.nb-carousel-track');
+  if (!track) return;
+  _nbMdCarDrag = { car, vp, track, x: e.clientX, dx: 0, idx: parseInt(car.dataset.i, 10) || 0 };
+  track.classList.add('dragging');
+  try { vp.setPointerCapture(e.pointerId); } catch (err) {}
+});
+document.addEventListener('pointermove', e => {
+  const d = _nbMdCarDrag;
+  if (!d) return;
+  const count = d.track.children.length;
+  let dx = e.clientX - d.x;
+  if (d.idx === 0 && dx > 0) dx = 0;
+  if (d.idx === count - 1 && dx < 0) dx = 0;
+  d.dx = dx;
+  d.track.style.transform = 'translateX(calc(-' + (d.idx * 100) + '% + ' + dx + 'px))';
+});
+function _nbMdCarEnd() {
+  const d = _nbMdCarDrag;
+  if (!d) return;
+  _nbMdCarDrag = null;
+  d.track.classList.remove('dragging');
+  const threshold = d.vp.getBoundingClientRect().width * 0.18;
+  _nbMdCarGo(d.car, d.dx < -threshold ? d.idx + 1 : d.dx > threshold ? d.idx - 1 : d.idx);
+}
+document.addEventListener('pointerup', _nbMdCarEnd);
+document.addEventListener('pointercancel', _nbMdCarEnd);
+document.addEventListener('click', e => {
+  const dot = e.target && e.target.closest ? e.target.closest('.alert-md-car .nb-carousel-dot') : null;
+  if (!dot) return;
+  _nbMdCarGo(dot.closest('.alert-md-car'), Array.prototype.indexOf.call(dot.parentNode.children, dot));
+});
+function _nbAlertMessageHtml(text) { return _nbMdRender(text); }
 // An alert: a short automatic statement, how long ago it was sent, and a delete icon. No open action.
 function _nbAlertCardHtml(s) {
   const ts = _nbSubEpoch(s.createdAt);
   return `
       <div class="guide-card alert-card" data-slug="${esc(s.slug)}">
-        <div class="gc-desc"><span class="gc-desc-text">${esc(s.message || '')}</span></div>
+        <div class="gc-desc"><div class="gc-desc-text alert-md">${_nbAlertMessageHtml(s.message || '')}</div></div>
         <div class="gc-steps-row">
           <span class="gc-desc-time">${ts ? _nbShortTimeAgo(ts) : ''}</span>
           <button class="gc-trash" onclick="nbDeleteAlert('${escJs(String(s.id || ''))}')" aria-label="Delete alert">
@@ -15792,7 +16345,7 @@ function _nbAlertCardHtml(s) {
         </div>
       </div>`;
 }
-const NB_ALERTS_EMPTY_SUB = NB_SUB_EMPTY_LEAD + 'Messages about your account, like a report on one of your notes, will show up here.';
+const NB_ALERTS_EMPTY_SUB = NB_SUB_EMPTY_LEAD + 'Announcements from us and messages about your account will show up here.';
 // Same confirmation dialog as deleting a note (#delete-dialog), reworded for an alert.
 function nbDeleteAlert(id) {
   const ov = document.getElementById('delete-overlay');
@@ -17936,6 +18489,7 @@ function nbRenderNotesScreen() {
   } else if (_nbActiveCat !== 'All') {
     filtered = all.filter(n => n.category === _nbActiveCat);
   }
+  const catCount = filtered.length; // notes in the selected category, before any search narrows the list
   if (_nbSearchQ) {
     filtered = filtered.filter(n =>
       (n.title || '').toLowerCase().includes(_nbSearchQ) ||
@@ -17960,9 +18514,9 @@ function nbRenderNotesScreen() {
   }
   empty.style.display = 'none';
   // Carousel stays up through the first note too — only more than one
-  // note (all.length, not filtered.length: it's general app orientation,
-  // not tied to the current category/search view) retires it.
-  if (all.length > 1) { if (carousel) carousel.style.display = 'none'; } else _nbRevealFade(carousel);
+  // note in the selected category (catCount: the category's own notes, not
+  // the total across All and not narrowed by search) retires it.
+  if (catCount > 1) { if (carousel) carousel.style.display = 'none'; } else _nbRevealFade(carousel);
   grid.style.display = '';
   grid.innerHTML = filtered.map(n => {
     const imgUrls = extractImagesFromHtml(_nbRehydrateImages(n.content || ''));
