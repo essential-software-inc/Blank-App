@@ -7919,7 +7919,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       return { src: 'https://platform.twitter.com/embed/Tweet.html?dnt=true&theme=light&id=' + id, title: 'X post', css: 'min-height:500px', allow: '' };
     }
     if (platform === 'tiktok') {
-      return { src: 'https://www.tiktok.com/embed/v2/' + id, title: 'TikTok video', css: 'height:740px;max-width:605px;margin:0 auto', allow: 'fullscreen' };
+      return { src: 'https://www.tiktok.com/player/v1/' + id + '?autoplay=0&loop=0', title: 'TikTok video', css: 'height:740px;max-width:605px;margin:0 auto', allow: 'fullscreen' };
     }
     return null;
   }
@@ -7937,6 +7937,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     frame.src = spec.src;
     frame.setAttribute('title', spec.title);
     if (spec.allow) frame.setAttribute('allow', spec.allow);
+    frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
     // No loading="lazy" here — the browser would defer fetching until
     // this block scrolls into view, which reads as "nothing happens
     // until I scroll to it" next to the video iframe (which has no
@@ -8384,7 +8385,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // a load is attempted) — an embed that loaded fine, including one
   // actively playing, is left alone, so a brief reconnect blip doesn't
   // restart video mid-playback for no reason.
-  function _retryPendingEmbeds() {
+  function _retryPendingEmbeds(fromTimer) {
     // Images: unlike the iframe cases below, a plain <img> reliably
     // fires 'error'/'load' on its own, so wireImage's listeners are
     // enough to keep embedRetryPending accurate — this just needs to
@@ -8404,17 +8405,26 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     });
     canvas.querySelectorAll('.blk-social-frame').forEach(function(wrap) {
       var embedEl = wrap.querySelector('.blk-social-embed');
-      if (embedEl && embedEl.dataset.embedRetryPending === '1') _forceSocialReload(wrap);
+      if (!embedEl || embedEl.dataset.embedRetryPending !== '1') return;
+      // TikTok answers rapid reloads with its "overload-protect" page, and that
+      // page can load fast enough to leave the retry flag set, so the timer would
+      // keep re-hitting TikTok forever. Timer sweeps skip TikTok; everything else
+      // is capped at 3 automatic retries.
+      if (wrap.dataset.socialPlatform === 'tiktok' && fromTimer) return;
+      var n = Number(embedEl.dataset.embedRetryCount) || 0;
+      if (n >= 3) return;
+      embedEl.dataset.embedRetryCount = String(n + 1);
+      _forceSocialReload(wrap);
     });
   }
-  window.addEventListener('online', _retryPendingEmbeds);
+  window.addEventListener('online', function() { _retryPendingEmbeds(false); });
   // Belt-and-suspenders, same reasoning as the font loader near the top of
   // this file: 'online' firing isn't proof the connection is actually
   // usable yet, and some webviews don't fire it reliably at all — so keep
   // checking for anything still stuck rather than relying on a single
   // one-shot attempt.
   setInterval(function() {
-    if (navigator.onLine !== false) _retryPendingEmbeds();
+    if (navigator.onLine !== false) _retryPendingEmbeds(true);
   }, 15000);
 
   function wireCaption(block) {
