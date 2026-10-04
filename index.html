@@ -7813,7 +7813,11 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // Resolves a TikTok short link / Instagram share link to { platform, id, url }
   // via the worker; TikTok falls back to its oEmbed if the worker fails.
   function _resolveSocialShort(url) {
-    return parent.nbResolveShortLink(url).then(function(j) {
+    // A missing bridge used to throw a silent TypeError here (no toast, button stuck disabled).
+    return Promise.resolve().then(function() {
+      if (typeof parent.nbResolveShortLink !== 'function') throw new Error('app bridge missing, reload the app');
+      return parent.nbResolveShortLink(url);
+    }).then(function(j) {
       if (j.platform === 'tiktok') return { platform: 'tiktok', id: j.id, url: 'https://www.tiktok.com/video/' + j.id };
       if (j.platform === 'instagram') return { platform: 'instagram', id: j.id, url: 'https://www.instagram.com/p/' + j.id + '/' };
       throw new Error('unexpected response');
