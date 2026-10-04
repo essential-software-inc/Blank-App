@@ -4071,6 +4071,12 @@ body.night #markup-iframe { background: #0e0e10; }
 }
 #markup-iframe-loadmask.out { opacity: 0; }
 #markup-iframe-loadmask.nb-instant { transition: none; }
+/* While a canvas is loading, keep the wrap laid out so the cover and its progress bar are visible
+   and animate for real (a bar inside a display:none wrap is not rendered, so its fill could not
+   transition and jumped straight to 100% when the wrap reappeared). Only the iframe stays hidden
+   until it is ready, exactly as before. */
+#markup-iframe-wrap:not(.show) { display: flex; }
+#markup-iframe-wrap:not(.show) #markup-iframe { display: none; }
 body.night #markup-iframe-loadmask {
   background: #0e0e10;
 }
@@ -20006,7 +20012,7 @@ function _nbCurrentBase() {
 // Puts the loadmask back over the canvas *immediately* (no .18s fade-in, which let the
 // previous canvas show through as a flicker) and cancels the fade-out that the last
 // render scheduled, so it can't fire in the middle of this load and uncover the stale canvas.
-let _nbMaskSettleTimer = null;
+var _nbMaskSettleTimer; // var, not let: boot code can reach _nbMaskCover() before this line runs
 function _nbMaskCover() {
   const mask = document.getElementById('markup-iframe-loadmask');
   if (_nbMaskSettleTimer) { clearTimeout(_nbMaskSettleTimer); _nbMaskSettleTimer = null; }
@@ -20016,22 +20022,38 @@ function _nbMaskCover() {
   void mask.offsetWidth;
   requestAnimationFrame(function() { mask.classList.remove('nb-instant'); });
 }
+var _nbLoadbarAt = 0;
 function _nbLoadbarStart() {
   const fill = document.getElementById('markup-iframe-loadmask-bar-fill');
   if (!fill) return;
+  // A load is already in progress (e.g. Share: the ad fetch started the bar and the render that
+  // follows starts it again): keep creeping from where it is, so the bar never jumps back.
+  // (A bar still "running" after 10 s is stale, e.g. a render that bailed out early: restart it.)
+  if (_nbLoadbarTimer && Date.now() - _nbLoadbarAt < 10000) return;
   if (_nbLoadbarTimer) { clearInterval(_nbLoadbarTimer); _nbLoadbarTimer = null; }
+  _nbLoadbarAt = Date.now();
+  // Fresh load: snap back to the start with the width transition off. Otherwise the previous
+  // load's 100% would visibly shrink to 8% (the bar "reversing") before it starts filling.
   let pct = 8;
+  fill.style.transition = 'none';
   fill.style.width = pct + '%';
+  void fill.offsetWidth;
+  fill.style.transition = '';
   _nbLoadbarTimer = setInterval(function() {
     pct += (90 - pct) * 0.15;
     if (pct > 89) pct = 89;
     fill.style.width = pct + '%';
   }, 200);
 }
-function _nbLoadbarFinish() {
+function _nbLoadbarFinish(glideMs) {
   if (_nbLoadbarTimer) { clearInterval(_nbLoadbarTimer); _nbLoadbarTimer = null; }
   const fill = document.getElementById('markup-iframe-loadmask-bar-fill');
-  if (fill) fill.style.width = '100%';
+  if (!fill) return;
+  // Glide the rest of the way to 100% over the cover's settle window instead of jumping there:
+  // the canvas is usually ready within a frame or two, so a jump read as "filled instantly",
+  // followed by a second of the glow still sweeping across a full bar.
+  if (glideMs > 0) fill.style.transition = 'width ' + glideMs + 'ms cubic-bezier(.4,.12,.3,1), background-color .2s ease';
+  fill.style.width = '100%';
 }
 
 function _nbForcePreviewClass(html) {
@@ -20077,7 +20099,7 @@ function nbRenderCanvas(forcePreview) {
   _nbLoadbarStart();
   const unmaskAfterSettle = function() {
     if (!mask) return;
-    _nbLoadbarFinish();
+    _nbLoadbarFinish(1000);
     if (_nbMaskSettleTimer) clearTimeout(_nbMaskSettleTimer);
     _nbMaskSettleTimer = setTimeout(function() { _nbMaskSettleTimer = null; mask.classList.add('out'); }, 1000);
   };
