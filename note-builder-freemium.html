@@ -4293,7 +4293,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         <button class="rdlg-ok rdlg-ok--blue" id="account-signin-btn" onclick="nbSignInWithGoogle()" style="width:100%">Sign in with Google</button>
       </div>
       <div id="account-signedin-btns" style="display:none">
-        <button class="rdlg-cancel" id="account-signout-btn" onclick="closeAccountScreen()">Signed in</button>
+        <button class="rdlg-cancel" id="account-signout-btn" onclick="closeAccountScreen()">Start now</button>
       </div>
     </div>
   </div>
@@ -11709,7 +11709,9 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) || 'Not signed in'; }, go: () => nbAccountBtnClick() },
       { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
-      { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() }]]
+      { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
+      { t: 'link', l: 'Support', s: 'essentialsoftware.support@gmail.com', go: () => { window.location.href = 'mailto:essentialsoftware.support@gmail.com'; } },
+      { t: 'info', l: 'App version', s: 'v3.2.9' }]]
   ];
   const E = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const CHEV = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
@@ -11721,11 +11723,12 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       const cur = String(r.get ? r.get() : window._nbSt(r.k));
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
     }
+    if (r.t === 'info') return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
     return '<button type="button" class="st-row st-link"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + CHEV + '</button>';
   }
   window._nbStRender = function () {
     const root = document.getElementById('st-root'); if (!root) return;
-    root.innerHTML = GROUPS.map((g, gi) => '<div class="st-grp"><div class="st-h">' + g[0] + '</div><div class="st-card">' + g[1].map((r, ri) => row(r, gi, ri)).join('') + '</div></div>').join('') + '<div class="st-foot">Bluebook \u00b7 \u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+    root.innerHTML = GROUPS.map((g, gi) => '<div class="st-grp"><div class="st-h">' + g[0] + '</div><div class="st-card">' + g[1].map((r, ri) => row(r, gi, ri)).join('') + '</div></div>').join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
   };
   const root = document.getElementById('st-root');
   function find(el) { const g = el.dataset.g, r = el.dataset.r; return g == null ? null : GROUPS[g][1][r]; }
@@ -11812,8 +11815,8 @@ function openEditorInfo() {
   if (_einfoEditorHtml === null) { _einfoEditorHtml = bodyEl.innerHTML; _einfoEditorTitle = titleEl.textContent; }
   bodyEl.innerHTML = _nbRepostMode ? EINFO_REPOST_HTML : _einfoEditorHtml;
   titleEl.textContent = _nbRepostMode ? 'Share' : _einfoEditorTitle;
-  bodyEl.scrollTop = 0;
   document.getElementById('einfo-overlay').classList.add('open');
+  bodyEl.scrollTop = 0;
   lockScroll();
 }
 function closeEditorInfo() {
