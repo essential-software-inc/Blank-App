@@ -4674,25 +4674,25 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
       <button id="einfo-closebtn" onclick="closeEditorInfo()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="einfo-body">
-      <p>Build a page piece by piece, like a scrapbook page. Add text, photos, and videos, then move things around until it looks right.</p>
+      <p>Make an illustrated article, a recipe with a video and an ingredient table, a trip plan with a packing checklist, or a how-to with code snippets. Mix in photos, quotes, songs, dividers, and more, and set it up exactly how you want. Then keep it to yourself, or publish it and share a link.</p>
       <h3>Add pieces</h3>
-      <p>Tap the bar at the top to add a heading, subheading, text, to-do list, quote, code, photo, YouTube video, Spotify song, Instagram post, table, or divider. Some pieces let you choose a font, color, or layout first.</p>
+      <p>Scroll the bar at the top and tap what you want to add: a heading, subheading, text, to-do list, quote, code, photo, YouTube video, Spotify song, Instagram post, table, or divider. Some pieces let you choose a font, color, or layout first.</p>
       <h3>Move things around</h3>
       <ul>
-        <li>Press and hold the dots on the right side of a piece, then slide it where you want it.</li>
-        <li>Drag the arrows to make a piece wider or narrower.</li>
+        <li>Press and hold the six dots in a piece's top-right corner, then slide it where you want it.</li>
+        <li>Drag the left-and-right arrow button, the first one in that corner, sideways to make a piece wider or narrower.</li>
         <li>Tap the X to delete it.</li>
       </ul>
       <h3>Change a photo, video, or post</h3>
-      <p>Tap the little pencil on it, then paste a new link or pick a new photo from your phone.</p>
+      <p>Tap the pencil in its top-right corner, then paste a new link or pick a new photo from your phone.</p>
       <h3>Add a caption</h3>
-      <p>Photos, videos, and posts have a spot underneath for a caption. Just start typing. Tap the X beside it to delete the caption, or the arrows to move it above or below.</p>
+      <p>Photos, videos, and posts have a spot underneath for a caption. Just start typing. Tap the X beside it to delete the caption, or the up-and-down arrow to move it above or below.</p>
       <h3>Style your words</h3>
-      <p>Highlight some text and a small bar pops up. Use it to make words bold, slanted, or underlined, add a link, or change the color or font.</p>
+      <p>Select some text and a small bar pops up. Use it to make words bold, italic, underlined, crossed off, or highlighted, add a link, or change the color, font, size, or alignment.</p>
       <h3>Make it look like you</h3>
-      <p>Look on the left side of a piece. The paint drop changes its color, and the curved arrow tilts it. The round drop in the bottom-left corner changes the color of the whole page.</p>
+      <p>In a piece's top-left corner, tap the drop-shaped button to change its color, or the circular arrow next to it to tilt it. The drop-shaped button in the bottom-left corner of the screen changes the background color of the whole note.</p>
       <h3>See what others will see</h3>
-      <p>Tap the round button in the bottom-right corner to hide the editing buttons and see your page the way everyone else will. Tap it again to go back to editing.</p>
+      <p>Tap the eye button in the bottom-right corner to hide the editing buttons and see your note the way everyone else will. Tap the pencil that replaces it to go back to editing.</p>
     </div>
   </div>
 </div>
@@ -11724,24 +11724,24 @@ function closePrivacy() {
   unlockScroll();
 }
 let _einfoEditorHtml = null, _einfoEditorTitle = null;
-const EINFO_REPOST_HTML = `<p>Collect the posts, videos, and songs you love from around the web onto one page. Just paste a link.</p>
+const EINFO_REPOST_HTML = `<p>Found something funny on Instagram, X, or YouTube? Instead of sending each post, clip, or song separately, paste them all into one note, put them in the order you want, and add a caption or two. Then publish it and send your friends the link.</p>
       <h3>Add something</h3>
-      <p>Tap the bar at the top to add text, a photo, or a post, video, or song from Instagram, X, Streamable, YouTube, or Spotify. For posts, videos, and songs, all you need is the link: copy it, then paste it in.</p>
+      <p>Scroll the bar at the top and tap what you want to add: text, a photo, or a post, video, or song from Instagram, X, Streamable, YouTube, or Spotify. For posts, videos, and songs, all you need is the link: copy it, then paste it in.</p>
       <h3>Move things around</h3>
       <ul>
-        <li>Press and hold the dots on the right side of a piece, then slide it where you want it.</li>
+        <li>Press and hold the six dots in a piece's top-right corner, then slide it where you want it.</li>
         <li>Tap the X to delete it.</li>
       </ul>
       <h3>Change a photo, video, or post</h3>
-      <p>Tap the little pencil on it, then paste a new link or pick a new photo from your phone.</p>
+      <p>Tap the pencil in its top-right corner, then paste a new link or pick a new photo from your phone.</p>
       <h3>Add a caption</h3>
       <p>Photos, videos, and posts have a spot underneath for a caption. Just start typing. Tap the X beside it to delete the caption.</p>
-      <h3>Pick a page color</h3>
-      <p>The round drop in the bottom-left corner changes the color of the whole page.</p>
+      <h3>Pick a background color</h3>
+      <p>The drop-shaped button in the bottom-left corner of the screen changes the background color of the whole note.</p>
       <h3>See what others will see</h3>
-      <p>Tap the round button in the bottom-right corner to hide the editing buttons and see your page the way everyone else will. Tap it again to go back to editing.</p>
+      <p>Tap the eye button in the bottom-right corner to hide the editing buttons and see your note the way everyone else will. Tap the pencil that replaces it to go back to editing.</p>
       <h3>Save and share</h3>
-      <p>A page you make in Share works like any other note: you can save it, publish it, or add it to a story. You'll find it in your Library with your other notes.</p>`;
+      <p>Publish your note to get one link anyone can open, then send that instead of a pile of separate posts. You can also keep it to yourself or add it to a story. Either way, you'll find it in your Library with your other notes.</p>`;
 
 function openEditorInfo() {
   const bodyEl = document.getElementById('einfo-body');
