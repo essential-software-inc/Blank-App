@@ -4271,7 +4271,7 @@ document.body.dataset.lockScrollY = window.scrollY;
     <svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg>
   </button>
   <span id="header-title"><span class="hdr-title-inner" id="hdr-title-text">Library</span></span>
-  <button class="hdr-btn" id="editor-info-btn" aria-label="About the editor" title="About the editor" onclick="openEditorInfo()" style="display:none">
+  <button class="hdr-btn" id="editor-info-btn" aria-label="Guide" title="Guide" onclick="openEditorInfo()" style="display:none">
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="7"/><line x1="9" y1="8" x2="9" y2="13"/><circle cx="9" cy="5.2" r="0.9" fill="currentColor" stroke="none"/></svg>
   </button>
   <button class="hdr-btn" id="dark-btn" aria-label="Toggle theme" title="Toggle theme">
@@ -4379,23 +4379,54 @@ document.body.dataset.lockScrollY = window.scrollY;
       </div>
       <div id="nb-notes-grid" style="display:none"></div>
     </section>
+    <section class="nb-screen" id="screen-settings"><div id="st-root"></div></section>
   </main>
 </div>
 
 </div>
 
+<style id="st-css">
+#screen-settings{--st-bg:#f4f6fb;--st-card:#fff;--st-line:#e8ecf4;--st-fg:#202122;--st-sub:#6b7280;--st-acc:#3366cc;--st-on:#fff;background:var(--st-bg);color:var(--st-fg)}
+body.night #screen-settings{--st-bg:#080808;--st-card:#111;--st-line:#282828;--st-fg:#f0f0f0;--st-sub:#888;--st-acc:#e0e0e0;--st-on:#111}
+body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;--st-fg:#1a0a12;--st-sub:#875068;--st-acc:#bd2856;--st-on:#fff}
+#st-root{padding:.9rem .9rem calc(58px + env(safe-area-inset-bottom,0px) + 1.2rem)}
+.st-grp{margin-bottom:1.2rem}
+.st-h{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--st-sub);margin:0 .3rem .45rem}
+.st-card{background:var(--st-card);border:1px solid var(--st-line);border-radius:12px;overflow:hidden}
+.st-row{display:flex;align-items:center;gap:.8rem;width:100%;padding:.8rem .9rem;background:none;border:0;border-top:1px solid var(--st-line);color:var(--st-fg);font:inherit;text-align:left;cursor:pointer}
+.st-row:first-child{border-top:0}
+.st-col{flex-direction:column;align-items:stretch;gap:.55rem;cursor:default}
+.st-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.st-l{font-size:.92rem;font-weight:600}
+.st-s{font-size:.75rem;color:var(--st-sub);line-height:1.35;margin-top:.1rem}
+.st-link svg{flex-shrink:0;color:var(--st-sub)}
+.st-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.st-chip{padding:.38rem .8rem;border-radius:999px;border:1px solid var(--st-line);background:none;color:var(--st-fg);font:inherit;font-size:.8rem;cursor:pointer}
+.st-chip.on{background:var(--st-acc);border-color:var(--st-acc);color:var(--st-on);font-weight:600}
+.st-foot{font-size:.72rem;color:var(--st-sub);text-align:center;line-height:1.6;padding:0 1rem}
+body.nb-no-tips #nb-onboard-carousel{display:none!important}
+body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinner)::before,body.nb-reduce-motion *:not(.ptr-spinner)::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+</style>
 <nav id="bottom-nav" aria-label="Primary">
   <div id="bottom-nav-items">
-    <button class="bn-item active" id="bn-create" onclick="nbCreateNew()" aria-label="Editor">
+    <button class="bn-item active" id="bn-create" onclick="nbCreateNew()" aria-label="Write">
       <span class="bn-hit">
         <svg id="bn-create-icon-plus" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
         <svg id="bn-create-icon-editor" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+      </span>
+    </button>
+    <button class="bn-item" id="bn-repost" onclick="nbRepostNav()" aria-label="Share">
+      <span class="bn-hit">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
       </span>
     </button>
     <button class="bn-item" id="bn-notes" onclick="nbNotesNavClick()" aria-label="Notes">
       <span class="bn-hit">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
       </span>
+    </button>
+    <button class="bn-item" id="bn-settings" onclick="nbSettingsNavClick()" aria-label="Settings">
+      <span class="bn-hit"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
     </button>
   </div>
 </nav>
@@ -4558,7 +4589,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 3 October 2026</em></p>
+      <p><em>Effective 4 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, preferences, and UI state all live on your device, with one exception: when you're signed in, which stories you've opened is tracked on our servers, against your account, instead of on your device (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy), a short queue of any likes or follows you tapped while offline that haven't been sent yet, and a small number recording how far your device's clock is off from our servers, so those taps are time-stamped correctly. If you sign in with Google, your notes, along with your favorites and theme choice, are additionally backed up to our servers (see below).</p>
@@ -4570,15 +4601,15 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Publishing a page</h3>
       <p>Publishing is always your choice, and it only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to us and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for that page. It's stored on your device, not kept as-is on our side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for about 30 days afterward (our clean-up runs nightly) in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). The page's own record is kept for the same period and then deleted. It holds the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID, which is why it stays even after the account itself has been deleted. If we remove a page for a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as that address stays reserved: the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID. This record stays even after the copy or the account is deleted, since removing it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
       <h3>Publishing as an ad</h3>
-      <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they tap Create, not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, we credit the corresponding number of views to your account. We also store how many views an ad has used and its current status (running, used up, or taken down). To report how many unique viewers an ad has reached, alongside its total view count, we store an anonymous identifier that each device generates, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and is used to tell whether a repeat view of a given ad came from a device already counted toward that ad, and for the activity counts described under "Activity counts" below; see also "Analytics" below. Unpublishing an ad removes it from Create immediately, and any views it had left go unused. That balance isn't returned to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched. Ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify).</p>
+      <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they start a new note in Write (or in Share, for a Share note), not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, we credit the corresponding number of views to your account. We also store how many views an ad has used and its current status (running, used up, or taken down). To report how many unique viewers an ad has reached, alongside its total view count, we store an anonymous identifier that each device generates, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and is used to tell whether a repeat view of a given ad came from a device already counted toward that ad, and for the activity counts described under "Activity counts" below; see also "Analytics" below. Unpublishing an ad removes it from Write and Share immediately, and any views it had left go unused. That balance isn't returned to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched. Ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Instagram, or Spotify, plus X and TikTok for Share notes).</p>
       <h3>Reporting a published page</h3>
       <p>Reports help keep Bluebook a good place for everyone. Anyone can report a published page from its public link. Reporting counts requests from the reporter's IP address for about a minute, just to stop spam. The address sits in a short-lived counter that expires on its own, and it's never stored as part of the report itself. We keep only the reason and details submitted, along with which page it's about and when. A report doesn't record who sent it. A report stays on file until it's reviewed, even if the page is unpublished or its author's account is deleted in the meantime. Once handled, it's deleted, except reports of child sexual abuse material, which are kept for 18 months, along with a copy of the reported page. The report's 18 months run from when it is closed; the page copy's run from when it was reported, or from the most recent report of that page if it's reported again, and the same period covers any other copy we hold of that page. A notification with the page's address, the reason, and the details may also be forwarded to our private alerting channel. Reports of child sexual abuse material are handled as the law requires, including being passed to the proper authority. We keep a short record of each one we pass on (the page's address, the date, the authority's reference for it, and a brief note) for 18 months from the latest. Moderation actions we take (such as a takedown, a dismissed report, or a restored page) are logged with the action, the page's address, the time, and a short note such as the reason given, for about 13 months, as a record of what was done.</p>
       <p>This applies the same way to pages currently running as ads. An ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
-      <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Create screen. To find it, save the ad without adding anything new to it, then open the Publish sheet for that note, which fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
+      <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Write or Share screen. To find it, save the ad without adding anything new to it, then open the Publish sheet for that note, which fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
       <h3>Alerts</h3>
       <p>We want you to know what's going on with your account and the app. When one of your pages is reported, or we remove or pause something of yours or change your account's status, you'll get an automatic message (an alert) stating the reason. We also use alerts to share news and good things with you, like announcements, new features, planned maintenance, safety tips, or a change to this policy or our terms. These can go to all accounts or to specific ones, and they're stored, shown, and deleted exactly like the others. Alerts appear under Alerts in your library, which only shows once your account has at least one. A count on it shows how many have arrived since you last viewed the list, and the list's own title shows how many you have in total. We store the text of each alert (which can name the page or item concerned), when it was sent, and when you deleted it, plus a single timestamp against your account marking the newest alert you've been shown, which is what lets that count follow you across your devices. Deleting an alert removes it from your list only; we keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes the reporter's identity or the details they wrote, which we don't pass on. If you delete your account, your alerts and that timestamp are deleted with it.</p>
       <h3>External images &amp; embeds</h3>
-      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, and Spotify embeds load directly from those services. We have no involvement with these third-party hosts. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device. This is checked automatically before an ad can go live or be updated.</p>
+      <p>Images embedded in a page via URL are fetched directly from their source when the page is built. YouTube, Instagram, X, TikTok, and Spotify embeds load directly from those services. We have no involvement with these third-party hosts. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device. This is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
       <p>This section covers links inside the app. In preview, tapping a link in a page shows its address in a sheet with a copy option. The app does not open, load, or navigate to the linked page. Nothing is fetched, and we have no visibility into what links a page contains. A published page works differently, and how you're viewing it matters: someone who opens its public web address directly, outside the app, is looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Within the app itself, opening a story or a note found through search shows that same published page in-app, in the app's own built-in viewer (see "Stories, subscriptions &amp; likes" below). You don't leave the app to see it. A link tapped inside that in-app view opens in your own browser, which takes you out of the app. The app doesn't load the linked page itself, and we have no involvement with that site, but like any site you open in a browser, it can see your IP address. If the app can't open the link, it copies its address instead.</p>
       <h3>Stories, subscriptions &amp; likes</h3>
@@ -4604,7 +4635,7 @@ document.body.dataset.lockScrollY = window.scrollY;
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 3 October 2026</em></p>
+      <p><em>Effective 4 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language, and you're welcome to reach out anytime with questions.</p>
       <h3>Responsible Use</h3>
       <p>Please use Bluebook kindly and lawfully. You agree to use it for lawful purposes only, and not to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish (see below).</p>
@@ -4617,9 +4648,9 @@ document.body.dataset.lockScrollY = window.scrollY;
       <h3>Reports, Alerts &amp; Suspension</h3>
       <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad) or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages appear under Alerts in your library. We may also use Alerts to share announcements and updates about the app, such as new features, maintenance, or changes to these terms. A profile picture that appears to impersonate someone else may be removed. <strong>To keep the app safe for everyone, multiple reports against your content, or repeated violations of these terms, can lead to your account being suspended.</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, to run and moderate the service.</p>
       <h3>Advertising (Publish as Ad)</h3>
-      <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing (processed on our behalf by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons. No images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own Add media and Add post tools. YouTube, Instagram, and Spotify are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. We check eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
-      <p>A running ad is shown to other people using this app as a starting template on their Create screen, not only to people who have its link. We do not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
-      <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it's shown on their Create screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance. Views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad's view count, for information only. It's derived from an anonymous identifier generated and stored on each device, used to tell whether a device has already been counted once for a given ad (and, separately, for the activity counts described in the Privacy Policy); it isn't tied to a Google account or any other identity, and is sent whether or not you're signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
+      <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing (processed on our behalf by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons. No images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own tools. YouTube, Instagram, and Spotify are the eligible sources, along with X and TikTok for pages made in Share, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. We check eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
+      <p>A running ad is shown to other people using this app as a starting template on their Write screen (or their Share screen, for a page made in Share), not only to people who have its link. We do not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
+      <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it's shown on their Write or Share screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance. Views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad's view count, for information only. It's derived from an anonymous identifier generated and stored on each device, used to tell whether a device has already been counted once for a given ad (and, separately, for the activity counts described in the Privacy Policy); it isn't tied to a Google account or any other identity, and is sent whether or not you're signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
       <p>Purchased views are a consumable purchase through Google Play. Refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad in error after it was approved, <a href="mailto:essentialsoftware.support@gmail.com">contact us</a> and we will, at our discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown, and any views it had left go unused (so check your balance before you unpublish); those views aren't returned to your account or transferable to another ad, and any unspent view-credit balance likewise goes unused if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
       <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags, and preview images, and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description, and tags, the same way you're responsible for anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. An optional display name and profile picture shown on your stories and to your subscribers don't need to be your real name or photo, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
@@ -4639,35 +4670,29 @@ document.body.dataset.lockScrollY = window.scrollY;
 <div id="einfo-overlay" onclick="if(event.target===this)closeEditorInfo()">
   <div id="einfo-dialog">
     <div id="einfo-dhdr">
-      <span id="einfo-dhdr-title">Editor Guide</span>
+      <span id="einfo-dhdr-title">Write</span>
       <button id="einfo-closebtn" onclick="closeEditorInfo()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="einfo-body">
-      <p>A note is made of blocks. Each block is one small piece (a heading, a photo, or a quote) that you can add, move, and style on its own.</p>
-      <h3>Add a block</h3>
-      <p>Tap a button in the bar at the top: Heading, Subheading, Text, Checklist, Quote, Code, Image, Media, Social post, Table, or Divider. Some types ask you to pick a font, color, or layout first.</p>
-      <h3>Move or resize a block</h3>
+      <p>Welcome to Write! This is where you build your own page, one piece at a time. Think of it like making a poster, but on your phone.</p>
+      <h3>Add stuff</h3>
+      <p>Tap the bar at the top to add things to your page. You can add a heading, some text, a to-do list, a quote, a photo, a table, and more. Some of them let you pick a font, a color, or a layout first.</p>
+      <h3>Move stuff around</h3>
       <ul>
-        <li>On the right side of a block, tap and hold the six-dot icon, then drag to move it.</li>
-        <li>Drag the double-arrow icon to make the block wider or narrower.</li>
-        <li>Tap the X icon to delete the block.</li>
+        <li>Press and hold the dots on the right side of a piece. Then slide it to where you want it.</li>
+        <li>Drag the arrows to make a piece wider or skinnier.</li>
+        <li>Tap the X to get rid of it.</li>
       </ul>
-      <h3>Change a photo, media, or post</h3>
-      <p>Tap the pencil icon on the block. You can paste a link or upload a file from your device.</p>
-      <h3>Add a caption or description</h3>
-      <p>Image, Media, and Social post blocks have a small text area just below them. That area is for a caption or description. When you add one of these blocks, a blinking cursor appears there. Start typing. Tap the X beside it to delete it. The arrows icon next to the X moves it above or below the block.</p>
-      <h3>Style a block</h3>
-      <p>On the left side of a block:</p>
-      <ul>
-        <li>Tap the paint-drop icon to change its background color.</li>
-        <li>Tap the curved-arrow icon to tilt it.</li>
-      </ul>
-      <h3>Change the page background</h3>
-      <p>Tap the round drop icon in the bottom-left corner. This colors the whole page, not just one block.</p>
-      <h3>Preview your note</h3>
-      <p>Tap the round icon in the bottom-right corner to see the note as it will look when saved or published, with all the editing controls hidden. Tap it again to go back to editing.</p>
-      <h3>Format text</h3>
-      <p>Select any text to open the format bar. From there you can bold, italicize, underline, add a link, change the color or font, and more.</p>
+      <h3>Change a photo, video, or post</h3>
+      <p>Tap the little pencil on it. Then paste in a new link, or pick a photo from your phone.</p>
+      <h3>Add a caption</h3>
+      <p>Photos, videos, and posts have a spot underneath for a caption. Just start typing. The X next to it deletes the caption, and the arrows move it above or below.</p>
+      <h3>Make it look like you</h3>
+      <p>Look on the left side of a piece. The paint drop changes its color, and the curved arrow tilts it. The round drop in the bottom-left corner changes the color of the whole page.</p>
+      <h3>See what others will see</h3>
+      <p>Tap the round button in the bottom-right corner. All the editing buttons hide, so you see your page the way everyone else will. Tap it again to go back to editing.</p>
+      <h3>Style your words</h3>
+      <p>Highlight some text and a small bar pops up. Use it to make words bold, slanted, or underlined, add a link, change the color or font, and more.</p>
     </div>
   </div>
 </div>
@@ -4748,8 +4773,8 @@ document.body.dataset.lockScrollY = window.scrollY;
       </div>
       <div id="pub-ad-tab" style="display:none">
         <div id="pub-ad-need-web" class="bkp-panel" style="display:none">
-          <p class="bkp-help">Publish this note to the web first. Once it's live, buy a view package and publish it as an ad here. It'll then be shown automatically as a starting template when someone clicks + to create a new note. Each time that happens, one view counts against the package until it runs out.</p>
-          <p class="bkp-help">A typical eligible ad is simple: up to two images linked from Wikipedia or Wikimedia Commons, embedded Instagram posts, YouTube videos, or Spotify players, plus one short disclaimer.</p>
+          <p class="bkp-help">Publish this note to the web first. Once it's live, buy a view package and publish it as an ad here. It'll then be shown automatically as a starting template when someone opens Write to start a new note (or Share, if this is a Share note). Each time that happens, one view counts against the package until it runs out.</p>
+          <p class="bkp-help">A typical eligible ad is simple: up to two images linked from Wikipedia or Wikimedia Commons, embedded Instagram posts, YouTube videos, or Spotify players (plus X posts and TikToks in Share), plus one short disclaimer.</p>
         </div>
         <div id="pub-ad-need-signin" class="bkp-panel" style="display:none">
           <p class="bkp-help">Sign in to publish or manage ads. Ad view credits are tied to your account.</p>
@@ -4757,7 +4782,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         <div id="pub-ad-main" style="display:none">
           <div id="pub-ad-elig" class="bkp-panel"></div>
           <div id="pub-ad-state-new" class="bkp-panel" style="display:none">
-            <p class="bkp-help">Buy a view package, then publish this note as an ad. It'll show as a starting template on other people's Create screen until the views run out.</p>
+            <p class="bkp-help">Buy a view package, then publish this note as an ad. It'll show as a starting template on other people's Write screen (or Share screen, for a Share note) until the views run out.</p>
             <div id="pub-ad-pkgs" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0"></div>
             <div id="pub-ad-balance" class="bkp-help"></div>
             <div id="pub-ad-status" class="pub-status"></div>
@@ -4983,6 +5008,11 @@ body{margin:0}
 .cv-toolbar-add-scroll{flex:1;display:flex;gap:.5rem;overflow-x:auto;padding:.7rem .9rem;scrollbar-width:none}
 .cv-toolbar-add-scroll::-webkit-scrollbar{display:none}
 .cv-toolbar-fmt{display:flex;align-items:stretch;width:100%}
+/* Repost mode (html.nb-repost, set by the outer page): no desktop toggle, no format bar,
+   no left-side/resize/rotate controls, no caption mover, and a reduced add bar. */
+html.nb-repost #cv-view-toggle,html.nb-repost .cv-toolbar-fmt,html.nb-repost .blk-ctrl-left,html.nb-repost .blk-resize,html.nb-repost .blk-resize-badge,html.nb-repost .blk-bg-btn,html.nb-repost .blk-rotate-btn,html.nb-repost .blk-cap-move{display:none !important}
+html.nb-repost .cv-add:not([data-rp]){display:none !important}
+html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 .cv-fmt-cancel{flex-shrink:0;position:sticky;left:0;z-index:2;display:flex;align-items:center;justify-content:center;width:36px;align-self:stretch;border:none;border-right:1px solid #e4e4e0;background:rgba(247,247,245,.98);color:#8a3b3b;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .cv-fmt-cancel:hover,.cv-fmt-cancel:active{color:#c23b3b}
 .cv-fmt-cancel svg{width:14px;height:14px}
@@ -5736,22 +5766,27 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
 
 </style>
 
-<div class="cv-page" data-page-bg="custom" style="--blk-custom-bg:#F50000">
+<div class="cv-page">
   <div class="cv-toolbar" id="cv-toolbar">
     <div class="cv-toolbar-add" id="cv-toolbar-add">
     <button class="cv-view-toggle" type="button" id="cv-view-toggle" aria-pressed="false" aria-label="Switch to desktop view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg></button>
     <div class="cv-toolbar-add-scroll" id="cv-toolbar-add-scroll">
     <button class="cv-add" type="button" data-type="heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5v14M19 5v14M5 12h14"/></svg>Heading</button>
     <button class="cv-add" type="button" data-type="subheading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v16"/><path d="M6 12c0-1.8 1.5-3 3.3-3s3.3 1.2 3.3 3v5"/></svg>Subheading</button>
-    <button class="cv-add" type="button" data-type="text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Text</button>
+    <button class="cv-add" type="button" data-type="text" data-rp="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Text</button>
     <button class="cv-add" type="button" data-type="checklist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="6" height="6" rx="1.5"/><path d="M4.5 7l1 1 2-2"/><path d="M12 7h9"/><rect x="3" y="14" width="6" height="6" rx="1.5"/><path d="M12 17h9"/></svg>Checklist</button>
     <button class="cv-add" type="button" data-type="quote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8c-2 0-3 1.3-3 3.3S5 15 7 15M7 8v4M17 8c-2 0-3 1.3-3 3.3S15 15 17 15M17 8v4"/></svg>Quote</button>
     <button class="cv-add" type="button" data-type="code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Code</button>
-    <button class="cv-add" type="button" data-type="image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5.5-5.5L4 21"/></svg>Image</button>
+    <button class="cv-add" type="button" data-type="image" data-rp="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5.5-5.5L4 21"/></svg>Image</button>
     <button class="cv-add" type="button" data-type="media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5l5 2.5-5 2.5v-5z"/></svg>Media</button>
     <button class="cv-add" type="button" data-type="social"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 9l3 3-3 3M13 15h4"/></svg>Social post</button>
     <button class="cv-add" type="button" data-type="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Table</button>
     <button class="cv-add" type="button" data-type="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16"/></svg>Divider</button>
+    <button class="cv-add" type="button" data-rp="1" data-rp-only="1" data-rp-plat="instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>Instagram</button>
+    <button class="cv-add" type="button" data-rp="1" data-rp-only="1" data-rp-plat="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11 16h5L9 4z"/><path d="M4 20l6.5-7M13.5 11L20 4"/></svg>X</button>
+    <button class="cv-add" type="button" data-rp="1" data-rp-only="1" data-rp-plat="tiktok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.4 2.4 2 4 4.5 4.2"/></svg>TikTok</button>
+    <button class="cv-add" type="button" data-rp="1" data-rp-only="1" data-rp-plat="youtube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="M10 9.5l5 2.5-5 2.5z"/></svg>YouTube</button>
+    <button class="cv-add" type="button" data-rp="1" data-rp-only="1" data-rp-plat="spotify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7.5 9.5c3-1 6.5-.8 9 .8M8 12.8c2.6-.8 5.4-.6 7.6.8M8.6 15.8c2-.5 4-.4 5.6.5"/></svg>Spotify</button>
     </div>
     </div>
     <div class="cv-toolbar-fmt" id="cv-toolbar-fmt" style="display:none">
@@ -7414,7 +7449,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
 
   /* --- Media source picker: YouTube link (or bare video ID) or Spotify link --- */
   var mediaPicker = (function() {
-    var overlay, box, handle, urlInput, targetFrame;
+    var overlay, box, handle, urlInput, targetFrame, pickHint = '';
     var drag = null;
 
     function youTubeEmbedUrl(input) {
@@ -7529,14 +7564,14 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
           close();
           return;
         }
-        var embed = youTubeEmbedUrl(raw);
-        if (!embed) {
+        var embed = pickHint === 'spotify' ? null : youTubeEmbedUrl(raw);
+        if (!embed && pickHint !== 'youtube') {
           var sp = parseSpotifyUrl(raw);
           if (sp) embed = SPOTIFY_EMBED_BASE + sp.id;
         }
         if (!embed) {
           var pasted = _pastedUrl(raw);
-          if (_pastedHost(pasted) === 'spotify.link') {
+          if (pickHint !== 'youtube' && _pastedHost(pasted) === 'spotify.link') {
             // Async: guard against the picker being closed (or reopened on
             // another block) while the request is in flight.
             var frameAtStart = targetFrame;
@@ -7593,8 +7628,10 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     }
 
     return {
-      open: function(frame) {
+      open: function(frame, hint) {
         if (!overlay) build();
+        pickHint = hint || '';
+        urlInput.placeholder = pickHint === 'youtube' ? 'YouTube link' : pickHint === 'spotify' ? 'Spotify link' : 'YouTube or Spotify link';
         targetFrame = frame;
         var block = frame ? frame.closest('.blk') : null;
         histBefore = block ? hcBeginBlock(block) : null;
@@ -7618,7 +7655,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // a single backslash before the regex engine ever sees it. Character
   // classes like [/] and [.] stand in for escapes, and the tokenizer
   // below is a char loop rather than a whitespace regex.
-  var PASTE_HOSTS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'instagram.com', 'instagr.am', 'spotify.com', 'spotify.link'];
+  var PASTE_HOSTS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'instagram.com', 'instagr.am', 'spotify.com', 'spotify.link', 'twitter.com', 'x.com/', 'tiktok.com'];
   var PASTE_PUNCT = '()[]<>.,;!?' + "'" + '"';
   // Spotify's embeddable content types — all share the same
   // open.spotify.com/<kind>/<id> URL shape.
@@ -7743,7 +7780,34 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       }
       return null;
     }
+    // X and TikTok are Repost-only: the regular Editor's social block stays Instagram-only.
+    if (window.__nbRepost) {
+      var xp = _socialPathParts(val);
+      if (host === 'x.com' || host === 'twitter.com' || host === 'mobile.twitter.com' || host === 'm.twitter.com') {
+        for (i = 0; i < xp.length - 1; i++) {
+          if ((xp[i] === 'status' || xp[i] === 'statuses') && /^[0-9]+$/.test(xp[i + 1])) {
+            return { platform: 'x', id: xp[i + 1], url: val };
+          }
+        }
+        return null;
+      }
+      if (host === 'tiktok.com' || host === 'm.tiktok.com') {
+        for (i = 0; i < xp.length - 1; i++) {
+          if (xp[i] === 'video' && /^[0-9]+$/.test(xp[i + 1])) {
+            return { platform: 'tiktok', id: xp[i + 1], url: val };
+          }
+        }
+        return null;
+      }
+    }
     return null;
+  }
+
+  // vm.tiktok.com / vt.tiktok.com / tiktok.com/t/... are redirect-only short links.
+  function _tiktokShortLink(raw) {
+    var v = _pastedUrl(raw);
+    var h = _pastedHost(v);
+    return h === 'vm.tiktok.com' || h === 'vt.tiktok.com' || (h === 'tiktok.com' && _socialPathParts(v)[0] === 't');
   }
 
   // Parses a pasted Spotify link (or "Copy Spotify URI" text) into
@@ -7787,6 +7851,12 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   function _socialEmbedSpec(platform, id) {
     if (platform === 'instagram') {
       return { src: 'https://www.instagram.com/p/' + id + '/embed/captioned/', title: 'Instagram post', css: 'min-height:480px', allow: '' };
+    }
+    if (platform === 'x') {
+      return { src: 'https://platform.twitter.com/embed/Tweet.html?dnt=true&theme=light&id=' + id, title: 'X post', css: 'min-height:500px', allow: '' };
+    }
+    if (platform === 'tiktok') {
+      return { src: 'https://www.tiktok.com/embed/v2/' + id, title: 'TikTok video', css: 'height:740px;max-width:605px;margin:0 auto', allow: 'fullscreen' };
     }
     return null;
   }
@@ -7837,8 +7907,22 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     container.appendChild(frame);
   }
 
+  // X's embed reports its rendered height to the parent; fit the matching iframe to it.
+  window.addEventListener('message', function(e) {
+    if (e.origin !== 'https://platform.twitter.com') return;
+    var d = e.data;
+    if (typeof d === 'string') { try { d = JSON.parse(d); } catch (err) { return; } }
+    var m = d && d['twttr.embed'];
+    if (!m || m.method !== 'twttr.private.resize' || !m.params || !m.params[0]) return;
+    var h = Number(m.params[0].height);
+    if (!h) return;
+    document.querySelectorAll('.blk-social-embed iframe').forEach(function(f) {
+      if (f.contentWindow === e.source) f.style.height = h + 'px';
+    });
+  });
+
   var socialPicker = (function() {
-    var overlay, box, handle, urlInput, targetWrap;
+    var overlay, box, handle, urlInput, targetWrap, pickHint = '';
     var drag = null;
 
     function build() {
@@ -7911,7 +7995,11 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
           return;
         }
         var parsed = parseSocialUrl(raw);
-        if (parsed) { commit(parsed, targetWrap); return; }
+        if (parsed && (!pickHint || parsed.platform === pickHint)) { commit(parsed, targetWrap); return; }
+        if (!parsed && pickHint === 'tiktok' && _tiktokShortLink(raw)) {
+          try { parent.showToast('Short TikTok links cannot be embedded. Open the video and copy its full link.'); } catch (e) {}
+          return;
+        }
         _rejectedLink(raw);
       }
 
@@ -7953,8 +8041,10 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     }
 
     return {
-      open: function(wrap) {
+      open: function(wrap, hint) {
         if (!overlay) build();
+        pickHint = hint || '';
+        urlInput.placeholder = { instagram: 'Instagram link', x: 'X link', tiktok: 'TikTok link' }[pickHint] || (window.__nbRepost ? 'Instagram, X, or TikTok link' : 'Instagram link');
         targetWrap = wrap;
         var block = wrap ? wrap.closest('.blk') : null;
         histBefore = block ? hcBeginBlock(block) : null;
@@ -9608,6 +9698,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     layoutClassicCanvas();
     hcRecordInsert(node);
     finishInsert(node);
+    return node;
   }
 
   function finishInsert(node) {
@@ -9667,6 +9758,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     btn.addEventListener('click', function() {
       var type = btn.dataset.type;
       var typeLabel = btn.textContent.trim();
+      if (window.__nbRepost && (type === 'text' || type === 'image')) { insertBlock(type); return; }
       var mediaOptions = type === 'image' ? IMAGE_STYLE_OPTIONS : type === 'media' ? MEDIA_STYLE_OPTIONS : null;
       if (mediaOptions) {
         askVariant(typeLabel, mediaOptions).then(function(opt) {
@@ -9698,6 +9790,27 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       } else {
         insertBlock(type);
       }
+    });
+  });
+
+  // Repost only: one add button per platform. Instagram/X/TikTok use the social block,
+  // YouTube/Spotify use the media block; the link sheet opens straight away. The delay
+  // lets finishInsert()'s caption focus land first so the link field keeps focus.
+  document.querySelectorAll('.cv-add[data-rp-plat]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var plat = btn.dataset.rpPlat;
+      var isMedia = plat === 'youtube' || plat === 'spotify';
+      var node = insertBlock(isMedia ? 'media' : 'social');
+      if (!node) return;
+      setTimeout(function() {
+        if (isMedia) {
+          var frame = node.querySelector('.blk-media-frame iframe');
+          if (frame) mediaPicker.open(frame, plat);
+        } else {
+          var wrap = node.querySelector('.blk-social-frame');
+          if (wrap) socialPicker.open(wrap, plat);
+        }
+      }, 140);
     });
   });
 
@@ -10199,6 +10312,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     function enterFmtMode() {
       if (fmtActive) return;
       if (page && page.classList.contains('cv-preview')) return;
+      if (window.__nbRepost) return;
       fmtActive = true;
       toolbarAdd.style.display = 'none';
       toolbarFmt.style.display = 'flex';
@@ -11397,6 +11511,7 @@ function applyTheme(mode) {
   let tc = document.querySelector('meta[name="theme-color"]');
   if (!tc) { tc = document.createElement('meta'); tc.name = 'theme-color'; document.head.appendChild(tc); }
   tc.content = themeColor;
+  if (typeof window._nbStRefresh === 'function') window._nbStRefresh();
 }
 function cycleTheme() {
   document.body.classList.add('theme-switching');
@@ -11422,6 +11537,109 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   let saved = 'light';
   try { saved = localStorage.getItem(DK) || 'light'; } catch (e) {}
   applyTheme(saved);
+})();
+
+/* ===================== Settings ===================== */
+(function () {
+  const KEY = 'nb_settings_v1';
+  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null };
+  let S = null, lastPoll = 0;
+  function load() {
+    try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
+  }
+  function put(k, v) { if (!S) load(); S[k] = v; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function classes() {
+    document.body.classList.toggle('nb-reduce-motion', !!window._nbSt('reduceMotion'));
+    document.body.classList.toggle('nb-no-tips', !window._nbSt('tips'));
+  }
+  window._nbSt = function (k) {
+    if (!S) load();
+    if (k === 'reduceMotion' && S.reduceMotion === null) return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    return S[k];
+  };
+  window._nbStSort = function (list) {
+    const s = window._nbSt('sort'); if (s === 'default') return list;
+    const a = list.slice(), t = n => (n.title || '').toLowerCase();
+    if (s === 'edited') a.sort((x, y) => (y.updatedAt || y.createdAt || 0) - (x.updatedAt || x.createdAt || 0));
+    else if (s === 'newest') a.sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
+    else if (s === 'oldest') a.sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0));
+    else if (s === 'az') a.sort((x, y) => t(x).localeCompare(t(y)));
+    return a;
+  };
+  window._nbStPollDue = function () {
+    const e = window._nbSt('syncEvery'); if (!e) return false;
+    const now = Date.now(); if (now - lastPoll < e * 1000 - 1000) return false;
+    lastPoll = now; return true;
+  };
+  function curTheme() { return document.body.classList.contains('pink') ? 'pink' : document.body.classList.contains('night') ? 'dark' : 'light'; }
+  function setTheme(m) {
+    document.body.classList.add('theme-switching'); void document.body.offsetWidth;
+    applyTheme(m);
+    try { localStorage.setItem(DK, m); localStorage.setItem(NB_THEME_TS_KEY, String(Date.now())); } catch (e) {}
+    setTimeout(() => document.body.classList.remove('theme-switching'), 200);
+    try { _nbSchedulePullThenPush(); } catch (e) {}
+  }
+  const GROUPS = [
+    ['Appearance', [
+      { t: 'chips', k: 'theme', l: 'Theme', o: [['light', 'Light'], ['dark', 'Dark'], ['pink', 'Pink']], get: curTheme, set: setTheme },
+      { t: 'sw', k: 'reduceMotion', l: 'Reduce motion', s: 'Fewer animations and transitions. Starts on if your phone has animations turned off.' }]],
+    ['Library', [
+      { t: 'chips', k: 'sort', l: 'Sort notes', o: [['default', 'Default'], ['edited', 'Recently edited'], ['newest', 'Newest'], ['oldest', 'Oldest'], ['az', 'A\u2013Z']] },
+      { t: 'sw', k: 'images', l: 'Image previews', s: 'Show photos on note cards. Off gives a tighter list.' },
+      { t: 'sw', k: 'stories', l: 'Stories strip', s: 'Show stories above your notes in All.', after: () => _nbSyncStoriesStripVisibility() },
+      { t: 'sw', k: 'tips', l: 'Welcome tips', s: 'Show the intro carousel in the Library.' }]],
+    ['Writing', [
+      { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
+      { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
+    ['Sync & backup', [
+      { t: 'chips', k: 'syncEvery', l: 'Auto-sync', s: 'How often Bluebook checks your account for changes. Manual only also skips the automatic backup, so tap Sync now to save your edits.', o: [[20, 'Every 20 sec'], [60, 'Every minute'], [300, 'Every 5 min'], [0, 'Manual only']] },
+      { t: 'link', l: 'Sync now', s: 'Pull and push your notes', go: () => { if (!nbIsSignedIn()) { showToast('Sign in to sync your notes'); return; } nbSyncNow(); } },
+      { t: 'link', l: 'Backup & restore', s: 'Save notes to a file, or restore one', go: () => openBackupSheet() }]],
+    ['Account', [
+      { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) || 'Not signed in'; }, go: () => nbAccountBtnClick() },
+      { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
+      { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
+      { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() }]]
+  ];
+  const E = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const CHEV = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+  function sub(r) { const s = typeof r.s === 'function' ? r.s() : r.s; return s ? '<span class="st-s">' + E(s) + '</span>' : ''; }
+  function row(r, g, i) {
+    const d = ' data-g="' + g + '" data-r="' + i + '"';
+    if (r.t === 'sw') return '<label class="st-row"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><span class="nb-switch"><input type="checkbox" class="nb-switch-input"' + d + (window._nbSt(r.k) ? ' checked' : '') + '><span class="nb-switch-track"><span class="nb-switch-thumb"></span></span></span></label>';
+    if (r.t === 'chips') {
+      const cur = String(r.get ? r.get() : window._nbSt(r.k));
+      return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
+    }
+    return '<button type="button" class="st-row st-link"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + CHEV + '</button>';
+  }
+  window._nbStRender = function () {
+    const root = document.getElementById('st-root'); if (!root) return;
+    root.innerHTML = GROUPS.map((g, gi) => '<div class="st-grp"><div class="st-h">' + g[0] + '</div><div class="st-card">' + g[1].map((r, ri) => row(r, gi, ri)).join('') + '</div></div>').join('') + '<div class="st-foot">Bluebook \u00b7 \u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+  };
+  const root = document.getElementById('st-root');
+  function find(el) { const g = el.dataset.g, r = el.dataset.r; return g == null ? null : GROUPS[g][1][r]; }
+  root.addEventListener('click', e => {
+    const b = e.target.closest('.st-chip, .st-link'); if (!b) return;
+    const r = find(b); if (!r) return;
+    if (b.classList.contains('st-link')) { r.go(); return; }
+    const v = r.k === 'syncEvery' ? Number(b.dataset.v) : b.dataset.v;
+    try { if (r.set) r.set(v); else put(r.k, v); } catch (err) { _nbLog('settings chip', err); }
+    window._nbStRender();
+  });
+  root.addEventListener('change', e => {
+    const i = e.target.closest('.nb-switch-input'); if (!i) return;
+    const r = find(i); if (!r) return;
+    put(r.k, i.checked); classes(); if (r.after) r.after();
+  });
+  window._nbStRefresh = function () { const sc = document.getElementById('screen-settings'); if (sc && sc.classList.contains('active')) window._nbStRender(); };
+  window.nbSettingsNavClick = function () {
+    if (document.getElementById('screen-create').classList.contains('active')) {
+      if (_nbCommitDraftToNote()) showToast('Changes saved automatically');
+    }
+    nbGoScreen('settings');
+  };
+  classes();
 })();
 
 /* ===================== Splash boot ===================== */
@@ -11450,7 +11668,32 @@ function closePrivacy() {
   document.getElementById('privacy-overlay').classList.remove('open');
   unlockScroll();
 }
+let _einfoEditorHtml = null, _einfoEditorTitle = null;
+const EINFO_REPOST_HTML = `<p>Welcome to Share! This is the quick way to put all the posts and videos you love from around the internet onto one page.</p>
+      <h3>Add something</h3>
+      <p>Tap the bar at the top to add some text, a photo, or a post or video from Instagram, X, TikTok, YouTube, or Spotify. For posts and videos, all you need is the link. Copy it, paste it in, done.</p>
+      <h3>Move stuff around</h3>
+      <ul>
+        <li>Press and hold the dots on the right side of a piece. Then slide it to where you want it.</li>
+        <li>Tap the X to get rid of it.</li>
+      </ul>
+      <h3>Change a photo, video, or post</h3>
+      <p>Tap the little pencil on it. Then paste a new link, or pick a photo from your phone.</p>
+      <h3>Add a caption</h3>
+      <p>Photos, videos, and posts have a spot underneath for a caption. Just start typing. The X next to it deletes the caption.</p>
+      <h3>Pick a page color</h3>
+      <p>The round drop in the bottom-left corner changes the color of the whole page.</p>
+      <h3>See what others will see</h3>
+      <p>Tap the round button in the bottom-right corner. All the editing buttons hide, so you see your page the way everyone else will. Tap it again to keep editing.</p>
+      <h3>Save and share</h3>
+      <p>Pages you make in Share get saved, published, and added to stories just like any other note. You can find them in your Library with all your other notes.</p>`;
 function openEditorInfo() {
+  const bodyEl = document.getElementById('einfo-body');
+  const titleEl = document.getElementById('einfo-dhdr-title');
+  if (_einfoEditorHtml === null) { _einfoEditorHtml = bodyEl.innerHTML; _einfoEditorTitle = titleEl.textContent; }
+  bodyEl.innerHTML = _nbRepostMode ? EINFO_REPOST_HTML : _einfoEditorHtml;
+  titleEl.textContent = _nbRepostMode ? 'Share' : _einfoEditorTitle;
+  bodyEl.scrollTop = 0;
   document.getElementById('einfo-overlay').classList.add('open');
   lockScroll();
 }
@@ -11541,6 +11784,7 @@ function _nbEntitlementActive(customerInfo) {
     customerInfo.entitlements.active[NB_PRO_ENTITLEMENT_ID]);
 }
 function _nbSetProFlag(isPro) {
+  setTimeout(function () { if (typeof window._nbStRefresh === 'function') window._nbStRefresh(); }, 0);
   try {
     if (isPro) localStorage.setItem('nbProUnlocked', '1');
     else localStorage.removeItem('nbProUnlocked');
@@ -13123,6 +13367,7 @@ function _nbHandleSessionExpired() {
   nbRenderAccountDialog();
 }
 function nbRenderAccountDialog() {
+  if (typeof window._nbStRefresh === 'function') window._nbStRefresh();
   const signedIn = nbIsSignedIn();
   const acct = nbAccount();
   document.getElementById('account-signedout-body').style.display = signedIn ? 'none' : '';
@@ -13441,6 +13686,12 @@ const _nbImgCache = new Map();
 let _nbImgCacheReady = false;
 const NB_DRAFT_ID_KEY = 'nb_draft_id_v1';
 const NB_EDITING_ID_KEY = 'nb_editing_note_id_v1';
+// Repost is the same canvas in a simplified mode. It keeps its own draft id so an
+// in-progress Repost never collides with the Editor's draft. _nbRepostMode is set by
+// the bottom-nav buttons, and by _nbCurrentBase() when an existing note is open
+// (a saved note carries note.repost).
+const NB_REPOST_DRAFT_ID_KEY = 'nb_repost_draft_id_v1';
+let _nbRepostMode = false;
 // One built-in note ships with a brand-new install so the Notes screen
 // isn't empty on first open. Seeding is tracked per demo note id (the ids
 // that have been offered before), not by a single "seeded once" flag: a
@@ -14117,6 +14368,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
   const desktopClass = note.desktopView ? ' cv-force-desktop' : '';
   const bgAttr = note.pageBg ? ` data-page-bg="${esc(note.pageBg)}"` : '';
   const bgStyle = (note.pageBg === 'custom' && note.pageBgCustom) ? ` style="--blk-custom-bg:${esc(note.pageBgCustom)}"` : '';
+  const kindMeta = note.repost ? '<meta name="nb-kind" content="share">' : '';
   const descMeta = note.desc ? `<meta name="description" content="${esc(note.desc)}">` : '';
   // The body IS the .cv-page (rather than a nested div) for two reasons:
   // 1. .cv-page's own background rule only paints its own box, and a plain
@@ -14136,6 +14388,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+${kindMeta}
 ${descMeta}
 <title>${esc(note.title || 'Untitled note')}</title>
 ${_nbGetPristineCanvasStyle()}
@@ -15059,7 +15312,7 @@ function _nbSyncStoriesStripVisibility() {
   if (!strip) return;
   const screen = document.getElementById('screen-notes');
   const onNotesAll = !!screen && screen.classList.contains('active') && _nbActiveCat === 'All';
-  strip.style.display = onNotesAll ? '' : 'none';
+  strip.style.display = (onNotesAll && _nbSt('stories')) ? '' : 'none';
 }
 // If the ring's image fails to load (dead/expired data URI, offline,
 // whatever), swap it back to the initial-letter avatar rather than
@@ -17297,17 +17550,24 @@ function _adAllowedImageHost(host) {
 }
 // Mirrors the worker's AD_ALLOWED_EMBED_HOSTS — see that file for why this
 // is an exact host match (the src is always generated by our own parsers,
-// never typed in by hand).
+// never typed in by hand). Share pages (marked with <meta name="nb-kind"
+// content="share">, see nbBuildStaticNoteHtml) may also carry X and TikTok
+// embeds, which only Share's own add buttons can produce.
 const AD_ALLOWED_EMBED_HOSTS = new Set([
   'www.youtube.com', 'www.instagram.com', 'open.spotify.com'
 ]);
-function _adAllowedEmbedHost(host) {
-  return AD_ALLOWED_EMBED_HOSTS.has(host);
+const AD_SHARE_EMBED_HOSTS = new Set([
+  'platform.twitter.com',  // _socialEmbedSpec('x')
+  'www.tiktok.com'         // _socialEmbedSpec('tiktok')
+]);
+function _adAllowedEmbedHost(host, kind) {
+  return AD_ALLOWED_EMBED_HOSTS.has(host) || (kind === 'share' && AD_SHARE_EMBED_HOSTS.has(host));
 }
 function nbAdCheckEligibility(html) {
   let doc;
   try { doc = new DOMParser().parseFromString(html, 'text/html'); }
   catch (e) { return { ok: false, reason: 'parse-failed' }; }
+  const kind = doc.querySelector('meta[name="nb-kind"][content="share"]') ? 'share' : 'write';
   const nonBlankBlocks = Array.from(doc.querySelectorAll('.blk[data-type="text"]'))
     .map(el => (el.textContent || '').replace(/\s+/g, ' ').trim())
     .filter(t => t.length > 0);
@@ -17346,9 +17606,9 @@ function nbAdCheckEligibility(html) {
     if (!_adAllowedImageHost(host)) return { ok: false, reason: 'non-wikimedia-image' };
   }
   // Video/social embeds must be one of the hosts our own editor generates —
-  // see AD_ALLOWED_EMBED_HOSTS above. Also caps each platform at one embed;
-  // each allowed host maps to exactly one platform, so counting by host IS
-  // counting by platform.
+  // see AD_ALLOWED_EMBED_HOSTS above (plus AD_SHARE_EMBED_HOSTS for Share
+  // pages). Also caps each platform at one embed; each allowed host maps to
+  // exactly one platform, so counting by host IS counting by platform.
   const embedSrcs = Array.from(doc.querySelectorAll('.blk-media-frame iframe, .blk-social-embed iframe')).map(f => f.getAttribute('src') || '');
   const embedHostCounts = new Map();
   for (const src of embedSrcs) {
@@ -17357,11 +17617,11 @@ function nbAdCheckEligibility(html) {
     try { u = new URL(src); } catch (e) { return { ok: false, reason: 'invalid-embed-src' }; }
     if (u.protocol !== 'https:') return { ok: false, reason: 'invalid-embed-src' };
     const host = u.hostname.toLowerCase();
-    if (!_adAllowedEmbedHost(host)) return { ok: false, reason: 'non-allowed-embed' };
+    if (!_adAllowedEmbedHost(host, kind)) return { ok: false, reason: 'non-allowed-embed' };
     embedHostCounts.set(host, (embedHostCounts.get(host) || 0) + 1);
   }
   if (Array.from(embedHostCounts.values()).some(c => c > 1)) return { ok: false, reason: 'duplicate-platform-embed' };
-  return { ok: true };
+  return { ok: true, kind };
 }
 const AD_NOT_ELIGIBLE_TOAST = 'Not eligible to run as an ad. Check the requirements above.';
 const AD_CHECK_FAILED_MSG = 'Couldn\u2019t check ad eligibility';
@@ -17376,8 +17636,8 @@ const AD_ELIGIBILITY_MESSAGES = {
   'non-wikimedia-image': 'Images must be linked from Wikipedia or Wikimedia Commons.',
   'invalid-image-src': 'One of the images has an invalid source.',
   'invalid-embed-src': 'One of the media/post embeds has an invalid source.',
-  'non-allowed-embed': 'Media and posts must be embedded via the editor\u2019s own Add media/Add post tools: YouTube, Instagram, or Spotify.',
-  'duplicate-platform-embed': 'Only one embed per platform is allowed. Remove the extra YouTube, Instagram, or Spotify embed.',
+  'non-allowed-embed': 'Media and posts must be added with the editor\u2019s own tools. Allowed: YouTube, Instagram, and Spotify, plus X and TikTok in Share.',
+  'duplicate-platform-embed': 'Only one embed per platform is allowed. Remove the extra one.',
   'parse-failed': AD_CHECK_FAILED_MSG
 };
 function nbAdCopyAttribution() {
@@ -17659,7 +17919,7 @@ async function nbAdPublish() {
       else { _nbLog('ads/publish', msg); showToast('Publish as ad failed' + _nbFailureReason(new Error('ads/publish: ' + res.status))); }
       return;
     }
-    showToast('Ad published. It\u2019ll start showing on Create screens.');
+    showToast('Ad published. It\u2019ll start showing on ' + (note.repost ? 'Share' : 'Write') + ' screens.');
     statusEl.textContent = '';
     await _pubRefreshAdTab();
   } catch (e) {
@@ -17718,7 +17978,7 @@ function nbAdUnpublish() {
   const confirmBtn = document.getElementById('unpublish-dialog-confirm');
   const origTitle = titleEl.textContent, origBody = bodyEl.textContent;
   titleEl.textContent = 'Unpublish this ad?';
-  bodyEl.textContent = 'It will stop showing on Create screens. The web page itself stays live. Unpublish it separately from the Publish to Web tab if you want that gone too. This can\u2019t be resumed on this address.';
+  bodyEl.textContent = 'It will stop showing on Write and Share screens. The web page itself stays live. Unpublish it separately from the Publish to Web tab if you want that gone too. This can\u2019t be resumed on this address.';
   confirmBtn.disabled = false;
   confirmBtn.textContent = 'Unpublish Ad';
   const restore = () => { titleEl.textContent = origTitle; bodyEl.textContent = origBody; };
@@ -17747,7 +18007,7 @@ function nbAdUnpublish() {
   ov.classList.add('open');
 }
 
-// ---- Create screen: hand out an ad template instead of the pristine one
+// ---- Write and Share screens: hand out an ad template instead of the pristine one
 // ---- when one's active, and count the edit-time view once they actually
 // ---- start editing it (see _nbCurrentBase/nbRenderCanvas below for how
 // ---- this plugs in).
@@ -17785,14 +18045,15 @@ let _nbAdFetchInFlightDraftId = null;
 let _nbPendingAdFragment = null;
 let _nbAdViewCounted = false; // guards the one-time POST /ads/:slug/view per draft session
 
-async function _nbFetchNextAd() {
+async function _nbFetchNextAd(kind) {
   // Short client-side timeout: a slow/unreachable network here should
   // never delay opening a fresh note, just silently fall back to the
   // pristine template exactly as if nothing were active.
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), 3000) : null;
   try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/next', controller ? { signal: controller.signal } : {});
+    // Write asks without a kind (what every older app version sends), Share asks for its own pool.
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/next' + (kind === 'share' ? '?kind=share' : ''), controller ? { signal: controller.signal } : {});
     if (!res.ok) return null;
     const data = await res.json();
     return (data && data.ad) || null;
@@ -18497,6 +18758,7 @@ function nbRenderNotesScreen() {
       (n.tags || []).some(t => t.toLowerCase().includes(_nbSearchQ))
     );
   }
+  filtered = _nbStSort(filtered);
   if (!filtered.length) {
     // Notes exist, this view just has none — swap in the reason this
     // particular list (category/Favorites/Uncategorized/search) is
@@ -18520,7 +18782,7 @@ function nbRenderNotesScreen() {
   grid.style.display = '';
   grid.innerHTML = filtered.map(n => {
     const imgUrls = extractImagesFromHtml(_nbRehydrateImages(n.content || ''));
-    const imgsHtml = _buildImgsHtml(imgUrls);
+    const imgsHtml = _nbSt('images') ? _buildImgsHtml(imgUrls) : '';
     const nid = escJs(n.id);
     nbInitOnboardCarousel();
     return `
@@ -18587,6 +18849,7 @@ function _nbShowDeleteConfirmDialog(id) {
     nbRenderNotesScreen();
     showToast('Note deleted');
   };
+  if (!_nbSt('confirmDelete')) { confirmBtn.onclick(); return; }
   ov.classList.add('open');
 }
 // A published note can't skip straight to delete — Unpublish here does
@@ -18604,8 +18867,8 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
   const cancelBtn = document.getElementById('delete-dialog-cancel');
   const confirmBtn = document.getElementById('delete-dialog-confirm');
   titleEl.textContent = 'Unpublish and delete?';
-  bodyEl.textContent = 'This note is published. Unpublish it, then confirm you still want to delete it.';
-  confirmBtn.textContent = 'Unpublish';
+  bodyEl.textContent = _nbSt('confirmDelete') ? 'This note is published. Unpublish it, then confirm you still want to delete it.' : 'This note is published. It will be unpublished and then deleted.';
+  confirmBtn.textContent = _nbSt('confirmDelete') ? 'Unpublish' : 'Unpublish & delete';
   confirmBtn.disabled = false;
   // Same guard as nbUnpublishNote/the account dialogs: this step actually
   // talks to the server, and without the guard Cancel just hid the
@@ -18657,7 +18920,7 @@ _nbFetchSubscriberCount(); // warm the cache at boot so the sign-out sheet doesn
 if (nbIsSignedIn()) { nbSyncPullThenPush(); _nbFetchProfileName(); _nbReconcileAccountActions(); }
 let _nbSyncPollBusy = false, _nbPollTick = 0;
 setInterval(() => {
-  if (!nbIsSignedIn() || document.hidden || _nbSyncPollBusy) return;
+  if (!nbIsSignedIn() || document.hidden || _nbSyncPollBusy || !_nbStPollDue()) return;
   if (++_nbPollTick % 3 === 0) _nbReconcileAccountActions(); // follows/likes from another device, about once a minute
   _nbSyncPollBusy = true;
   nbSyncPullThenPush().finally(() => { _nbSyncPollBusy = false; });
@@ -18852,6 +19115,11 @@ function nbGoScreen(name) {
   const btn = document.getElementById('bn-' + name);
   if (screen) screen.classList.add('active');
   if (btn) btn.classList.add('active');
+  // Repost shares the Editor's screen; its own nav button is the active one there.
+  if (name === 'create' && _nbRepostMode) {
+    document.getElementById('bn-create').classList.remove('active');
+    document.getElementById('bn-repost').classList.add('active');
+  }
   document.getElementById('feed-search-wrap').style.display = (name === 'notes') ? '' : 'none';
   // #ptr-bar lives outside #nb-screens (see its init comment), so it isn't
   // covered by the classList wipe above and an interrupted drag can leave
@@ -18890,11 +19158,12 @@ function nbGoScreen(name) {
   // Editor glyph while you're already there (nothing to create — tapping
   // it is a no-op), and a "+" everywhere else, where tapping it takes you
   // to the editor / starts a fresh note.
-  document.getElementById('bn-create-icon-editor').style.display = (name === 'create') ? '' : 'none';
-  document.getElementById('bn-create-icon-plus').style.display = (name === 'create') ? 'none' : '';
-  document.getElementById('bn-create').setAttribute('aria-label', name === 'create' ? 'Editor' : 'New note');
+  const _onEditor = (name === 'create' && !_nbRepostMode);
+  document.getElementById('bn-create-icon-editor').style.display = _onEditor ? '' : 'none';
+  document.getElementById('bn-create-icon-plus').style.display = _onEditor ? 'none' : '';
+  document.getElementById('bn-create').setAttribute('aria-label', _onEditor ? 'Write' : 'New note');
   const hdrTitleTextEl = document.getElementById('hdr-title-text');
-  hdrTitleTextEl.textContent = (name === 'create') ? 'Editor' : nbLibraryTitleText(name === 'notes');
+  hdrTitleTextEl.textContent = (name === 'create') ? (_nbRepostMode ? 'Share' : 'Write') : name === 'settings' ? 'Settings' : nbLibraryTitleText(name === 'notes');
   nbUpdateTitleMarquee(document.getElementById('header-title'), hdrTitleTextEl);
   window.scrollTo(0, 0);
   // Auto-sync on leaving the Editor, or on landing on the Notes screen
@@ -18910,7 +19179,8 @@ function nbGoScreen(name) {
   // forget: a failure here (offline, expired session) isn't worth
   // interrupting the screen switch over, and the manual "Sync now"
   // button remains for anyone who wants to confirm it.
-  if (leavingEditor || name === 'notes') nbSyncPullThenPush();
+  if (name === 'settings') _nbStRender();
+  if ((leavingEditor || name === 'notes') && _nbSt('syncEvery')) nbSyncPullThenPush();
   if (name === 'notes') { _nbReconcileAccountActions(); if (_nbIsFeedCat(_nbActiveCat)) nbRefreshCurrentView('landing', false); }
 }
 // Enforce the landing state explicitly (Create screen + search bar hidden)
@@ -18935,8 +19205,10 @@ if (_pendingRestoreMsg) {
   document.getElementById('restore-dialog-ok').onclick = () => { ov.classList.remove('open'); };
   ov.classList.add('open');
 } else {
-  // Always boot to Notes now, rather than the old Editor-by-default.
-  nbGoScreen('notes');
+  // Always boot to Notes now, rather than the old Editor-by-default (Settings can switch to Write).
+  const _so = _nbSt('startOn');
+  nbGoScreen('notes'); // the Editor section starts .active in the HTML, so leave it first or nbCreateNew() sees "already there" and does nothing
+  if (!nbAtFreeNoteLimit()) { if (_so === 'write') nbCreateNew(); else if (_so === 'share') nbRepostNav(); }
 }
 /* ===================== Backup sheet ===================== */
 function openBackupSheet() {
@@ -19448,7 +19720,7 @@ function nbRestoreState(htmlSrc, uiState) {
 }
 
 
-function nbBuildSafeHtml(htmlSrc, uiState, draftId) {
+function nbBuildSafeHtml(htmlSrc, uiState, draftId, repost) {
   htmlSrc = nbRestoreState(htmlSrc, uiState);
   // No separate image-retry script is injected here: htmlSrc already
   // carries the full retry logic (wireImage()/_retryPendingEmbeds()) baked
@@ -19457,6 +19729,7 @@ function nbBuildSafeHtml(htmlSrc, uiState, draftId) {
   // get the same automatic + tap-to-retry behavior as video and social
   // embeds through one retry path.
   const _uiStateGlobals = `<script data-noteinfra="1">window.__savedNoteUiState=${JSON.stringify(uiState || null).replace(/</g, '\\u003c')};window.__noteId=${JSON.stringify(draftId || null).replace(/</g, '\\u003c')};<\/script>`;
+  const _repostGlobal = repost ? '<script data-noteinfra="1">window.__nbRepost=true;<\/script>' : '';
   const _noScrollbarCss = '<style data-noteinfra="1">html,body{scrollbar-width:none;-ms-overflow-style:none}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none}</style>';
   const _errRelay = `<script data-noteinfra="1">window.onerror=function(msg,src,line,col,err){parent.postMessage({type:'markup-error',msg:msg+(line?(' (line '+line+')'):'')},location.origin||'*');return true};<\/script>`;
   // #5b5bd6 is the canvas's one hardcoded accent color (selection/hover/
@@ -19488,7 +19761,7 @@ function nbBuildSafeHtml(htmlSrc, uiState, draftId) {
   Object.keys(_cvAccentByTheme.fills).forEach(function (origHex) {
     htmlSrc = htmlSrc.split('#' + origHex).join('#' + _cvAccentByTheme.fills[origHex]);
   });
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="referrer" content="strict-origin-when-cross-origin"><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:#fff;color:#1a1a1a}</style>${_noScrollbarCss}</head><body>${_uiStateGlobals}${htmlSrc}${_errRelay}${_NB_NOTE_UI_STATE_SCRIPT}</body></html>`;
+  return `<!DOCTYPE html><html${repost ? ' class="nb-repost"' : ''}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="referrer" content="strict-origin-when-cross-origin"><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:#fff;color:#1a1a1a}</style>${_noScrollbarCss}</head><body>${_uiStateGlobals}${_repostGlobal}${htmlSrc}${_errRelay}${_NB_NOTE_UI_STATE_SCRIPT}</body></html>`;
 }
 
 /* ===================== Bluebook canvas: draft state + render =====================
@@ -19496,11 +19769,16 @@ function nbBuildSafeHtml(htmlSrc, uiState, draftId) {
    notes data layer above -- see the hoist comment there. */
 function _nbDraftUiKey(id) { return 'nb_draft_uistate_' + id; }
 function _nbNewDraftId() { return 'd_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function _nbDraftIdKey() { return _nbRepostMode ? NB_REPOST_DRAFT_ID_KEY : NB_DRAFT_ID_KEY; }
 function _nbGetDraftId() {
   let id;
-  try { id = localStorage.getItem(NB_DRAFT_ID_KEY); } catch (e) {}
-  if (!id) { id = _nbNewDraftId(); try { localStorage.setItem(NB_DRAFT_ID_KEY, id); } catch (e) {} }
+  const key = _nbDraftIdKey();
+  try { id = localStorage.getItem(key); } catch (e) {}
+  if (!id) { id = _nbNewDraftId(); try { localStorage.setItem(key, id); } catch (e) {} }
   return id;
+}
+function _nbSetDraftId(id) {
+  try { localStorage.setItem(_nbDraftIdKey(), id); } catch (e) {}
 }
 function _nbLoadDraftUiState(id) {
   try { return JSON.parse(localStorage.getItem(_nbDraftUiKey(id)) || 'null'); } catch (e) { return null; }
@@ -19574,7 +19852,7 @@ function _nbCurrentBase() {
     // savedFragment is just that note's own canvas content (migrated on
     // the fly if it was saved under the old full-document format), used
     // as a fallback uiState.full when there's no in-session draft yet.
-    if (note) return { base: NB_PRISTINE_TEMPLATE, draftId: 'note_' + editingId, isExisting: true, note, savedFragment: _nbExtractCanvasFragment(note.content) };
+    if (note) { _nbRepostMode = !!note.repost; return { base: NB_PRISTINE_TEMPLATE, draftId: 'note_' + editingId, isExisting: true, note, savedFragment: _nbExtractCanvasFragment(note.content), repost: _nbRepostMode }; }
     // The note vanished (deleted elsewhere) — fall back to a new draft.
     _nbSetEditingId(null);
   }
@@ -19587,7 +19865,7 @@ function _nbCurrentBase() {
   // left over from a since-abandoned draft is not this draft's content.
   const curDraftId = _nbGetDraftId();
   const adFragmentForThisDraft = (_nbPendingAdDraftId === curDraftId) ? _nbPendingAdFragment : null;
-  return { base: NB_PRISTINE_TEMPLATE, draftId: curDraftId, isExisting: false, note: null, savedFragment: adFragmentForThisDraft || null };
+  return { base: NB_PRISTINE_TEMPLATE, draftId: curDraftId, isExisting: false, note: null, savedFragment: adFragmentForThisDraft || null, repost: _nbRepostMode };
 }
 
 // Trickle-style progress for the loadmask bar: the real finish time is
@@ -19624,7 +19902,7 @@ function nbRenderCanvas(forcePreview) {
   const iframe = document.getElementById('markup-iframe');
   const mask = document.getElementById('markup-iframe-loadmask');
   if (!wrap || !iframe) return;
-  const { base, draftId, savedFragment, note } = _nbCurrentBase();
+  const { base, draftId, savedFragment, note, repost } = _nbCurrentBase();
   // No in-session draft yet (fresh open, or after Reset to original) —
   // fall back to the note's own last-saved canvas content so it isn't
   // blank. A draft, once it exists, always wins. Carry the note's saved
@@ -19632,8 +19910,10 @@ function nbRenderCanvas(forcePreview) {
   // savedFragment (see nbConfirmSave's comment on pageBg), so without
   // this a freshly-reopened note would render with the default
   // background even though one was saved.
-  const uiState = _nbLoadDraftUiState(draftId) || (savedFragment ? { full: savedFragment, pageBg: note && note.pageBg, pageBgCustom: note && note.pageBgCustom, desktopView: note && note.desktopView } : null);
-  let safeHtml = nbBuildSafeHtml(base, uiState, draftId);
+  let uiState = _nbLoadDraftUiState(draftId) || (savedFragment ? { full: savedFragment, pageBg: note && note.pageBg, pageBgCustom: note && note.pageBgCustom, desktopView: note && note.desktopView } : null);
+  // Repost starts from a blank canvas, never the Editor's starter layout.
+  if (repost && (!uiState || typeof uiState.full !== 'string')) uiState = Object.assign({}, uiState, { full: savedFragment || '' });
+  let safeHtml = nbBuildSafeHtml(base, uiState, draftId, repost);
   // Opening a saved note from its card should always land in read-only
   // preview, regardless of what edit/preview state it happened to be
   // left in last. The canvas's own boot script (inside the iframe)
@@ -19730,76 +20010,102 @@ function nbCreateNew() {
   // loadmask animation for no reason. Either way, + should only ever
   // take you TO the Editor, never reset what's already open there.
   const screen = document.getElementById('screen-create');
-  if (screen && screen.classList.contains('active')) return;
+  if (screen && screen.classList.contains('active') && !_nbRepostMode) return;
   // Only reached when + is tapped from somewhere other than the Editor
   // itself (see the early return above), which per the comment above is
   // always "start a new note" — exactly the case the free-tier cap needs
   // to block once five notes already exist.
   if (nbAtFreeNoteLimit()) { openPaywallDialog(); return; }
+  // Coming over from Repost: keep an open repost note's edits, then start a fresh Editor note.
+  if (_nbRepostMode) {
+    if (screen && screen.classList.contains('active') && _nbGetEditingId() && _nbCommitDraftToNote()) showToast('Changes saved automatically');
+    _nbSetEditingId(null);
+    _nbRepostMode = false;
+  }
   if (_nbGetEditingId()) {
     _nbSetEditingId(null);
     nbGoScreen('create');
     nbRenderCanvas();
   } else {
-    nbGoScreen('create');
-    // Genuinely fresh draft — no in-session ui-state yet, and nothing
-    // already fetched for this draft — is the only case that checks for
-    // an active ad before falling back to the blank pristine template.
-    // A draft that's already in progress (ui-state exists, or an ad was
-    // already resolved for it) always renders immediately, unchanged from
-    // before, so resuming work never waits on a network round-trip.
-    const freshDraft = !_nbLoadDraftUiState(_nbGetDraftId()) && !_nbPendingAdSlug;
-    if (freshDraft) {
-      const fetchDraftId = _nbGetDraftId();
-      if (_nbAdFetchInFlightDraftId === fetchDraftId) {
-        // Already fetching for this exact draft — e.g. the person left
-        // Create and tapped it again before the first request resolved.
-        // That request's own .then() below will render once it lands;
-        // firing a second one here would just double the network call.
-        return;
-      }
-      _nbAdFetchInFlightDraftId = fetchDraftId;
-      // Keep the loadmask visibly progressing during the wait rather than
-      // showing nothing — nbRenderCanvas() below picks the same bar right
-      // back up once it starts its own render.
-      const mask = document.getElementById('markup-iframe-loadmask');
-      if (mask) mask.classList.remove('out');
-      _nbLoadbarStart();
-      _nbFetchNextAd().then(ad => {
-        if (_nbAdFetchInFlightDraftId === fetchDraftId) _nbAdFetchInFlightDraftId = null;
-        // The user may have backed out of this draft and landed on a
-        // different fresh one while the request was in flight — a response
-        // that arrives after that no longer belongs to anything on screen,
-        // so drop it rather than seeding (or slug-tagging) the wrong draft.
-        if (_nbGetDraftId() !== fetchDraftId) return;
-        if (ad && ad.slug && ad.html) {
-          _nbAdBlockAdded = false;
-          _nbAdViewCounted = false;
-          try {
-            _nbPendingAdFragment = _nbExtractCanvasFragment(ad.html);
-            _nbPendingAdSlug = ad.slug;
-            _nbPendingAdDraftId = fetchDraftId;
-          }
-          catch (e) { _nbLog('ad fragment extract', e); _nbPendingAdFragment = null; _nbPendingAdSlug = null; _nbPendingAdDraftId = null; }
-        }
-        nbRenderCanvas();
-      });
+    _nbShowDraftWithAd('write');
+  }
+}
+// Shared by Write (nbCreateNew) and Share (nbRepostNav): shows the current draft for
+// whichever mode is active, handing a brand-new draft the next ad of that kind (Write ads
+// for Write, Share ads for Share) in place of the blank starting canvas.
+function _nbShowDraftWithAd(kind) {
+  nbGoScreen('create');
+  // Genuinely fresh draft — no in-session ui-state yet, and nothing
+  // already fetched for this draft — is the only case that checks for
+  // an active ad before falling back to the blank pristine template.
+  // A draft that's already in progress (ui-state exists, or an ad was
+  // already resolved for it) always renders immediately, unchanged from
+  // before, so resuming work never waits on a network round-trip.
+  const freshDraft = !_nbLoadDraftUiState(_nbGetDraftId()) && !_nbPendingAdSlug;
+  if (freshDraft) {
+    const fetchDraftId = _nbGetDraftId();
+    if (_nbAdFetchInFlightDraftId === fetchDraftId) {
+      // Already fetching for this exact draft — e.g. the person left
+      // Create and tapped it again before the first request resolved.
+      // That request's own .then() below will render once it lands;
+      // firing a second one here would just double the network call.
       return;
     }
-    // Rebuild the iframe the same way reopening a saved note does, rather
-    // than just switching screens onto whatever's still sitting there.
-    // nbRenderCanvas() reloads from the draft's own saved ui-state (see
-    // _nbLoadDraftUiState above), so nothing in progress is lost — but it
-    // does mean the canvas document is rebuilt from scratch, which is
-    // exactly what makes a stuck YouTube/social embed retry and a
-    // base64 image that failed to paint the first time show up again.
-    nbRenderCanvas();
+    _nbAdFetchInFlightDraftId = fetchDraftId;
+    // Keep the loadmask visibly progressing during the wait rather than
+    // showing nothing — nbRenderCanvas() below picks the same bar right
+    // back up once it starts its own render.
+    const mask = document.getElementById('markup-iframe-loadmask');
+    if (mask) mask.classList.remove('out');
+    _nbLoadbarStart();
+    _nbFetchNextAd(kind).then(ad => {
+      if (_nbAdFetchInFlightDraftId === fetchDraftId) _nbAdFetchInFlightDraftId = null;
+      // The user may have backed out of this draft and landed on a
+      // different fresh one while the request was in flight — a response
+      // that arrives after that no longer belongs to anything on screen,
+      // so drop it rather than seeding (or slug-tagging) the wrong draft.
+      if (_nbGetDraftId() !== fetchDraftId) return;
+      if (ad && ad.slug && ad.html) {
+        _nbAdBlockAdded = false;
+        _nbAdViewCounted = false;
+        try {
+          _nbPendingAdFragment = _nbExtractCanvasFragment(ad.html);
+          _nbPendingAdSlug = ad.slug;
+          _nbPendingAdDraftId = fetchDraftId;
+        }
+        catch (e) { _nbLog('ad fragment extract', e); _nbPendingAdFragment = null; _nbPendingAdSlug = null; _nbPendingAdDraftId = null; }
+      }
+      nbRenderCanvas();
+    });
+    return;
   }
+  // Rebuild the iframe the same way reopening a saved note does, rather
+  // than just switching screens onto whatever's still sitting there.
+  // nbRenderCanvas() reloads from the draft's own saved ui-state (see
+  // _nbLoadDraftUiState above), so nothing in progress is lost — but it
+  // does mean the canvas document is rebuilt from scratch, which is
+  // exactly what makes a stuck YouTube/social embed retry and a
+  // base64 image that failed to paint the first time show up again.
+  nbRenderCanvas();
 }
 // Card tap: open that note for editing. Always re-renders, since it's
 // always a context switch (even re-tapping the same note the canvas is
 // already showing is a harmless no-op re-render).
+// Bottom-nav "Repost": always starts a fresh repost note (same rule as the Editor's
+// nav button). Tapping it while already on Repost does nothing.
+function nbRepostNav() {
+  const screen = document.getElementById('screen-create');
+  const onScreen = !!(screen && screen.classList.contains('active'));
+  if (onScreen && _nbRepostMode) return;
+  if (nbAtFreeNoteLimit()) { openPaywallDialog(); return; }
+  if (onScreen && _nbGetEditingId() && _nbCommitDraftToNote()) showToast('Changes saved automatically');
+  _nbSetEditingId(null);
+  _nbRepostMode = true;
+  _nbShowDraftWithAd('share');
+}
 function nbOpenNoteForEdit(id) {
+  const _n = nbLoadNotes().find(x => x.id === id);
+  _nbRepostMode = !!(_n && _n.repost);
   _nbSetEditingId(id);
   nbGoScreen('create');
   nbRenderCanvas(true);
@@ -19938,7 +20244,7 @@ function resetEditToOriginal() {
   // note it's that note's own last-saved version.
   document.getElementById('edit-reset-body').textContent = _nbCurrentBase().isExisting
     ? 'This will discard any edits made since this note was last saved and restore that version. This can\u2019t be undone.'
-    : 'This will discard any edits and restore the default template. This can\u2019t be undone.';
+    : (_nbRepostMode ? 'This will clear everything on the canvas. This can\u2019t be undone.' : 'This will discard any edits and restore the default template. This can\u2019t be undone.');
   ov.classList.add('open');
   document.getElementById('edit-reset-cancel').onclick = () => ov.classList.remove('open');
   ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
@@ -19948,7 +20254,7 @@ function resetEditToOriginal() {
     _nbClearDraftUiState(draftId, isExisting ? savedFragment : null);
     if (!isExisting) {
       const newId = _nbNewDraftId();
-      try { localStorage.setItem(NB_DRAFT_ID_KEY, newId); } catch (e) {}
+      _nbSetDraftId(newId);
       _nbPendingAdSlug = null; _nbPendingAdFragment = null; _nbAdViewCounted = false; _nbAdBlockAdded = false; _nbPendingAdDraftId = null;
     }
     nbRenderCanvas();
@@ -20032,7 +20338,7 @@ function nbNewFromEditor() {
   else showToast('New canvas');
   _nbSetEditingId(null);
   const newId = _nbNewDraftId();
-  try { localStorage.setItem(NB_DRAFT_ID_KEY, newId); } catch (e) {}
+  _nbSetDraftId(newId);
   _nbPendingAdSlug = null; _nbPendingAdFragment = null; _nbAdViewCounted = false; _nbAdBlockAdded = false; _nbPendingAdDraftId = null;
   nbRenderCanvas();
 }
@@ -20172,7 +20478,7 @@ function nbConfirmSave() {
     return;
   }
 
-  const { draftId, isExisting, note: existingNote, savedFragment } = _nbCurrentBase();
+  const { draftId, isExisting, note: existingNote, savedFragment, repost } = _nbCurrentBase();
   // Free-tier cap only ever blocks growing the notes list — updating a
   // note that already exists (isExisting) never changes the count, so
   // it's exempt even once the limit was hit with this exact note already
@@ -20190,7 +20496,7 @@ function nbConfirmSave() {
   // than re-deriving from a live snapshot that doesn't exist yet.
   const content = (uiState && typeof uiState.full === 'string')
     ? uiState.full
-    : (isExisting ? savedFragment : _nbExtractCanvasFragment(NB_PRISTINE_TEMPLATE));
+    : (isExisting ? savedFragment : (repost ? (savedFragment || '') : _nbExtractCanvasFragment(NB_PRISTINE_TEMPLATE)));
   // Canvas background lives outside #cv-canvas (see snapshot()'s
   // st.pageBg), so it isn't part of `content` above and was never being
   // written onto the note at all — every save silently reset it back to
@@ -20232,6 +20538,7 @@ function nbConfirmSave() {
     notes.unshift({
       id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       title, desc, category, tags, content, pageBg, pageBgCustom, desktopView,
+      repost: repost || undefined,
       adSourceSlug,
       createdAt: Date.now()
     });
@@ -20252,7 +20559,7 @@ function nbConfirmSave() {
   _nbClearDraftUiState(draftId, content);
   _nbSetEditingId(null);
   const newId = _nbNewDraftId();
-  try { localStorage.setItem(NB_DRAFT_ID_KEY, newId); } catch (e) {}
+  _nbSetDraftId(newId);
   _nbPendingAdSlug = null; _nbPendingAdFragment = null; _nbAdViewCounted = false; _nbAdBlockAdded = false; _nbPendingAdDraftId = null;
   nbRenderCanvas();
 
