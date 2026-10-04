@@ -11679,6 +11679,14 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     const r = find(i); if (!r) return;
     put(r.k, i.checked); classes(); if (r.after) r.after();
   });
+  // Follow the phone's animation setting while the app is open or after it
+  // resumes, until the user has made their own choice with the switch.
+  window._nbStApplyClasses = classes;
+  try {
+    const mq = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)');
+    if (mq) { if (mq.addEventListener) mq.addEventListener('change', classes); else if (mq.addListener) mq.addListener(classes); }
+  } catch (e) {}
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) classes(); });
   window._nbStRefresh = function () { const sc = document.getElementById('screen-settings'); if (sc && sc.classList.contains('active')) window._nbStRender(); };
   window.nbSettingsNavClick = function () {
     if (document.getElementById('screen-create').classList.contains('active')) {
@@ -12174,6 +12182,7 @@ function _nbBindAppResumeListener() {
   try {
     AppPlugin.addListener('appStateChange', (state) => {
       if (state && state.isActive) {
+        try { if (window._nbStApplyClasses) window._nbStApplyClasses(); } catch (e) {}
         _nbNudgeWebViewRepaint();
         _nbPingPresence();
         nbSyncPullThenPush();
@@ -20643,7 +20652,7 @@ nbRenderCanvas();
 window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
   'use strict';
   try {
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    if (window._nbSt ? window._nbSt('reduceMotion') : (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return null;
     if (typeof THREE === 'undefined') return null;
     if (!bgCanvas || !iconCanvas || !iconSvg) return null;
 
