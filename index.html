@@ -7655,7 +7655,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // a single backslash before the regex engine ever sees it. Character
   // classes like [/] and [.] stand in for escapes, and the tokenizer
   // below is a char loop rather than a whitespace regex.
-  var PASTE_HOSTS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'instagram.com', 'instagr.am', 'spotify.com', 'spotify.link', 'twitter.com', 'x.com/', 'tiktok.com'];
+  var PASTE_HOSTS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'instagram.com', 'instagr.am', 'spotify.com', 'spotify.link', 'twitter.com', 'x.com/', 't.co/', 'tiktok.com'];
   var PASTE_PUNCT = '()[]<>.,;!?' + "'" + '"';
   // Spotify's embeddable content types — all share the same
   // open.spotify.com/<kind>/<id> URL shape.
@@ -7727,14 +7727,21 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // Tells the person why a link was refused instead of the picker just
   // sitting there. Toast lives on the parent, same as wireMedia's.
   function _rejectedLink(raw, err) {
-    var msg = err ? "Couldn't resolve that short link (" + (err.message || err) + ")" : "Couldn't recognize that link";
+    // Plain-language toast only; the technical reason goes to the console.
+    var msg = "Couldn't recognize that link";
+    if (err) {
+      try { console.warn('Short link failed:', err.message || err); } catch (e) {}
+      msg = (typeof navigator !== 'undefined' && navigator.onLine === false)
+        ? "You're offline. Check your connection and try again."
+        : "Couldn't open that short link. Open the post and copy its full link instead.";
+    }
     try { parent.showToast(msg); } catch (e) {}
   }
 
   // spotify.link is a redirect-only short link (a JS redirect, so it can't
   // be followed with fetch), but Spotify's oEmbed API accepts it and
   // returns the embed iframe for whatever it points at. Both documented
-  // bases are tried; the failure reasons are joined into the toast.
+  // bases are tried; the failure reasons are joined into the console warning.
   function _spotifyOembed(base, url) {
     return fetch(base + '/oembed?url=' + encodeURIComponent(url))
       .then(function(r) { if (!r.ok) throw new Error(base.split('//')[1] + ' HTTP ' + r.status); return r.json(); })
@@ -7820,6 +7827,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     }).then(function(j) {
       if (j.platform === 'tiktok') return { platform: 'tiktok', id: j.id, url: 'https://www.tiktok.com/video/' + j.id };
       if (j.platform === 'instagram') return { platform: 'instagram', id: j.id, url: 'https://www.instagram.com/p/' + j.id + '/' };
+      if (j.platform === 'x') return { platform: 'x', id: j.id, url: 'https://x.com/i/status/' + j.id };
       throw new Error('unexpected response');
     }).catch(function(err) {
       if (!_tiktokShortLink(url)) throw err;
@@ -7829,6 +7837,9 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       });
     });
   }
+
+  // t.co/... is X's redirect-only link wrapper (Repost only, like X itself).
+  function _xShortLink(raw) { return _pastedHost(_pastedUrl(raw)) === 't.co'; }
 
   // instagram.com/share/... is a redirect-only link (same reason as above).
   function _instagramShareLink(raw) {
@@ -7841,7 +7852,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   function _tiktokShortLink(raw) {
     var v = _pastedUrl(raw);
     var h = _pastedHost(v);
-    return h === 'vm.tiktok.com' || h === 'vt.tiktok.com' || (h === 'tiktok.com' && _socialPathParts(v)[0] === 't');
+    return h === 'vm.tiktok.com' || h === 'vt.tiktok.com' || ((h === 'tiktok.com' || h === 'm.tiktok.com') && _socialPathParts(v)[0] === 't');
   }
 
   // Short links can't be followed with fetch, but TikTok's oEmbed accepts them
@@ -8048,7 +8059,10 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
         }
         var parsed = parseSocialUrl(raw);
         if (parsed && (!pickHint || parsed.platform === pickHint)) { commit(parsed, targetWrap); return; }
-        if (!parsed && ((pickHint === 'tiktok' && _tiktokShortLink(raw)) || ((!pickHint || pickHint === 'instagram') && _instagramShareLink(raw)))) {
+        // Short/share links: TikTok and X t.co (Repost only, like parseSocialUrl) or Instagram. With no
+        // pickHint (the combined "Instagram, X, or TikTok link" picker) any may be pasted.
+        var shortPlat = _tiktokShortLink(raw) ? 'tiktok' : (_instagramShareLink(raw) ? 'instagram' : (_xShortLink(raw) ? 'x' : ''));
+        if (!parsed && shortPlat && (shortPlat === 'instagram' || window.__nbRepost) && (!pickHint || pickHint === shortPlat)) {
           // Async: guard against the picker closing/reopening mid-request.
           var wrapAtStart = targetWrap;
           var goBtn = overlay.querySelector('.img-pick-url-go');
