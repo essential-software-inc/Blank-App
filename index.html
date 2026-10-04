@@ -7818,8 +7818,11 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       if (j.platform === 'instagram') return { platform: 'instagram', id: j.id, url: 'https://www.instagram.com/p/' + j.id + '/' };
       throw new Error('unexpected response');
     }).catch(function(err) {
-      if (_tiktokShortLink(url)) return _resolveTiktokShort(url);
-      throw err;
+      if (!_tiktokShortLink(url)) throw err;
+      // Keep the worker's reason: the fallback's own error (usually just "Failed to fetch") hid it.
+      return _resolveTiktokShort(url).catch(function(e2) {
+        throw new Error('worker: ' + (err.message || err) + '; oembed: ' + (e2.message || e2));
+      });
     });
   }
 
