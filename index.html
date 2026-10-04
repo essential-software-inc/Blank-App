@@ -7771,6 +7771,8 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     var i;
     if (host === 'instagram.com' || host === 'm.instagram.com' || host === 'instagr.am') {
       var ig = _socialPathParts(val);
+      // /share/<kind>/<code> is a redirect link: its code is NOT the post shortcode.
+      if (ig[0] === 'share') return null;
       // Scanning for the kind (not assuming ig[0]) also covers
       // instagram.com/<user>/p/<id> and the /embed/ form.
       for (i = 0; i < ig.length - 1; i++) {
@@ -7793,8 +7795,13 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       }
       if (host === 'tiktok.com' || host === 'm.tiktok.com') {
         for (i = 0; i < xp.length - 1; i++) {
-          if (xp[i] === 'video' && /^[0-9]+$/.test(xp[i + 1])) {
+          // /video/<id> and /photo/<id> (carousels) — same post id, same embed player.
+          if ((xp[i] === 'video' || xp[i] === 'photo') && /^[0-9]+$/.test(xp[i + 1])) {
             return { platform: 'tiktok', id: xp[i + 1], url: val };
+          }
+          // Old m.tiktok.com/v/<id>.html form.
+          if (xp[i] === 'v' && /^[0-9]+[.]html$/.test(xp[i + 1])) {
+            return { platform: 'tiktok', id: xp[i + 1].slice(0, -5), url: val };
           }
         }
         return null;
@@ -7803,11 +7810,49 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     return null;
   }
 
+  // Resolves a TikTok short link / Instagram share link to { platform, id, url }
+  // via the worker; TikTok falls back to its oEmbed if the worker fails.
+  function _resolveSocialShort(url) {
+    return parent.nbResolveShortLink(url).then(function(j) {
+      if (j.platform === 'tiktok') return { platform: 'tiktok', id: j.id, url: 'https://www.tiktok.com/video/' + j.id };
+      if (j.platform === 'instagram') return { platform: 'instagram', id: j.id, url: 'https://www.instagram.com/p/' + j.id + '/' };
+      throw new Error('unexpected response');
+    }).catch(function(err) {
+      if (_tiktokShortLink(url)) return _resolveTiktokShort(url);
+      throw err;
+    });
+  }
+
+  // instagram.com/share/... is a redirect-only link (same reason as above).
+  function _instagramShareLink(raw) {
+    var v = _pastedUrl(raw);
+    var h = _pastedHost(v);
+    return (h === 'instagram.com' || h === 'm.instagram.com') && _socialPathParts(v)[0] === 'share';
+  }
+
   // vm.tiktok.com / vt.tiktok.com / tiktok.com/t/... are redirect-only short links.
   function _tiktokShortLink(raw) {
     var v = _pastedUrl(raw);
     var h = _pastedHost(v);
     return h === 'vm.tiktok.com' || h === 'vt.tiktok.com' || (h === 'tiktok.com' && _socialPathParts(v)[0] === 't');
+  }
+
+  // Short links can't be followed with fetch, but TikTok's oEmbed accepts them
+  // and returns the video id (embed_product_id, or data-video-id in the html).
+  // No backslashes (see note above).
+  function _resolveTiktokShort(url) {
+    return fetch('https://www.tiktok.com/oembed?url=' + encodeURIComponent(url))
+      .then(function(r) { if (!r.ok) throw new Error('tiktok.com HTTP ' + r.status); return r.json(); })
+      .then(function(j) {
+        var id = j && j.embed_product_id ? String(j.embed_product_id) : '';
+        if (!/^[0-9]+$/.test(id)) {
+          var m = /data-video-id="([0-9]+)"/.exec((j && j.html) || '');
+          id = m ? m[1] : '';
+        }
+        if (!id) throw new Error('tiktok.com returned no video');
+        var base = j && typeof j.author_url === 'string' && j.author_url.indexOf('https://www.tiktok.com/') === 0 ? j.author_url.replace(/[/]+$/, '') : 'https://www.tiktok.com';
+        return { platform: 'tiktok', id: id, url: base + '/video/' + id };
+      });
   }
 
   // Parses a pasted Spotify link (or "Copy Spotify URI" text) into
@@ -7996,8 +8041,18 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
         }
         var parsed = parseSocialUrl(raw);
         if (parsed && (!pickHint || parsed.platform === pickHint)) { commit(parsed, targetWrap); return; }
-        if (!parsed && pickHint === 'tiktok' && _tiktokShortLink(raw)) {
-          try { parent.showToast('Short TikTok links cannot be embedded. Open the video and copy its full link.'); } catch (e) {}
+        if (!parsed && ((pickHint === 'tiktok' && _tiktokShortLink(raw)) || ((!pickHint || pickHint === 'instagram') && _instagramShareLink(raw)))) {
+          // Async: guard against the picker closing/reopening mid-request.
+          var wrapAtStart = targetWrap;
+          var goBtn = overlay.querySelector('.img-pick-url-go');
+          goBtn.disabled = true;
+          _resolveSocialShort(_pastedUrl(raw)).then(function(p) {
+            goBtn.disabled = false;
+            if (wrapAtStart && targetWrap === wrapAtStart) commit(p, wrapAtStart);
+          }, function(err) {
+            goBtn.disabled = false;
+            _rejectedLink(raw, err);
+          });
           return;
         }
         _rejectedLink(raw);
@@ -14589,6 +14644,17 @@ function _pubDefaultSlug(note) {
   return (note.title || 'note').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'note';
 }
 function _pubUrlFor(slug) { return NB_PUBLISH_API.replace(/\/$/, '') + '/@' + slug; }
+// Called from the editor iframes (parent.nbResolveShortLink): the worker follows
+// TikTok / Instagram share-link redirects, which browsers can't read (CORS).
+function nbResolveShortLink(url) {
+  return fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/resolve-link?u=' + encodeURIComponent(url))
+    .then(function(r) {
+      return r.json().catch(function() { return {}; }).then(function(j) {
+        if (!r.ok || !j.id) throw new Error((j && j.error) || ('HTTP ' + r.status));
+        return j;
+      });
+    });
+}
 // Swaps a button (or link) between its normal label and a spinner +
 // in-progress label while any of this file's async actions — sign-in,
 // sign-out, delete account, purchase, restore, publish/update/unpublish —
