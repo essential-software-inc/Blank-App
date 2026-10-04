@@ -4070,6 +4070,7 @@ body.night #markup-iframe { background: #0e0e10; }
   pointer-events: none;
 }
 #markup-iframe-loadmask.out { opacity: 0; }
+#markup-iframe-loadmask.nb-instant { transition: none; }
 body.night #markup-iframe-loadmask {
   background: #0e0e10;
 }
@@ -20002,6 +20003,19 @@ function _nbCurrentBase() {
 // approaches — _nbLoadbarFinish() is what actually claims 100%, right
 // as the mask is about to fade out, so the bar always visibly fills up
 // rather than sitting frozen partway.
+// Puts the loadmask back over the canvas *immediately* (no .18s fade-in, which let the
+// previous canvas show through as a flicker) and cancels the fade-out that the last
+// render scheduled, so it can't fire in the middle of this load and uncover the stale canvas.
+let _nbMaskSettleTimer = null;
+function _nbMaskCover() {
+  const mask = document.getElementById('markup-iframe-loadmask');
+  if (_nbMaskSettleTimer) { clearTimeout(_nbMaskSettleTimer); _nbMaskSettleTimer = null; }
+  if (!mask) return;
+  mask.classList.add('nb-instant');
+  mask.classList.remove('out');
+  void mask.offsetWidth;
+  requestAnimationFrame(function() { mask.classList.remove('nb-instant'); });
+}
 function _nbLoadbarStart() {
   const fill = document.getElementById('markup-iframe-loadmask-bar-fill');
   if (!fill) return;
@@ -20059,12 +20073,13 @@ function nbRenderCanvas(forcePreview) {
   // fixed settle window past reveal — same idea as the app's own boot
   // splash covering its startup work rather than racing to make every
   // part of that work land before first paint.
-  if (mask) mask.classList.remove('out');
+  _nbMaskCover();
   _nbLoadbarStart();
   const unmaskAfterSettle = function() {
     if (!mask) return;
     _nbLoadbarFinish();
-    setTimeout(function() { mask.classList.add('out'); }, 1000);
+    if (_nbMaskSettleTimer) clearTimeout(_nbMaskSettleTimer);
+    _nbMaskSettleTimer = setTimeout(function() { _nbMaskSettleTimer = null; mask.classList.add('out'); }, 1000);
   };
   // Hide first, exactly like the original's renderMarkupNote(). While the
   // wrap is display:none the iframe's document still fully parses, runs
@@ -20162,6 +20177,7 @@ function nbCreateNew() {
 // whichever mode is active, handing a brand-new draft the next ad of that kind (Write ads
 // for Write, Share ads for Share) in place of the blank starting canvas.
 function _nbShowDraftWithAd(kind) {
+  _nbMaskCover(); // cover the old canvas before the Editor screen becomes visible
   nbGoScreen('create');
   // Genuinely fresh draft — no in-session ui-state yet, and nothing
   // already fetched for this draft — is the only case that checks for
@@ -20183,8 +20199,7 @@ function _nbShowDraftWithAd(kind) {
     // Keep the loadmask visibly progressing during the wait rather than
     // showing nothing — nbRenderCanvas() below picks the same bar right
     // back up once it starts its own render.
-    const mask = document.getElementById('markup-iframe-loadmask');
-    if (mask) mask.classList.remove('out');
+    _nbMaskCover();
     _nbLoadbarStart();
     _nbFetchNextAd(kind).then(ad => {
       if (_nbAdFetchInFlightDraftId === fetchDraftId) _nbAdFetchInFlightDraftId = null;
