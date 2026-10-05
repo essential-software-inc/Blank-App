@@ -1,1 +1,36 @@
+package __PACKAGE__;
 
+import com.getcapacitor.JSObject;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+import com.google.android.play.core.integrity.IntegrityManager;
+import com.google.android.play.core.integrity.IntegrityManagerFactory;
+import com.google.android.play.core.integrity.IntegrityTokenRequest;
+
+// Thin bridge to the Play Integrity API. The web layer passes a nonce, gets back a Google-signed
+// integrity token plus this app's package name, and sends both to the worker's POST /ads/attest.
+// Copied into the generated android/ project by scripts/add-play-integrity.py (the __PACKAGE__
+// placeholder is replaced with MainActivity's package).
+@CapacitorPlugin(name = "PlayIntegrity")
+public class PlayIntegrityPlugin extends Plugin {
+    @PluginMethod
+    public void requestToken(final PluginCall call) {
+        String nonce = call.getString("nonce");
+        if (nonce == null || nonce.isEmpty()) {
+            call.reject("nonce required");
+            return;
+        }
+        IntegrityManager manager = IntegrityManagerFactory.create(getContext());
+        manager
+            .requestIntegrityToken(IntegrityTokenRequest.builder().setNonce(nonce).build())
+            .addOnSuccessListener(response -> {
+                JSObject out = new JSObject();
+                out.put("token", response.token());
+                out.put("appId", getContext().getPackageName());
+                call.resolve(out);
+            })
+            .addOnFailureListener(e -> call.reject(String.valueOf(e.getMessage())));
+    }
+}
