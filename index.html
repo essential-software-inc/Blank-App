@@ -402,7 +402,7 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
 
 #terms-dialog .rdlg-body a {
   color: #3366cc;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer
 }
 
@@ -1949,7 +1949,7 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 
 #terms-dialog .rdlg-body a {
   color: #3366cc;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer
 }
 
@@ -2698,7 +2698,7 @@ html[data-splash="2"] { --splash-img: var(--splash-img-2) }
 #account-screen-consideration a {
   color: #fff;
   font-weight: 600;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -3374,6 +3374,77 @@ body.night .pub-pkg-btn.selected { border-color: #9a9a9e; background: #2a2a2c }
 body.pink .pub-pkg-btn { border-color: #f5c5d8; background: #fff0f6; color: #1a0a12 }
 body.pink .pub-pkg-btn .pub-pkg-price { color: #a5788e }
 body.pink .pub-pkg-btn.selected { border-color: #c8365e; background: #ffe0ec }
+
+.pub-pkg-btn:disabled { opacity: .6; cursor: default }
+.pub-pkg-btn .pub-pkg-lock { display: block; margin-top: 3px; font-size: 10.5px; font-weight: 500; line-height: 1.25; color: #6b6f7a }
+.pub-pkg-btn .pub-pkg-lock svg { vertical-align: -1px; margin-right: 3px }
+.ad-prog { border: 1.5px solid #e2e5ee; background: #f8f9fc; border-radius: 12px; padding: .75rem .8rem; color: #202122; font-size: 12.5px }
+.ad-prog-t { font-weight: 700; margin-bottom: .2rem }
+.ad-prog-s { color: #5f6370; font-size: 11.5px; line-height: 1.4; margin-top: .3rem }
+.ad-prog-row { margin-top: .5rem }
+.ad-prog-l { display: flex; justify-content: space-between; gap: .5rem; font-size: 11.5px; font-weight: 600 }
+.ad-prog-bar { height: 5px; border-radius: 3px; background: #e2e5ee; margin-top: 4px; overflow: hidden }
+.ad-prog-bar > i { display: block; height: 100%; border-radius: 3px; background: #3366cc }
+.ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
+.ad-prog .ebtn-sec { margin-top: .6rem }
+.ad-prog-link { display: inline-block; margin-top: .5rem; font-size: 11.5px; font-weight: 600; color: #3366cc; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent }
+body.night .ad-prog-link { color: #7da7f0 }
+body.pink .ad-prog-link { color: #bd2856 }
+.inv-code-row { display: flex; align-items: center; gap: .5rem; margin-top: .35rem }
+.inv-code { flex: 1; font-weight: 700; letter-spacing: .12em; font-size: .95rem; user-select: all }
+.inv-code-row .com-field { flex: 1; min-width: 0; text-transform: uppercase }
+.inv-follow { display: flex; align-items: center; gap: .4rem; margin-top: .4rem; font-size: .7rem }
+body.night .ad-prog { border-color: #333537; background: #1c1c1e; color: #e8e8e8 }
+body.night .ad-prog-s, body.night .pub-pkg-btn .pub-pkg-lock { color: #9a9a9e }
+body.night .ad-prog-bar { background: #333537 }
+body.night .ad-prog-bar > i { background: #aaaaaa }
+body.night .ad-prog-row.met .ad-prog-bar > i { background: #4aa36a }
+body.pink .ad-prog { border-color: #f5c5d8; background: #fff0f6; color: #1a0a12 }
+body.pink .ad-prog-s, body.pink .pub-pkg-btn .pub-pkg-lock { color: #875068 }
+body.pink .ad-prog-bar { background: #f5c5d8 }
+body.pink .ad-prog-bar > i { background: #c8365e }
+body.pink .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
+#st-ads-card { padding: .8rem .9rem }
+#st-ads-card .ad-prog { border: 0; background: none; padding: 0; color: var(--st-fg) }
+#st-ads-card .ad-prog-s { color: var(--st-sub) }
+#st-ads-card .ad-prog-bar { background: var(--st-line) }
+#st-ads-card .ad-prog-bar > i { background: var(--st-acc) }
+#st-ads-card .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
+#st-invite { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--st-line); color: var(--st-fg); font-size: .8rem }
+#st-invite .ad-prog-t { font-size: .85rem }
+#st-invite .ad-prog-s { color: var(--st-sub) }
+#st-invite .inv-code { color: var(--st-fg) }
+#st-invite-input { flex: 1; min-width: 0; box-sizing: border-box; padding: .5rem .6rem; border-radius: 10px; border: 1px solid var(--st-line); background: var(--st-bg); color: var(--st-fg); font: inherit; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; outline: none }
+#account-invite-wrap { margin-bottom: .8rem; text-align: center }
+#account-invite-toggle { display: inline-block; color: #fff; opacity: .85; font-size: .78rem; font-weight: 600; text-decoration: underline; cursor: pointer }
+#account-invite-fields { display: none; margin-top: .55rem }
+#account-invite-input { width: 100%; box-sizing: border-box; padding: .6rem .7rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12); color: #fff; font: inherit; font-size: .9rem; font-weight: 700; letter-spacing: .12em; text-align: center; text-transform: uppercase; outline: none }
+#account-invite-input::placeholder { color: rgba(255,255,255,.6); letter-spacing: normal; font-weight: 500; text-transform: none }
+#account-invite-follow-row { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-top: .45rem; color: #fff; font-size: .72rem; opacity: .9 }
+#account-invite-msg { margin-top: .35rem; color: #fff; opacity: .85; font-size: .7rem; line-height: 1.35 }
+
+/* Custom checkbox (.nb-chk): the invite "also subscribe" option on the sign-in screen and in Settings.
+   Drawn instead of the native control: soft glass box with an inset edge when empty, a filled box with a check that
+   wipes in when on. Colors come from --chk-* so every theme sets them in one place. */
+.nb-chk { -webkit-appearance: none; appearance: none; position: relative; flex: none; box-sizing: border-box; width: 16px; height: 16px; margin: 0; border-radius: 5px; cursor: pointer;
+  border: 1.5px solid var(--chk-line); background: var(--chk-bg); box-shadow: inset 0 1px 2px var(--chk-shade);
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .12s ease; -webkit-tap-highlight-color: transparent }
+.nb-chk::after { content: ""; position: absolute; inset: 0; background: var(--chk-ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.4 10.4l3.2 3.1 5.9-6.5' fill='none' stroke='%23000' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.4 10.4l3.2 3.1 5.9-6.5' fill='none' stroke='%23000' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  clip-path: inset(0 100% 0 0); transition: clip-path .22s cubic-bezier(.65, 0, .35, 1) .03s }
+.nb-chk:checked { background: var(--chk-on); border-color: var(--chk-on); box-shadow: none }
+.nb-chk:checked::after { clip-path: inset(0 0 0 0) }
+.nb-chk:active { transform: scale(.88) }
+.nb-chk:focus-visible { outline: 2px solid var(--chk-on); outline-offset: 2px }
+/* Sign-in: the input above is a light translucent field, so the box is the opposite: a dark solid well with a crisp white edge, filling to solid white when on. */
+#account-invite-follow-row { --chk-line: rgba(255,255,255,.9); --chk-bg: rgba(8,16,48,.42); --chk-shade: rgba(0,0,0,.35); --chk-on: #fff; --chk-ink: #3366cc; gap: .5rem; line-height: 1.2 }
+body.night #account-invite-follow-row { --chk-line: rgba(255,255,255,.55); --chk-bg: #1b1b1d; --chk-on: #e8e8e8; --chk-ink: #111 }
+body.pink #account-invite-follow-row { --chk-bg: rgba(120,10,45,.35); --chk-ink: #c8365e }
+.inv-follow { --chk-line: var(--st-sub); --chk-bg: var(--st-card); --chk-shade: rgba(0,0,0,.1); --chk-on: var(--st-acc); --chk-ink: var(--st-on); gap: .5rem }
+#notes-invite-link { display: none; margin-top: .7rem; font-size: .78rem; font-weight: 600; text-decoration: none; cursor: pointer; color: #3366cc }
+body.night #notes-invite-link { color: #f0f0f0 }
+body.pink #notes-invite-link { color: #c8365e }
 
 body.pink #edit-dhdr {
   background: #c8365e;
@@ -4290,6 +4361,14 @@ document.body.dataset.lockScrollY = window.scrollY;
         Signed in as <b id="account-email"></b>. Notes are backed up to your account.
       </div>
       <div id="account-signedout-btns">
+        <div id="account-invite-wrap">
+          <a id="account-invite-toggle" onclick="nbToggleSigninInvite()">Have an invite code?</a>
+          <div id="account-invite-fields">
+            <input id="account-invite-input" type="text" maxlength="12" autocapitalize="characters" autocomplete="off" placeholder="Invite code" oninput="nbSigninInviteInput(this.value)">
+            <label id="account-invite-follow-row"><input type="checkbox" class="nb-chk" id="account-invite-follow" checked onchange="nbSigninInviteInput(document.getElementById('account-invite-input').value)"> Also subscribe to my friend</label>
+            <div id="account-invite-msg">We&rsquo;ll add it when you sign in.</div>
+          </div>
+        </div>
         <button class="rdlg-ok rdlg-ok--blue" id="account-signin-btn" onclick="nbSignInWithGoogle()" style="width:100%">Sign in with Google</button>
       </div>
       <div id="account-signedin-btns" style="display:none">
@@ -4403,6 +4482,7 @@ document.body.dataset.lockScrollY = window.scrollY;
         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <div class="nb-empty-title" id="notes-empty-title">Welcome to Bluebook</div>
         <div class="nb-empty-sub" id="notes-empty-sub">Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one. It'll show up here, sorted by category.</div>
+        <a id="notes-invite-link" onclick="openAccountScreen(true)">Joined through a friend? Add their invite code</a>
       </div>
       <div class="nb-carousel" id="nb-onboard-carousel">
           <div class="nb-carousel-viewport">
@@ -4821,6 +4901,7 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
           <div id="pub-ad-elig" class="bkp-panel"></div>
           <div id="pub-ad-state-new" class="bkp-panel" style="display:none">
             <p class="bkp-help">Buy a view package, then publish this note as an ad. It'll show as a starting template on other people's Write screen (or Share screen, for a Share note) until the views run out.</p>
+            <div id="pub-ad-standing"></div>
             <div id="pub-ad-pkgs" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0"></div>
             <div id="pub-ad-balance" class="bkp-help"></div>
             <div id="pub-ad-status" class="pub-status"></div>
@@ -11729,6 +11810,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   window._nbStRender = function () {
     const root = document.getElementById('st-root'); if (!root) return;
     root.innerHTML = GROUPS.map((g, gi) => '<div class="st-grp"><div class="st-h">' + g[0] + '</div><div class="st-card">' + g[1].map((r, ri) => row(r, gi, ri)).join('') + '</div></div>').join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+    try { _nbSettingsAdsMount(); } catch (e) { _nbLog('settings ads mount', e); }
   };
   const root = document.getElementById('st-root');
   function find(el) { const g = el.dataset.g, r = el.dataset.r; return g == null ? null : GROUPS[g][1][r]; }
@@ -12557,6 +12639,7 @@ async function _nbCompleteGoogleSignIn(idToken) {
   if (!nbRefreshCurrentView('signin', true)) nbRenderNotesScreen();
   nbRenderStoriesStrip(); // ring state (seen/unseen) is per-account
   _nbFetchSubscriberCount(); // so it's already cached by the time the sign-out sheet is first opened
+  _nbRedeemPendingInvite(); // a code typed on the sign-in screen
   _nbReconcileAccountActions(); // this account's follows and likes, wherever they were made
   _nbFetchProfileName(); // pick up whatever name this account already has set, if any
   // Pull first so anything already backed up from another device merges
@@ -13499,6 +13582,8 @@ function nbRenderAccountDialog() {
   document.getElementById('account-signedout-btns').style.display = signedIn ? 'none' : '';
   document.getElementById('account-signedin-btns').style.display = signedIn ? '' : 'none';
   if (signedIn && acct) document.getElementById('account-email').textContent = acct.email || '';
+  const il = document.getElementById('notes-invite-link');
+  if (il) il.style.display = signedIn ? 'none' : 'block';
 }
 // Header account icon: signed-out taps go straight to the full-screen
 // sign-in view; signed-in taps confirm first (openLogoutConfirm below),
@@ -13530,11 +13615,12 @@ function _nbStartAcctSplash3D() {
 function _nbStopAcctSplash3D() {
   if (_acctSplash3DCtl) { _acctSplash3DCtl.stop(); _acctSplash3DCtl = null; }
 }
-function openAccountScreen() {
+function openAccountScreen(focusInvite) {
   nbRenderAccountDialog();
   document.getElementById('account-screen').classList.add('open');
   lockScroll();
   _nbStartAcctSplash3D();
+  if (focusInvite === true && !nbIsSignedIn() && document.getElementById('account-invite-fields').style.display !== 'block') nbToggleSigninInvite();
 }
 // Ignores taps that land while Google sign-in is still in flight —
 // nbSignInWithGoogle() disables account-signin-btn for the duration (see
@@ -17784,6 +17870,251 @@ function nbAdCopyAttribution() {
     .catch(() => {});
 }
 
+// ---- Earned ad packages ----
+// The worker (AD_TIERS) decides what is unlocked and sends it in GET /ads/mine as `standing`; the app only shows it.
+// Packages are locked here before any purchase starts, and again on the server when the ad is published.
+let _pubAdStanding = null;
+let _nbInviteCode = '';
+function _pubAdPkgLock(def) {
+  const st = _pubAdStanding;
+  if (!st) return 'Checking your access\u2026'; // fail closed: never let someone pay for a package we can't confirm is open
+  if (def.views <= st.maxViews) return null;
+  const t = st.tiers.find(x => x.views >= def.views) || st.tiers[st.tiers.length - 1];
+  if (st.held && t.met) return 'Paused until ' + new Date((st.held.returns && st.held.returns[t.tier]) || st.held.fullUntil || st.held.until).toLocaleDateString();
+  const r = t.reqs.find(x => !x.met);
+  return r ? 'Unlocks at ' + r.need.toLocaleString() + ' ' + r.label : 'Locked';
+}
+function _pubAdSlotMsg(st) {
+  if (!st || !st.tier) return '';
+  if (st.activeAds >= st.maxActive) return 'You\u2019re running ' + st.activeAds + ' of the ' + st.maxActive + (st.maxActive === 1 ? ' ad' : ' ads') + ' your level allows. Let one finish, or unlock the next package for more.';
+  const need = st.minNotesPerAd * (st.activeAds + 1);
+  if (st.notes < need) return 'Every running ad needs ' + st.minNotesPerAd + ' published notes behind it. Publish ' + (need - st.notes) + ' more to run this one.';
+  return '';
+}
+function _pubRenderAdStanding(targetId, opts) {
+  const el = document.getElementById(targetId || 'pub-ad-standing');
+  if (!el) return;
+  el.innerHTML = '';
+  const st = _pubAdStanding;
+  if (!st) return;
+  const card = document.createElement('div');
+  card.className = 'ad-prog';
+  const add = (cls, text) => { const d = document.createElement('div'); d.className = cls; d.textContent = text; card.appendChild(d); return d; };
+  const next = st.nextTier ? st.tiers[st.nextTier - 1] : null;
+  add('ad-prog-t', st.tier ? 'Ad level ' + st.tier + ' of ' + st.tiers.length + ': up to ' + st.maxViews.toLocaleString() + ' views' : 'Your first ad package is almost within reach');
+  const inAccount = !!(opts && opts.account);
+  if (!next) {
+    add('ad-prog-s', 'Every package is unlocked. Thank you for building something worth reading.');
+  } else if (inAccount) {
+    add('ad-prog-s', 'Next: ' + next.views.toLocaleString() + ' views. Publishing notes, earning likes and subscribers, liking and following others, sharing to stories and inviting friends all count. We\u2019ll send you an alert the moment it unlocks.');
+    next.reqs.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'ad-prog-row' + (r.met ? ' met' : '');
+      const l = document.createElement('div');
+      l.className = 'ad-prog-l';
+      const a = document.createElement('span');
+      a.textContent = r.label.charAt(0).toUpperCase() + r.label.slice(1) + (r.hint ? ' (' + r.hint + ')' : '');
+      const b = document.createElement('span');
+      b.textContent = r.met ? 'Done' : r.have.toLocaleString() + ' / ' + r.need.toLocaleString();
+      l.appendChild(a); l.appendChild(b);
+      const bar = document.createElement('div');
+      bar.className = 'ad-prog-bar';
+      const fill = document.createElement('i');
+      fill.style.width = Math.min(100, Math.round((r.have / r.need) * 100)) + '%';
+      bar.appendChild(fill);
+      row.appendChild(l); row.appendChild(bar);
+      card.appendChild(row);
+    });
+  }
+  if (st.held) {
+    const d1 = new Date(st.held.until).toLocaleDateString(), d2 = new Date(st.held.fullUntil || st.held.until).toLocaleDateString();
+    add('ad-prog-s', d1 === d2
+      ? 'A recent rule strike is holding the bigger packages back until ' + d1 + '. It lifts on its own, and we\u2019ll send you an alert when your package is back.'
+      : 'Recent rule strikes are holding the bigger packages back. The next package steps back up on ' + d1 + ' and everything you\u2019ve earned is open again on ' + d2 + '. It lifts on its own, and we\u2019ll send you an alert as each package returns.');
+  }
+  const slot = inAccount ? '' : _pubAdSlotMsg(st);
+  if (slot) add('ad-prog-s', slot);
+  if (!inAccount && next) {
+    const a = document.createElement('a');
+    a.className = 'ad-prog-link';
+    a.textContent = 'See progress and invite friends in Settings';
+    a.onclick = () => { closePublishSheet(); nbGoScreen('settings'); };
+    card.appendChild(a);
+  }
+  if (inAccount && next) add('ad-prog-s', 'Friends who join with your invite code count too (see Invite friends below).');
+  el.appendChild(card);
+}
+// ---- Invite code at sign-in ----
+// Typed on the signed-out screen and kept (localStorage) until the first successful sign-in redeems it, so a failed
+// sign-in attempt or an app restart in between doesn't lose it.
+const NB_PENDING_INVITE_KEY = 'nbPendingInvite';
+// Whether the person ticked "Also subscribe" while they could see it. Saved with the code, so a code redeemed later (after a restart,
+// with the sign-in panel closed) never subscribes anyone to anyone unless they actually chose that.
+const NB_PENDING_INVITE_FOLLOW_KEY = 'nbPendingInviteFollow';
+function nbToggleSigninInvite() {
+  const f = document.getElementById('account-invite-fields');
+  const open = f.style.display === 'block';
+  f.style.display = open ? 'none' : 'block';
+  document.getElementById('account-invite-toggle').style.display = open ? '' : 'none';
+  if (!open) { const i = document.getElementById('account-invite-input'); try { i.value = localStorage.getItem(NB_PENDING_INVITE_KEY) || i.value; const fc = document.getElementById('account-invite-follow'); const fv = localStorage.getItem(NB_PENDING_INVITE_FOLLOW_KEY); if (fc && fv !== null) fc.checked = fv === '1'; } catch (e) {} setTimeout(() => i.focus(), 50); }
+}
+function nbSigninInviteInput(v) {
+  const code = String(v || '').trim();
+  try {
+    if (code) {
+      localStorage.setItem(NB_PENDING_INVITE_KEY, code);
+      const fc = document.getElementById('account-invite-follow');
+      localStorage.setItem(NB_PENDING_INVITE_FOLLOW_KEY, fc && fc.checked ? '1' : '0');
+    } else { localStorage.removeItem(NB_PENDING_INVITE_KEY); localStorage.removeItem(NB_PENDING_INVITE_FOLLOW_KEY); }
+  } catch (e) {}
+}
+function _nbClearPendingInvite() {
+  try { localStorage.removeItem(NB_PENDING_INVITE_KEY); localStorage.removeItem(NB_PENDING_INVITE_FOLLOW_KEY); } catch (e) {}
+  const inp = document.getElementById('account-invite-input'); if (inp) inp.value = '';
+}
+async function _nbRedeemPendingInvite() {
+  let code = '', follow = false;
+  try { code = localStorage.getItem(NB_PENDING_INVITE_KEY) || ''; follow = localStorage.getItem(NB_PENDING_INVITE_FOLLOW_KEY) === '1'; } catch (e) {}
+  if (!code) return;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/referral/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      body: JSON.stringify({ code: code, follow: follow })
+    });
+    if (res.ok) {
+      _nbClearPendingInvite();
+      const d = await res.json();
+      showToast(d.followed ? 'Invite added. You now subscribe to your friend.' : 'Invite added. Thank you!');
+      return;
+    }
+    // Only an answer about the code itself ends the attempt (400 not a code, 404 no such code, 409 already used / too late / refused).
+    // Anything else (401 session not ready, 403, 429 slow down, 5xx) keeps the code for the next sign-in.
+    if (res.status === 400 || res.status === 404 || res.status === 409) {
+      _nbClearPendingInvite();
+      let m = ''; try { m = (await res.json()).error; } catch (e) {}
+      showToast(m || 'Couldn\u2019t add that invite code');
+    }
+  } catch (e) { _nbLog('redeem pending invite', e); } // network failure: keep the code for next time
+}
+// ---- Settings screen: ad level + invites ----
+let _nbStAds = null, _nbStAdsAt = 0, _nbStAdsSeq = 0, _nbStAdsSub = null;
+function _nbSettingsAdsMount() {
+  const root = document.getElementById('st-root');
+  if (!root || !nbIsSignedIn()) return;
+  const grps = root.querySelectorAll('.st-grp');
+  const before = grps[grps.length - 1]; // the Account group
+  const acct = nbAccount();
+  const who = acct && acct.sub;
+  if (who !== _nbStAdsSub) { _nbStAds = null; _nbStAdsAt = 0; _nbStAdsSub = who; } // another account never sees the last one's numbers
+  const g = document.createElement('div');
+  g.className = 'st-grp';
+  g.id = 'st-ads-grp';
+  g.innerHTML = '<div class="st-h">Ads &amp; invites</div><div class="st-card" id="st-ads-card"><div id="st-ads-standing"></div><div id="st-invite"></div></div>';
+  root.insertBefore(g, before);
+  _nbSettingsAdsPaint();
+  if (Date.now() - _nbStAdsAt > 20000) _nbSettingsAdsFetch();
+}
+async function _nbSettingsAdsFetch() {
+  if (!nbIsSignedIn() || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+  const seq = ++_nbStAdsSeq;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/mine', { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } });
+    if (!res.ok) throw new Error('ads/mine: ' + res.status);
+    const d = await res.json();
+    if (seq !== _nbStAdsSeq || !nbIsSignedIn()) return;
+    _nbStAds = d.standing || null;
+    _nbStAdsAt = Date.now();
+    _nbSettingsAdsPaint();
+  } catch (e) { _nbLog('settings ads', e); }
+}
+function _nbSettingsAdsPaint() {
+  const stEl = document.getElementById('st-ads-standing');
+  const invEl = document.getElementById('st-invite');
+  if (!stEl || !invEl) return; // Settings isn't showing
+  if (!_nbStAds) { stEl.innerHTML = '<div class="ad-prog-s">Loading your ad level\u2026</div>'; invEl.style.display = 'none'; return; }
+  _pubAdStanding = _nbStAds;
+  _pubRenderAdStanding('st-ads-standing', { account: true });
+  const rf = _nbStAds.referral;
+  if (!rf || !rf.code) { invEl.style.display = 'none'; return; }
+  _nbInviteCode = rf.code;
+  invEl.style.display = '';
+  invEl.innerHTML = '';
+  const add = (cls, text) => { const d = document.createElement('div'); d.className = cls; d.textContent = text; invEl.appendChild(d); return d; };
+  add('ad-prog-t', 'Invite friends');
+  add('ad-prog-s', rf.invited
+    ? rf.qualified + ' of ' + rf.invited + ' invited ' + (rf.invited === 1 ? 'friend counts' : 'friends count') + ' toward your ad access. A friend counts once they publish a note and have been active on two days.'
+    : 'Friends you invite help you unlock bigger ad packages once they publish a note and have been active on two days.');
+  const row = document.createElement('div');
+  row.className = 'inv-code-row';
+  const code = document.createElement('span');
+  code.className = 'inv-code';
+  code.textContent = rf.code;
+  const share = document.createElement('button');
+  share.type = 'button';
+  share.className = 'ebtn-sec';
+  share.textContent = 'Share';
+  share.onclick = nbInviteShare;
+  row.appendChild(code); row.appendChild(share);
+  invEl.appendChild(row);
+  if (rf.canRedeem) {
+    add('ad-prog-s', 'Joined because of a friend? Add their invite code.').style.marginTop = '.7rem';
+    const r2 = document.createElement('div');
+    r2.className = 'inv-code-row';
+    const inp = document.createElement('input');
+    inp.id = 'st-invite-input'; inp.type = 'text'; inp.maxLength = 12; inp.placeholder = 'Invite code';
+    inp.autocapitalize = 'characters'; inp.autocomplete = 'off';
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button'; addBtn.className = 'ebtn-sec'; addBtn.textContent = 'Add';
+    addBtn.onclick = nbInviteRedeem;
+    r2.appendChild(inp); r2.appendChild(addBtn);
+    invEl.appendChild(r2);
+    const lab = document.createElement('label');
+    lab.className = 'inv-follow';
+    lab.innerHTML = '<input type="checkbox" class="nb-chk" id="st-invite-follow" checked> Also subscribe to them';
+    invEl.appendChild(lab);
+  }
+}
+async function nbInviteShare() {
+  const code = _nbInviteCode;
+  if (!code) { showToast('Your invite code isn\u2019t ready yet'); return; }
+  const text = 'Join me on Bluebook! Add my invite code ' + code + ' under Your account and subscribe to read my notes.';
+  const cap = window.Capacitor && window.Capacitor.Plugins;
+  try {
+    if (cap && cap.Share) { await cap.Share.share({ text: text, dialogTitle: 'Invite a friend' }); return; }
+    if (navigator.share) { await navigator.share({ text: text }); return; }
+  } catch (e) {
+    if (e && (e.name === 'AbortError' || /cancel/i.test(String(e.message || '')))) return;
+    _nbLog('invite share', e);
+  }
+  try { await navigator.clipboard.writeText(text); showToast('Invite copied'); }
+  catch (e) { showToast('Your invite code is ' + code); }
+}
+async function nbInviteRedeem() {
+  const input = document.getElementById('st-invite-input');
+  if (!input) return;
+  const code = (input.value || '').trim();
+  if (!code) return;
+  if (_pubOfflineGuard()) return;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/referral/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      body: JSON.stringify({ code: code, follow: document.getElementById('st-invite-follow').checked })
+    });
+    if (!res.ok) {
+      let m = '';
+      try { m = (await res.json()).error; } catch (e) {}
+      showToast(m || 'Couldn\u2019t add that code');
+      return;
+    }
+    const d = await res.json();
+    input.value = '';
+    _nbStAdsAt = 0; _nbSettingsAdsFetch(); // the redeem box goes away and counts refresh
+    showToast(d.followed ? 'Invite added. You now subscribe to your friend.' : 'Invite added. Thank you!');
+  } catch (e) { _nbLog('invite redeem', e); showToast('Couldn\u2019t add that code' + _nbFailureReason(e)); }
+}
+
 // RevenueCat offering/packages for view credits.
 // Views-per-package is display-only here; the server (AD_VIEW_PACKAGES in
 // the worker) is the actual source of truth for what a given product ID
@@ -17906,6 +18237,8 @@ async function _pubRefreshAdTab() {
   // late response can't re-show ad-tab buttons over another tab.
   if (_pubAdRefreshCallToken !== _pubAdRefreshToken) return;
   _pubAdRecord = (data.ads || []).find(a => a.slug === note.publishedSlug) || null;
+  _pubAdStanding = data.standing || null;
+  if (_pubAdStanding && _pubAdStanding.referral) _nbInviteCode = _pubAdStanding.referral.code || _nbInviteCode;
   const newState = document.getElementById('pub-ad-state-new');
   const liveState = document.getElementById('pub-ad-state-live');
   const blockedState = document.getElementById('pub-ad-state-blocked');
@@ -17918,6 +18251,7 @@ async function _pubRefreshAdTab() {
     if (elig.ok) {
       document.getElementById('pub-ad-balance').textContent = 'View credit balance: ' + data.creditBalance;
       document.getElementById('pub-ad-status').textContent = '';
+      _pubRenderAdStanding();
       await _pubRenderAdPackages(elig.ok);
       if (_pubAdRefreshCallToken !== _pubAdRefreshToken) return;
     }
@@ -17990,7 +18324,16 @@ async function _pubRenderAdPackages(eligible) {
     const btn = document.createElement('button');
     btn.className = 'pub-pkg-btn';
     btn.innerHTML = def.views.toLocaleString() + ' views<br><span class="pub-pkg-price">' + (price || (Purchases ? '\u2026' : 'app only')) + '</span>';
-    btn.disabled = !eligible || !Purchases;
+    const lock = _pubAdPkgLock(def);
+    if (lock) {
+      const l = document.createElement('span');
+      l.className = 'pub-pkg-lock';
+      l.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+      l.appendChild(document.createTextNode(lock));
+      btn.appendChild(l);
+      btn.classList.add('locked');
+    }
+    btn.disabled = !eligible || !Purchases || !!lock || !!_pubAdSlotMsg(_pubAdStanding);
     btn.onclick = () => nbAdSelectPackage(def, pkg, btn);
     wrap.appendChild(btn);
   });
@@ -18019,6 +18362,9 @@ async function nbAdPublish() {
   const btn = document.getElementById('pub-ad-publish-btn');
   const statusEl = document.getElementById('pub-ad-status');
   const { def, pkg } = _pubAdSelectedViews;
+  // Never start a purchase the server would refuse afterwards: locked packages are checked here first.
+  const lockMsg = _pubAdPkgLock(def) || _pubAdSlotMsg(_pubAdStanding);
+  if (lockMsg) { showToast(lockMsg); return; }
   _pubSetBtnLoading(btn, true, 'Processing\u2026');
   try {
     if (!pkg) { showToast('That package isn\u2019t available right now. Try again later.'); return; }
@@ -18053,6 +18399,7 @@ async function nbAdPublish() {
       const msg = await res.text().catch(() => '');
       if (res.status === 422) showToast(AD_NOT_ELIGIBLE_TOAST);
       else if (res.status === 409) showToast('This page is already registered as an ad');
+      else if (res.status === 403) { let m = ''; try { m = JSON.parse(msg).error; } catch (e) {} showToast(m || 'That package isn\u2019t unlocked yet'); }
       else if (res.status === 402) showToast('Not enough view credits yet. Try again shortly.');
       else { _nbLog('ads/publish', msg); showToast('Publish as ad failed' + _nbFailureReason(new Error('ads/publish: ' + res.status))); }
       return;
@@ -18182,6 +18529,7 @@ let _nbAdFetchInFlightDraftId = null;
 // _nbExtractCanvasFragment does the same extraction either way.
 let _nbPendingAdFragment = null;
 let _nbAdViewCounted = false; // guards the one-time POST /ads/:slug/view per draft session
+let _nbPendingAdViewToken = null; // single-use token GET /ads/next issued with that ad; the view count only lands with it
 
 async function _nbFetchNextAd(kind) {
   // Short client-side timeout: a slow/unreachable network here should
@@ -18210,8 +18558,9 @@ function _nbMaybeCountAdView() {
   fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(_nbPendingAdSlug) + '/view', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ viewerId: _nbDeviceId() })
+    body: JSON.stringify({ viewerId: _nbDeviceId(), viewToken: _nbPendingAdViewToken })
   }).catch(e => _nbLog('ad view count', e));
+  _nbPendingAdViewToken = null;
 }
 
 function nbImportNotes(e) {
@@ -20239,6 +20588,7 @@ function _nbShowDraftWithAd(kind) {
         try {
           _nbPendingAdFragment = _nbExtractCanvasFragment(ad.html);
           _nbPendingAdSlug = ad.slug;
+          _nbPendingAdViewToken = ad.viewToken || null;
           _nbPendingAdDraftId = fetchDraftId;
         }
         catch (e) { _nbLog('ad fragment extract', e); _nbPendingAdFragment = null; _nbPendingAdSlug = null; _nbPendingAdDraftId = null; }
