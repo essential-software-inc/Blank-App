@@ -9,7 +9,9 @@
     "cap:add:android": "cap add android",
     "cap:open:ios": "cap open ios",
     "cap:open:android": "cap open android",
-    "cap:doctor": "cap doctor"
+    "cap:doctor": "cap doctor",
+    "capacitor:sync:before": "python3 scripts/patch-ad-attest-client.py --skip-missing www/index.html",
+    "capacitor:sync:after": "python3 scripts/add-play-integrity.py"
   },
   "dependencies": {
     "@capacitor/core": "latest",
