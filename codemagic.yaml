@@ -100,14 +100,22 @@ workflows:
           # build rather than committed as a one-off edit. Located by name
           # instead of a hardcoded path since Free and Pro ship under
           # different appIds/package folders.
-          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java | head -n 1)
           python3 - "$MAINACTIVITY_SRC" <<'PY'
-          import sys
-          path = sys.argv[1]
+          import re, sys
+          path = sys.argv[1] if len(sys.argv) > 1 else ""
+          if not path:
+              raise SystemExit("ERROR: no MainActivity.java found under android/app/src/main/java.")
           with open(path) as f:
               content = f.read()
-          old = "public class MainActivity extends BridgeActivity {}"
-          new = """public class MainActivity extends BridgeActivity {
+          if "setSupportZoom(false)" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
+          # Match the class declaration only (not its body), so this works
+          # whether the template ships an empty body, whitespace/newlines
+          # inside the braces, or extra methods/comments.
+          pattern = r"(public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{)"
+          method = """
               @Override
               public void onStart() {
                   super.onStart();
@@ -115,14 +123,16 @@ workflows:
                   getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
                   getBridge().getWebView().getSettings().setDisplayZoomControls(false);
               }
-          }"""
-          if old not in content:
+          """
+          if not re.search(pattern, content):
+              print("----- " + path + " -----")
+              print(content)
               raise SystemExit(
-                  "ERROR: MainActivity.java didn't match the expected empty "
-                  "class body - the installed @capacitor/android version may "
-                  "have changed the template. Update this patch step to match."
+                  "ERROR: MainActivity.java has no 'public class MainActivity "
+                  "extends BridgeActivity {' declaration - see file dump above. "
+                  "Update this patch step to match."
               )
-          content = content.replace(old, new, 1)
+          content = re.sub(pattern, lambda m: m.group(1) + method, content, count=1)
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
@@ -269,14 +279,22 @@ workflows:
           # build rather than committed as a one-off edit. Located by name
           # instead of a hardcoded path since Free and Pro ship under
           # different appIds/package folders.
-          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java | head -n 1)
           python3 - "$MAINACTIVITY_SRC" <<'PY'
-          import sys
-          path = sys.argv[1]
+          import re, sys
+          path = sys.argv[1] if len(sys.argv) > 1 else ""
+          if not path:
+              raise SystemExit("ERROR: no MainActivity.java found under android/app/src/main/java.")
           with open(path) as f:
               content = f.read()
-          old = "public class MainActivity extends BridgeActivity {}"
-          new = """public class MainActivity extends BridgeActivity {
+          if "setSupportZoom(false)" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
+          # Match the class declaration only (not its body), so this works
+          # whether the template ships an empty body, whitespace/newlines
+          # inside the braces, or extra methods/comments.
+          pattern = r"(public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{)"
+          method = """
               @Override
               public void onStart() {
                   super.onStart();
@@ -284,14 +302,16 @@ workflows:
                   getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
                   getBridge().getWebView().getSettings().setDisplayZoomControls(false);
               }
-          }"""
-          if old not in content:
+          """
+          if not re.search(pattern, content):
+              print("----- " + path + " -----")
+              print(content)
               raise SystemExit(
-                  "ERROR: MainActivity.java didn't match the expected empty "
-                  "class body - the installed @capacitor/android version may "
-                  "have changed the template. Update this patch step to match."
+                  "ERROR: MainActivity.java has no 'public class MainActivity "
+                  "extends BridgeActivity {' declaration - see file dump above. "
+                  "Update this patch step to match."
               )
-          content = content.replace(old, new, 1)
+          content = re.sub(pattern, lambda m: m.group(1) + method, content, count=1)
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
@@ -427,14 +447,22 @@ workflows:
           # build rather than committed as a one-off edit. Located by name
           # instead of a hardcoded path since Free and Pro ship under
           # different appIds/package folders.
-          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java | head -n 1)
           python3 - "$MAINACTIVITY_SRC" <<'PY'
-          import sys
-          path = sys.argv[1]
+          import re, sys
+          path = sys.argv[1] if len(sys.argv) > 1 else ""
+          if not path:
+              raise SystemExit("ERROR: no MainActivity.java found under android/app/src/main/java.")
           with open(path) as f:
               content = f.read()
-          old = "public class MainActivity extends BridgeActivity {}"
-          new = """public class MainActivity extends BridgeActivity {
+          if "setSupportZoom(false)" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
+          # Match the class declaration only (not its body), so this works
+          # whether the template ships an empty body, whitespace/newlines
+          # inside the braces, or extra methods/comments.
+          pattern = r"(public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{)"
+          method = """
               @Override
               public void onStart() {
                   super.onStart();
@@ -442,14 +470,16 @@ workflows:
                   getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
                   getBridge().getWebView().getSettings().setDisplayZoomControls(false);
               }
-          }"""
-          if old not in content:
+          """
+          if not re.search(pattern, content):
+              print("----- " + path + " -----")
+              print(content)
               raise SystemExit(
-                  "ERROR: MainActivity.java didn't match the expected empty "
-                  "class body - the installed @capacitor/android version may "
-                  "have changed the template. Update this patch step to match."
+                  "ERROR: MainActivity.java has no 'public class MainActivity "
+                  "extends BridgeActivity {' declaration - see file dump above. "
+                  "Update this patch step to match."
               )
-          content = content.replace(old, new, 1)
+          content = re.sub(pattern, lambda m: m.group(1) + method, content, count=1)
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
@@ -575,14 +605,22 @@ workflows:
           # build rather than committed as a one-off edit. Located by name
           # instead of a hardcoded path since Free and Pro ship under
           # different appIds/package folders.
-          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java | head -n 1)
           python3 - "$MAINACTIVITY_SRC" <<'PY'
-          import sys
-          path = sys.argv[1]
+          import re, sys
+          path = sys.argv[1] if len(sys.argv) > 1 else ""
+          if not path:
+              raise SystemExit("ERROR: no MainActivity.java found under android/app/src/main/java.")
           with open(path) as f:
               content = f.read()
-          old = "public class MainActivity extends BridgeActivity {}"
-          new = """public class MainActivity extends BridgeActivity {
+          if "setSupportZoom(false)" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
+          # Match the class declaration only (not its body), so this works
+          # whether the template ships an empty body, whitespace/newlines
+          # inside the braces, or extra methods/comments.
+          pattern = r"(public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{)"
+          method = """
               @Override
               public void onStart() {
                   super.onStart();
@@ -590,14 +628,16 @@ workflows:
                   getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
                   getBridge().getWebView().getSettings().setDisplayZoomControls(false);
               }
-          }"""
-          if old not in content:
+          """
+          if not re.search(pattern, content):
+              print("----- " + path + " -----")
+              print(content)
               raise SystemExit(
-                  "ERROR: MainActivity.java didn't match the expected empty "
-                  "class body - the installed @capacitor/android version may "
-                  "have changed the template. Update this patch step to match."
+                  "ERROR: MainActivity.java has no 'public class MainActivity "
+                  "extends BridgeActivity {' declaration - see file dump above. "
+                  "Update this patch step to match."
               )
-          content = content.replace(old, new, 1)
+          content = re.sub(pattern, lambda m: m.group(1) + method, content, count=1)
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
@@ -745,14 +785,22 @@ workflows:
           # build rather than committed as a one-off edit. Located by name
           # instead of a hardcoded path since Free and Pro ship under
           # different appIds/package folders.
-          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java | head -n 1)
           python3 - "$MAINACTIVITY_SRC" <<'PY'
-          import sys
-          path = sys.argv[1]
+          import re, sys
+          path = sys.argv[1] if len(sys.argv) > 1 else ""
+          if not path:
+              raise SystemExit("ERROR: no MainActivity.java found under android/app/src/main/java.")
           with open(path) as f:
               content = f.read()
-          old = "public class MainActivity extends BridgeActivity {}"
-          new = """public class MainActivity extends BridgeActivity {
+          if "setSupportZoom(false)" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
+          # Match the class declaration only (not its body), so this works
+          # whether the template ships an empty body, whitespace/newlines
+          # inside the braces, or extra methods/comments.
+          pattern = r"(public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{)"
+          method = """
               @Override
               public void onStart() {
                   super.onStart();
@@ -760,14 +808,16 @@ workflows:
                   getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
                   getBridge().getWebView().getSettings().setDisplayZoomControls(false);
               }
-          }"""
-          if old not in content:
+          """
+          if not re.search(pattern, content):
+              print("----- " + path + " -----")
+              print(content)
               raise SystemExit(
-                  "ERROR: MainActivity.java didn't match the expected empty "
-                  "class body - the installed @capacitor/android version may "
-                  "have changed the template. Update this patch step to match."
+                  "ERROR: MainActivity.java has no 'public class MainActivity "
+                  "extends BridgeActivity {' declaration - see file dump above. "
+                  "Update this patch step to match."
               )
-          content = content.replace(old, new, 1)
+          content = re.sub(pattern, lambda m: m.group(1) + method, content, count=1)
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
@@ -897,14 +947,22 @@ workflows:
           # build rather than committed as a one-off edit. Located by name
           # instead of a hardcoded path since Free and Pro ship under
           # different appIds/package folders.
-          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java | head -n 1)
           python3 - "$MAINACTIVITY_SRC" <<'PY'
-          import sys
-          path = sys.argv[1]
+          import re, sys
+          path = sys.argv[1] if len(sys.argv) > 1 else ""
+          if not path:
+              raise SystemExit("ERROR: no MainActivity.java found under android/app/src/main/java.")
           with open(path) as f:
               content = f.read()
-          old = "public class MainActivity extends BridgeActivity {}"
-          new = """public class MainActivity extends BridgeActivity {
+          if "setSupportZoom(false)" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
+          # Match the class declaration only (not its body), so this works
+          # whether the template ships an empty body, whitespace/newlines
+          # inside the braces, or extra methods/comments.
+          pattern = r"(public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{)"
+          method = """
               @Override
               public void onStart() {
                   super.onStart();
@@ -912,14 +970,16 @@ workflows:
                   getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
                   getBridge().getWebView().getSettings().setDisplayZoomControls(false);
               }
-          }"""
-          if old not in content:
+          """
+          if not re.search(pattern, content):
+              print("----- " + path + " -----")
+              print(content)
               raise SystemExit(
-                  "ERROR: MainActivity.java didn't match the expected empty "
-                  "class body - the installed @capacitor/android version may "
-                  "have changed the template. Update this patch step to match."
+                  "ERROR: MainActivity.java has no 'public class MainActivity "
+                  "extends BridgeActivity {' declaration - see file dump above. "
+                  "Update this patch step to match."
               )
-          content = content.replace(old, new, 1)
+          content = re.sub(pattern, lambda m: m.group(1) + method, content, count=1)
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
@@ -1074,14 +1134,22 @@ workflows:
           # See android-pro-workflow's identical step: MainActivity.java is
           # regenerated by `npx cap add android` every build, so this patch
           # is re-applied each time.
-          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java)
+          MAINACTIVITY_SRC=$(find android/app/src/main/java -name MainActivity.java | head -n 1)
           python3 - "$MAINACTIVITY_SRC" <<'PY'
-          import sys
-          path = sys.argv[1]
+          import re, sys
+          path = sys.argv[1] if len(sys.argv) > 1 else ""
+          if not path:
+              raise SystemExit("ERROR: no MainActivity.java found under android/app/src/main/java.")
           with open(path) as f:
               content = f.read()
-          old = "public class MainActivity extends BridgeActivity {}"
-          new = """public class MainActivity extends BridgeActivity {
+          if "setSupportZoom(false)" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
+          # Match the class declaration only (not its body), so this works
+          # whether the template ships an empty body, whitespace/newlines
+          # inside the braces, or extra methods/comments.
+          pattern = r"(public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{)"
+          method = """
               @Override
               public void onStart() {
                   super.onStart();
@@ -1089,14 +1157,16 @@ workflows:
                   getBridge().getWebView().getSettings().setBuiltInZoomControls(false);
                   getBridge().getWebView().getSettings().setDisplayZoomControls(false);
               }
-          }"""
-          if old not in content:
+          """
+          if not re.search(pattern, content):
+              print("----- " + path + " -----")
+              print(content)
               raise SystemExit(
-                  "ERROR: MainActivity.java didn't match the expected empty "
-                  "class body - the installed @capacitor/android version may "
-                  "have changed the template. Update this patch step to match."
+                  "ERROR: MainActivity.java has no 'public class MainActivity "
+                  "extends BridgeActivity {' declaration - see file dump above. "
+                  "Update this patch step to match."
               )
-          content = content.replace(old, new, 1)
+          content = re.sub(pattern, lambda m: m.group(1) + method, content, count=1)
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
