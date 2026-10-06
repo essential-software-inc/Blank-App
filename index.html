@@ -18129,6 +18129,22 @@ async function _nbSettingsAdsFetch() {
     _nbSettingsAdsPaint();
   } catch (e) { _nbLog('settings ads', e); }
 }
+// Back online with Settings still open: load the ad level (or the package prices) that couldn't load while
+// offline. Same retry chain as the other screens, since 'online' can fire before the connection is usable.
+let _nbStOnlineToken = 0;
+window.addEventListener('online', () => {
+  const token = ++_nbStOnlineToken;
+  const delays = [800, 2500, 6000];
+  (function attempt(i) {
+    setTimeout(async () => {
+      if (token !== _nbStOnlineToken || !nbIsSignedIn() || !document.getElementById('st-ads-standing')) return;
+      if (!_nbStAds) await _nbSettingsAdsFetch();
+      else if (_nbStFundFailed) await _nbSettingsFundRender();
+      if (_nbStAds && !_nbStFundFailed) return;
+      if (i + 1 < delays.length) attempt(i + 1);
+    }, delays[i]);
+  })(0);
+});
 function _nbSettingsAdsPaint() {
   const stEl = document.getElementById('st-ads-standing');
   const invEl = document.getElementById('st-invite');
@@ -18576,7 +18592,7 @@ async function _nbBuyViews(Purchases, pkg, views, knownBalance, setStatus) {
 }
 
 // ---- Settings: fund the balance. Buy views now with no note attached; they sit in the balance and go on any ad later. ----
-let _nbStFunding = false, _nbStFundSeq = 0;
+let _nbStFunding = false, _nbStFundSeq = 0, _nbStFundFailed = false;
 let _nbFundStatusText = '';
 function _nbFundStatus(t) { _nbFundStatusText = t || ''; const e = document.getElementById('st-fund-status'); if (e) e.textContent = _nbFundStatusText; }
 async function _nbSettingsFundRender() {
@@ -18593,6 +18609,7 @@ async function _nbSettingsFundRender() {
     packages = offering && offering.availablePackages;
   } catch (e) { failed = true; _nbLog('settings offerings', e); }
   if (seq !== _nbStFundSeq || !document.getElementById('st-fund')) return; // a newer render owns the DOM
+  _nbStFundFailed = failed;
   el.innerHTML = '';
   const t = document.createElement('div'); t.className = 'ad-prog-t'; t.textContent = 'Add views to your balance'; el.appendChild(t);
   const sub = document.createElement('div'); sub.className = 'ad-prog-s';
