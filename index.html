@@ -3409,11 +3409,13 @@ body.pink .pub-ad-loading { color: #875068 }
 body.night .ad-prog { border-color: #333537; background: #1c1c1e; color: #e8e8e8 }
 body.night .ad-prog-s, body.night .pub-pkg-btn .pub-pkg-lock { color: #9a9a9e }
 body.night .ad-prog-bar { background: #333537 }
+body.night .ad-prog-sep { border-top-color: #333537 }
 body.night .ad-prog-bar > i { background: #aaaaaa }
 body.night .ad-prog-row.met .ad-prog-bar > i { background: #4aa36a }
 body.pink .ad-prog { border-color: #f5c5d8; background: #fff0f6; color: #1a0a12 }
 body.pink .ad-prog-s, body.pink .pub-pkg-btn .pub-pkg-lock { color: #875068 }
 body.pink .ad-prog-bar { background: #f5c5d8 }
+body.pink .ad-prog-sep { border-top-color: #f5c5d8 }
 body.pink .ad-prog-bar > i { background: #c8365e }
 body.pink .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
 #st-ads-card { padding: .8rem .9rem }
@@ -17967,7 +17969,7 @@ function _pubAdPkgLock(def) {
 }
 function _pubAdSlotMsg(st) {
   if (!st) return '';
-  if (st.activeAds >= st.maxActive) return 'You\u2019re running ' + st.activeAds + ' of the ' + st.maxActive + (st.maxActive === 1 ? ' ad' : ' ads') + ' your level allows. Let one finish, or unlock the next package for more.';
+  if (st.activeAds >= st.maxActive) return 'You\u2019re at your level\u2019s limit of ' + st.maxActive + (st.maxActive === 1 ? ' ad' : ' ads') + ' running at once. ' + (st.nextTier ? 'Let one finish, or unlock the next package for more.' : 'Let one finish to start another.');
   const need = st.minNotesPerAd * (st.activeAds + 1);
   if (st.notes < need) return 'Every running ad needs ' + st.minNotesPerAd + ' published notes behind it. Publish ' + (need - st.notes) + ' more to run this one.';
   return '';
