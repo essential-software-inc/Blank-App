@@ -3378,6 +3378,9 @@ body.pink .pub-pkg-btn.selected { border-color: #c8365e; background: #ffe0ec }
 .pub-pkg-btn:disabled { opacity: .6; cursor: default }
 .pub-pkg-btn .pub-pkg-lock { display: block; margin-top: 3px; font-size: 10.5px; font-weight: 500; line-height: 1.25; color: #6b6f7a }
 .pub-pkg-btn .pub-pkg-lock svg { vertical-align: -1px; margin-right: 3px }
+.pub-bal { display: flex; flex-direction: column; gap: .5rem; margin: .6rem 0 }
+.pub-bal-btn { width: 100% }
+.pub-bal-amt { display: flex; flex-direction: column; gap: .35rem }
 .ad-prog { border: 1.5px solid #e2e5ee; background: #f8f9fc; border-radius: 12px; padding: .75rem .8rem; color: #202122; font-size: 12.5px }
 .ad-prog-t { font-weight: 700; margin-bottom: .2rem }
 .ad-prog-s { color: #5f6370; font-size: 11.5px; line-height: 1.4; margin-top: .3rem }
@@ -3388,8 +3391,16 @@ body.pink .pub-pkg-btn.selected { border-color: #c8365e; background: #ffe0ec }
 .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
 .ad-prog .ebtn-sec { margin-top: .6rem }
 .ad-prog-link { display: inline-block; margin-top: .5rem; font-size: 11.5px; font-weight: 600; color: #3366cc; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent }
-body.night .ad-prog-link { color: #7da7f0 }
+body.night .ad-prog-link { color: #e8e8e8 }
 body.pink .ad-prog-link { color: #bd2856 }
+#st-ads-grp { scroll-margin-top: 64px }
+.pub-ad-loading { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; margin: .6rem 0; font-size: .8rem; color: rgba(32,33,34,.65) }
+.pub-ad-spin { width: 15px; height: 15px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; opacity: .7; animation: pub-ad-spin .7s linear infinite; flex: none }
+@keyframes pub-ad-spin { to { transform: rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) { .pub-ad-spin { animation-duration: 2.4s } }
+.pub-ad-loading .ebtn-sec { margin: 0 }
+body.night .pub-ad-loading { color: #9a9a9e }
+body.pink .pub-ad-loading { color: #875068 }
 .inv-code-row { display: flex; align-items: center; gap: .5rem; margin-top: .35rem }
 .inv-code { flex: 1; font-weight: 700; letter-spacing: .12em; font-size: .95rem; user-select: all }
 .inv-code-row .com-field { flex: 1; min-width: 0; text-transform: uppercase }
@@ -3405,15 +3416,31 @@ body.pink .ad-prog-bar { background: #f5c5d8 }
 body.pink .ad-prog-bar > i { background: #c8365e }
 body.pink .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
 #st-ads-card { padding: .8rem .9rem }
+#st-so-card { padding: .8rem .9rem; color: var(--st-fg) }
+#st-so-card .ad-prog-s { color: var(--st-sub); font-size: .8rem; line-height: 1.45 }
+#st-signedout-invite { display: block; width: 100%; box-sizing: border-box; margin-top: .7rem; padding: .6rem .8rem; border-radius: 10px; border: 1px solid var(--st-line); background: var(--st-bg); color: var(--st-fg); font: inherit; font-size: .85rem; font-weight: 700; text-align: center }
 #st-ads-card .ad-prog { border: 0; background: none; padding: 0; color: var(--st-fg) }
 #st-ads-card .ad-prog-s { color: var(--st-sub) }
 #st-ads-card .ad-prog-bar { background: var(--st-line) }
 #st-ads-card .ad-prog-bar > i { background: var(--st-acc) }
 #st-ads-card .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
+#st-ads-bal { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; margin-bottom: .8rem; padding-bottom: .7rem; border-bottom: 1px solid var(--st-line); color: var(--st-fg); font-size: .85rem }
+#st-ads-bal .ad-prog-s { color: var(--st-sub) }
+#st-fund { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--st-line); color: var(--st-fg); font-size: .8rem }
+#st-fund .ad-prog-t { font-size: .85rem }
+#st-fund .ad-prog-s { color: var(--st-sub) }
+.st-fund-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .6rem }
+.st-fund-btn { flex: 1 1 40%; min-width: 0; padding: .6rem .5rem; border-radius: 12px; border: 1px solid var(--st-line); background: var(--st-bg); color: var(--st-fg); font: inherit; font-size: .82rem; font-weight: 700; line-height: 1.35; text-align: center; cursor: pointer }
+.st-fund-btn small { display: block; font-weight: 400; color: var(--st-sub) }
+.st-fund-btn:disabled { opacity: .6; cursor: default }
 #st-invite { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--st-line); color: var(--st-fg); font-size: .8rem }
 #st-invite .ad-prog-t { font-size: .85rem }
 #st-invite .ad-prog-s { color: var(--st-sub) }
 #st-invite .inv-code { color: var(--st-fg) }
+#st-invite-input::placeholder { color: var(--st-sub); opacity: .75; font-weight: 500; letter-spacing: normal; text-transform: none }
+#st-invite-input:focus { border-color: var(--st-acc) }
+#st-invite .ebtn-sec:active, #st-signedout-invite:active, .st-fund-btn:active:not(:disabled) { opacity: .7 }
+#st-invite .ebtn-sec { background: var(--st-bg); border-color: var(--st-line); color: var(--st-fg); font-weight: 700; padding: .5rem .9rem; border-radius: 10px }
 #st-invite-input { flex: 1; min-width: 0; box-sizing: border-box; padding: .5rem .6rem; border-radius: 10px; border: 1px solid var(--st-line); background: var(--st-bg); color: var(--st-fg); font: inherit; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; outline: none }
 #account-invite-wrap { margin-bottom: .8rem; text-align: center }
 #account-invite-toggle { display: inline-block; color: #fff; opacity: .85; font-size: .78rem; font-weight: 600; text-decoration: underline; cursor: pointer }
@@ -3442,9 +3469,6 @@ body.pink .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
 body.night #account-invite-follow-row { --chk-line: rgba(255,255,255,.55); --chk-bg: #1b1b1d; --chk-on: #e8e8e8; --chk-ink: #111 }
 body.pink #account-invite-follow-row { --chk-bg: rgba(120,10,45,.35); --chk-ink: #c8365e }
 .inv-follow { --chk-line: var(--st-sub); --chk-bg: var(--st-card); --chk-shade: rgba(0,0,0,.1); --chk-on: var(--st-acc); --chk-ink: var(--st-on); gap: .5rem }
-#notes-invite-link { display: none; margin-top: .7rem; font-size: .78rem; font-weight: 600; text-decoration: none; cursor: pointer; color: #3366cc }
-body.night #notes-invite-link { color: #f0f0f0 }
-body.pink #notes-invite-link { color: #c8365e }
 
 body.pink #edit-dhdr {
   background: #c8365e;
@@ -4482,7 +4506,6 @@ document.body.dataset.lockScrollY = window.scrollY;
         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <div class="nb-empty-title" id="notes-empty-title">Welcome to Bluebook</div>
         <div class="nb-empty-sub" id="notes-empty-sub">Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one. It'll show up here, sorted by category.</div>
-        <a id="notes-invite-link" onclick="openAccountScreen(true)">Joined through a friend? Add their invite code</a>
       </div>
       <div class="nb-carousel" id="nb-onboard-carousel">
           <div class="nb-carousel-viewport">
@@ -4707,25 +4730,28 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 4 October 2026</em></p>
+      <p><em>Effective 6 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, preferences, and UI state all live on your device, with one exception: when you're signed in, which stories you've opened is tracked on our servers, against your account, instead of on your device (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy), a short queue of any likes or follows you tapped while offline that haven't been sent yet, and a small number recording how far your device's clock is off from our servers, so those taps are time-stamped correctly. If you sign in with Google, your notes, along with your favorites and theme choice, are additionally backed up to our servers (see below).</p>
       <h3>Google sign-in &amp; sync</h3>
       <p>Signing in is entirely optional, and Google handles it, so we never see your Google password. We receive your Google account identifier and email address, and keep them with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a session token that keeps you signed in (a session lasts up to 30 days). While signed in, your notes (including embedded images), along with which notes you've marked as favorites and your theme choice, are backed up to our servers so they can be restored on another device, and your Pro purchase (if any) and any ad view-credit balance (see "In-app purchases" below) are linked to your account so they carry over too. Signing out stops further syncing. Your backup stays in place so you can pick it up again when you sign back in, and deleting your account removes it, as described below. Images in your backup that no note references any more (for example after you delete a note or replace an image) are deleted by the nightly clean-up once they are more than 14 days old.</p>
-      <p>Your account is yours to keep or remove: you can delete it at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs this device out and schedules your account for deletion in 30 days. The deletion runs as part of a nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes and images, profile name and picture, subscriptions (both ones you made and ones to you), story-seen, like and follow records (including the timestamps kept for them), running ads and their view statistics, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance, and take down every page you published (a copy of each page, along with its record, is then kept for about 30 more days, as described under "Publishing a page"). Until then your published pages and stories stay online. Changed your mind? Signing back in with the same Google account during the 30 days cancels the deletion and restores full access. Every device where you're signed in is signed out as part of the deletion (each one finds out the next time the app contacts the server, usually within about a minute). Deleting your account does not delete anything held by Google or RevenueCat, which is governed by their own policies.</p>
+      <p>Your account is yours to keep or remove: you can delete it at any time by tapping the account icon and choosing Delete account under Show more. Doing so signs this device out and schedules your account for deletion in 30 days. The deletion runs as part of a nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes and images, profile name and picture, subscriptions (both ones you made and ones to you), story-seen, like and follow records (including the timestamps kept for them), running ads and their view statistics, your invite code and any invites you made or used, your ad access record, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance, and take down every page you published (a copy of each page, along with its record, is then kept for about 30 more days, as described under "Publishing a page"). Until then your published pages and stories stay online. Changed your mind? Signing back in with the same Google account during the 30 days cancels the deletion and restores full access. Every device where you're signed in is signed out as part of the deletion (each one finds out the next time the app contacts the server, usually within about a minute). Deleting your account does not delete anything held by Google or RevenueCat, which is governed by their own policies.</p>
       <h3>In-app purchases</h3>
-      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on our behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID. Before you sign in, that's an anonymous ID RevenueCat generates for your install, and once you sign in, it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself, not through our own servers. The app keeps a cached copy of that result on your device and refreshes it from RevenueCat on launch and after a purchase or restore. Ad view-credits do involve our servers, which receive confirmation from RevenueCat, not from Google directly, and credit the views to your account. We never receive your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
+      <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing, processed on our behalf by RevenueCat, a third-party subscription-management service. RevenueCat receives the purchase and entitlement data needed to confirm what you bought, tied to an ID. Before you sign in, that's an anonymous ID RevenueCat generates for your install, and once you sign in, it's your Google account identifier, which is what lets a purchase be carried over to another device. The two unlocks work differently after that: whether Pro is active is checked directly against RevenueCat by the app itself, not through our own servers. The app keeps a cached copy of that result on your device and refreshes it from RevenueCat on launch and after a purchase or restore. Ad view-credits do involve our servers, which receive confirmation from RevenueCat, not from Google directly, and credit the views to your account. We keep a ledger of your view credits: each purchase (for a particular ad, or added to your balance from Settings), each time views are put on an ad (with that ad's address), each refund or return, and each gift of free views for an invite, with the time. Views returned to you stay in your balance and can be put on an ad without a new purchase, which doesn't involve Google Play or RevenueCat. If Google Play refunds a purchase, we deduct those views. The ledger is deleted with your account. We never receive your payment details, which Google handles directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
-      <p>Publishing is always your choice, and it only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to us and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for that page. It's stored on your device, not kept as-is on our side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for about 30 days afterward (our clean-up runs nightly) in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). The page's own record is kept for the same period and then deleted. It holds the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID, which is why it stays even after the account itself has been deleted. If we remove a page for a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as that address stays reserved: the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID. This record stays even after the copy or the account is deleted, since removing it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
+      <p>Publishing is always your choice, and it only happens when you tap Publish. Your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose are sent to us and stored so the page can be served at a public link. Anyone with that link can view the page. You can publish without signing in, in which case the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on, so it appears among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for that page. It's stored on your device, not kept as-is on our side. Only a scrambled version of it is kept there, just enough to confirm it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes it down, and if the page was running as an ad, the ad stops too. A copy may be kept for about 30 days afterward (our clean-up runs nightly) in case of an abuse report or takedown request, then deleted (18 months if the page was reported as child sexual abuse material; see "Reporting a published page"). The page's own record is kept for the same period and then deleted. It holds the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID, which is why it stays even after the account itself has been deleted. If we remove a page for a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as that address stays reserved: the address, a scrambled form of the private token, the title, description and tags, and, if the page was tied to an account, that account's internal ID. This record stays even after the copy or the account is deleted, since removing it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. The address sits in a short-lived counter that expires on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, likes, subscribing, marking stories as seen, adding an invite code, and backups are rate-limited with a short-lived counter tied to your account, which expires within a couple of minutes.</p>
       <h3>Publishing as an ad</h3>
       <p>From the Publish sheet's "Publish as Ad" tab, you can additionally register an already-published page to run as an ad, shown to other people using this app as a starting template when they start a new note in Write (or in Share, for a Share note), not only to people who have the page's link, which is how a regular published page works. Running an ad requires signing in. Buying views is a purchase handled as described under "In-app purchases" above; once confirmed, we credit the corresponding number of views to your account. We also store how many views an ad has used and its current status (running, used up, or taken down). To report how many unique viewers an ad has reached, alongside its total view count, we store an anonymous identifier that each device generates, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or any other identifying information, and is used to tell whether a repeat view of a given ad came from a device already counted toward that ad, and for the activity counts described under "Activity counts" below; see also "Analytics" below. Unpublishing an ad removes it from Write and Share immediately, and any views it had left go unused. That balance isn't returned to your account. The underlying published page and its normal link are unaffected by unpublishing an ad; taking the page itself down is still done separately from the Publish to Web tab. See "External images &amp; embeds" below for how images, video, audio, and social-post embeds inside an ad are fetched. Ads are additionally restricted to images from Wikipedia or Wikimedia Commons, and to video, audio, and social-post embeds added through the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable).</p>
+      <h3>Ad access &amp; invites</h3>
+      <p>To decide which ad packages you can start and how many ads you can run, our servers count, from records described in this policy, your subscribers, published notes, stories, likes received and given, accounts you follow, how many of the last 30 days your account was active, your running ads, and any strikes. Strikes are read from the alerts we sent you about removals, pauses and suspensions, which we keep for up to a year and which stop counting after 60 days or when we excuse one. These counts are shown to you as progress, are used to enforce the limits, and aren't shown to other people.</p>
+      <p>Each signed-in account gets a random 8-character invite code, stored against the account. When someone adds a code, we store a record of which account entered which account's code, when it happened, and whether and why it stopped counting (the invited account was suspended or being deleted, or we removed it for abuse). A friend can add one code, in their first 14 days. The inviter is told by alert that a friend joined, without a name, and sees only totals: how many friends added their code and how many currently count, never who. Whether an invite counts depends on the invited account having published a note and been active on at least two days. If the friend chooses to subscribe at the same time, that is stored like any other subscription. Sharing your code uses your device's share sheet or clipboard; the message goes through the app you choose, and we don't see it. When an invite counts, we add 100 free views to your ledger. That entry carries the invited account's internal ID, so the same invite can't be rewarded twice. It stays in your ledger (and only there) until you delete your account, even if the invited account is deleted first. Deleting either account deletes the record of the invite itself.</p>
       <h3>Reporting a published page</h3>
       <p>Reports help keep Bluebook a good place for everyone. Anyone can report a published page from its public link. Reporting counts requests from the reporter's IP address, just to stop spam. The address sits in a short-lived counter that expires on its own about a minute after the last report from that address, and it's never stored as part of the report itself. We keep only the reason and details submitted, along with which page it's about and when. A report doesn't record who sent it. A report stays on file until it's reviewed, even if the page is unpublished or its author's account is deleted in the meantime. Once handled, it's deleted, except reports of child sexual abuse material, which are kept for 18 months, along with a copy of the reported page. The report's 18 months run from when it is closed; the page copy's run from when it was reported, or from the most recent report of that page if it's reported again, and the same period covers any other copy we hold of that page. A notification with the page's address, the reason, and the details may also be forwarded to our private alerting channel. Reports of child sexual abuse material are handled as the law requires, including being passed to the proper authority. We keep a short record of each one we pass on (the page's address, the date, the authority's reference for it, and a brief note) for 18 months from the latest. Moderation actions we take (such as a takedown, a dismissed report, or a restored page) are logged with the action, the page's address, the time, and a short note such as the reason given, for about 13 months, as a record of what was done.</p>
       <p>This applies the same way to pages currently running as ads. An ad and its published page are the exact same thing at the exact same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
       <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Write or Share screen. To find it, save the ad without adding anything new to it, then open the Publish sheet for that note, which fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
       <h3>Alerts</h3>
-      <p>We want you to know what's going on with your account and the app. When one of your pages is reported, or we remove or pause something of yours or change your account's status, you'll get an automatic message (an alert) stating the reason. We also use alerts to share news and good things with you, like announcements, new features, planned maintenance, safety tips, or a change to this policy or our terms. These can go to all accounts or to specific ones, and they're stored, shown, and deleted exactly like the others. Alerts appear under Alerts in your library, which only shows once your account has at least one. A count on it shows how many have arrived since you last viewed the list, and the list's own title shows how many you have in total. We store the text of each alert (which can name the page or item concerned), when it was sent, and when you deleted it, plus a single timestamp against your account marking the newest alert you've been shown, which is what lets that count follow you across your devices. Deleting an alert removes it from your list only; we keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes the reporter's identity or the details they wrote, which we don't pass on. If you delete your account, your alerts and that timestamp are deleted with it.</p>
+      <p>We want you to know what's going on with your account and the app. When one of your pages is reported, or we remove or pause something of yours or change your account's status, you'll get an automatic message (an alert) stating the reason. We also use alerts to share news and good things with you, like announcements, new features, unlocking a bigger ad package, a friend adding your invite code, planned maintenance, safety tips, or a change to this policy or our terms. These can go to all accounts or to specific ones, and they're stored, shown, and deleted exactly like the others. Alerts appear under Alerts in your library, which only shows once your account has at least one. A count on it shows how many have arrived since you last viewed the list, and the list's own title shows how many you have in total. We store the text of each alert (which can name the page or item concerned), when it was sent, and when you deleted it, plus a single timestamp against your account marking the newest alert you've been shown, which is what lets that count follow you across your devices. Deleting an alert removes it from your list only; we keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes the reporter's identity or the details they wrote, which we don't pass on. If you delete your account, your alerts and that timestamp are deleted with it.</p>
       <h3>External images &amp; embeds</h3>
       <p>Images embedded in a page via URL are fetched directly from their source when the page is built. Instagram, X, Streamable, YouTube, and Spotify embeds load directly from those services. We have no involvement with these third-party hosts, with one exception: when you paste an Instagram share link or an X (t.co) short link using the editor's own tools, our server follows the link just to find out which post it points to. It doesn't read the page, and it counts requests from your IP address in a short-lived counter that expires on its own after about a minute and isn't kept afterward or linked to your account. A page published as an ad is additionally restricted to images linked directly from Wikipedia or Wikimedia Commons, and cannot contain images uploaded from your device. This is checked automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
@@ -4737,7 +4763,7 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
       <h3>Third-party requests &amp; server logs</h3>
       <p>Using the app makes some requests to third parties, which see your IP address like any website you visit: a script library (three.js) is loaded from Cloudflare's cdnjs when the app opens; Google's sign-in code is loaded from Google when you sign in; the app occasionally requests a tiny blank page from Google (gstatic.com) just to check whether you're online; and if you paste a Spotify link using the editor's own tools, the app asks Spotify (open.spotify.com) for that link's embed details. Requests to our servers run on Cloudflare, which processes them and may keep standard request logs (such as time, address requested, and IP address) that we can use to operate and debug the service. We don't use them for analytics or tracking.</p>
       <h3>Activity counts</h3>
-      <p>To know roughly how many people use the app, and how many are using it right now, our servers record when the app is open. While the app is open, it contacts the server on launch, when you return to it, and about every four minutes, sending the same anonymous per-device identifier described under "Publishing as an ad" above. If you're signed in, this (and any other request you make while signed in) records only the time your account was last active, against your account. If you're not signed in, the server records the device identifier with the times it was first and last seen (plus the daily log described below), and nothing else: it isn't linked to a name, email address, or Google account, and if you later sign in on that device the signed-out record is deleted. We use these records only for private, aggregate totals (such as total, new and currently active users and devices) and to look up an account's last activity when operating the service. They're never shown to other people, shared, or used for advertising, and that last-activity record is deleted about 90 days after its last activity (an account's is also deleted with the account). Separately, so usage can be charted across weeks, months and years, the server keeps a minimal daily log: for each day an account or device was active, one entry holding just that date and the account or device identifier, with no name, email, or content. These entries are used only for those aggregate charts and are removed automatically after 800 days (about 26 months). They aren't removed early when you delete your account or sign in on a device that was signed out. There's no setting to turn this off, because nothing beyond this is collected; clearing the app's storage gives you a fresh anonymous identifier from then on.</p>
+      <p>To know roughly how many people use the app, and how many are using it right now, our servers record when the app is open. While the app is open, it contacts the server on launch, when you return to it, and about every four minutes, sending the same anonymous per-device identifier described under "Publishing as an ad" above. If you're signed in, this (and any other request you make while signed in) records only the time your account was last active, against your account. If you're not signed in, the server records the device identifier with the times it was first and last seen (plus the daily log described below), and nothing else: it isn't linked to a name, email address, or Google account, and if you later sign in on that device the signed-out record is deleted. We use these records for private, aggregate totals (such as total, new and currently active users and devices) to look up an account's last activity when operating the service, and, for signed-in accounts, to count recent active days toward ad access and invites (see "Ad access &amp; invites"). They're never shown to other people, shared, or used for advertising, and that last-activity record is deleted about 90 days after its last activity (an account's is also deleted with the account). Separately, so usage can be charted across weeks, months and years, the server keeps a minimal daily log: for each day an account or device was active, one entry holding just that date and the account or device identifier, with no name, email, or content. These entries are used for those aggregate charts and for the active-day counts in "Ad access &amp; invites", and are removed automatically after 800 days (about 26 months). They aren't removed early when you delete your account or sign in on a device that was signed out. There's no setting to turn this off, because nothing beyond this is collected; clearing the app's storage gives you a fresh anonymous identifier from then on.</p>
       <h3>Analytics</h3>
       <p>We do not collect analytics, telemetry, or crash reports from this app, and do not track what you do inside it. The only usage figures it keeps are the two uses of the anonymous per-device identifier described above: counting an ad's unique viewers (see "Publishing as an ad"), and the activity counts (see "Activity counts").</p>
       <h3>Contact</h3>
@@ -4753,7 +4779,7 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 4 October 2026</em></p>
+      <p><em>Effective 6 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language, and you're welcome to reach out anytime with questions.</p>
       <h3>Responsible Use</h3>
       <p>Please use Bluebook kindly and lawfully. You agree to use it for lawful purposes only, and not to create, store, or export content that is illegal, harmful, threatening, abusive, defamatory, or infringes on the rights of others. This applies with extra weight to anything you publish (see below).</p>
@@ -4764,16 +4790,21 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
       <h3>Published Content</h3>
       <p>A published page is stored on our servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. We may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. A page you publish while signed out isn't tied to an account; if you later sign in and use its private token to show it in stories or save an update, it becomes part of your account, counts toward your account's page limit, and is taken down if you delete your account. Unpublish it yourself and its address frees up right away for reuse. If we remove it instead, for a takedown or abuse report, the address stays permanently reserved and can't be reclaimed or republished.</p>
       <h3>Reports, Alerts &amp; Suspension</h3>
-      <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad) or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages appear under Alerts in your library. We may also use Alerts to share announcements and updates about the app, such as new features, maintenance, or changes to these terms. A profile picture that appears to impersonate someone else may be removed. <strong>To keep the app safe for everyone, multiple reports against your content, or repeated violations of these terms, can lead to your account being suspended.</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, to run and moderate the service.</p>
+      <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad) or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages appear under Alerts in your library. We may also use Alerts to share announcements and updates about the app, such as new features, maintenance, or changes to these terms. A profile picture that appears to impersonate someone else may be removed. <strong>To keep the app safe for everyone, multiple reports against your content, or repeated violations of these terms, can lead to your account being suspended. Pages, stories, ads, profile pictures or display names we remove or pause, and suspensions, are recorded as strikes against your account for 60 days, which affect which ad packages you can start (see Ad Access &amp; Invites below), unless we excuse one.</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, to run and moderate the service.</p>
       <h3>Advertising (Publish as Ad)</h3>
       <p>You may register an already-published page to run as an ad, purchasing a set number of views through Google Play Billing (processed on our behalf by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be eligible, a page must: contain no added text or captions beyond blank lines; keep the required attribution notice present, unedited, and clearly visible at its original size; contain no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons. No images uploaded from your device. A page may also include video, audio, and social-post embeds added through the editor's own tools. YouTube, Spotify, Instagram, X, and Streamable are the eligible sources, limited to one embed per platform; embeds added any other way are not eligible. An ad remains subject to the Responsible Use section above, and in addition may not contain sexual or adult content, or use its images, embeds, attribution, or branding to impersonate a person, brand, or organization, or otherwise mislead viewers about who or what it represents. We check eligibility automatically before an ad can be published or updated, and may refuse or take down an ad that no longer meets these rules, or that otherwise breaks these terms. Since an ad and its underlying page are the same thing, reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app as a starting template on their Write screen (or their Share screen, for a page made in Share), not only to people who have its link. We do not guarantee that an ad will receive any particular number of impressions in a given time, that the ad service will be available without interruption, or any outcome from an ad being shown.</p>
       <p>A <strong>view</strong> is counted once someone actually begins editing a note handed to them as your ad, not merely when it's shown on their Write or Share screen. This is the standard cost-per-mille (CPM) model most ad platforms use: each view is counted as a plain impression, and a repeat view from the same person or device still counts and is still deducted from your view balance. Views are not limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> figure alongside your ad's view count, for information only. It's derived from an anonymous identifier generated and stored on each device, used to tell whether a device has already been counted once for a given ad (and, separately, for the activity counts described in the Privacy Policy); it isn't tied to a Google account or any other identity, and is sent whether or not you're signed in. Because it identifies a device rather than a person, someone viewing from two devices is counted as two unique viewers, and reinstalling the app or clearing its storage resets that device as a new one going forward. The unique viewers figure does not affect your view balance or how views are deducted, which follows the CPM model described above regardless of how many unique viewers it corresponds to.</p>
-      <p>Purchased views are a consumable purchase through Google Play. Refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad in error after it was approved, <a href="mailto:essentialsoftware.support@gmail.com">contact us</a> and we will, at our discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown, and any views it had left go unused (so check your balance before you unpublish); those views aren't returned to your account or transferable to another ad, and any unspent view-credit balance likewise goes unused if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately.</p>
+      <p>If Google Play refunds a view purchase, the views it paid for are taken back out of your balance. If that leaves your balance below zero, your running ads are stopped, and you can't start a new ad until your balance covers it again.</p>
+      <p>Purchased views are a consumable purchase through Google Play. Refer to Google Play's own refund policy for anything related to the purchase transaction itself. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad in error after it was approved, <a href="mailto:essentialsoftware.support@gmail.com">contact us</a> and we will, at our discretion, credit or refund the affected views; this is independent of, and doesn't replace, Google Play's own refund process for the purchase itself. Unpublishing an ad stops it from being shown, and any views it had left go unused (so check your balance before you unpublish); those views aren't returned to your account or transferable to another ad, and any unspent view-credit balance likewise goes unused if your account is deleted. Taking down the ad does not affect the underlying published page, which stays live until you unpublish it separately. Views we return to your account (for example, a refund of an ad's unused views) stay in your balance, and you can put any amount of them on one of your ads from the Publish as Ad tab without buying again.</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
       <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags, and preview images, and lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description, and tags, the same way you're responsible for anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. An optional display name and profile picture shown on your stories and to your subscribers don't need to be your real name or photo, but may not impersonate another person, account, or brand, or otherwise mislead viewers about who's posting.</p>
       <p>A signed-in account can also like a published note. Likes are a simple sign of appreciation. Each note's own like count is visible on its card to you as its author in your Published and Stories tabs, and to anyone who sees the note in their Subscribed feed or Liked tab, but never who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. You agree not to use likes abusively, such as by using multiple accounts or automated means to inflate or suppress a note's count. We may remove likes, or suspend your ability to like, for the same reasons we can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what is recorded about likes.</p>
+      <h3>Ad Access &amp; Invites</h3>
+      <p>Bigger ad packages are earned, not only bought. The 1,000-view package is open to every signed-in account. Larger packages, and running more ads at once, unlock as your account builds standing in the app: subscribers, published notes, likes received, likes you give to other notes, accounts you follow, days you've been active, stories, and friends you've invited. Every running ad also needs at least five published notes behind it. The Publish as Ad tab shows your progress toward each requirement, and we may change the requirements or packages going forward; ads already running aren't affected. A strike (see Reports, Alerts &amp; Suspension) holds larger packages back until it ages out after 60 days: one strike limits you to the 5,000-view package, two or more to the 1,000-view package. A hold only stops new ads from starting, and you'll get an alert when it lifts. Views bought for a package that is held or still locked stay in your balance until you can use them.</p>
+      <p>Every signed-in account has an invite code it can share. A new account can add one friend's code, once, in its first 14 days. You can't use your own code, and two accounts can't invite each other. When someone adds your code, you get an alert, and they can choose to subscribe to you at the same time (they're asked first). An invite counts toward your ad access, as three subscribers each for packages from 5,000 views up and for up to five invites, once that friend has published a note and been active on at least two days. When an invite counts, we also add 100 free views to your balance, for up to five friends. Free views work like any views in your balance: you can put them on any of your ads from the Publish as Ad tab without buying a package, but they can't be cashed out or transferred. The friend you invite doesn't receive anything. If we void an invite for abuse, we take its free views back out of your balance, and return them if we restore it. Please only invite real people. Creating or using extra accounts, or asking others to, to inflate invites, subscribers, likes, or any other measure used here isn't allowed. We may stop counting invites or any of these measures, hold or reduce your packages, or suspend accounts where that happens. An invite also stops counting while the invited account is suspended or being deleted, and counts again if that ends.</p>
       <h3>Purchases &amp; Eligibility</h3>
+      <p>You can buy a view package for a particular note when you publish it as an ad, or add views to your balance from Settings to put on any of your ads later. Views in your balance aren't tied to a note until you use them.</p>
       <p>Buying view packages is handled entirely through Google Play Billing (processed on our behalf by RevenueCat), and any age or account requirements for making a purchase are set and enforced by Google Play, not by us. By buying a view package, you confirm you're permitted under Google Play's own terms to make purchases on the account you're using.</p>
       <h3>Third-Party Content</h3>
       <p>Images, video, and audio you embed by URL are loaded directly from the source you provide. You are responsible for having the right to use any content you embed. Images used in an ad are restricted as described above, and the required attribution notice exists specifically because third-party trademarks, logos, and brand names may appear in an ad's content or images. You're still responsible for having the right to use whatever you include, and that notice does not grant any rights of its own.</p>
@@ -4899,11 +4930,19 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
         </div>
         <div id="pub-ad-main" style="display:none">
           <div id="pub-ad-elig" class="bkp-panel"></div>
+          <div id="pub-ad-loading" class="pub-ad-loading" role="status" aria-live="polite" style="display:none"><span class="pub-ad-spin" id="pub-ad-spin"></span><span id="pub-ad-loading-txt"></span><button type="button" class="ebtn-sec" id="pub-ad-retry" style="display:none" onclick="_pubRefreshAdTab()">Try again</button></div>
           <div id="pub-ad-state-new" class="bkp-panel" style="display:none">
-            <p class="bkp-help">Buy a view package, then publish this note as an ad. It'll show as a starting template on other people's Write screen (or Share screen, for a Share note) until the views run out.</p>
+            <p class="bkp-help">Buy a view package for this note, or use views already in your balance. It'll show as a starting template on other people's Write screen (or Share screen, for a Share note) until the views run out.</p>
             <div id="pub-ad-standing"></div>
             <div id="pub-ad-pkgs" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0"></div>
-            <div id="pub-ad-balance" class="bkp-help"></div>
+            <div id="pub-ad-bal" class="pub-bal" style="display:none">
+              <button type="button" id="pub-ad-bal-btn" class="pub-pkg-btn pub-bal-btn" onclick="nbAdSelectBalance()">Use my balance<br><span class="pub-pkg-price" id="pub-ad-bal-sub"></span></button>
+              <div id="pub-ad-bal-amt" class="pub-bal-amt" style="display:none">
+                <label class="bkp-help" for="pub-ad-bal-input">Views to use for this note</label>
+                <input id="pub-ad-bal-input" class="com-field" type="text" inputmode="numeric" autocomplete="off" oninput="_pubAdBalInput(this)">
+                <div id="pub-ad-bal-hint" class="pub-status"></div>
+              </div>
+            </div>
             <div id="pub-ad-status" class="pub-status"></div>
           </div>
           <div id="pub-ad-state-live" class="bkp-panel" style="display:none">
@@ -11847,14 +11886,55 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 
 /* ===================== Splash boot ===================== */
 (function captureSplashBg() {
-  const splashEl = document.getElementById('splash');
-  if (!splashEl) return;
-  const clone = splashEl.cloneNode(false);
-  clone.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;top:-9999px;left:-9999px';
-  document.documentElement.appendChild(clone);
-  const splashBg = getComputedStyle(clone).backgroundImage;
-  document.documentElement.removeChild(clone);
-  document.documentElement.style.setProperty('--splash-img', splashBg);
+  // Huge data: URIs inside CSS custom properties / <img src> get re-parsed and
+  // their decoded bitmaps evicted under memory pressure (Android WebView), so
+  // the splash, backup sheet, account sheet and onboarding carousel can lose
+  // their images until restart. Convert each to a blob: URL once, hold a
+  // decoded Image reference for the session, and point everything at that.
+  const root = document.documentElement;
+  const keep = window._nbImgKeep = window._nbImgKeep || [];
+  function dataToBlobUrl(d) {
+    try {
+      const m = /^data:([^;,]+);base64,(.*)$/s.exec(d);
+      if (!m) return null;
+      const bin = atob(m[2]), u8 = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      return URL.createObjectURL(new Blob([u8], { type: m[1] }));
+    } catch (e) { return null; }
+  }
+  // 1) splash / sheet background
+  const idx = parseInt(root.getAttribute('data-splash'), 10) || 0;
+  const raw = getComputedStyle(root).getPropertyValue('--splash-img-' + idx);
+  const um = /url\(\s*["']?(data:[^"')]+)["']?\s*\)/.exec(raw || '');
+  if (um) {
+    const burl = dataToBlobUrl(um[1]);
+    if (burl) {
+      const img = new Image();
+      keep.push(img);
+      const apply = () => root.style.setProperty('--splash-img', 'url("' + burl + '")');
+      img.onerror = () => root.style.removeProperty('--splash-img'); // fall back to data-splash CSS rule
+      img.src = burl;
+      (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(apply);
+      // re-decode + re-assert on resume from background
+      const refresh = () => {
+        if (document.hidden) return;
+        const r = img.decode ? img.decode() : Promise.resolve();
+        r.catch(() => {}).then(apply);
+      };
+      document.addEventListener('visibilitychange', refresh);
+      window.addEventListener('pageshow', refresh);
+    }
+  }
+  // 2) onboarding carousel images
+  document.querySelectorAll('#nb-onboard-track img[src^="data:"]').forEach(function (el) {
+    const orig = el.getAttribute('src');
+    const burl = dataToBlobUrl(orig);
+    if (!burl) return;
+    el.addEventListener('error', function () { if (el.getAttribute('src') !== orig) el.setAttribute('src', orig); }, { once: true });
+    el.setAttribute('src', burl);
+    const pre = new Image(); keep.push(pre); pre.src = burl;
+    if (pre.decode) pre.decode().catch(() => {});
+  });
 })();
 function _setSplashBarPct(pct) {
   const bar = document.getElementById('splash-bar-fill');
@@ -13582,8 +13662,6 @@ function nbRenderAccountDialog() {
   document.getElementById('account-signedout-btns').style.display = signedIn ? 'none' : '';
   document.getElementById('account-signedin-btns').style.display = signedIn ? '' : 'none';
   if (signedIn && acct) document.getElementById('account-email').textContent = acct.email || '';
-  const il = document.getElementById('notes-invite-link');
-  if (il) il.style.display = signedIn ? 'none' : 'block';
 }
 // Header account icon: signed-out taps go straight to the full-screen
 // sign-in view; signed-in taps confirm first (openLogoutConfirm below),
@@ -14951,6 +15029,7 @@ function nbOpenPublishSheet(id, keepTab) {
   // directly) so the chosen tab has the last word on which footer shows.
   _pubShowTab(keepTab === 'ad' ? 'ad' : 'web');
   document.getElementById('publish-overlay').classList.add('open');
+  try { if (nbIsSignedIn()) _pubAdGetOfferings().catch(() => {}); } catch (e) {} // warm the ad package prices before the Ad tab is opened
   lockScroll();
 }
 function _pubUserClose() {
@@ -17885,11 +17964,18 @@ function _pubAdPkgLock(def) {
   return r ? 'Unlocks at ' + r.need.toLocaleString() + ' ' + r.label : 'Locked';
 }
 function _pubAdSlotMsg(st) {
-  if (!st || !st.tier) return '';
+  if (!st) return '';
   if (st.activeAds >= st.maxActive) return 'You\u2019re running ' + st.activeAds + ' of the ' + st.maxActive + (st.maxActive === 1 ? ' ad' : ' ads') + ' your level allows. Let one finish, or unlock the next package for more.';
   const need = st.minNotesPerAd * (st.activeAds + 1);
   if (st.notes < need) return 'Every running ad needs ' + st.minNotesPerAd + ' published notes behind it. Publish ' + (need - st.notes) + ' more to run this one.';
   return '';
+}
+// Opens Settings and scrolls to the "Ads & invites" section (it only exists while signed in; otherwise Settings just opens).
+function nbGoSettingsAds() {
+  nbGoScreen('settings');
+  const jump = () => { const g = document.getElementById('st-ads-grp'); if (g) g.scrollIntoView({ behavior: 'auto', block: 'start' }); };
+  requestAnimationFrame(jump);
+  setTimeout(jump, 300); // the publish sheet may still be closing / locking scroll on the first pass
 }
 function _pubRenderAdStanding(targetId, opts) {
   const el = document.getElementById(targetId || 'pub-ad-standing');
@@ -17901,7 +17987,7 @@ function _pubRenderAdStanding(targetId, opts) {
   card.className = 'ad-prog';
   const add = (cls, text) => { const d = document.createElement('div'); d.className = cls; d.textContent = text; card.appendChild(d); return d; };
   const next = st.nextTier ? st.tiers[st.nextTier - 1] : null;
-  add('ad-prog-t', st.tier ? 'Ad level ' + st.tier + ' of ' + st.tiers.length + ': up to ' + st.maxViews.toLocaleString() + ' views' : 'Your first ad package is almost within reach');
+  add('ad-prog-t', 'Ad level ' + st.tier + ' of ' + st.tiers.length + ': up to ' + st.maxViews.toLocaleString() + ' views');
   const inAccount = !!(opts && opts.account);
   if (!next) {
     add('ad-prog-s', 'Every package is unlocked. Thank you for building something worth reading.');
@@ -17937,8 +18023,8 @@ function _pubRenderAdStanding(targetId, opts) {
   if (!inAccount && next) {
     const a = document.createElement('a');
     a.className = 'ad-prog-link';
-    a.textContent = 'See progress and invite friends in Settings';
-    a.onclick = () => { closePublishSheet(); nbGoScreen('settings'); };
+    a.textContent = 'See your progress in Settings';
+    a.onclick = () => { closePublishSheet(); nbGoSettingsAds(); };
     card.appendChild(a);
   }
   if (inAccount && next) add('ad-prog-s', 'Friends who join with your invite code count too (see Invite friends below).');
@@ -17998,19 +18084,29 @@ async function _nbRedeemPendingInvite() {
   } catch (e) { _nbLog('redeem pending invite', e); } // network failure: keep the code for next time
 }
 // ---- Settings screen: ad level + invites ----
-let _nbStAds = null, _nbStAdsAt = 0, _nbStAdsSeq = 0, _nbStAdsSub = null;
+let _nbStAds = null, _nbStBal = null, _nbStAdsAt = 0, _nbStAdsSeq = 0, _nbStAdsSub = null;
 function _nbSettingsAdsMount() {
   const root = document.getElementById('st-root');
-  if (!root || !nbIsSignedIn()) return;
+  if (!root) return;
   const grps = root.querySelectorAll('.st-grp');
   const before = grps[grps.length - 1]; // the Account group
+  if (!nbIsSignedIn()) {
+    // Signed out there is no ad level or balance yet, but a friend's invite code can still be added at sign-in.
+    const gi = document.createElement('div');
+    gi.className = 'st-grp';
+    gi.id = 'st-ads-grp';
+    gi.innerHTML = '<div class="st-h">Invites</div><div class="st-card" id="st-so-card"><div class="ad-prog-s">Joined through a friend? Add their invite code when you sign in.</div><button type="button" class="ebtn-sec" id="st-signedout-invite">Add invite code</button></div>';
+    root.insertBefore(gi, before);
+    document.getElementById('st-signedout-invite').onclick = () => openAccountScreen(true);
+    return;
+  }
   const acct = nbAccount();
   const who = acct && acct.sub;
-  if (who !== _nbStAdsSub) { _nbStAds = null; _nbStAdsAt = 0; _nbStAdsSub = who; } // another account never sees the last one's numbers
+  if (who !== _nbStAdsSub) { _nbStAds = null; _nbStBal = null; _nbStAdsAt = 0; _nbStAdsSub = who; } // another account never sees the last one's numbers
   const g = document.createElement('div');
   g.className = 'st-grp';
   g.id = 'st-ads-grp';
-  g.innerHTML = '<div class="st-h">Ads &amp; invites</div><div class="st-card" id="st-ads-card"><div id="st-ads-standing"></div><div id="st-invite"></div></div>';
+  g.innerHTML = '<div class="st-h">Ads &amp; invites</div><div class="st-card" id="st-ads-card"><div id="st-ads-bal"></div><div id="st-ads-standing"></div><div id="st-fund"></div><div id="st-invite"></div></div>';
   root.insertBefore(g, before);
   _nbSettingsAdsPaint();
   if (Date.now() - _nbStAdsAt > 20000) _nbSettingsAdsFetch();
@@ -18024,6 +18120,7 @@ async function _nbSettingsAdsFetch() {
     const d = await res.json();
     if (seq !== _nbStAdsSeq || !nbIsSignedIn()) return;
     _nbStAds = d.standing || null;
+    _nbStBal = Math.max(0, Math.floor(Number(d.creditBalance) || 0)); // unspent views (refunds, invite gifts)
     _nbStAdsAt = Date.now();
     _nbSettingsAdsPaint();
   } catch (e) { _nbLog('settings ads', e); }
@@ -18032,9 +18129,18 @@ function _nbSettingsAdsPaint() {
   const stEl = document.getElementById('st-ads-standing');
   const invEl = document.getElementById('st-invite');
   if (!stEl || !invEl) return; // Settings isn't showing
-  if (!_nbStAds) { stEl.innerHTML = '<div class="ad-prog-s">Loading your ad level\u2026</div>'; invEl.style.display = 'none'; return; }
+  const balEl = document.getElementById('st-ads-bal');
+  if (balEl) {
+    balEl.style.display = _nbStBal === null ? 'none' : '';
+    if (_nbStBal !== null) {
+      balEl.innerHTML = '<span class="ad-prog-s">Ad view balance</span><b></b>';
+      balEl.lastChild.textContent = _nbStBal.toLocaleString() + (_nbStBal === 1 ? ' view' : ' views');
+    }
+  }
+  if (!_nbStAds) { stEl.innerHTML = '<div class="ad-prog-s">Loading your ad level\u2026</div>'; invEl.style.display = 'none'; _nbSettingsFundRender(); return; }
   _pubAdStanding = _nbStAds;
   _pubRenderAdStanding('st-ads-standing', { account: true });
+  _nbSettingsFundRender();
   const rf = _nbStAds.referral;
   if (!rf || !rf.code) { invEl.style.display = 'none'; return; }
   _nbInviteCode = rf.code;
@@ -18042,9 +18148,10 @@ function _nbSettingsAdsPaint() {
   invEl.innerHTML = '';
   const add = (cls, text) => { const d = document.createElement('div'); d.className = cls; d.textContent = text; invEl.appendChild(d); return d; };
   add('ad-prog-t', 'Invite friends');
+  const gv = rf.giftViews || 100, gmax = rf.giftMaxInvites || 5;
   add('ad-prog-s', rf.invited
-    ? rf.qualified + ' of ' + rf.invited + ' invited ' + (rf.invited === 1 ? 'friend counts' : 'friends count') + ' toward your ad access. A friend counts once they publish a note and have been active on two days.'
-    : 'Friends you invite help you unlock bigger ad packages once they publish a note and have been active on two days.');
+    ? rf.qualified + ' of ' + rf.invited + ' invited ' + (rf.invited === 1 ? 'friend counts' : 'friends count') + ' toward your ad access. A friend counts once they publish a note and have been active on two days, and each one gives you ' + gv.toLocaleString() + ' free ad views (up to ' + gmax + ' friends; ' + (rf.giftedInvites || 0) + ' so far).'
+    : 'When a friend you invite publishes a note and has been active on two days, you get ' + gv.toLocaleString() + ' free ad views (up to ' + gmax + ' friends), and they count toward unlocking bigger ad packages.');
   const row = document.createElement('div');
   row.className = 'inv-code-row';
   const code = document.createElement('span');
@@ -18127,7 +18234,8 @@ const AD_PACKAGE_IDENTIFIERS = [
 ];
 const AD_OFFERING_ID = 'ad_views';
 
-let _pubAdSelectedViews = null;
+let _pubAdSelectedViews = null; // {def, pkg} for a package, {balance:true} when spending the balance
+let _pubAdBalance = 0; // unspent views on the account (refunds), from GET /ads/mine
 let _pubAdRecord = null; // the matching row from GET /ads/mine, if any
 // Set when the Ad tab's load couldn't run (or failed) because we were
 // offline. The 'online' listener below uses it to silently re-run the load
@@ -18170,6 +18278,33 @@ function _pubShowTab(tab) {
 // buttons stacked underneath whichever footer the current tab is
 // actually showing (e.g. Unpublish/Save Changes on the Web tab).
 let _pubAdRefreshToken = 0;
+// Loading / error indicator for the Ad tab (shows until packages + ad status are both ready).
+function _pubAdLoadingShow(msg, opts) {
+  const el = document.getElementById('pub-ad-loading'); if (!el) return;
+  const err = !!(opts && opts.error);
+  document.getElementById('pub-ad-loading-txt').textContent = msg;
+  document.getElementById('pub-ad-spin').style.display = err ? 'none' : '';
+  document.getElementById('pub-ad-retry').style.display = err ? '' : 'none';
+  el.style.display = '';
+}
+function _pubAdLoadingHide() { const el = document.getElementById('pub-ad-loading'); if (el) el.style.display = 'none'; }
+// RevenueCat offerings: one shared request (so it runs in parallel with /ads/mine instead of after it, and the
+// publish sheet can warm it up when it opens), cached for 5 minutes, with a timeout so it can never hang forever.
+let _pubAdOfferings = null;
+function _pubAdGetOfferings() {
+  const P = _nbRcPlugin();
+  if (!P) return Promise.resolve(null);
+  const c = _pubAdOfferings;
+  if (c && Date.now() - c.at < 300000) return c.p;
+  const entry = { at: Date.now(), p: null };
+  entry.p = Promise.race([
+    P.getOfferings(),
+    new Promise((_, rej) => setTimeout(() => rej(new Error('offerings timed out')), 15000))
+  ]).catch(e => { if (_pubAdOfferings === entry) _pubAdOfferings = null; throw e; });
+  _pubAdOfferings = entry;
+  return entry.p;
+}
+let _pubAdPkgsFailed = false;
 async function _pubRefreshAdTab() {
   if (document.getElementById('pub-ad-tab').style.display === 'none') return;
   const _pubAdRefreshCallToken = ++_pubAdRefreshToken;
@@ -18215,16 +18350,24 @@ async function _pubRefreshAdTab() {
     document.getElementById('pub-ad-state-new').style.display = 'none';
   }
 
-  if (_pubOfflineGuard()) { _pubAdOfflinePending = true; return; }
+  if (_pubOfflineGuard()) { _pubAdOfflinePending = true; _pubAdLoadingHide(); return; }
+  _pubAdLoadingShow(elig.ok ? 'Loading ad packages\u2026' : 'Checking ad status\u2026');
+  if (elig.ok) _pubAdGetOfferings().catch(() => {}); // start prices loading now, alongside /ads/mine
   let data;
+  const _adCtl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const _adTimer = setTimeout(() => { if (_adCtl) _adCtl.abort(); }, 20000);
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/mine', {
-      headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken() },
+      signal: _adCtl ? _adCtl.signal : undefined
     });
     if (!res.ok) throw new Error('ads/mine failed: ' + res.status);
     data = await res.json();
+    clearTimeout(_adTimer);
   } catch (e) {
+    clearTimeout(_adTimer);
     _nbLog('ads/mine', e);
+    if (_pubAdRefreshCallToken === _pubAdRefreshToken) _pubAdLoadingShow('Couldn\u2019t load ad packages.', { error: true });
     // Connection dropped between the guard above and the response — treat
     // it the same as being offline from the start, so it retries on 'online'.
     if (typeof navigator !== 'undefined' && navigator.onLine === false) _pubAdOfflinePending = true;
@@ -18249,9 +18392,10 @@ async function _pubRefreshAdTab() {
     _pubAdSelectedViews = null;
     document.getElementById('pub-ad-publish-btn').disabled = true;
     if (elig.ok) {
-      document.getElementById('pub-ad-balance').textContent = 'View credit balance: ' + data.creditBalance;
+      _pubAdBalance = Math.max(0, Math.floor(Number(data.creditBalance) || 0));
       document.getElementById('pub-ad-status').textContent = '';
       _pubRenderAdStanding();
+      _pubRenderAdBalance();
       await _pubRenderAdPackages(elig.ok);
       if (_pubAdRefreshCallToken !== _pubAdRefreshToken) return;
     }
@@ -18281,6 +18425,9 @@ async function _pubRefreshAdTab() {
            + ' and has stopped running. Publishing this exact page as a new ad isn\u2019t supported yet. Publish a copy under a different address instead.')
         : 'This ad was unpublished and can\u2019t be resumed on this address. Publish a copy under a different address to run it again.';
   }
+  if (_pubAdRefreshCallToken !== _pubAdRefreshToken) return;
+  if (_pubAdPkgsFailed) _pubAdLoadingShow('Couldn\u2019t load package prices.', { error: true });
+  else _pubAdLoadingHide();
 }
 
 // Silently re-runs the Ad tab load once connectivity returns. Only fires if
@@ -18309,12 +18456,13 @@ async function _pubRenderAdPackages(eligible) {
   wrap.innerHTML = '';
   const Purchases = _nbRcPlugin();
   let packages = null;
+  _pubAdPkgsFailed = false;
   if (Purchases) {
     try {
-      const offerings = await Purchases.getOfferings();
+      const offerings = await _pubAdGetOfferings();
       const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
       packages = offering && offering.availablePackages;
-    } catch (e) { _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
+    } catch (e) { _pubAdPkgsFailed = true; _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
   }
   if (myToken !== _pubAdPkgsToken) return; // a newer call has since started; let it own the DOM
   wrap.innerHTML = '';
@@ -18323,7 +18471,7 @@ async function _pubRenderAdPackages(eligible) {
     const price = pkg && pkg.product && pkg.product.priceString;
     const btn = document.createElement('button');
     btn.className = 'pub-pkg-btn';
-    btn.innerHTML = def.views.toLocaleString() + ' views<br><span class="pub-pkg-price">' + (price || (Purchases ? '\u2026' : 'app only')) + '</span>';
+    btn.innerHTML = def.views.toLocaleString() + ' views<br><span class="pub-pkg-price">' + (price || (Purchases ? (_pubAdPkgsFailed ? '\u2014' : '\u2026') : 'app only')) + '</span>';
     const lock = _pubAdPkgLock(def);
     if (lock) {
       const l = document.createElement('span');
@@ -18333,7 +18481,7 @@ async function _pubRenderAdPackages(eligible) {
       btn.appendChild(l);
       btn.classList.add('locked');
     }
-    btn.disabled = !eligible || !Purchases || !!lock || !!_pubAdSlotMsg(_pubAdStanding);
+    btn.disabled = !eligible || !Purchases || !pkg || !!lock || !!_pubAdSlotMsg(_pubAdStanding);
     btn.onclick = () => nbAdSelectPackage(def, pkg, btn);
     wrap.appendChild(btn);
   });
@@ -18344,68 +18492,213 @@ function nbAdSelectPackage(def, pkg, btn) {
     b.classList.remove('selected');
   });
   btn.classList.add('selected');
+  document.getElementById('pub-ad-bal-btn').classList.remove('selected');
+  document.getElementById('pub-ad-bal-amt').style.display = 'none';
   document.getElementById('pub-ad-publish-btn').disabled = false;
 }
 
-// Purchases the selected view package, then registers this note as an ad
-// for that many views. The webhook that credits the balance is async
-// (RevenueCat -> worker), so this polls GET /ads/mine briefly for the
-// balance to catch up before calling /ads/publish, instead of racing it
-// with the allocation call and surfacing a confusing 402.
+// ---- Spending the balance: views already on the account (refunds) go on this note without a store purchase ----
+// Most views one ad can take from the balance right now: the balance, held to what the account's level allows per ad.
+function _pubAdBalCap() {
+  const st = _pubAdStanding;
+  return st ? Math.min(_pubAdBalance, st.maxViews) : 0;
+}
+function _pubRenderAdBalance() {
+  const wrap = document.getElementById('pub-ad-bal');
+  const btn = document.getElementById('pub-ad-bal-btn');
+  btn.classList.remove('selected');
+  document.getElementById('pub-ad-bal-amt').style.display = 'none';
+  if (_pubAdBalance <= 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  const cap = _pubAdBalCap();
+  document.getElementById('pub-ad-bal-sub').textContent = _pubAdBalance.toLocaleString() + ' views available'
+    + (cap > 0 && cap < _pubAdBalance ? ' (up to ' + cap.toLocaleString() + ' per ad at your level)' : '');
+  btn.disabled = cap <= 0 || !!_pubAdSlotMsg(_pubAdStanding);
+}
+function nbAdSelectBalance() {
+  const cap = _pubAdBalCap();
+  if (cap <= 0) return;
+  _pubAdSelectedViews = { balance: true };
+  Array.from(document.getElementById('pub-ad-pkgs').children).forEach(b => b.classList.remove('selected'));
+  document.getElementById('pub-ad-bal-btn').classList.add('selected');
+  document.getElementById('pub-ad-bal-amt').style.display = '';
+  const inp = document.getElementById('pub-ad-bal-input');
+  inp.value = String(cap);
+  _pubAdBalInput(inp);
+}
+function _pubAdBalInput(inp) {
+  const cap = _pubAdBalCap();
+  const digits = String(inp.value).replace(/\D/g, '').slice(0, 7);
+  if (inp.value !== digits) inp.value = digits;
+  const n = digits ? parseInt(digits, 10) : 0;
+  const hint = document.getElementById('pub-ad-bal-hint');
+  const over = n > cap;
+  hint.textContent = !n ? 'Enter how many views to use, up to ' + cap.toLocaleString() + '.'
+    : over ? 'You can use up to ' + cap.toLocaleString() + ' views on this note.'
+    : (_pubAdBalance - n).toLocaleString() + ' views will stay in your balance.';
+  hint.classList.toggle('taken', over);
+  document.getElementById('pub-ad-publish-btn').disabled = !(n >= 1 && !over);
+}
+
+// Buys one view package and waits for the purchase to land on the account balance (RevenueCat -> worker webhook is async).
+// Used by Publish as Ad (buy for this note) and by Settings (fund the balance). Returns {cancelled:true} when the person
+// backs out of the store sheet, else {confirmed, balance}. `confirmed` is false when the credit hasn't shown up after ~12s;
+// the purchase is still safe (the webhook credits it whenever it arrives), so callers tell the person it is confirming.
+// The balance is read fresh before buying so the wait is for THIS purchase even when the account already holds views.
+async function _nbBuyViews(Purchases, pkg, views, knownBalance, setStatus) {
+  const api = NB_PUBLISH_API.replace(/\/$/, '');
+  const auth = () => ({ 'Authorization': 'Bearer ' + nbSessionToken() });
+  let before = knownBalance;
+  try {
+    const r0 = await fetch(api + '/ads/mine', { headers: auth() });
+    if (r0.ok) { const d0 = await r0.json(); before = Math.max(0, Number(d0.creditBalance) || 0); }
+  } catch (e) { _nbLog('ads/mine baseline', e); }
+  try {
+    await Purchases.purchasePackage({ aPackage: pkg });
+  } catch (e) {
+    if (e && e.userCancelled) return { cancelled: true };
+    throw e;
+  }
+  setStatus('Confirming purchase\u2026');
+  let balance = -1;
+  for (let i = 0; i < 6; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const res = await fetch(api + '/ads/mine', { headers: auth() });
+      if (res.ok) { const d = await res.json(); balance = d.creditBalance; if (balance >= before + views) break; }
+    } catch (e) { _nbLog('ads/mine poll', e); }
+  }
+  return { cancelled: false, confirmed: balance >= before + views, balance: balance };
+}
+
+// ---- Settings: fund the balance. Buy views now with no note attached; they sit in the balance and go on any ad later. ----
+let _nbStFunding = false, _nbStFundSeq = 0;
+let _nbFundStatusText = '';
+function _nbFundStatus(t) { _nbFundStatusText = t || ''; const e = document.getElementById('st-fund-status'); if (e) e.textContent = _nbFundStatusText; }
+async function _nbSettingsFundRender() {
+  const el = document.getElementById('st-fund');
+  if (!el) return;
+  const Purchases = _nbRcPlugin();
+  if (!_nbStAds || !Purchases) { el.style.display = 'none'; return; } // buying needs the installed app and a known ad level
+  const seq = ++_nbStFundSeq;
+  el.style.display = '';
+  let packages = null, failed = false;
+  try {
+    const offerings = await _pubAdGetOfferings();
+    const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
+    packages = offering && offering.availablePackages;
+  } catch (e) { failed = true; _nbLog('settings offerings', e); }
+  if (seq !== _nbStFundSeq || !document.getElementById('st-fund')) return; // a newer render owns the DOM
+  el.innerHTML = '';
+  const t = document.createElement('div'); t.className = 'ad-prog-t'; t.textContent = 'Add views to your balance'; el.appendChild(t);
+  const sub = document.createElement('div'); sub.className = 'ad-prog-s';
+  sub.textContent = 'Buy views now and put them on any of your ads later, in any amount. They aren\u2019t tied to a note until you use them.';
+  el.appendChild(sub);
+  const grid = document.createElement('div'); grid.className = 'st-fund-grid'; el.appendChild(grid);
+  AD_PACKAGE_IDENTIFIERS.forEach(def => {
+    const pkg = packages && packages.find(p => p.identifier === def.id);
+    const price = pkg && pkg.product && pkg.product.priceString;
+    const lock = _pubAdPkgLock(def);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'st-fund-btn';
+    b.appendChild(document.createTextNode(def.views.toLocaleString() + ' views'));
+    const sm = document.createElement('small');
+    sm.textContent = lock || price || (failed ? '\u2014' : '\u2026');
+    b.appendChild(sm);
+    b.disabled = _nbStFunding || !pkg || !!lock;
+    b.onclick = () => nbSettingsFund(def, pkg);
+    grid.appendChild(b);
+  });
+  const st = document.createElement('div'); st.className = 'ad-prog-s'; st.id = 'st-fund-status'; st.style.marginTop = '.5rem'; st.textContent = _nbStFunding ? _nbFundStatusText : ''; el.appendChild(st);
+}
+async function nbSettingsFund(def, pkg) {
+  if (_nbStFunding) return;
+  const Purchases = _nbRcPlugin();
+  if (!Purchases || !pkg) { showToast('Buying views requires the installed app from Google Play'); return; }
+  if (_pubOfflineGuard()) return;
+  const lock = _pubAdPkgLock(def); // never start a purchase that can't be used yet
+  if (lock) { showToast(lock); return; }
+  _nbStFunding = true; _nbFundStatusText = '';
+  await _nbSettingsFundRender();
+  try {
+    const r = await _nbBuyViews(Purchases, pkg, def.views, _nbStBal || 0, _nbFundStatus);
+    if (r.cancelled) return;
+    if (!r.confirmed) {
+      showToast('Purchase is still confirming. Your balance will update shortly.');
+      _nbStAdsAt = 0; _nbSettingsAdsFetch();
+      return;
+    }
+    _nbStBal = Math.max(0, Math.floor(Number(r.balance) || 0));
+    _nbStAdsAt = Date.now();
+    showToast(def.views.toLocaleString() + ' views added to your balance.');
+  } catch (e) {
+    _nbLog('settings fund', e);
+    showToast('Purchase failed' + _nbFailureReason(e));
+  } finally {
+    _nbStFunding = false;
+    _nbSettingsAdsPaint();
+  }
+}
+
+// Registers this note as an ad. A package is bought and allocated to this note in one go; "Use my balance" skips the store
+// and puts any amount (up to the level's cap) of the views already on the account on the note. The webhook that credits a
+// purchase is async (RevenueCat -> worker), so the purchase path polls GET /ads/mine briefly for the balance to catch up
+// before calling /ads/publish, instead of racing it with the allocation call and surfacing a confusing 402.
 async function nbAdPublish() {
   const note = _pubFindNote(_pubNoteId);
   if (!note || !note.publishedSlug) { showToast('Note not found'); return; }
   if (!_pubAdSelectedViews) return;
+  const fromBalance = !!_pubAdSelectedViews.balance;
   const Purchases = _nbRcPlugin();
-  if (!Purchases) { showToast('Buying ad views requires the installed app from Google Play'); return; }
+  if (!fromBalance && !Purchases) { showToast('Buying ad views requires the installed app from Google Play'); return; }
   if (_pubOfflineGuard()) return;
   const btn = document.getElementById('pub-ad-publish-btn');
   const statusEl = document.getElementById('pub-ad-status');
-  const { def, pkg } = _pubAdSelectedViews;
-  // Never start a purchase the server would refuse afterwards: locked packages are checked here first.
-  const lockMsg = _pubAdPkgLock(def) || _pubAdSlotMsg(_pubAdStanding);
-  if (lockMsg) { showToast(lockMsg); return; }
-  _pubSetBtnLoading(btn, true, 'Processing\u2026');
+  const api = NB_PUBLISH_API.replace(/\/$/, '');
+  let views, def = null, pkg = null;
+  if (fromBalance) {
+    const cap = _pubAdBalCap();
+    views = parseInt(document.getElementById('pub-ad-bal-input').value, 10) || 0;
+    if (views < 1 || views > cap) { showToast('Enter between 1 and ' + cap.toLocaleString() + ' views'); return; }
+    const slotMsg = _pubAdSlotMsg(_pubAdStanding);
+    if (slotMsg) { showToast(slotMsg); return; }
+  } else {
+    ({ def, pkg } = _pubAdSelectedViews);
+    views = def.views;
+    // Never start a purchase the server would refuse afterwards: locked packages are checked here first.
+    const lockMsg = _pubAdPkgLock(def) || _pubAdSlotMsg(_pubAdStanding);
+    if (lockMsg) { showToast(lockMsg); return; }
+  }
+  _pubSetBtnLoading(btn, true, fromBalance ? 'Publishing\u2026' : 'Processing\u2026');
   try {
-    if (!pkg) { showToast('That package isn\u2019t available right now. Try again later.'); return; }
-    try {
-      await Purchases.purchasePackage({ aPackage: pkg });
-    } catch (e) {
-      if (e && e.userCancelled) return;
-      throw e;
-    }
-    statusEl.textContent = 'Confirming purchase\u2026';
-    let balance = -1;
-    for (let i = 0; i < 6; i++) {
-      await new Promise(r => setTimeout(r, 2000));
-      try {
-        const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/mine', {
-          headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
-        });
-        if (res.ok) { const d = await res.json(); balance = d.creditBalance; if (balance >= def.views) break; }
-      } catch (e) { _nbLog('ads/mine poll', e); }
-    }
-    if (balance < def.views) {
-      showToast('Purchase is still confirming. Try Publish as Ad again in a minute.');
-      return;
+    if (!fromBalance) {
+      if (!pkg) { showToast('That package isn\u2019t available right now. Try again later.'); return; }
+      const r = await _nbBuyViews(Purchases, pkg, views, _pubAdBalance, t => { statusEl.textContent = t; });
+      if (r.cancelled) return;
+      if (!r.confirmed) {
+        showToast('Purchase is still confirming. Try Publish as Ad again in a minute.');
+        return;
+      }
     }
     statusEl.textContent = 'Publishing\u2026';
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/publish', {
+    const res = await fetch(api + '/ads/publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
-      body: JSON.stringify({ slug: note.publishedSlug, token: note.publishToken, views: def.views })
+      body: JSON.stringify({ slug: note.publishedSlug, token: note.publishToken, views: views, useBalance: fromBalance })
     });
     if (!res.ok) {
       const msg = await res.text().catch(() => '');
       if (res.status === 422) showToast(AD_NOT_ELIGIBLE_TOAST);
       else if (res.status === 409) showToast('This page is already registered as an ad');
       else if (res.status === 403) { let m = ''; try { m = JSON.parse(msg).error; } catch (e) {} showToast(m || 'That package isn\u2019t unlocked yet'); }
-      else if (res.status === 402) showToast('Not enough view credits yet. Try again shortly.');
+      else if (res.status === 402) showToast(fromBalance ? 'Your balance doesn\u2019t cover that many views.' : 'Not enough view credits yet. Try again shortly.');
       else { _nbLog('ads/publish', msg); showToast('Publish as ad failed' + _nbFailureReason(new Error('ads/publish: ' + res.status))); }
       return;
     }
     showToast('Ad published. It\u2019ll start showing on ' + (note.repost ? 'Share' : 'Write') + ' screens.');
     statusEl.textContent = '';
+    _nbStAdsAt = 0; // the Settings balance row is stale now: refetch next time it opens
     await _pubRefreshAdTab();
   } catch (e) {
     _nbLog('ad publish', e);
