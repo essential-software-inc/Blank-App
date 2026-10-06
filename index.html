@@ -3385,6 +3385,7 @@ body.pink .pub-pkg-btn.selected { border-color: #c8365e; background: #ffe0ec }
 .ad-prog-t { font-weight: 700; margin-bottom: .2rem }
 .ad-prog-s { color: #5f6370; font-size: 11.5px; line-height: 1.4; margin-top: .3rem }
 .ad-prog-row { margin-top: .5rem }
+.ad-prog-sep { margin-top: .75rem; padding-top: .65rem; border-top: 1px solid #e2e5ee }
 .ad-prog-l { display: flex; justify-content: space-between; gap: .5rem; font-size: 11.5px; font-weight: 600 }
 .ad-prog-bar { height: 5px; border-radius: 3px; background: #e2e5ee; margin-top: 4px; overflow: hidden }
 .ad-prog-bar > i { display: block; height: 100%; border-radius: 3px; background: #3366cc }
@@ -18028,7 +18029,7 @@ function _pubRenderAdStanding(targetId, opts) {
     a.onclick = () => { closePublishSheet(); nbGoSettingsAds(); };
     card.appendChild(a);
   }
-  if (inAccount && next) add('ad-prog-s', 'Friends who join with your invite code count too (see Invite friends below).');
+  if (inAccount && next) add('ad-prog-s ad-prog-sep', 'Friends you invite count toward this too, once they publish a note and are active on two days. See Invite friends below.');
   el.appendChild(card);
 }
 // ---- Invite code at sign-in ----
@@ -18186,7 +18187,7 @@ function _nbSettingsAdsPaint() {
 async function nbInviteShare() {
   const code = _nbInviteCode;
   if (!code) { showToast('Your invite code isn\u2019t ready yet'); return; }
-  const text = 'Join me on Bluebook! Add my invite code ' + code + ' under Your account and subscribe to read my notes.';
+  const text = 'Join me on Bluebook! On the sign-in screen, tap "Have an invite code?" and enter ' + code + ' to subscribe to my notes.';
   const cap = window.Capacitor && window.Capacitor.Plugins;
   try {
     if (cap && cap.Share) { await cap.Share.share({ text: text, dialogTitle: 'Invite a friend' }); return; }
