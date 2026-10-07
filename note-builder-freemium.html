@@ -2204,21 +2204,25 @@ body.pink #logout-profile-name-status { color: #875068 }
    introducing a second visual weight here. Shows the last cached count
    immediately on open and is refreshed in place — see
    _nbLoadCachedSubscriberCount / _nbFetchSubscriberCount. */
-#logout-subscriber-count {
+#logout-subscriber-count,
+#logout-following-count {
   font-size: .68rem;
   font-weight: 600;
   color: #54595d;
+  text-align: center;
   min-height: 1em
 }
 body.night #logout-avatar-fallback { background: #111111; color: #999999 }
 body.night #logout-avatar-btn { background: #111111 }
 body.night #logout-avatar-badge { background: #3a3a3d; border-color: #0e0e10 }
 body.night #logout-avatar-status { color: #999999 }
-body.night #logout-subscriber-count { color: #b7bfca }
+body.night #logout-subscriber-count,
+body.night #logout-following-count { color: #b7bfca }
 body.pink #logout-avatar-fallback { color: #c8365e }
 body.pink #logout-avatar-badge { background: #e1306c }
 body.pink #logout-avatar-status { color: #875068 }
-body.pink #logout-subscriber-count { color: #875068 }
+body.pink #logout-subscriber-count,
+body.pink #logout-following-count { color: #875068 }
 
 @keyframes acct-sync-spin {
   from { transform: rotate(0deg) }
@@ -3976,7 +3980,8 @@ body:not(.night):not(.pink) #logout-avatar-status {
    as #logout-profile-name-row label / #logout-profile-name-status just
    above — #logout-subscriber-count needs the same white-on-dark override
    or it inherits its base near-black color and disappears. */
-body:not(.night):not(.pink) #logout-subscriber-count {
+body:not(.night):not(.pink) #logout-subscriber-count,
+body:not(.night):not(.pink) #logout-following-count {
   color: rgba(255, 255, 255, .7) !important
 }
 
@@ -4688,6 +4693,7 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
         <input id="logout-avatar-input" type="file" accept="image/*" style="display:none" onchange="_nbOnProfileImageChosen(this.files[0])">
         <div id="logout-avatar-status"></div>
         <div id="logout-subscriber-count" aria-live="polite"></div>
+        <div id="logout-following-count" aria-live="polite"></div>
       </div>
       <div id="logout-profile-name-row">
         <label for="logout-profile-name-input">Display name</label>
@@ -4763,7 +4769,7 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
       <h3>Stories, subscriptions &amp; likes</h3>
       <p>From a published note's Publish sheet, you can turn on "Show in stories" (you need to sign in). That adds the note to a stories strip that other people using the app can see, not only people who have the link. It's similar to Publish as Ad, but without purchased views. Our servers save the note's web address, title, description and tags (if you've added them), when the note was created, and up to three preview images from the note's published page (plus how many images the note has, so a feed card can show how many more there are), along with your account ID. Your story shows the title. The Subscribed feed of anyone who subscribes to you shows the title, description, tags, how long ago the note was created, and how many likes it has. Preview images that come from your device are copied to our servers, and they can be loaded without a sign-in check while the story is showing. A preview image added by URL isn't copied, so viewers' devices load it straight from its source when they see your story or feed card, and that host can see their IP address. If you turn the toggle off within the first 24 hours, or unpublish the note at any time, we delete the saved copies, including the saved description and tags. Other people's devices never get your Google account ID or email. Instead, each account has a separate random author ID that means nothing outside the app. It's sent with your stories, so your picture and display name can go with them and a Subscribe tap can reach the right account. We make it ourselves, it isn't made from your Google account, and it's deleted with your account. To tell you apart from other authors, viewers see your display name, picture, or the note's title. A story can appear in the strip for 24 hours from when you turn on "Show in stories" (editing the note doesn't restart that clock). After that, it leaves the strip and your Stories tab. The strip isn't a list of every story. It shows a selection of other people's stories that reshuffles every few hours, so a story still within its 24 hours may or may not be shown to a given viewer. Your own live stories always lead your own strip, and stories from accounts a viewer already follows show up in their Subscribed feed instead of the strip. A story stays in the Subscribed feed of people who follow you (from when they followed you onward) for 7 days from when you turned on "Show in stories", or until you unpublish the note, whichever comes first. After that it leaves the feed, but the published page itself stays online. After the first 24 hours the toggle turns itself off. That just tells you the story has left the strip and your Stories tab. It stays in your followers' feeds for the rest of the 7 days. If you turn the toggle off yourself within the first 24 hours, the story disappears from the strip and from your followers' feeds.</p>
       <p>A display name and profile picture are both optional. If you set a display name, it's shown on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed. If you leave it blank, viewers just see the note's title in both places. A display name can be up to 30 characters. If you set a profile picture, it's only shown on your stories, as the ring around your avatar in the stories strip. It doesn't show on your notes in the Subscribed feed. A picture you upload is stored on our servers and served from a web address based on your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing (or to you, when you're signed in). So anyone who has your author ID, for example from seeing one of your stories, can load it during that time, and no one else can. Once you have no stories showing, the picture is no longer shown to others. If you remove the picture, it's deleted from our servers. With no picture, the story ring uses the note's own image if it has one, and only then an initial letter, taken from your display name (or the note's title if you haven't set one). That initial is never taken from your account email, which is never sent to other viewers at all.</p>
-      <p>A signed-in account can subscribe to (follow) another account from that account's story. We save who follows whom so we can build your Subscribed feed, show whether you're already following someone, and keep your follows on every device you sign in on. You can see how many accounts follow you as a total, never who. The app also keeps a copy of who you follow on your device, so it can show the Subscribe/Subscribed button without asking our servers each time. We also record, under your account, which stories you've opened, so a story you've already seen doesn't keep grabbing your attention in the strip. Searching your Subscribed feed happens on your device, within the stories already loaded. What you type is never sent to us. A signed-in account can also like a published note. We record, under your account, which notes you've liked so the heart shows correctly across your devices. For each note you like or unlike, and each account you follow or unfollow, we also note the time of your most recent action. That way, taps made on different devices (or offline and sent later) are applied in the right order. That note stays after you unlike or unfollow, and is removed once the like or follow is gone and the note is more than 30 days old, or when your account is deleted. Each published note's own like count shows on its card wherever that card appears: your Published and Stories tabs, and the Subscribed feed or Liked tab of anyone who sees the note, but never who liked it. You can also see one total on your account screen: the number of likes across all your published notes. If you unpublish a note, the likes it received are removed, so both that note's count and the combined total go down. When a published note that isn't showing as a story appears as a card, either in its author's Published tab or in someone's Liked tab, we may copy up to three preview images from that page to our servers. Like story preview images, these copies can be loaded without a sign-in check, and they're deleted when the note is unpublished or its author's account is deleted.</p>
+      <p>A signed-in account can subscribe to (follow) another account from that account's story. We save who follows whom so we can build your Subscribed feed, show whether you're already following someone, and keep your follows on every device you sign in on. You can see how many accounts follow you as a total, never who, and how many accounts you follow. The app also keeps a copy of who you follow on your device, so it can show the Subscribe/Subscribed button without asking our servers each time. We also record, under your account, which stories you've opened, so a story you've already seen doesn't keep grabbing your attention in the strip. Searching your Subscribed feed happens on your device, within the stories already loaded. What you type is never sent to us. A signed-in account can also like a published note. We record, under your account, which notes you've liked so the heart shows correctly across your devices. For each note you like or unlike, and each account you follow or unfollow, we also note the time of your most recent action. That way, taps made on different devices (or offline and sent later) are applied in the right order. That note stays after you unlike or unfollow, and is removed once the like or follow is gone and the note is more than 30 days old, or when your account is deleted. Each published note's own like count shows on its card wherever that card appears: your Published and Stories tabs, and the Subscribed feed or Liked tab of anyone who sees the note, but never who liked it. You can also see one total on your account screen: the number of likes across all your published notes. If you unpublish a note, the likes it received are removed, so both that note's count and the combined total go down. When a published note that isn't showing as a story appears as a card, either in its author's Published tab or in someone's Liked tab, we may copy up to three preview images from that page to our servers. Like story preview images, these copies can be loaded without a sign-in check, and they're deleted when the note is unpublished or its author's account is deleted.</p>
       <h3>Third-party requests &amp; server logs</h3>
       <p>Using the app makes a few requests to other companies, which can see your IP address, like any website you visit. A script library (three.js) is loaded from Cloudflare's cdnjs when the app opens. Google's sign-in code is loaded from Google when you sign in. The app sometimes asks Google (gstatic.com) for a tiny blank page, just to check whether you're online. And if you paste a Spotify link using the editor's own tools, the app asks Spotify (open.spotify.com) for that link's embed details. Requests to our servers run on Cloudflare, which processes them and may keep standard request logs (like the time, the address requested, and your IP address) that we can use to run and fix the service. We don't use them for analytics or tracking.</p>
       <h3>Activity counts</h3>
@@ -11831,6 +11837,11 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Backup & restore', s: 'Save notes to a file, or restore one', go: () => openBackupSheet() }]],
     ['Account', [
       { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) || 'Not signed in'; }, go: () => nbAccountBtnClick() },
+      { t: 'link', l: 'Display name', show: () => nbIsSignedIn(), s: () => _nbLoadCachedProfileName() || 'Not set', go: () => nbSettingsEditDisplayName() },
+      { t: 'info', l: 'Subscribers', show: () => nbIsSignedIn(), s: () => _nbStAcctText('count') },
+      { t: 'info', l: 'Likes', show: () => nbIsSignedIn(), s: () => _nbStAcctText('likes') },
+      { t: 'info', l: 'Following', show: () => nbIsSignedIn(), s: () => _nbStAcctText('following') },
+      { t: 'info', l: 'Account created', show: () => nbIsSignedIn(), s: () => _nbStAcctText('createdAt') },
       { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
@@ -11852,8 +11863,9 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   }
   window._nbStRender = function () {
     const root = document.getElementById('st-root'); if (!root) return;
-    root.innerHTML = GROUPS.map((g, gi) => '<div class="st-grp"><div class="st-h">' + g[0] + '</div><div class="st-card">' + g[1].map((r, ri) => row(r, gi, ri)).join('') + '</div></div>').join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+    root.innerHTML = GROUPS.map((g, gi) => '<div class="st-grp"><div class="st-h">' + g[0] + '</div><div class="st-card">' + g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join('') + '</div></div>').join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
     try { _nbSettingsAdsMount(); } catch (e) { _nbLog('settings ads mount', e); }
+    try { _nbSettingsAcctFetch(); } catch (e) { _nbLog('settings acct fetch', e); }
   };
   const root = document.getElementById('st-root');
   function find(el) { const g = el.dataset.g, r = el.dataset.r; return g == null ? null : GROUPS[g][1][r]; }
@@ -13738,6 +13750,7 @@ function openLogoutConfirm() {
   _nbFetchProfileName(); // reconcile with the server in case another device set it
   _nbRefreshProfileAvatar();
   document.getElementById('logout-subscriber-count').textContent = _nbLoadCachedSubscriberCount();
+  document.getElementById('logout-following-count').textContent = _nbLoadCachedFollowingCount();
   _nbFetchSubscriberCount();
   document.getElementById('logout-more-body').style.display = 'none';
   document.getElementById('delete-account-btn').style.display = 'none';
@@ -15500,6 +15513,7 @@ function _nbSaveSubscribedAuthors(set) {
   const key = _nbSubscribedAuthorsKey();
   if (!key) return;
   try { localStorage.setItem(key, JSON.stringify([...set])); } catch (e) {}
+  try { _nbStAcctAt = 0; } catch (e) {} // a follow/unfollow changes Settings > Following: refetch it next time Settings opens
 }
 // Other people's devices only ever see an account's opaque author ID, never its
 // Google sub. These compare against both so an account that signed in before the
@@ -17268,6 +17282,12 @@ async function _nbFetchProfileName(silent) {
     return true;
   } catch (e) { _nbLog('profile name fetch', e); if (!silent) showToast('Couldn\u2019t refresh your name' + _nbFailureReason(e)); return false; }
 }
+function _nbFollowingCountCacheKey() { const acct = nbAccount(); return acct ? 'nb_following_count_v1:' + acct.sub : null; }
+function _nbLoadCachedFollowingCount() {
+  const key = _nbFollowingCountCacheKey();
+  if (!key) return '';
+  try { return localStorage.getItem(key) || ''; } catch (e) { return ''; }
+}
 function _nbSubscriberCountCacheKey() { const acct = nbAccount(); return acct ? 'nb_subscriber_count_v1:' + acct.sub : null; }
 // Snappy first paint for the dialog, same role _nbLoadCachedProfileName
 // plays for the display name field: openLogoutConfirm shows this
@@ -17288,8 +17308,9 @@ let _nbCountFetchSeq = 0;
 async function _nbFetchSubscriberCount() {
   const el = document.getElementById('logout-subscriber-count');
   if (!el) return true;
+  const fel = document.getElementById('logout-following-count'), fkey = _nbFollowingCountCacheKey();
   const key = _nbSubscriberCountCacheKey();
-  if (!nbIsSignedIn()) { el.textContent = ''; if (key) { try { localStorage.removeItem(key); } catch (e) {} } return true; }
+  if (!nbIsSignedIn()) { el.textContent = ''; if (fel) fel.textContent = ''; if (key) { try { localStorage.removeItem(key); } catch (e) {} } if (fkey) { try { localStorage.removeItem(fkey); } catch (e) {} } return true; }
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
   const reqId = ++_nbCountFetchSeq; // only the newest request may write
   try {
@@ -17310,6 +17331,13 @@ async function _nbFetchSubscriberCount() {
     }
     el.textContent = text;
     if (key) { try { localStorage.setItem(key, text); } catch (e) {} }
+    // Accounts this one follows, from the same response (field: following), on a line of its own.
+    // Left as it was if the worker doesn't send it yet.
+    if (data && typeof data.following === 'number' && fel) {
+      const ftext = data.following + ' following';
+      fel.textContent = ftext;
+      if (fkey) { try { localStorage.setItem(fkey, ftext); } catch (e) {} }
+    }
     return true;
   } catch (e) { _nbLog('subscriber count fetch', e); return false; }
 }
@@ -17405,6 +17433,7 @@ async function _nbSaveProfileName(raw) {
     _nbStoriesFetchSeq++; // a /stories fetch that started before this save carries the old name
     const key = _nbProfileNameCacheKey();
     if (key) { try { localStorage.setItem(key, name); } catch (e) {} }
+    if (typeof window._nbStRefresh === 'function') window._nbStRefresh(); // Settings > Display name shows the new name
     if (statusEl) statusEl.textContent = 'Saved';
     // Keep the Log Out dialog's own avatar and any story rings for this
     // account in step with the new name right away, rather than leaving
@@ -18129,6 +18158,54 @@ async function _nbSettingsAdsFetch() {
     _nbSettingsAdsPaint();
   } catch (e) { _nbLog('settings ads', e); }
 }
+// Settings > Account rows: display name, subscribers, likes, following and when the account was made. The
+// numbers come from /account/subscriber-count and are cached per account, so the rows show the last known
+// values straight away (and offline); '\u2014' until the first load. A changed answer re-renders Settings.
+let _nbStAcctStats = null, _nbStAcctAt = 0, _nbStAcctSub = null, _nbStAcctSeq = 0;
+function _nbStAcctKey() { const a = nbAccount(); return a && a.sub ? 'nb_st_acct_stats_v1:' + a.sub : null; }
+function _nbStAcctGet() {
+  const a = nbAccount(); const who = (a && a.sub) || null;
+  if (who !== _nbStAcctSub) { // another account never sees the last one's numbers
+    _nbStAcctStats = null; _nbStAcctAt = 0; _nbStAcctSub = who;
+    const k = _nbStAcctKey();
+    if (k) { try { _nbStAcctStats = JSON.parse(localStorage.getItem(k)) || null; } catch (e) {} }
+  }
+  return _nbStAcctStats;
+}
+function _nbStAcctText(field) {
+  const d = _nbStAcctGet(), v = d && d[field];
+  if (v == null) return '\u2014';
+  if (field === 'createdAt') return new Date(v).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  return Number(v).toLocaleString();
+}
+async function _nbSettingsAcctFetch(force) {
+  if (!nbIsSignedIn() || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+  _nbStAcctGet();
+  if (!force && Date.now() - _nbStAcctAt < 20000) return;
+  _nbStAcctAt = Date.now();
+  const seq = ++_nbStAcctSeq, who = _nbStAcctSub, nameBefore = _nbLoadCachedProfileName();
+  try {
+    const [res] = await Promise.all([
+      fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/subscriber-count', { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } }),
+      _nbFetchProfileName(true) // picks up a name set on another device; writes the cache the row reads
+    ]);
+    if (!res.ok) throw new Error('acct stats: ' + res.status);
+    const d = await res.json();
+    if (seq !== _nbStAcctSeq || !nbIsSignedIn() || _nbStAcctSub !== who) return;
+    const next = { count: d.count || 0, likes: d.likes || 0, following: d.following == null ? null : d.following, createdAt: d.createdAt || null };
+    const changed = JSON.stringify(next) !== JSON.stringify(_nbStAcctStats) || nameBefore !== _nbLoadCachedProfileName();
+    _nbStAcctStats = next;
+    const k = _nbStAcctKey();
+    if (k) { try { localStorage.setItem(k, JSON.stringify(next)); } catch (e) {} }
+    if (changed && typeof window._nbStRefresh === 'function') window._nbStRefresh();
+  } catch (e) { _nbStAcctAt = 0; _nbLog('settings acct stats', e); } // 0 = last try failed, so the next render or reconnect retries
+}
+// Settings > Display name: open the Account sheet with the name field already unlocked.
+function nbSettingsEditDisplayName() {
+  if (!nbIsSignedIn()) { openAccountScreen(); return; }
+  openLogoutConfirm(); // opens with the field locked and the button on Edit
+  _nbToggleProfileNameEdit(); // unlocks, focuses, and switches the button to Save
+}
 // Back online with Settings still open: load the ad level (or the package prices) that couldn't load while
 // offline. Same retry chain as the other screens, since 'online' can fire before the connection is usable.
 let _nbStOnlineToken = 0;
@@ -18140,7 +18217,8 @@ window.addEventListener('online', () => {
       if (token !== _nbStOnlineToken || !nbIsSignedIn() || !document.getElementById('st-ads-standing')) return;
       if (!_nbStAds) await _nbSettingsAdsFetch();
       else if (_nbStFundFailed) await _nbSettingsFundRender();
-      if (_nbStAds && !_nbStFundFailed) return;
+      if (i === 0 || !_nbStAcctAt) await _nbSettingsAcctFetch(true);
+      if (_nbStAds && !_nbStFundFailed && _nbStAcctAt) return;
       if (i + 1 < delays.length) attempt(i + 1);
     }, delays[i]);
   })(0);
