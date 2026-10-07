@@ -18405,6 +18405,12 @@ function _pubAdGetOfferings() {
   return entry.p;
 }
 let _pubAdPkgsFailed = false;
+// A load only counts as good when every package we sell came back. Anything less (request error, empty or
+// missing offering, a package id absent) is a failure: the price shows an em dash and a retry is scheduled.
+function _pubAdPkgsIncomplete(packages) {
+  return !packages || AD_PACKAGE_IDENTIFIERS.some(d => !packages.find(p => p.identifier === d.id));
+}
+function _pubAdRetryDelay(n) { return Math.min(3000 * Math.pow(2, n), 30000); } // 3s, 6s, 12s, 24s, then every 30s
 async function _pubRefreshAdTab() {
   if (document.getElementById('pub-ad-tab').style.display === 'none') return;
   const _pubAdRefreshCallToken = ++_pubAdRefreshToken;
@@ -18549,7 +18555,7 @@ window.addEventListener('online', () => {
 // wipes the other's freshly-appended buttons (packages missing) or
 // appends its own on top without re-clearing (duplicated buttons, often
 // priceless if that straggler's own getOfferings() came back empty).
-let _pubAdPkgsToken = 0;
+let _pubAdPkgsToken = 0, _pubAdPkgsTries = 0, _pubAdPkgsTimer = null;
 async function _pubRenderAdPackages(eligible) {
   const myToken = ++_pubAdPkgsToken;
   const wrap = document.getElementById('pub-ad-pkgs');
@@ -18562,9 +18568,23 @@ async function _pubRenderAdPackages(eligible) {
       const offerings = await _pubAdGetOfferings();
       const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
       packages = offering && offering.availablePackages;
-    } catch (e) { _pubAdPkgsFailed = true; _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
+      if (_pubAdPkgsIncomplete(packages)) { _pubAdPkgsFailed = true; _pubAdOfferings = null; _nbLog('ad offerings', new Error('offering or package missing')); }
+    } catch (e) { _pubAdPkgsFailed = true; _nbLog('ad offerings', e); if (!_pubAdPkgsTries) showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
   }
   if (myToken !== _pubAdPkgsToken) return; // a newer call has since started; let it own the DOM
+  clearTimeout(_pubAdPkgsTimer);
+  if (_pubAdPkgsFailed) {
+    // Keep trying on its own while the Ad tab stays open; no need to close and reopen the sheet.
+    _pubAdPkgsTimer = setTimeout(() => {
+      const ov = document.getElementById('publish-overlay'), tab = document.getElementById('pub-ad-tab');
+      if (!ov || !ov.classList.contains('open') || !tab || tab.style.display === 'none') { _pubAdPkgsTries = 0; return; }
+      _pubAdPkgsTries++;
+      _pubRenderAdPackages(eligible);
+    }, _pubAdRetryDelay(_pubAdPkgsTries));
+  } else if (Purchases) {
+    if (_pubAdPkgsTries) _pubAdLoadingHide(); // an earlier "couldn't load prices" banner no longer applies
+    _pubAdPkgsTries = 0;
+  }
   wrap.innerHTML = '';
   AD_PACKAGE_IDENTIFIERS.forEach(def => {
     const pkg = packages && packages.find(p => p.identifier === def.id);
@@ -18672,7 +18692,7 @@ async function _nbBuyViews(Purchases, pkg, views, knownBalance, setStatus) {
 }
 
 // ---- Settings: fund the balance. Buy views now with no note attached; they sit in the balance and go on any ad later. ----
-let _nbStFunding = false, _nbStFundSeq = 0, _nbStFundFailed = false;
+let _nbStFunding = false, _nbStFundSeq = 0, _nbStFundFailed = false, _nbStFundTries = 0, _nbStFundTimer = null;
 let _nbFundStatusText = '';
 function _nbFundStatus(t) { _nbFundStatusText = t || ''; const e = document.getElementById('st-fund-status'); if (e) e.textContent = _nbFundStatusText; }
 async function _nbSettingsFundRender() {
@@ -18687,9 +18707,15 @@ async function _nbSettingsFundRender() {
     const offerings = await _pubAdGetOfferings();
     const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
     packages = offering && offering.availablePackages;
+    if (_pubAdPkgsIncomplete(packages)) { failed = true; _pubAdOfferings = null; _nbLog('settings offerings', new Error('offering or package missing')); }
   } catch (e) { failed = true; _nbLog('settings offerings', e); }
   if (seq !== _nbStFundSeq || !document.getElementById('st-fund')) return; // a newer render owns the DOM
   _nbStFundFailed = failed;
+  clearTimeout(_nbStFundTimer);
+  if (failed) {
+    // Retry by itself for as long as Settings is showing; the next render re-arms or stops this.
+    _nbStFundTimer = setTimeout(() => { if (document.getElementById('st-fund')) { _nbStFundTries++; _nbSettingsFundRender(); } }, _pubAdRetryDelay(_nbStFundTries));
+  } else _nbStFundTries = 0;
   el.innerHTML = '';
   const t = document.createElement('div'); t.className = 'ad-prog-t'; t.textContent = 'Add views to your balance'; el.appendChild(t);
   const sub = document.createElement('div'); sub.className = 'ad-prog-s';
