@@ -11844,7 +11844,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'info', l: 'Account created', show: () => nbIsSignedIn(), s: () => _nbStAcctText('createdAt') },
     ]],
     ['About & support', [
-      { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
+      { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', inert: () => nbIsPro(), go: () => openPaywallDialog() },
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
       { t: 'link', l: 'Support', s: 'essentialsoftware.support@gmail.com', go: () => { window.location.href = 'mailto:essentialsoftware.support@gmail.com'; } },
@@ -11860,7 +11860,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       const cur = String(r.get ? r.get() : window._nbSt(r.k));
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
     }
-    if (r.t === 'info') return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
+    if (r.t === 'info' || (r.inert && r.inert())) return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
     return '<button type="button" class="st-row st-link"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + CHEV + '</button>';
   }
   window._nbStRender = function () {
