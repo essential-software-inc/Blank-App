@@ -11836,15 +11836,13 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Sync now', s: 'Pull and push your notes', go: () => { if (!nbIsSignedIn()) { showToast('Sign in to sync your notes'); return; } nbSyncNow(); } },
       { t: 'link', l: 'Backup & restore', s: 'Save notes to a file, or restore one', go: () => openBackupSheet() }]],
     ['Account', [
-      { t: 'link', l: 'Email', s: () => { const a = nbAccount(); return (a && a.email) || 'Not signed in'; }, go: () => nbAccountBtnClick() },
+      { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) || 'Not signed in'; }, go: () => nbAccountBtnClick() },
       { t: 'link', l: 'Display name', show: () => nbIsSignedIn(), s: () => _nbLoadCachedProfileName() || 'Not set', go: () => nbSettingsEditDisplayName() },
       { t: 'info', l: 'Subscribers', show: () => nbIsSignedIn(), s: () => _nbStAcctText('count') },
       { t: 'info', l: 'Likes', show: () => nbIsSignedIn(), s: () => _nbStAcctText('likes') },
       { t: 'info', l: 'Following', show: () => nbIsSignedIn(), s: () => _nbStAcctText('following') },
       { t: 'info', l: 'Account created', show: () => nbIsSignedIn(), s: () => _nbStAcctText('createdAt') },
-    ]],
-    ['About & support', [
-      { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', inert: () => nbIsPro(), go: () => openPaywallDialog() },
+      { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
       { t: 'link', l: 'Support', s: 'essentialsoftware.support@gmail.com', go: () => { window.location.href = 'mailto:essentialsoftware.support@gmail.com'; } },
@@ -11860,7 +11858,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       const cur = String(r.get ? r.get() : window._nbSt(r.k));
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
     }
-    if (r.t === 'info' || (r.inert && r.inert())) return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
+    if (r.t === 'info') return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
     return '<button type="button" class="st-row st-link"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + CHEV + '</button>';
   }
   window._nbStRender = function () {
@@ -11961,7 +11959,98 @@ function _setSplashBarPct(pct) {
   if (bar) bar.style.width = clamped + '%';
   if (wrap) wrap.style.setProperty('--splash-pct', clamped + '%');
 }
+// ---- Terms & Privacy Policy updates ----
+// The app ships with a copy of each document (the text inside #privacy-body and #cterms-body). An admin can publish a newer one
+// (Tools > Terms & Privacy Policy in the admin page, which also alerts everyone). The app keeps the newest version it has seen
+// and shows that instead of its built-in copy, from the next time it shows the document.
+const NB_LEGAL = { privacy: 'privacy-body', terms: 'cterms-body' };
+const _nbLegalBundled = {};
+const _NB_LEGAL_TAGS = { P: 1, H3: 1, H4: 1, STRONG: 1, EM: 1, B: 1, I: 1, U: 1, UL: 1, OL: 1, LI: 1, BR: 1, A: 1, SMALL: 1, SPAN: 1, DIV: 1, BLOCKQUOTE: 1 };
+const _NB_LEGAL_DROP = { SCRIPT: 1, STYLE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, LINK: 1, META: 1, BASE: 1, FORM: 1, INPUT: 1, BUTTON: 1, TEXTAREA: 1, SELECT: 1, SVG: 1, MATH: 1, TEMPLATE: 1, NOSCRIPT: 1, IMG: 1, VIDEO: 1, AUDIO: 1 };
+function _nbLegalKey(kind) { return 'nb_legal_v1:' + kind; }
+function _nbLegalCached(kind) {
+  try {
+    const j = JSON.parse(localStorage.getItem(_nbLegalKey(kind)) || 'null');
+    return j && j.v > 0 && typeof j.html === 'string' ? j : null;
+  } catch (e) { return null; }
+}
+// Only basic text markup gets through: unknown tags are unwrapped, risky ones dropped, every attribute removed except a link's
+// https/mailto address. (The worker refuses worse than this too; this is the check on the device.)
+function _nbLegalClean(html) {
+  const doc = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html');
+  (function clean(node) {
+    let c = node.firstChild;
+    while (c) {
+      let next = c.nextSibling;
+      if (c.nodeType === 1) {
+        const tag = c.tagName;
+        if (_NB_LEGAL_DROP[tag]) {
+          node.removeChild(c);
+        } else if (tag === 'H1' || tag === 'H2') {
+          const h = doc.createElement('h3');
+          while (c.firstChild) h.appendChild(c.firstChild);
+          node.replaceChild(h, c);
+          clean(h);
+        } else if (!_NB_LEGAL_TAGS[tag]) {
+          next = c.firstChild || next;
+          while (c.firstChild) node.insertBefore(c.firstChild, c);
+          node.removeChild(c);
+        } else {
+          const href = tag === 'A' ? c.getAttribute('href') : null;
+          Array.from(c.attributes).forEach(a => c.removeAttribute(a.name));
+          if (tag === 'A' && href && /^(https:|mailto:)/i.test(href.trim())) {
+            c.setAttribute('href', href.trim());
+            c.setAttribute('target', '_blank');
+            c.setAttribute('rel', 'noopener noreferrer');
+          }
+          clean(c);
+        }
+      } else if (c.nodeType !== 3) {
+        node.removeChild(c);
+      }
+      c = next;
+    }
+  })(doc.body);
+  return doc.body.innerHTML;
+}
+// yyyy-mm-dd from the text's leading "Effective <d> <Month> <yyyy>" line, or '' when it has none.
+function _nbLegalEff(html) {
+  const m = /^\s*<p>\s*<em>\s*Effective\s+(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\s*<\/em>\s*<\/p>/i.exec(String(html || ''));
+  if (!m) return '';
+  const i = ['january','february','march','april','may','june','july','august','september','october','november','december'].indexOf(m[2].toLowerCase());
+  return i < 0 ? '' : m[3] + '-' + String(i + 1).padStart(2, '0') + '-' + String(Number(m[1])).padStart(2, '0');
+}
+// Puts the newest text this device has (if any) into the document. The built-in text stays as the fallback.
+function _nbLegalApply(kind) {
+  const el = document.getElementById(NB_LEGAL[kind]);
+  if (!el) return;
+  if (_nbLegalBundled[kind] === undefined) _nbLegalBundled[kind] = el.innerHTML;
+  const c = _nbLegalCached(kind);
+  if (!c) { el.innerHTML = _nbLegalBundled[kind]; return; }
+  // An app update can ship a built-in copy newer than the published one this device cached: the newer Effective date wins.
+  const be = _nbLegalEff(_nbLegalBundled[kind]), ce = _nbLegalEff(c.html);
+  if (be && ce && be > ce) { el.innerHTML = _nbLegalBundled[kind]; return; }
+  try { el.innerHTML = _nbLegalClean(c.html); } catch (e) { el.innerHTML = _nbLegalBundled[kind]; _nbLog('legal apply', e); }
+}
+async function nbLegalSync(kind) {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/legal/' + kind);
+    if (!res.ok) return;
+    const j = await res.json();
+    const cur = _nbLegalCached(kind);
+    // version 0 = nothing published yet: keep the built-in copy.
+    if (!j || !(j.version > 0) || typeof j.html !== 'string' || (cur && cur.v >= j.version)) return;
+    try { localStorage.setItem(_nbLegalKey(kind), JSON.stringify({ v: j.version, html: j.html, at: j.updatedAt || 0 })); } catch (e) { return; }
+    _nbLegalApply(kind);
+  } catch (e) { _nbLog('legal sync', e); }
+}
+function nbLegalSyncAll() { Object.keys(NB_LEGAL).forEach(nbLegalSync); }
+setTimeout(nbLegalSyncAll, 6000);
+window.addEventListener('online', () => setTimeout(nbLegalSyncAll, 2500));
 function openPrivacy() {
+  _nbLegalApply('privacy');
+  nbLegalSync('privacy');
   document.getElementById('privacy-overlay').classList.add('open');
   lockScroll();
 }
@@ -13872,6 +13961,8 @@ function nbGateRestoreBackup(e) {
   return false;
 }
 function openConsumerTerms() {
+  _nbLegalApply('terms');
+  nbLegalSync('terms');
   document.getElementById('cterms-overlay').classList.add('open');
   lockScroll();
 }
@@ -18405,12 +18496,6 @@ function _pubAdGetOfferings() {
   return entry.p;
 }
 let _pubAdPkgsFailed = false;
-// A load only counts as good when every package we sell came back. Anything less (request error, empty or
-// missing offering, a package id absent) is a failure: the price shows an em dash and a retry is scheduled.
-function _pubAdPkgsIncomplete(packages) {
-  return !packages || AD_PACKAGE_IDENTIFIERS.some(d => !packages.find(p => p.identifier === d.id));
-}
-function _pubAdRetryDelay(n) { return Math.min(3000 * Math.pow(2, n), 30000); } // 3s, 6s, 12s, 24s, then every 30s
 async function _pubRefreshAdTab() {
   if (document.getElementById('pub-ad-tab').style.display === 'none') return;
   const _pubAdRefreshCallToken = ++_pubAdRefreshToken;
@@ -18555,7 +18640,7 @@ window.addEventListener('online', () => {
 // wipes the other's freshly-appended buttons (packages missing) or
 // appends its own on top without re-clearing (duplicated buttons, often
 // priceless if that straggler's own getOfferings() came back empty).
-let _pubAdPkgsToken = 0, _pubAdPkgsTries = 0, _pubAdPkgsTimer = null;
+let _pubAdPkgsToken = 0;
 async function _pubRenderAdPackages(eligible) {
   const myToken = ++_pubAdPkgsToken;
   const wrap = document.getElementById('pub-ad-pkgs');
@@ -18568,23 +18653,9 @@ async function _pubRenderAdPackages(eligible) {
       const offerings = await _pubAdGetOfferings();
       const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
       packages = offering && offering.availablePackages;
-      if (_pubAdPkgsIncomplete(packages)) { _pubAdPkgsFailed = true; _pubAdOfferings = null; _nbLog('ad offerings', new Error('offering or package missing')); }
-    } catch (e) { _pubAdPkgsFailed = true; _nbLog('ad offerings', e); if (!_pubAdPkgsTries) showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
+    } catch (e) { _pubAdPkgsFailed = true; _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
   }
   if (myToken !== _pubAdPkgsToken) return; // a newer call has since started; let it own the DOM
-  clearTimeout(_pubAdPkgsTimer);
-  if (_pubAdPkgsFailed) {
-    // Keep trying on its own while the Ad tab stays open; no need to close and reopen the sheet.
-    _pubAdPkgsTimer = setTimeout(() => {
-      const ov = document.getElementById('publish-overlay'), tab = document.getElementById('pub-ad-tab');
-      if (!ov || !ov.classList.contains('open') || !tab || tab.style.display === 'none') { _pubAdPkgsTries = 0; return; }
-      _pubAdPkgsTries++;
-      _pubRenderAdPackages(eligible);
-    }, _pubAdRetryDelay(_pubAdPkgsTries));
-  } else if (Purchases) {
-    if (_pubAdPkgsTries) _pubAdLoadingHide(); // an earlier "couldn't load prices" banner no longer applies
-    _pubAdPkgsTries = 0;
-  }
   wrap.innerHTML = '';
   AD_PACKAGE_IDENTIFIERS.forEach(def => {
     const pkg = packages && packages.find(p => p.identifier === def.id);
@@ -18692,7 +18763,7 @@ async function _nbBuyViews(Purchases, pkg, views, knownBalance, setStatus) {
 }
 
 // ---- Settings: fund the balance. Buy views now with no note attached; they sit in the balance and go on any ad later. ----
-let _nbStFunding = false, _nbStFundSeq = 0, _nbStFundFailed = false, _nbStFundTries = 0, _nbStFundTimer = null;
+let _nbStFunding = false, _nbStFundSeq = 0, _nbStFundFailed = false;
 let _nbFundStatusText = '';
 function _nbFundStatus(t) { _nbFundStatusText = t || ''; const e = document.getElementById('st-fund-status'); if (e) e.textContent = _nbFundStatusText; }
 async function _nbSettingsFundRender() {
@@ -18707,15 +18778,9 @@ async function _nbSettingsFundRender() {
     const offerings = await _pubAdGetOfferings();
     const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
     packages = offering && offering.availablePackages;
-    if (_pubAdPkgsIncomplete(packages)) { failed = true; _pubAdOfferings = null; _nbLog('settings offerings', new Error('offering or package missing')); }
   } catch (e) { failed = true; _nbLog('settings offerings', e); }
   if (seq !== _nbStFundSeq || !document.getElementById('st-fund')) return; // a newer render owns the DOM
   _nbStFundFailed = failed;
-  clearTimeout(_nbStFundTimer);
-  if (failed) {
-    // Retry by itself for as long as Settings is showing; the next render re-arms or stops this.
-    _nbStFundTimer = setTimeout(() => { if (document.getElementById('st-fund')) { _nbStFundTries++; _nbSettingsFundRender(); } }, _pubAdRetryDelay(_nbStFundTries));
-  } else _nbStFundTries = 0;
   el.innerHTML = '';
   const t = document.createElement('div'); t.className = 'ad-prog-t'; t.textContent = 'Add views to your balance'; el.appendChild(t);
   const sub = document.createElement('div'); sub.className = 'ad-prog-s';
@@ -19001,8 +19066,12 @@ function nbImportNotes(e) {
   reader.onload = async function (ev) {
     try {
       const json = JSON.parse(ev.target.result);
-      const incoming = Array.isArray(json.notes) ? json.notes : Array.isArray(json) ? json : null;
-      if (!incoming) throw new Error('bad format');
+      const rawIncoming = Array.isArray(json.notes) ? json.notes : Array.isArray(json) ? json : null;
+      if (!rawIncoming) throw new Error('bad format');
+      // Checked before anything is written: an entry that isn't a note object with an id is skipped, and a file with
+      // no usable note at all is refused, so a damaged backup can't fail half-way after its images are already stored.
+      const incoming = rawIncoming.filter(n => n && typeof n === 'object' && !Array.isArray(n) && (typeof n.id === 'string' || typeof n.id === 'number'));
+      if (rawIncoming.length && !incoming.length) throw new Error('bad format');
       // Restore the referenced image data first so it's already in
       // IndexedDB by the time the notes referencing it render. Awaited
       // (not fire-and-forget) so the reload below can't fire before
