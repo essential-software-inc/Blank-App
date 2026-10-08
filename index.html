@@ -12028,8 +12028,9 @@ function _nbLegalApply(kind) {
   const c = _nbLegalCached(kind);
   if (!c) { el.innerHTML = _nbLegalBundled[kind]; return; }
   // An app update can ship a built-in copy newer than the published one this device cached: the newer Effective date wins.
+  // A cached copy with no readable Effective date counts as oldest, so the built-in wins over it.
   const be = _nbLegalEff(_nbLegalBundled[kind]), ce = _nbLegalEff(c.html);
-  if (be && ce && be > ce) { el.innerHTML = _nbLegalBundled[kind]; return; }
+  if (be && be > ce) { el.innerHTML = _nbLegalBundled[kind]; return; }
   try { el.innerHTML = _nbLegalClean(c.html); } catch (e) { el.innerHTML = _nbLegalBundled[kind]; _nbLog('legal apply', e); }
 }
 async function nbLegalSync(kind) {
