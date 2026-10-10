@@ -4324,6 +4324,8 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 // One-time: glass mode became default-on. Settings used to persist glassMode:false for everyone who ever changed any setting,
 // which silently overrode the new default (classic splash/sign-in). Drop that stale false once; later toggles are respected.
 try{if(!localStorage.getItem('nb_glass_def1')){var _s=JSON.parse(localStorage.getItem('nb_settings_v1')||'null');if(_s&&_s.glassMode===false){delete _s.glassMode;localStorage.setItem('nb_settings_v1',JSON.stringify(_s))}localStorage.setItem('nb_glass_def1','1')}}catch(e){}
+// One-time: swipe-from-left-edge-to-open-Media became default-on; same stale-false problem as glass mode above.
+try{if(!localStorage.getItem('nb_swipe_def1')){var _t=JSON.parse(localStorage.getItem('nb_settings_v1')||'null');if(_t&&_t.mediaSwipe===false){delete _t.mediaSwipe;localStorage.setItem('nb_settings_v1',JSON.stringify(_t))}localStorage.setItem('nb_swipe_def1','1')}}catch(e){}
 </script>
 <script>
 // Locks scroll before any layout happens, so the WebView never sees a
@@ -5015,6 +5017,12 @@ body.pink #md-hdr{background:#c8365e}
 /* one glass recipe for every theme: same tint strength + blur, so light no longer reads solid white */
 #md-hdr,body.pink #md-hdr,#md-sticky,.md-acts,#md-np-top,#md-np.np-docked #md-np-dock{background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
 #md-hdr,#md-sticky,.md-acts,#md-np-top,#md-np-dock{transition:background-color .2s,box-shadow .2s,border-color .2s}
+/* Media sheets (item menu, playlists, new playlist): same glass as the other sheets, handle bar and title sit directly on it */
+#md-sheet-box{background:color-mix(in srgb,var(--md-sheet) 70%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
+.md-grab,.md-sh-title{background:transparent}
+/* hairlines between rows / tiles: the solid near-white ones read as white lines on glass, so they become translucent */
+#md-screen{--md-div:rgba(20,30,50,.1)}
+body.pink #md-screen{--md-div:rgba(200,54,94,.16)}
 body:not(.pink) #md-screen:not(.md-scrolled) #md-hdr{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
 body.pink #md-hdr{color:var(--md-cur);border-bottom-color:var(--md-div);box-shadow:var(--md-stsh)}
 body.pink #md-screen:not(.md-scrolled) #md-hdr{background:transparent;box-shadow:none;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -5024,9 +5032,9 @@ body.pink #md-hdr .md-ib:active{background:var(--md-press)}
 #md-hdr{transition:background-color .2s,box-shadow .2s,border-color .2s,color .2s}
 #md-screen:not(.md-scrolled) #md-sticky,#md-screen:not(.md-scrolled) .md-acts{background:transparent;border-bottom-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 /* ===== app tabs share the Media look: wash backdrop, header/search melt into it at rest, glass once scrolled ===== */
-body{--nb-bg:#fff;--nb-wash:.24;--nb-hdr-fg:#3366cc;--nb-hbd:#e8ecf4;--nb-hsh:0 2px 12px rgba(0,0,0,.10);--nb-stbd:#eef1f7}
+body{--nb-bg:#fff;--nb-wash:.24;--nb-hdr-fg:#3366cc;--nb-hbd:rgba(20,30,50,.1);--nb-hsh:0 2px 12px rgba(0,0,0,.10);--nb-stbd:rgba(20,30,50,.08)}
 body.night{--nb-bg:#080808;--nb-wash:.5;--nb-hdr-fg:#e8e8e8;--nb-hbd:rgba(255,255,255,.06);--nb-hsh:0 4px 8px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.08);--nb-stbd:#232326}
-body.pink{--nb-bg:#fff8fb;--nb-wash:.28;--nb-hdr-fg:#bd2856;--nb-hbd:#f5d5e2;--nb-hsh:0 4px 8px rgba(200,54,94,.12),0 8px 24px rgba(200,54,94,.08);--nb-stbd:#f5c5d8}
+body.pink{--nb-bg:#fff8fb;--nb-wash:.28;--nb-hdr-fg:#bd2856;--nb-hbd:rgba(200,54,94,.16);--nb-hsh:0 4px 8px rgba(200,54,94,.12),0 8px 24px rgba(200,54,94,.08);--nb-stbd:rgba(200,54,94,.16)}
 #nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--splash-img,var(--splash-img-0));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
 #nb-wash-fade{position:fixed;left:0;right:0;top:0;height:74%;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--nb-bg) 0%,transparent) 0%,color-mix(in srgb,var(--nb-bg) 10%,transparent) 20%,color-mix(in srgb,var(--nb-bg) 35%,transparent) 40%,color-mix(in srgb,var(--nb-bg) 68%,transparent) 60%,color-mix(in srgb,var(--nb-bg) 92%,transparent) 80%,color-mix(in srgb,var(--nb-bg) 98%,transparent) 90%,var(--nb-bg) 100%)}
 body.reader-mode #nb-wash,body.reader-mode #nb-wash-fade{display:none}
@@ -5072,6 +5080,33 @@ body:not(.reader-mode):not(.nb-scrolled) #nb-app #site-header,body:not(.reader-m
 body.pink:not(.reader-mode) #nb-app #header-title,body.pink:not(.reader-mode) #nb-app #header-title .hdr-title-inner,body.pink:not(.reader-mode) #nb-app .hdr-btn,body.pink:not(.reader-mode) #nb-app #back-btn,body.pink:not(.reader-mode) #nb-app .hdr-dashes{color:var(--nb-hdr-fg)}
 body.pink:not(.reader-mode) #nb-app #back-btn svg{stroke:var(--nb-hdr-fg)}
 body:not(.reader-mode) #nb-app #screen-settings{background:transparent}
+/* Story strip: the solid white gap between the gradient ring and the avatar becomes a page-tinted glass gap, and the seen ring / empty avatar fill turn translucent */
+.nb-story-ring-inner,.nb-story-ring-img{border-color:color-mix(in srgb,var(--nb-bg) 40%,transparent)}
+/* Unseen ring: same hues, softened to glass (translucent so the wash shows through, a little less saturated, hairline edge like the cards) */
+.nb-story-ring:not(.seen){background:linear-gradient(45deg,rgba(245,166,35,.72),rgba(225,48,108,.72),rgba(193,53,132,.72),rgba(131,58,180,.72));box-shadow:0 0 0 1px var(--nb-card-ring),0 1px 3px var(--nb-card-lift);filter:saturate(.85)}
+body:not(.night):not(.pink) .nb-story-ring.seen{background:rgba(20,30,50,.16)}
+body.pink .nb-story-ring.seen{background:rgba(200,54,94,.2)}
+body.night .nb-story-ring.seen{background:rgba(255,255,255,.18)}
+body:not(.night):not(.pink) .nb-story-ring-inner{background:rgba(233,237,243,.6)}
+body.pink .nb-story-ring-inner{background:rgba(251,225,236,.6)}
+body.night .nb-story-ring-inner{background:rgba(17,17,17,.6)}
+#screen-settings{--st-line:rgba(20,30,50,.1)}
+/* Switches / progress tracks: the pale off-track vanished on the translucent surfaces, so it gets a firmer tint + hairline edge (on = unchanged) */
+body:not(.night):not(.pink) .nb-switch-track{background:rgba(20,30,50,.28);box-shadow:inset 0 0 0 1px rgba(20,30,50,.12)}
+body:not(.night):not(.pink) .nb-switch-input:checked ~ .nb-switch-track{background:#3366cc;box-shadow:none}
+body.pink .nb-switch-track{background:rgba(200,54,94,.32);box-shadow:inset 0 0 0 1px rgba(200,54,94,.16)}
+body.pink .nb-switch-input:checked ~ .nb-switch-track{background:#bd2856;box-shadow:none}
+body.night .nb-switch-track{box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+body.night .nb-switch-input:checked ~ .nb-switch-track{box-shadow:none}
+body:not(.night):not(.pink) #st-ads-card .ad-prog-bar,body:not(.night):not(.pink) .ad-prog-bar{background:rgba(20,30,50,.16)}
+body.pink .ad-prog-bar{background:rgba(200,54,94,.2)}
+body.night #screen-settings{--st-line:#282828}
+body.pink #screen-settings{--st-line:rgba(200,54,94,.16)}
+/* Story viewer: header is the same see-through glass as the app header, over the same colour wash (the iframe below stays opaque) */
+#story-viewer-overlay{overflow:hidden}
+#story-viewer-overlay::before{content:'';position:absolute;left:-20%;right:-20%;top:-10%;height:180px;background-image:var(--splash-img,var(--splash-img-0));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
+#story-viewer-header{z-index:1;background:color-mix(in srgb,var(--nb-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border-bottom-color:var(--nb-hbd)}
+#story-viewer-frame{position:relative;z-index:1}
 
 /* ===== Glass + dark: legibility over the wash ===== */
 /* The wash is an image, so it is kept dim in dark themes: white titles/icons and the greys on top of it stay readable. */
@@ -5105,7 +5140,7 @@ body.pink #edit-reset-overlay,body.pink #sync-conflict-overlay,body.pink #delete
 #unpublish-dialog,
 #delete-account-dialog,
 #signout-dialog {
-  background:#fff;border:none;border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;
+  background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(213,222,242,.6);border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;
   box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)
 }
 body.night #reset-dialog,
@@ -5114,7 +5149,7 @@ body.night #delete-dialog,
 body.night #unpublish-dialog,
 body.night #delete-account-dialog,
 body.night #signout-dialog {
-  background:#111;border:1px solid rgba(255,255,255,.07);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6)
+  background:rgba(17,17,17,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.1);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6)
 }
 body.pink #reset-dialog,
 body.pink #sync-conflict-dialog,
@@ -5122,7 +5157,7 @@ body.pink #delete-dialog,
 body.pink #unpublish-dialog,
 body.pink #delete-account-dialog,
 body.pink #signout-dialog {
-  background:#fff8fb;border:none;border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22)
+  background:rgba(255,248,251,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(245,197,216,.6);border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22)
 }
 #reset-dialog .rdlg-title,
 #sync-conflict-dialog .rdlg-title,
@@ -5194,7 +5229,7 @@ body.pink #signout-dialog .rdlg-body {color:#875068}
 #unpublish-dialog .rdlg-cancel,
 #delete-account-dialog .rdlg-cancel,
 #signout-dialog .rdlg-cancel {
-  background:#f6f8fc;color:#3366cc;border:1px solid #e4e9f5
+  background:rgba(246,248,252,.6);color:#3366cc;border:1px solid rgba(20,30,50,.12)
 }
 body.night #reset-dialog .rdlg-cancel,
 body.night #sync-conflict-dialog .rdlg-cancel,
@@ -5202,7 +5237,7 @@ body.night #delete-dialog .rdlg-cancel,
 body.night #unpublish-dialog .rdlg-cancel,
 body.night #delete-account-dialog .rdlg-cancel,
 body.night #signout-dialog .rdlg-cancel {
-  background:#1c1c1c;color:#b0b0b0;border:1px solid #383838
+  background:rgba(28,28,28,.6);color:#b0b0b0;border:1px solid #383838
 }
 body.pink #reset-dialog .rdlg-cancel,
 body.pink #sync-conflict-dialog .rdlg-cancel,
@@ -5210,7 +5245,7 @@ body.pink #delete-dialog .rdlg-cancel,
 body.pink #unpublish-dialog .rdlg-cancel,
 body.pink #delete-account-dialog .rdlg-cancel,
 body.pink #signout-dialog .rdlg-cancel {
-  background:#ffe0ec;color:#c8365e;border:1px solid #f5c5d8
+  background:rgba(255,224,236,.6);color:#c8365e;border:1px solid rgba(200,54,94,.2)
 }
 @media (prefers-reduced-motion:reduce){
 #edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay,#reset-dialog,#sync-conflict-dialog,#delete-dialog,#unpublish-dialog,#delete-account-dialog,#signout-dialog{animation:none}
@@ -5240,7 +5275,7 @@ body.nb-reduce-motion #signout-dialog {animation:none}
 #restore-overlay,
 #privacy-overlay,
 #cterms-overlay,
-#einfo-overlay {--sh-bg:#fff;--sh-fg:#202122;--sh-sub:#54595d;--sh-div:#e8ecf4;--sh-shadow:rgba(0,0,0,.25);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:#f6f8fc;--sh-secf:#3366cc;--sh-secb:#e4e9f5;--sh-field:#fff;--sh-fieldsh:inset 0 2px 6px rgba(20,30,50,.12),inset 0 1px 2px rgba(20,30,50,.06);--sh-fieldf:#fff;--sh-fieldfsh:inset 0 1px 2px rgba(51,102,204,.05),0 0 0 3px rgba(51,102,204,.2)}
+#einfo-overlay {--sh-bg:rgba(255,255,255,.7);--sh-fg:#202122;--sh-sub:#54595d;--sh-div:rgba(20,30,50,.1);--sh-shadow:rgba(0,0,0,.25);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(246,248,252,.6);--sh-secf:#3366cc;--sh-secb:rgba(20,30,50,.12);--sh-field:#fff;--sh-fieldsh:inset 0 2px 6px rgba(20,30,50,.12),inset 0 1px 2px rgba(20,30,50,.06);--sh-fieldf:#fff;--sh-fieldfsh:inset 0 1px 2px rgba(51,102,204,.05),0 0 0 3px rgba(51,102,204,.2)}
 body.night #edit-overlay,
 body.night #publish-overlay,
 body.night #backup-overlay,
@@ -5250,7 +5285,7 @@ body.night #paywall-overlay,
 body.night #restore-overlay,
 body.night #privacy-overlay,
 body.night #cterms-overlay,
-body.night #einfo-overlay {--sh-bg:#111;--sh-fg:#e8e8e8;--sh-sub:#8f98a3;--sh-div:rgba(255,255,255,.07);--sh-shadow:rgba(0,0,0,.6);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:#1c1c1c;--sh-secf:#b0b0b0;--sh-secb:#383838;--sh-field:#0a0a0c;--sh-fieldsh:inset 0 2px 6px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.05);--sh-fieldf:#141418;--sh-fieldfsh:0 0 0 3px rgba(255,255,255,.1)}
+body.night #einfo-overlay {--sh-bg:rgba(17,17,17,.72);--sh-fg:#e8e8e8;--sh-sub:#8f98a3;--sh-div:rgba(255,255,255,.07);--sh-shadow:rgba(0,0,0,.6);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(28,28,28,.6);--sh-secf:#b0b0b0;--sh-secb:#383838;--sh-field:#0a0a0c;--sh-fieldsh:inset 0 2px 6px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.05);--sh-fieldf:#141418;--sh-fieldfsh:0 0 0 3px rgba(255,255,255,.1)}
 body.pink #edit-overlay,
 body.pink #publish-overlay,
 body.pink #backup-overlay,
@@ -5260,7 +5295,7 @@ body.pink #paywall-overlay,
 body.pink #restore-overlay,
 body.pink #privacy-overlay,
 body.pink #cterms-overlay,
-body.pink #einfo-overlay {--sh-bg:#fff8fb;--sh-fg:#1a0a12;--sh-sub:#875068;--sh-div:#f5d5e2;--sh-shadow:rgba(200,54,94,.2);--sh-scrim:rgba(70,12,32,.45);--sh-secbg:#ffe0ec;--sh-secf:#c8365e;--sh-secb:#f5c5d8;--sh-field:#fff2f7;--sh-fieldsh:inset 0 2px 5px rgba(200,54,94,.06),0 1px 0 rgba(255,255,255,.6);--sh-fieldf:#fff;--sh-fieldfsh:0 0 0 3px rgba(200,54,94,.15)}
+body.pink #einfo-overlay {--sh-bg:rgba(255,248,251,.72);--sh-fg:#1a0a12;--sh-sub:#875068;--sh-div:rgba(200,54,94,.16);--sh-shadow:rgba(200,54,94,.2);--sh-scrim:rgba(70,12,32,.45);--sh-secbg:rgba(255,224,236,.6);--sh-secf:#c8365e;--sh-secb:rgba(200,54,94,.2);--sh-field:#fff2f7;--sh-fieldsh:inset 0 2px 5px rgba(200,54,94,.06),0 1px 0 rgba(255,255,255,.6);--sh-fieldf:#fff;--sh-fieldfsh:0 0 0 3px rgba(200,54,94,.15)}
 #edit-overlay,
 #publish-overlay,
 #backup-overlay,
@@ -5272,36 +5307,36 @@ body.pink #einfo-overlay {--sh-bg:#fff8fb;--sh-fg:#1a0a12;--sh-sub:#875068;--sh-
 #cterms-overlay,
 #einfo-overlay {background:var(--sh-scrim);animation:sh-fade .2s}
 #edit-dialog,
-#publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+#publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
 body:not(.night):not(.pink) #edit-dialog,
-body:not(.night):not(.pink) #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+body:not(.night):not(.pink) #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
 body.night #edit-dialog,
-body.night #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+body.night #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
 body.pink #edit-dialog,
-body.pink #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+body.pink #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
 #edit-dialog {max-height:85vh}
 #publish-sheet {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
 #publish-sheet.is-live {height:min(calc(330px + env(safe-area-inset-bottom,0px)),85vh)}
 #edit-dhdr,
-#publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+#publish-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
 #edit-dhdr-title,
 #publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
 #edit-close,
 #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .15s}
 body:not(.night):not(.pink) #edit-dhdr,
-body:not(.night):not(.pink) #publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+body:not(.night):not(.pink) #publish-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
 body:not(.night):not(.pink) #edit-dhdr-title,
 body:not(.night):not(.pink) #publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
 body:not(.night):not(.pink) #edit-close,
 body:not(.night):not(.pink) #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .15s}
 body.night #edit-dhdr,
-body.night #publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+body.night #publish-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
 body.night #edit-dhdr-title,
 body.night #publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
 body.night #edit-close,
 body.night #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .15s}
 body.pink #edit-dhdr,
-body.pink #publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+body.pink #publish-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
 body.pink #edit-dhdr-title,
 body.pink #publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
 body.pink #edit-close,
@@ -5309,7 +5344,7 @@ body.pink #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;he
 #edit-close:active,
 #publish-close:active {background:rgba(127,127,127,.18)}
 #pub-tabs {padding:0 1.2rem !important;gap:1.2rem !important;border-bottom:1px solid var(--sh-div)}
-#publish-body {background:var(--sh-bg) !important;color:var(--sh-fg);padding:1.1rem 1.2rem .8rem}
+#publish-body {background:transparent !important;color:var(--sh-fg);padding:1.1rem 1.2rem .8rem}
 #edit-dialog .markup-meta-fields {background:transparent;border:none;padding:.3rem 1.2rem .5rem;gap:.6rem}
 #edit-dialog #edit-meta-row {background:transparent !important;border:none !important;padding:0 1.2rem .9rem !important;gap:.6rem !important}
 #edit-dialog .com-field,
@@ -5322,12 +5357,12 @@ body.pink #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;he
 #pub-slug-prefix {padding-left:.9rem;font-size:.95rem}
 #pub-slug-input {padding:.7rem .9rem .7rem .15rem;font-size:.95rem}
 .pub-url {border-radius:12px;padding:.7rem .9rem}
-body:not(.night):not(.pink) .pub-url {background:#f6f8fc;border-color:#e4e9f5}
+body:not(.night):not(.pink) .pub-url {background:rgba(246,248,252,.6);border-color:rgba(20,30,50,.12)}
 #edit-dfooter,
 #pub-footer-new,
 #pub-footer-live,
 #pub-footer-ad-new,
-#pub-footer-ad-live {background:var(--sh-bg) !important;border:none !important;padding:.5rem 1.2rem calc(env(safe-area-inset-bottom,0px) + 1rem);gap:.6rem}
+#pub-footer-ad-live {background:transparent !important;border:none !important;padding:.5rem 1.2rem calc(env(safe-area-inset-bottom,0px) + 1rem);gap:.6rem}
 #edit-dfooter-r,
 #pub-footer-new-r,
 #pub-footer-live-r,
@@ -5364,28 +5399,28 @@ body:not(.night):not(.pink) .pub-url {background:#f6f8fc;border-color:#e4e9f5}
 #backup-body,
 #account-body {padding:1.1rem 1.2rem calc(env(safe-area-inset-bottom,0px) + 1.2rem)}
 body.night #backup-sheet,
-body.night #account-dialog {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+body.night #account-dialog {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important}
 body.night #backup-hdr,
-body.night #account-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;box-shadow:none !important}
+body.night #account-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;box-shadow:none !important}
 body.night #backup-hdr-title,
 body.night #account-hdr-title {color:var(--sh-fg) !important}
 body.night #backup-close,
 body.night #account-close,
 body.night .acct-sync-btn {color:var(--sh-sub) !important}
 body.night #backup-body,
-body.night #account-body {background:var(--sh-bg) !important;color:var(--sh-fg)}
+body.night #account-body {background:transparent !important;color:var(--sh-fg)}
 body.night #backup-body .bkp-help {color:var(--sh-sub)}
 body.pink #backup-sheet,
-body.pink #account-dialog {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+body.pink #account-dialog {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important}
 body.pink #backup-hdr,
-body.pink #account-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;box-shadow:none !important}
+body.pink #account-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;box-shadow:none !important}
 body.pink #backup-hdr-title,
 body.pink #account-hdr-title {color:var(--sh-fg) !important}
 body.pink #backup-close,
 body.pink #account-close,
 body.pink .acct-sync-btn {color:var(--sh-sub) !important}
 body.pink #backup-body,
-body.pink #account-body {background:var(--sh-bg) !important;color:var(--sh-fg)}
+body.pink #account-body {background:transparent !important;color:var(--sh-fg)}
 body.pink #backup-body .bkp-help {color:var(--sh-sub)}
 body:not(.night):not(.pink) #backup-hdr,
 body:not(.night):not(.pink) #account-hdr {background:transparent !important;border:none !important;box-shadow:none !important}
@@ -5397,13 +5432,13 @@ body:not(.night):not(.pink) #account-hdr {background:transparent !important;bord
 #account-body .bkp-btn-sec {background:var(--sh-secbg) !important;color:var(--sh-secf) !important;border:1px solid var(--sh-secb) !important;box-shadow:none !important;text-shadow:none !important}
 #terms-dialog,
 #paywall-dialog,
-#restore-dialog {background:#fff !important;border:none;border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+#restore-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:none;border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
 body.night #terms-dialog,
 body.night #paywall-dialog,
-body.night #restore-dialog {background:#111 !important;border:1px solid rgba(255,255,255,.07);box-shadow:0 8px 24px rgba(0,0,0,.6)}
+body.night #restore-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.07);box-shadow:0 8px 24px rgba(0,0,0,.6)}
 body.pink #terms-dialog,
 body.pink #paywall-dialog,
-body.pink #restore-dialog {background:#fff8fb !important;border:none;box-shadow:0 8px 24px rgba(200,54,94,.22)}
+body.pink #restore-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:none;box-shadow:0 8px 24px rgba(200,54,94,.22)}
 #terms-dialog .rdlg-title,
 #paywall-dialog .rdlg-title,
 #restore-dialog .rdlg-title {font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5rem}
@@ -5435,10 +5470,10 @@ body.pink #restore-dialog .rdlg-body {color:#875068}
 #restore-dialog .ebtn-pri:active {transform:scale(.97)}
 #privacy-dialog,
 #cterms-dialog,
-#einfo-dialog {background:#fff !important;border:none;border-radius:20px;box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+#einfo-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:none;border-radius:20px;box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
 #privacy-dhdr,
 #cterms-dhdr,
-#einfo-dhdr {background:#fff;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
+#einfo-dhdr {background:transparent;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
 #privacy-dhdr-title,
 #cterms-dhdr-title,
 #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
@@ -5450,10 +5485,10 @@ body.pink #restore-dialog .rdlg-body {color:#875068}
 #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
 body.night #privacy-dialog,
 body.night #cterms-dialog,
-body.night #einfo-dialog {background:#111 !important;border:1px solid rgba(255,255,255,.07);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+body.night #einfo-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.07);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
 body.night #privacy-dhdr,
 body.night #cterms-dhdr,
-body.night #einfo-dhdr {background:#111;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
+body.night #einfo-dhdr {background:transparent;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
 body.night #privacy-dhdr-title,
 body.night #cterms-dhdr-title,
 body.night #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
@@ -5465,10 +5500,10 @@ body.night #cterms-body,
 body.night #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
 body.pink #privacy-dialog,
 body.pink #cterms-dialog,
-body.pink #einfo-dialog {background:#fff8fb !important;border:none;border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+body.pink #einfo-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:none;border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
 body.pink #privacy-dhdr,
 body.pink #cterms-dhdr,
-body.pink #einfo-dhdr {background:#fff8fb;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
+body.pink #einfo-dhdr {background:transparent;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
 body.pink #privacy-dhdr-title,
 body.pink #cterms-dhdr-title,
 body.pink #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
@@ -5497,11 +5532,11 @@ body.pink #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:
 #st-invite .ebtn-sec {border-radius:14px}
 #story-viewer-title {font-weight:800;font-size:1.05rem;letter-spacing:-.02em}
 #account-screen-card {border-radius:20px}
-#_wptoast {background:rgba(255,255,255,.92) !important;color:#202122 !important;border:1px solid #e8ecf4;box-shadow:0 8px 24px rgba(20,30,50,.18) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+#_wptoast {background:rgba(255,255,255,.7) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:#202122 !important;border:1px solid #e8ecf4;box-shadow:0 8px 24px rgba(20,30,50,.18) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 #_wptoast .toast-ok {background:#f6f8fc;color:#3366cc;border:1px solid #e4e9f5;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
-body.night #_wptoast {background:rgba(30,30,34,.9) !important;color:#f0f0f0 !important;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.6) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+body.night #_wptoast {background:rgba(30,30,34,.72) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:#f0f0f0 !important;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.6) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 body.night #_wptoast .toast-ok {background:#1c1c1c;color:#b0b0b0;border:1px solid #383838;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
-body.pink #_wptoast {background:rgba(255,242,247,.94) !important;color:#1a0a12 !important;border:1px solid #f5c5d8;box-shadow:0 8px 24px rgba(200,54,94,.22) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+body.pink #_wptoast {background:rgba(255,242,247,.72) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:#1a0a12 !important;border:1px solid #f5c5d8;box-shadow:0 8px 24px rgba(200,54,94,.22) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 body.pink #_wptoast .toast-ok {background:#ffe0ec;color:#c8365e;border:1px solid #f5c5d8;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
 @media (prefers-reduced-motion:reduce){
 #edit-overlay,
@@ -12877,7 +12912,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 /* ===================== Settings ===================== */
 (function () {
   const KEY = 'nb_settings_v1';
-  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, glassMode: true, mediaSwipe: false, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
+  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, glassMode: true, mediaSwipe: true, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
   let S = null, lastPoll = 0;
   function load() {
     try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
@@ -16297,9 +16332,15 @@ function _nbMotionOff() {
 // button is pinned to its old pixel width, then transitioned to the new one; the pins are removed afterwards so
 // the normal layout (which already equals the end state) takes over seamlessly.
 const _NB_MORPH_MS = 300;
+// In a column flex container flex-basis sizes the HEIGHT, so a width morph pinned through flex-basis makes the button
+// jump to that many px tall and shrink back. Column containers (account sheet buttons, empty-state buttons) skip it.
+function _nbIsColumnFlex(el) {
+  const p = el && getComputedStyle(el);
+  return !!p && /flex$/.test(p.display) && p.flexDirection.indexOf('column') === 0;
+}
 function _pubMorphRow(btn, mutate) {
   const row = btn && btn.parentElement;
-  if (!row || _nbMotionOff() || !btn.isConnected) { mutate(); return; }
+  if (!row || _nbMotionOff() || !btn.isConnected || _nbIsColumnFlex(row)) { mutate(); return; }
   const items = Array.from(row.children).filter(el => el.nodeType === 1 && el.getBoundingClientRect().width > 0);
   const before = items.map(el => el.getBoundingClientRect().width);
   const _t0 = performance.now();
@@ -16387,14 +16428,16 @@ function _pubClearMorph(el) {
       const ow = lastW.get(el);
       lastW.set(el, nw);
       if (ow === undefined || Math.abs(nw - ow) < 2) continue;
+      if (ow < 1 || nw < 1) continue; // shown/hidden (sheet opening), not a content change
       const t = touched.get(el);
       if (!t || now - t > 100) continue; // resized by layout/rotation/etc., not by its own content changing
       touched.delete(el);
       if (_nbMotionOff() || el.classList.contains('nb-morphing') || (el._nbMorphAt && now - el._nbMorphAt < 500)) continue;
-      el.animate([
-        { width: ow + 'px', flexBasis: ow + 'px', flexGrow: 0, flexShrink: 0, minWidth: '0px', overflow: 'hidden', whiteSpace: 'nowrap' },
-        { width: nw + 'px', flexBasis: nw + 'px', flexGrow: 0, flexShrink: 0, minWidth: '0px', overflow: 'hidden', whiteSpace: 'nowrap' }
-      ], { duration: 280, easing: 'cubic-bezier(.34,1.2,.5,1)' });
+      const col = el.parentElement && _nbIsColumnFlex(el.parentElement); // column: flex-basis would size the height, so animate width only
+      const kf = w => col
+        ? { width: w + 'px', overflow: 'hidden', whiteSpace: 'nowrap' }
+        : { width: w + 'px', flexBasis: w + 'px', flexGrow: 0, flexShrink: 0, minWidth: '0px', overflow: 'hidden', whiteSpace: 'nowrap' };
+      el.animate([kf(ow), kf(nw)], { duration: 280, easing: 'cubic-bezier(.34,1.2,.5,1)' });
     }
   });
   const watch = root => {
@@ -17853,7 +17896,13 @@ let _nbSubFeedTotal = null; // size of the whole list, as the worker reports it 
 const NB_EMPTY_LEADS = [
   'Mix text, photos, checklists, and more into scrapbook-style notes. ',
   'Paste posts, videos, and songs into one note on the Share screen. ',
-  'Play the songs and videos from your notes in the Media panel. '
+  'Play the songs and videos from your notes in the Media panel. ',
+  'Scan your notes in Media to build a library of songs, videos, albums, and playlists. ',
+  'Swipe in from the left edge of any screen to open Media. ',
+  'Sign in to sync your notes between devices and keep an automatic backup. ',
+  'Save your notes to a file, or restore them, from Backup & restore in Settings. ',
+  'Switch between Light, Dark, and Pink themes, or turn on Glass mode, in Settings. ',
+  'Sort your notes by recently edited, newest, or A\u2013Z from Settings. '
 ];
 // Rotates so the empty states cover the whole app, not just Write: starts on the next one each launch
 // and moves on whenever a category is picked, so it stays put across re-renders of the same list.
