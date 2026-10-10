@@ -574,6 +574,79 @@ body.pink #_wptoast .toast-ok {
   to { transform: rotate(360deg) }
 }
 
+/* Busy buttons ("Signing out…", "Unpublishing…", "Saving…") swap in a longer label than the idle one, while the
+   buttons in a row are equal-width (flex:1 1 0; min-width:0). _pubFitBusyBtn() measures the busy label and, only
+   if it won't fit at the button's normal width with its own side padding, adds .nb-busy-grow so THIS button
+   widens to fit (and ends up wider than its neighbour); the neighbour just gives up the extra space. */
+.nb-busy-measure {
+  flex: none !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  white-space: nowrap !important
+}
+
+.nb-busy-grow {
+  flex: 1 0 auto !important;
+  min-width: max-content !important;
+  white-space: nowrap !important
+}
+
+:has(> .nb-busy-grow) > button:not(.nb-busy-grow) {
+  min-width: min-content !important
+}
+
+/* While a row of buttons is resizing (see _pubMorphRow) the label stays on one line and is clipped by the button
+   instead of wrapping, so the text slides in/out with the width rather than reflowing mid-animation. */
+.nb-morphing { overflow: hidden; white-space: nowrap !important }
+
+/* Click feedback for every button: the press squash / spring-back is driven from JS (see _nbButtonFx, it uses the
+   independent `scale` property so it never fights a button's own transform or transition). The ripple lives in its
+   own clipping layer so it never clips badges or shadows on the button itself. */
+.nb-ripple-clip {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none
+}
+
+.nb-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: currentColor;
+  opacity: .22;
+  transform: scale(0);
+  animation: nb-ripple .6s cubic-bezier(.2, .6, .3, 1) forwards
+}
+
+@keyframes nb-ripple {
+  to { transform: scale(1); opacity: 0 }
+}
+
+body.nb-reduce-motion .nb-ripple-clip { display: none }
+
+/* Switches: springy thumb, stretches while pressed (like a physical toggle), track colour fades */
+.nb-switch-track { transition: background-color .26s ease, box-shadow .2s ease !important }
+.nb-switch-thumb { transition: transform .34s cubic-bezier(.34, 1.56, .64, 1), width .16s ease, box-shadow .2s ease !important }
+.nb-switch-input:not(:disabled):active ~ .nb-switch-track .nb-switch-thumb { width: 23px }
+.nb-switch-input:not(:disabled):checked:active ~ .nb-switch-track .nb-switch-thumb { transform: translateX(11px) }
+body.nb-reduce-motion .nb-switch-track,
+body.nb-reduce-motion .nb-switch-thumb { transition: none !important }
+
+/* Pill choices: colours ease over instead of snapping, and in sequence so the text is never left in the wrong
+   colour for the fill behind it (re-rendered bars do the same in _nbPillFx):
+   - becoming selected: the label flips to its selected colour first, then the fill arrives behind it
+   - becoming unselected: the fill drains first, then the label flips back
+   (Each state's own transition applies on the way INTO that state.) Works for every theme, as it only orders
+   the existing colours. */
+body .cat-pill, body .md-chip, body .md-srcb, body .st-chip, body .pub-tab-btn {
+  transition: background-color .22s ease, border-color .22s ease, color .12s ease .12s, box-shadow .22s ease
+}
+body .cat-pill.active, body .md-chip.on, body .md-srcb.on, body .st-chip.on, body .pub-tab-btn.is-active {
+  transition: color .1s ease, background-color .22s ease .08s, border-color .22s ease .08s, box-shadow .22s ease .08s
+}
+
 #feed-view {
   display: block
 }
@@ -616,8 +689,8 @@ body.pink #_wptoast .toast-ok {
   font-family: inherit;
   cursor: pointer;
   color: #54595d;
-  background: #f6f8fc;
-  border: 1px solid #e4e9f5;
+  background: rgba(246, 248, 252, .5);
+  border: 1px solid rgba(213, 222, 242, .75);
   white-space: nowrap;
   transition: background .12s, color .12s;
   user-select: none;
@@ -3625,18 +3698,30 @@ body:not(.night):not(.pink) .ebtn-pri:disabled {
 }
 
 body:not(.night):not(.pink) .guide-card {
-  background: linear-gradient(160deg, #ffffff 0%, #f6f8fc 100%) !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.72) 0%, rgba(246, 248, 252, 0.6) 100%) !important;
   border: none !important;
-  box-shadow: 0 1px 3px rgba(20, 30, 50, 0.12), 0 1px 2px rgba(20, 30, 50, 0.06) !important;
+  box-shadow: 0 1px 3px rgba(20, 30, 50, 0.09), 0 1px 2px rgba(20, 30, 50, 0.04), 0 0 0 1px rgba(213, 222, 242, 0.5) !important;
   border-radius: 16px !important;
   transition: box-shadow 0.2s ease
 }
 
-body:not(.night):not(.pink) .guide-card:active {
-  box-shadow: 0 2px 6px rgba(20, 30, 50, 0.16), 0 1px 3px rgba(20, 30, 50, 0.10) !important
+/* Light theme: the bottom nav melts into the page like the header does (frosted glass instead of a solid white bar) */
+body:not(.night):not(.pink):not(.reader-mode) #bottom-nav {
+  background: color-mix(in srgb, var(--nb-bg, #fff) 68%, transparent) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border-top-color: rgba(213, 222, 242, 0.6);
+  box-shadow: 0 -1px 6px rgba(20, 30, 50, 0.05)
 }
 
-body:not(.night):not(.pink) input[type="search"],
+/* Light theme: small boxes inside Settings cards */
+body:not(.night):not(.pink) .ad-prog { background: rgba(248, 249, 252, 0.6); border-color: rgba(213, 222, 242, 0.75) }
+body:not(.night):not(.pink) #st-signedout-invite { background: rgba(244, 246, 251, 0.6); border-color: rgba(213, 222, 242, 0.75) }
+
+body:not(.night):not(.pink) .guide-card:active {
+  box-shadow: 0 2px 6px rgba(20, 30, 50, 0.13), 0 1px 3px rgba(20, 30, 50, 0.08), 0 0 0 1px rgba(213, 222, 242, 0.6) !important
+}
+
 body:not(.night):not(.pink) .com-field {
   background: #ffffff !important;
   border: 1px solid transparent !important;
@@ -3645,9 +3730,22 @@ body:not(.night):not(.pink) .com-field {
   transition: all 0.2s ease
 }
 
-body:not(.night):not(.pink) input[type="search"]:focus,
 body:not(.night):not(.pink) .com-field:focus {
   background: #ffffff !important;
+  box-shadow: inset 0 1px 2px rgba(51, 102, 204, 0.05), 0 0 0 3px rgba(51, 102, 204, 0.2) !important
+}
+
+/* Search bars: translucent rather than pure white, so they pick up the page wash instead of glaring against it */
+body:not(.night):not(.pink) input[type="search"] {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid transparent !important;
+  box-shadow: inset 0 1px 3px rgba(20, 30, 50, 0.07), 0 0 0 1px rgba(213, 222, 242, 0.6) !important;
+  border-radius: 12px;
+  transition: all 0.2s ease
+}
+
+body:not(.night):not(.pink) input[type="search"]:focus {
+  background: rgba(255, 255, 255, 0.85) !important;
   box-shadow: inset 0 1px 2px rgba(51, 102, 204, 0.05), 0 0 0 3px rgba(51, 102, 204, 0.2) !important
 }
 
@@ -4553,6 +4651,9 @@ body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;-
 .st-grp{margin-bottom:1.2rem}
 .st-h{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--st-sub);margin:0 .3rem .45rem}
 .st-card{background:var(--st-card);border:1px solid var(--st-line);border-radius:12px;overflow:hidden}
+/* Light theme: Settings cards (and the amount buttons inside them) are translucent, like the Library cards, pills and search bars */
+body:not(.night):not(.pink) .st-card{background:rgba(255,255,255,.68);border-color:rgba(213,222,242,.7);box-shadow:0 1px 3px rgba(20,30,50,.06)}
+body:not(.night):not(.pink) .st-fund-btn{background:rgba(244,246,251,.6);border-color:rgba(213,222,242,.75)}
 .st-row{display:flex;align-items:center;gap:.8rem;width:100%;padding:.8rem .9rem;background:none;border:0;border-top:1px solid var(--st-line);color:var(--st-fg);font:inherit;text-align:left;cursor:pointer}
 .st-row:first-child{border-top:0}
 .st-col{flex-direction:column;align-items:stretch;gap:.55rem;cursor:default}
@@ -4560,6 +4661,11 @@ body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;-
 .st-l{font-size:.92rem;font-weight:600}
 .st-s{font-size:.75rem;color:var(--st-sub);line-height:1.35;margin-top:.1rem}
 .st-link svg{flex-shrink:0;color:var(--st-sub)}
+.st-danger{justify-content:center}
+.st-danger .st-txt{flex:none;align-items:center}
+.st-danger .st-l{color:#d6284a;font-weight:700}
+body.night .st-danger .st-l{color:#ff7a8c}
+body.pink .st-danger .st-l{color:#bd2856}
 .st-chips{display:flex;flex-wrap:wrap;gap:.4rem}
 .st-chip{padding:.38rem .8rem;border-radius:999px;border:1px solid var(--st-line);background:none;color:var(--st-fg);font:inherit;font-size:.8rem;cursor:pointer}
 .st-chip.on{background:var(--st-acc);border-color:var(--st-acc);color:var(--st-on);font-weight:600}
@@ -4577,11 +4683,11 @@ body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinn
 --md-hb:#fff;--md-hf:#3366cc;--md-hbd:#e8ecf4;--md-hsh:0 2px 12px rgba(0,0,0,.10);
 --md-stbg:#fff;--md-stbd:#eef1f7;--md-stsh:0 1px 3px rgba(20,30,50,.06);
 --md-csh:0 1px 3px rgba(20,30,50,.12),0 1px 2px rgba(20,30,50,.06);
---md-pill:#f6f8fc;--md-pillb:#e4e9f5;--md-pillf:#54595d;--md-pa:#3366cc;--md-paf:#fff;
+--md-pill:rgba(246,248,252,.5);--md-pillb:rgba(213,222,242,.75);--md-pillf:#54595d;--md-pa:#3366cc;--md-paf:#fff;
 --md-pri:#3366cc;--md-prif:#fff;--md-prish:inset 0 1.5px 0 rgba(255,255,255,.25),inset 0 -1.5px 0 rgba(0,0,0,.15),0 6px 16px rgba(51,102,204,.35),0 2px 4px rgba(0,0,0,.15);
 --md-sec:#f6f8fc;--md-secf:#3366cc;--md-secb:#e4e9f5;
 --md-ico:#9aabcc;--md-cur:#3366cc;--md-bar:#3366cc;--md-npb:#3366cc;--md-npbf:#fff;
---md-field:#fff;--md-fieldsh:inset 0 2px 6px rgba(20,30,50,.12),inset 0 1px 2px rgba(20,30,50,.06);--md-fieldf:#fff;--md-fieldfsh:inset 0 1px 2px rgba(51,102,204,.05),0 0 0 3px rgba(51,102,204,.2);
+--md-field:rgba(255,255,255,.6);--md-fieldsh:inset 0 1px 3px rgba(20,30,50,.07),0 0 0 1px rgba(213,222,242,.6);--md-fieldf:rgba(255,255,255,.85);--md-fieldfsh:inset 0 1px 2px rgba(51,102,204,.05),0 0 0 3px rgba(51,102,204,.2);
 --md-sheet:#fff;--md-mini:rgba(255,255,255,.88);--md-msh:0 8px 24px rgba(20,30,50,.18);--md-wash:.24;--md-tint:rgba(51,102,204,.08);
 --md-hh:calc(58px + env(safe-area-inset-top,0px));
 --md-ph:#757575;--md-ring:rgba(51,102,204,.38);--md-ash:rgba(0,0,0,.35);--md-lsh:rgba(0,0,0,.28);--md-ssh:rgba(0,0,0,.25);--md-sscrim:rgba(10,10,12,.5);--md-track:rgba(127,127,127,.3);--md-grab:rgba(127,127,127,.4);--md-press:rgba(127,127,127,.18);
@@ -12703,7 +12809,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'sw', k: 'images', l: 'Image previews', s: 'Show photos on note cards. Off gives a tighter list.' },
       { t: 'sw', k: 'stories', l: 'Stories strip', s: 'Show stories above your notes in All.', after: () => _nbSyncStoriesStripVisibility() },
       { t: 'sw', k: 'tips', l: 'Welcome tips', s: 'Show the intro carousel in the Library.' },
-      { t: 'sw', k: 'hideLibCount', l: 'Hide Library category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Uncategorized and your own categories).', after: () => buildCatBar() },
+      { t: 'sw', k: 'hideLibCount', l: 'Hide Library category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Alerts, Published, Stories, Subscribed, Liked, Uncategorized and your own categories).', after: () => buildCatBar() },
       { t: 'sw', k: 'hideMdCount', l: 'Hide Media category counts', s: 'Hide the counts on the Media tabs (Songs, Videos, Albums and Playlists).' },
       { t: 'sw', k: 'mediaSwipe', l: 'Swipe from left edge to open Media', s: 'Swipe in from the left edge of the screen, on any screen in the app, to open Media (songs, videos, albums, playlists).' }]],
     ['Writing', [
@@ -12723,6 +12829,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'info', l: 'Account created', show: () => nbIsSignedIn(), s: () => _nbStAcctText('createdAt') },
       { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
     ]],
+    ['', [
+      { t: 'link', l: 'Sign out', danger: true, show: () => nbIsSignedIn(), go: () => openSettingsSignOutConfirm() }]],
     ['About & Support', [
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
@@ -12740,11 +12848,11 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
     }
     if (r.t === 'info') return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
-    return '<button type="button" class="st-row st-link"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + CHEV + '</button>';
+    return '<button type="button" class="st-row st-link' + (r.danger ? ' st-danger' : '') + '"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + (r.danger ? '' : CHEV) + '</button>';
   }
   window._nbStRender = function () {
     const root = document.getElementById('st-root'); if (!root) return;
-    root.innerHTML = GROUPS.map((g, gi) => '<div class="st-grp"><div class="st-h">' + E(g[0]) + '</div><div class="st-card">' + g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join('') + '</div></div>').join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+    root.innerHTML = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
     try { _nbSettingsAdsMount(); } catch (e) { _nbLog('settings ads mount', e); }
     try { _nbSettingsAcctFetch(); } catch (e) { _nbLog('settings acct fetch', e); }
   };
@@ -12756,7 +12864,15 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     if (b.classList.contains('st-link')) { r.go(); return; }
     const v = r.k === 'syncEvery' ? Number(b.dataset.v) : b.dataset.v;
     try { if (r.set) r.set(v); else put(r.k, v); } catch (err) { _nbLog('settings chip', err); }
-    window._nbStRender();
+    // Move the highlight in place first so the colours ease over (and pop), then redraw once it has settled;
+    // redrawing straight away replaced the buttons and nothing could animate.
+    const sibs = b.parentElement ? Array.from(b.parentElement.querySelectorAll('.st-chip')) : [];
+    if (sibs.length && !_nbMotionOff()) {
+      sibs.forEach(s => { const on = s === b; s.classList.toggle('on', on); s.setAttribute('aria-pressed', String(on)); });
+      b.animate([{ scale: '.9' }, { scale: '1.08', offset: .55 }, { scale: '1' }], { duration: 340, easing: 'ease-out' });
+      clearTimeout(window._nbStChipT);
+      window._nbStChipT = setTimeout(() => window._nbStRender(), 300);
+    } else window._nbStRender();
   });
   root.addEventListener('change', e => {
     const i = e.target.closest('.nb-switch-input'); if (!i) return;
@@ -13717,6 +13833,8 @@ async function _nbCompleteGoogleSignIn(idToken) {
   if (!nbRefreshCurrentView('signin', true)) nbRenderNotesScreen();
   nbRenderStoriesStrip(); // ring state (seen/unseen) is per-account
   _nbFetchSubscriberCount(); // so it's already cached by the time the sign-out sheet is first opened
+  _nbFetchPubCounts().catch(e => _nbLog('pub counts', e)); // Published | Stories | Liked tab counts for the new account
+  _nbFetchSubUnread(true).catch(e => _nbLog('count unread', e)); // and the Subscribed tab's unread count
   _nbRedeemPendingInvite(); // a code typed on the sign-in screen
   _nbReconcileAccountActions(); // this account's follows and likes, wherever they were made
   _nbFetchProfileName(); // pick up whatever name this account already has set, if any
@@ -13815,6 +13933,7 @@ async function nbSignOut() {
   if (!nbRefreshCurrentView('signout', true)) nbRenderNotesScreen();
   nbRenderStoriesStrip();
   _nbFetchSubscriberCount(); // clears/resets now that we're signed out
+  _nbFetchPubCounts().catch(e => _nbLog('pub counts', e)); // signed out: drops the Published | Stories counts
 }
 // Same {notes, images} shape nbExportNotes() writes to a backup file —
 // kept as its own small function rather than refactoring nbExportNotes
@@ -14811,6 +14930,34 @@ async function confirmLogout() {
   document.getElementById('signout-overlay').classList.remove('open');
   closeLogoutConfirm();
   openAccountScreen();
+}
+// Settings' Sign out tile: the same confirmation dialog as the account sheet's Sign out, but opened from Settings, so
+// Cancel (or a tap outside) just closes it and a successful sign-out stays on Settings (which redraws signed-out)
+// instead of jumping to the account screen.
+function openSettingsSignOutConfirm() {
+  if (!nbIsSignedIn()) return;
+  const ov = document.getElementById('signout-overlay');
+  const cancelBtn = document.getElementById('signout-dialog-cancel');
+  const confirmBtn = document.getElementById('signout-dialog-confirm');
+  const acct = nbAccount();
+  document.getElementById('signout-confirm-email').textContent = (acct && acct.email) ? (window._nbMaskEmail ? window._nbMaskEmail(acct.email) : acct.email) : 'your account';
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = 'Sign out';
+  delete confirmBtn.dataset.origLabel;
+  const close = () => { if (confirmBtn.disabled) return; ov.classList.remove('open'); };
+  cancelBtn.onclick = close;
+  ov.onclick = (e) => { if (e.target === ov) close(); };
+  confirmBtn.onclick = async () => {
+    _pubSetBtnLoading(confirmBtn, true, 'Signing out\u2026');
+    try {
+      await Promise.all([nbSignOut(), new Promise(r => setTimeout(r, 400))]);
+    } finally {
+      _pubSetBtnLoading(confirmBtn, false);
+    }
+    ov.classList.remove('open');
+    try { if (typeof window._nbStRefresh === 'function') window._nbStRefresh(); } catch (e) {}
+  };
+  ov.classList.add('open');
 }
 // The account dialog's Sign out button asks first. Same layering as Delete account below: this dialog sits on top (higher
 // z-index, themed with the other confirm dialogs), the account dialog is hidden while it is up, and Cancel or a tap outside
@@ -15940,6 +16087,7 @@ function _pubSaveNoteFields(id, fields) {
   // any change made on another device since.
   nbSyncPullThenPush();
   _nbRefreshPublishedCat(); // Published appears with the first published note and goes with the last
+  if ('publishedSlug' in fields || 'showInStories' in fields || 'lastPublishedAt' in fields) _nbFetchPubCounts(true).catch(e => _nbLog('pub counts', e)); // the tab counts follow a publish, update (which can start a new 24h story cycle), unpublish or stories toggle
   return arr[idx];
 }
 function _pubDefaultSlug(note) {
@@ -15993,7 +16141,212 @@ function _pubLockSiblingSecondaries(btn, lock) {
     }
   });
 }
+// A busy label is longer than the idle one (Sign out -> "Signing out…", Unpublish -> "Unpublishing…") and the
+// buttons in a row share the width equally, so the label used to get squeezed or wrapped. Measure the busy label
+// on one nowrap line (.nb-busy-measure); only if that is wider than the button currently is, mark the button
+// .nb-busy-grow so it widens to fit with its normal side padding. Buttons whose label already fits are untouched,
+// and the class is always removed again when loading ends.
+function _pubFitBusyBtn(btn, loading) {
+  if (!btn || !btn.classList) return;
+  btn.classList.remove('nb-busy-grow', 'nb-busy-measure');
+  if (!loading) return;
+  const have = btn.getBoundingClientRect().width;
+  btn.classList.add('nb-busy-measure');
+  const need = btn.getBoundingClientRect().width;
+  btn.classList.remove('nb-busy-measure');
+  if (need > have + 0.5) btn.classList.add('nb-busy-grow');
+}
+// ---- Animated resize + click feedback ----
+function _nbMotionOff() {
+  // Same source of truth as the Settings switch: _nbSt('reduceMotion') already resolves to the phone's setting while the switch is untouched, and to the switch once it has been set either way.
+  try { return window._nbSt ? !!window._nbSt('reduceMotion') : !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; }
+}
+// Runs `mutate` (which swaps a label / grows a button) and animates every button in the same row from its old
+// width to its new one, so growing for "Unpublishing…" and shrinking back are smooth rather than a jump. Each
+// button is pinned to its old pixel width, then transitioned to the new one; the pins are removed afterwards so
+// the normal layout (which already equals the end state) takes over seamlessly.
+const _NB_MORPH_MS = 300;
+function _pubMorphRow(btn, mutate) {
+  const row = btn && btn.parentElement;
+  if (!row || _nbMotionOff() || !btn.isConnected) { mutate(); return; }
+  const items = Array.from(row.children).filter(el => el.nodeType === 1 && el.getBoundingClientRect().width > 0);
+  const before = items.map(el => el.getBoundingClientRect().width);
+  const _t0 = performance.now();
+  items.forEach(el => { el._nbMorphAt = _t0; clearTimeout(el._nbMorphT); _pubClearMorph(el); });
+  mutate();
+  const after = items.map(el => el.getBoundingClientRect().width);
+  const moving = items.filter((el, i) => Math.abs(after[i] - before[i]) > 1);
+  if (!moving.length) return;
+  items.forEach((el, i) => {
+    const s = el.style;
+    el.classList.add('nb-morphing');
+    s.setProperty('transition', 'none', 'important');
+    s.setProperty('flex-grow', '0', 'important');
+    s.setProperty('flex-shrink', '0', 'important');
+    s.setProperty('min-width', '0', 'important');
+    s.setProperty('flex-basis', before[i] + 'px', 'important');
+  });
+  void row.offsetWidth; // commit the starting widths before transitioning
+  items.forEach((el, i) => {
+    const s = el.style;
+    s.setProperty('transition', 'flex-basis ' + _NB_MORPH_MS + 'ms cubic-bezier(.34,1.2,.5,1), transform .42s cubic-bezier(.34,1.56,.64,1)', 'important');
+    s.setProperty('flex-basis', after[i] + 'px', 'important');
+    el._nbMorphT = setTimeout(() => _pubClearMorph(el), _NB_MORPH_MS + 60);
+  });
+}
+function _pubClearMorph(el) {
+  el.classList.remove('nb-morphing');
+  ['transition', 'flex-grow', 'flex-shrink', 'min-width', 'flex-basis'].forEach(k => el.style.removeProperty(k));
+}
+// Generic button effects, for every <button> / [role=button] in the app (present now or added later):
+//  1. press: squash on pointer-down, springy overshoot on release (Web Animations on the `scale` property, so it
+//     can't clash with a button's own transform/transition rules); 2. a ripple from the tap point; 3. whenever a
+//     button's label/content changes and that changes its width ("Follow" -> "Following", "Scanning…", ...), the
+//     width eases from the old size to the new one instead of jumping. Loading rows (_pubMorphRow) animate
+//     themselves and are skipped here. All of it is off under reduced motion. Opt a button out with data-nofx.
+(function _nbButtonFx() {
+  const SEL = 'button,[role="button"]';
+  const scaleOf = el => { const n = parseFloat(getComputedStyle(el).scale); return isFinite(n) ? n : 1; };
+  const skip = el => {
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('data-nofx')) return true;
+    const r = el.getBoundingClientRect();
+    return r.width < 4 || r.height < 4 || (r.width > 520 && r.height > 160); // big card-like targets: no squash
+  };
+  let cur = null;
+  function release() {
+    if (!cur) return;
+    const el = cur.el, anim = cur.anim;
+    cur = null;
+    const from = scaleOf(el);
+    anim.cancel();
+    el.animate([{ scale: String(from) }, { scale: '1.035', offset: .55 }, { scale: '1' }], { duration: 380, easing: 'ease-out' });
+  }
+  document.addEventListener('pointerdown', function (e) {
+    if (_nbMotionOff()) return;
+    const b = e.target && e.target.closest && e.target.closest(SEL);
+    if (skip(b)) return;
+    if (cur) { cur.anim.cancel(); cur = null; }
+    const r = b.getBoundingClientRect();
+    const s = Math.max(.93, 1 - 20 / Math.max(r.width, r.height));
+    cur = { el: b, anim: b.animate([{ scale: String(scaleOf(b)) }, { scale: String(s) }], { duration: 90, easing: 'ease-out', fill: 'forwards' }) };
+    // ripple, in its own clipping layer
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const d = 2 * Math.max(Math.hypot(x, y), Math.hypot(r.width - x, y), Math.hypot(x, r.height - y), Math.hypot(r.width - x, r.height - y));
+    if (getComputedStyle(b).position === 'static') b.style.position = 'relative';
+    const clip = document.createElement('span');
+    clip.className = 'nb-ripple-clip';
+    const rip = document.createElement('span');
+    rip.className = 'nb-ripple';
+    rip.style.cssText = 'width:' + d + 'px;height:' + d + 'px;left:' + (x - d / 2) + 'px;top:' + (y - d / 2) + 'px';
+    clip.appendChild(rip);
+    b.appendChild(clip);
+    setTimeout(() => clip.remove(), 650);
+  }, { passive: true, capture: true });
+  ['pointerup', 'pointercancel'].forEach(t => document.addEventListener(t, release, { passive: true, capture: true }));
+  window.addEventListener('blur', release);
+
+  // ---- smooth width change when a button's content changes ----
+  if (!window.ResizeObserver || !window.MutationObserver) return;
+  const lastW = new WeakMap(), touched = new WeakMap();
+  const ro = new ResizeObserver(entries => {
+    const now = performance.now();
+    for (const en of entries) {
+      const el = en.target;
+      const nw = el.getBoundingClientRect().width;
+      const ow = lastW.get(el);
+      lastW.set(el, nw);
+      if (ow === undefined || Math.abs(nw - ow) < 2) continue;
+      const t = touched.get(el);
+      if (!t || now - t > 100) continue; // resized by layout/rotation/etc., not by its own content changing
+      touched.delete(el);
+      if (_nbMotionOff() || el.classList.contains('nb-morphing') || (el._nbMorphAt && now - el._nbMorphAt < 500)) continue;
+      el.animate([
+        { width: ow + 'px', flexBasis: ow + 'px', flexGrow: 0, flexShrink: 0, minWidth: '0px', overflow: 'hidden', whiteSpace: 'nowrap' },
+        { width: nw + 'px', flexBasis: nw + 'px', flexGrow: 0, flexShrink: 0, minWidth: '0px', overflow: 'hidden', whiteSpace: 'nowrap' }
+      ], { duration: 280, easing: 'cubic-bezier(.34,1.2,.5,1)' });
+    }
+  });
+  const watch = root => {
+    if (root.nodeType !== 1) return;
+    if (root.matches && root.matches(SEL)) ro.observe(root);
+    if (root.querySelectorAll) root.querySelectorAll(SEL).forEach(el => ro.observe(el));
+  };
+  const isFx = n => n.nodeType === 1 && n.classList && n.classList.contains('nb-ripple-clip');
+  const mo = new MutationObserver(recs => {
+    const now = performance.now();
+    for (const r of recs) {
+      if (r.type === 'childList') {
+        r.addedNodes.forEach(n => { if (!isFx(n)) watch(n); });
+        const only = Array.from(r.addedNodes).concat(Array.from(r.removedNodes)).every(isFx);
+        if (only) continue;
+      }
+      const n = r.target;
+      const host = n && (n.nodeType === 1 ? n : n.parentElement);
+      const btn = host && host.closest && host.closest(SEL);
+      if (btn) touched.set(btn, now);
+    }
+  });
+  const start = () => {
+    watch(document.documentElement);
+    mo.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+// Pill choices that are re-rendered when you pick one (the Library category bar, Media chips and source switch):
+// the old highlighted pill is destroyed and a new one drawn, so nothing could transition. This remembers which pill
+// was highlighted and the colours it had, and when a different one comes up highlighted it eases the new pill from
+// the inactive look to the active look (with a small pop) and the previous one from active back to inactive.
+(function _nbPillFx() {
+  if (!window.MutationObserver) return;
+  const PILL = '.cat-pill,.md-chip,.md-srcb';
+  const GROUPS = '#feed-cats,.md-cats,#md-src';
+  const isOn = el => el.classList.contains('active') || el.classList.contains('on');
+  const colours = el => { const c = getComputedStyle(el); return { backgroundColor: c.backgroundColor, color: c.color, borderColor: c.borderTopColor }; };
+  const state = new Map();
+  let queued = false;
+  function scan() {
+    queued = false;
+    const off = _nbMotionOff();
+    document.querySelectorAll(GROUPS).forEach(g => {
+      const key = g.id || g.className;
+      if (!g.offsetParent) return; // hidden: don't record, don't animate
+      const pills = Array.from(g.querySelectorAll(PILL));
+      const idx = pills.findIndex(isOn);
+      if (idx < 0) { state.delete(key); return; }
+      const act = pills[idx];
+      const label = act.textContent.replace(/[0-9]+/g, '').trim();
+      const idle = pills.find(x => !isOn(x));
+      const prev = state.get(key);
+      const cur = { label, idx, on: colours(act) };
+      if (prev && prev.label !== label && !off) {
+        if (idle) {
+          const from = colours(idle);
+          // label first, fill behind it (fill: 'backwards' holds the old fill during the short delay)
+          act.animate([{ color: from.color }], { duration: 100, easing: 'ease-out' });
+          act.animate([{ backgroundColor: from.backgroundColor, borderColor: from.borderColor }], { duration: 220, delay: 80, easing: 'ease-out', fill: 'backwards' });
+        }
+        act.animate([{ scale: '.9' }, { scale: '1.08', offset: .55 }, { scale: '1' }], { duration: 340, easing: 'ease-out' });
+        const old = pills.find(x => !isOn(x) && x.textContent.replace(/[0-9]+/g, '').trim() === prev.label);
+        if (old) {
+          // fill drains first, label flips back after
+          old.animate([{ backgroundColor: prev.on.backgroundColor, borderColor: prev.on.borderColor }], { duration: 220, easing: 'ease-out' });
+          old.animate([{ color: prev.on.color }], { duration: 120, delay: 120, easing: 'ease-out', fill: 'backwards' });
+        }
+      }
+      state.set(key, cur);
+    });
+  }
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(scan); } };
+  const mo = new MutationObserver(queue);
+  const start = () => { mo.observe(document.documentElement, { childList: true, subtree: true }); queue(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
 function _pubSetBtnLoading(btn, loading, loadingLabel) {
+  if (!btn) return;
+  _pubMorphRow(btn, () => _pubApplyBtnLoading(btn, loading, loadingLabel));
+}
+function _pubApplyBtnLoading(btn, loading, loadingLabel) {
   if (!btn) return;
   const isFormControl = 'disabled' in btn;
   _pubLockSiblingSecondaries(btn, loading);
@@ -16001,10 +16354,12 @@ function _pubSetBtnLoading(btn, loading, loadingLabel) {
   if (loading) {
     btn.dataset.origLabel = btn.textContent;
     btn.innerHTML = '<span class="com-spinner"></span>' + loadingLabel;
+    _pubFitBusyBtn(btn, true);
     if (isFormControl) btn.disabled = true;
     else { btn.style.pointerEvents = 'none'; btn.setAttribute('aria-disabled', 'true'); }
     _nbBusyBtnCount++;
   } else {
+    _pubFitBusyBtn(btn, false);
     btn.textContent = btn.dataset.origLabel || btn.textContent;
     delete btn.dataset.origLabel;
     if (isFormControl) btn.disabled = false;
@@ -16474,7 +16829,9 @@ function _pubOnStoriesToggle(checked) {
   }
   const noteId = note.id;
   showToast(checked ? 'Now showing in stories' : 'Removed from stories');
+  const wasShowing = _nbStoryOverrides.has(note.publishedSlug) ? !!_nbStoryOverrides.get(note.publishedSlug).show : !!note.showInStories; // rapid toggles: compare with the last tap, not the last confirmation
   _nbStoryOptimistic(note, checked);
+  if (wasShowing !== checked) _nbBumpPubCount('stories', checked ? 1 : -1);
   _pubStoriesChain = _pubStoriesChain
     .then(() => _pubSendStoriesToggle(noteId, checked))
     .catch(e => _nbLog('stories toggle chain', e));
@@ -16490,6 +16847,7 @@ async function _pubSendStoriesToggle(noteId, checked) {
   } catch (e) {
     _nbLog('stories toggle', e);
     _nbStoryOverrides.delete(slug);
+    _nbFetchPubCounts(true).catch(err => _nbLog('pub counts', err)); // undo the optimistic count with the real one
     const sw = document.getElementById('pub-stories-switch');
     if (sw && _pubNoteId === noteId) sw.checked = !!note.showInStories; // put the switch back to what's actually saved
     nbRenderStoriesStrip().catch(err => _nbLog('stories toggle: strip refresh', err));
@@ -16561,7 +16919,10 @@ function _nbSubscribedAuthors() {
 function _nbSaveSubscribedAuthors(set) {
   const key = _nbSubscribedAuthorsKey();
   if (!key) return;
-  try { localStorage.setItem(key, JSON.stringify([...set])); } catch (e) {}
+  const next = JSON.stringify([...set]);
+  let changed = true;
+  try { changed = localStorage.getItem(key) !== next; localStorage.setItem(key, next); } catch (e) {}
+  if (changed) _nbCountsSoon('unread'); // following or unfollowing someone changes what the Subscribed feed holds
   try { _nbStAcctAt = 0; } catch (e) {} // a follow/unfollow changes Settings > Following: refetch it next time Settings opens
 }
 // Other people's devices only ever see an account's opaque author ID, never its
@@ -16852,6 +17213,7 @@ function nbOpenStory(slug, authorSub, title) {
       if (!res.ok) return; // rate-limited or refused — don't grey the ring for something the server didn't record
       const entry = _nbStoriesCache.find(s => s.slug === slug);
       if (entry) entry.seen = true;
+      _nbNoteOpenedSeen(slug); // the Subscribed tab's unread count follows
     }).catch(e => _nbLog('mark story seen', e));
   }
 }
@@ -16913,7 +17275,10 @@ function _nbLikedSlugs() {
 function _nbSaveLikedSlugs(set) {
   const key = _nbLikedSlugsKey();
   if (!key) return;
-  try { localStorage.setItem(key, JSON.stringify([...set])); } catch (e) {}
+  const next = JSON.stringify([...set]);
+  let changed = true;
+  try { changed = localStorage.getItem(key) !== next; localStorage.setItem(key, next); } catch (e) {}
+  if (changed) _nbCountsSoon('liked'); // the Liked tab's count follows a like or unlike, here or reconciled from another device
 }
 function _nbSetLikeBtnState(btn, isLiked) {
   btn.innerHTML = isLiked ? NB_LIKED_ICON : NB_LIKE_ICON;
@@ -18037,6 +18402,7 @@ async function _nbDeleteAlertNow(id) {
     showToast('Alert deleted');
   } catch (e) {
     _nbLog('delete alert', e);
+    if (_nbAlertTotal !== null) { _nbAlertTotal++; try { nbUpdateCatCounts(); } catch (err) {} } // the delete didn't happen: put the count back
     showToast('Couldn\u2019t delete' + _nbFailureReason(e));
     if (_nbActiveCat === 'Alerts') { _nbSubFeedPaintKey = null; nbRenderNotesScreen(); }
     return;
@@ -18258,9 +18624,13 @@ async function _nbLoadSubFeedPage() {
     const stories = tab === 'alerts'
       ? ((data && data.alerts) || []).map(a => Object.assign({ slug: 'alert:' + a.id }, a))
       : (data && data.stories) || [];
-    if (isFirstPage && tab === 'alerts') { _nbAlertTotal = (data && typeof data.total === 'number') ? data.total : stories.length; _nbRefreshAlertsCat(); }
+    if (isFirstPage && tab === 'alerts') {
+      const t = (data && typeof data.total === 'number') ? data.total : stories.length;
+      if (t !== _nbAlertTotal) { _nbAlertTotal = t; buildCatBar(); } // the pill shows this total, so it redraws when it changes
+    }
     if (!_nbIsFeedCat(_nbActiveCat)) return; // category switched while this was in flight
     if (isFirstPage && tab === _nbFeedKind()) _nbSubFeedTotal = (data && typeof data.total === 'number') ? data.total : null;
+    if (isFirstPage) _nbNotePubCount(tab, data); // the tab counts learn from the list just loaded
     if (tab !== _nbFeedKind()) { setTimeout(() => { if (_nbIsFeedCat(_nbActiveCat)) _nbLoadSubFeedPage(); }, 0); return; } // list switched: load the current one once this call has released the lock
     // Everything on this first page is now on screen, so it counts as seen, up to the newest one shown (the pill's
     // badge counts what arrived after that; the title count is the list's total).
@@ -20154,6 +20524,146 @@ function nbImportNotes(e) {
 const NB_BASE_CATS = ['All', 'Favorites', 'Uncategorized'];
 let _nbActiveCat = 'All';
 let _nbSubTab = 'feed'; // inside Subscribed: 'feed' (who you follow) or 'liked' (notes you liked)
+// Counts on the capsule tabs: Published (live notes on this account), Stories (how many of them are showing in
+// stories), Subscribed (notes in the feed this account hasn't opened yet) and Liked (notes it has liked). null = not
+// known yet (no count drawn, rather than a wrong 0). They belong to the account they were fetched for, so a different
+// sign-in never shows the previous one's numbers. Each key has its own sequence number so a refresh of one retires
+// only that key's in-flight answer.
+const NB_COUNT_KEYS = ['published', 'stories', 'liked', 'unread'];
+const _nbPubCounts = { published: null, stories: null, liked: null, unread: null };
+const _nbCountSeq = { published: 0, stories: 0, liked: 0, unread: 0 };
+const _nbCountAt = { published: 0, stories: 0, liked: 0, unread: 0 };
+const NB_COUNT_PATHS = { published: '/account/published-notes', stories: '/account/stories', liked: '/account/liked-notes' };
+let _nbPubCountsSub = null;
+// A list's size from its first page: the server's total when it sends one, else the rows themselves when the
+// whole list fit in one page (no nextCursor); a partial page with no total is unknown, not "the page size".
+function _nbPubListTotal(data) {
+  if (!data) return null;
+  if (typeof data.total === 'number' && data.total >= 0) return data.total;
+  if (Array.isArray(data.stories) && !data.nextCursor) return data.stories.length;
+  return null;
+}
+// Applies new counts. A count appearing or going away changes the pill markup (rebuild); a number changing
+// under a count that's already drawn only needs its text swapped.
+function _nbApplyPubCounts(next) {
+  let shape = false, value = false;
+  for (const k of NB_COUNT_KEYS) {
+    if (!(k in next)) continue;
+    const v = next[k];
+    if (v === _nbPubCounts[k]) continue;
+    if ((v === null) !== (_nbPubCounts[k] === null)) shape = true; else value = true;
+    _nbPubCounts[k] = v;
+  }
+  if (shape) buildCatBar(); else { if (value) nbUpdateCatCounts(); _nbRefreshPublishedCat(); } // the count can also be what makes the Published pill appear or go
+}
+// Counts belong to whoever is signed in: moving to another account (or signing out) forgets every number and
+// retires everything in flight. Returns the signed-in account, or null.
+function _nbCountsAdopt() {
+  const acct = nbIsSignedIn() ? nbAccount() : null;
+  const sub = acct ? acct.sub : null;
+  if (sub !== _nbPubCountsSub) {
+    _nbPubCountsSub = sub;
+    NB_COUNT_KEYS.forEach(k => { _nbCountSeq[k]++; _nbCountAt[k] = 0; });
+    _nbApplyPubCounts({ published: null, stories: null, liked: null, unread: null });
+  }
+  return acct;
+}
+// Count learned for free from a list the app just loaded (its first page). kind is the list: 'published',
+// 'stories', 'liked' or 'feed' (Subscribed, whose first page also says how much of the feed is unopened).
+function _nbNotePubCount(kind, data) {
+  if (!nbIsSignedIn()) return;
+  const acct = nbAccount();
+  if (!acct || acct.sub !== _nbPubCountsSub) return; // counts for another account's session: the next fetch re-keys them
+  if (kind === 'feed') { if (data && typeof data.unread === 'number' && data.unread >= 0) _nbApplyPubCounts({ unread: data.unread }); return; }
+  if (!(kind in NB_COUNT_PATHS)) return;
+  const t = _nbPubListTotal(data);
+  if (t !== null) _nbApplyPubCounts({ [kind]: t });
+}
+// Optimistic nudge (a stories toggle or a note just opened, before the server confirms). It also retires any fetch of
+// that count still in flight, whose answer predates the change; the confirmation's own fetch settles the real number.
+function _nbBumpPubCount(kind, delta) {
+  _nbCountSeq[kind]++;
+  if (_nbPubCounts[kind] === null) return;
+  _nbApplyPubCounts({ [kind]: Math.max(0, _nbPubCounts[kind] + delta) });
+}
+// One count from the server. Lists give their total; a worker that doesn't send one is counted by walking the pages
+// (capped, and dropped the moment a newer fetch or a sign-out makes this one stale); a list too long to walk stays
+// unknown. Subscribed asks /subscriptions/unread. A failed answer (undefined) keeps what's already shown.
+async function _nbFetchCount(kind, force, minMs) {
+  if (!_nbCountsAdopt()) return;
+  if (!force && Date.now() - _nbCountAt[kind] < (minMs || 15000)) return;
+  _nbCountAt[kind] = Date.now();
+  const seq = ++_nbCountSeq[kind], sub = _nbPubCountsSub;
+  const base = NB_PUBLISH_API.replace(/\/$/, '');
+  const get = async path => _nbApiFetch(base + path, { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } });
+  let v;
+  try {
+    if (kind === 'unread') {
+      const res = await get('/subscriptions/unread');
+      const d = res.ok ? await res.json() : null;
+      v = d && typeof d.count === 'number' && d.count >= 0 ? d.count : undefined; // an older worker has no such route: no count
+    } else {
+      let cursor = null, sum = 0;
+      for (let i = 0; i < 20 && v === undefined; i++) {
+        if (seq !== _nbCountSeq[kind]) return;
+        const res = await get(NB_COUNT_PATHS[kind] + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''));
+        if (!res.ok) break;
+        const d = await res.json();
+        const t = i === 0 ? _nbPubListTotal(d) : null;
+        if (t !== null) { v = t; break; }
+        sum += Array.isArray(d && d.stories) ? d.stories.length : 0;
+        cursor = (d && d.nextCursor) || null;
+        if (!cursor) v = sum;
+      }
+    }
+  } catch (e) { _nbLog('count ' + kind, e); v = undefined; }
+  if (seq !== _nbCountSeq[kind] || !nbIsSignedIn() || nbAccount().sub !== sub) return; // signed out, switched account or a newer fetch started meanwhile
+  if (v !== undefined && v !== null) _nbApplyPubCounts({ [kind]: v });
+}
+// Published, Stories and Liked change only when this account acts (here or on another device); Subscribed's unread
+// count moves whenever someone you follow posts, so it has its own, lighter, more frequent refresh.
+// One cheap request (/account/counts) answers all three; a worker without it (404/405) or one that answers with nothing
+// usable is counted list by list instead.
+let _nbCountsRouteMissing = false;
+async function _nbFetchPubCounts(force, minMs) {
+  if (!_nbCountsAdopt()) return;
+  const keys = ['published', 'stories', 'liked'];
+  if (!force && Date.now() - _nbCountAt.published < (minMs || 15000)) return;
+  if (!_nbCountsRouteMissing) {
+    const sub = _nbPubCountsSub;
+    keys.forEach(k => { _nbCountAt[k] = Date.now(); });
+    const seqs = {}; keys.forEach(k => { seqs[k] = ++_nbCountSeq[k]; });
+    try {
+      const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/counts', { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } });
+      if (res.status === 404 || res.status === 405) _nbCountsRouteMissing = true;
+      else if (res.ok) {
+        const d = await res.json();
+        if (!nbIsSignedIn() || nbAccount().sub !== sub) return;
+        const next = {};
+        keys.forEach(k => { if (d && typeof d[k] === 'number' && d[k] >= 0 && seqs[k] === _nbCountSeq[k]) next[k] = d[k]; }); // a key refreshed or nudged meanwhile keeps its newer value
+        if (Object.keys(next).length) { _nbApplyPubCounts(next); return; }
+      }
+    } catch (e) { _nbLog('account counts', e); }
+  }
+  await Promise.all(keys.map(k => _nbFetchCount(k, true)));
+}
+function _nbFetchSubUnread(force) { return _nbFetchCount('unread', force, 8000); }
+// Something this count depends on just changed on this device (a like, a follow): refresh it shortly, once
+// however many changes arrive together.
+const _nbCountsSoonTimers = {};
+function _nbCountsSoon(kind) {
+  clearTimeout(_nbCountsSoonTimers[kind]);
+  _nbCountsSoonTimers[kind] = setTimeout(() => (kind === 'unread' ? _nbFetchSubUnread(true) : _nbFetchPubCounts(true)).catch(e => _nbLog('count ' + kind, e)), 500);
+}
+// A note was just opened (and the server asked to record it as seen): if it is an unopened note of the Subscribed
+// feed on screen, the count drops at once; the server's own count follows.
+function _nbNoteOpenedSeen(slug) {
+  if (_nbActiveCat === 'Subscribed' && _nbSubTab === 'feed') {
+    const row = _nbSubFeedStories.find(x => x && x.slug === slug);
+    if (row && row.seen === false) { row.seen = true; _nbBumpPubCount('unread', -1); }
+  }
+  _nbFetchSubUnread(true).catch(e => _nbLog('count unread', e)); // opened from the strip or anywhere else, it may still have been unread
+}
 let _nbPubTab = 'published'; // inside Published: 'published' (every live note) or 'stories' (currently showing)
 let _nbCapsuleShown = false;
 let _nbPublishedShown = false;
@@ -20169,7 +20679,7 @@ function _nbFeedKind() { return _nbActiveCat === 'Published' ? _nbPubTab : _nbAc
 // (a story is always also a published note), and stays while it's the open category (so
 // unpublishing the last one doesn't yank the screen away mid-browse).
 function _nbShowPublishedCat() {
-  return nbIsSignedIn() && (_nbActiveCat === 'Published' || nbVisibleNotes().some(n => n.publishedSlug));
+  return nbIsSignedIn() && (_nbActiveCat === 'Published' || (_nbPubCounts.published || 0) > 0 || nbVisibleNotes().some(n => n.publishedSlug)); // the server's count covers a note published on another device that hasn't synced down yet
 }
 function _nbRefreshPublishedCat() { if (_nbShowPublishedCat() !== _nbPublishedShown) buildCatBar(); }
 // Unread alerts (arrived since Alerts was last opened, tracked server-side so it follows the account
@@ -20189,7 +20699,8 @@ async function _nbFetchAlertUnread() {
     if (!res.ok) return;
     const data = await res.json();
     const n = Math.max(0, Number(data.count) || 0);
-    const total = typeof data.total === 'number' ? Math.max(0, data.total) : _nbAlertTotal; // absent from an older worker: the unread count alone decides
+    // While the Alerts list is open its own load owns the total, so the pill never says more than the list shows.
+    const total = _nbActiveCat === 'Alerts' ? _nbAlertTotal : typeof data.total === 'number' ? Math.max(0, data.total) : _nbAlertTotal; // absent from an older worker: the unread count alone decides
     if (n !== _nbAlertUnread || total !== _nbAlertTotal) { _nbAlertUnread = n; _nbAlertTotal = total; buildCatBar(); }
   } catch (e) { _nbLog('alerts unread', e); }
 }
@@ -20197,17 +20708,24 @@ async function _nbFetchAlertUnread() {
 // that moment as seen, so one that lands after the list was fetched still counts as unread.
 function _nbMarkAlertsSeen(upTo) {
   if (!nbIsSignedIn() || !(upTo > 0)) return;
+  const hadUnread = _nbAlertUnread > 0;
   _nbAlertUnread = 0;
+  if (hadUnread) buildCatBar(); // the red badge gives way to the plain count
   _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/alerts/seen', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + nbSessionToken(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ upTo })
   }).catch(e => _nbLog('alerts seen', e));
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) _nbFetchAlertUnread(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { _nbFetchAlertUnread(); _nbFetchPubCounts().catch(e => _nbLog('pub counts', e)); _nbFetchSubUnread().catch(e => _nbLog('count unread', e)); } });
 // Note count for one local category pill, same filters as the list it opens. Feed pills (Alerts, Published,
 // Subscribed) are server-fed and keep their own styling, so they get no count here.
 function nbCatPillCount(c, notes) {
+  if (c === 'Alerts') return _nbAlertTotal; // null until known
+  if (c === 'Published') return _nbPubCounts.published; // null until the server has answered
+  if (c === 'Stories') return _nbPubCounts.stories;
+  if (c === 'Subscribed') return _nbPubCounts.unread; // notes in the feed not opened yet
+  if (c === 'Liked') return _nbPubCounts.liked;
   if (c === 'All') return notes.length;
   if (c === 'Favorites') return notes.filter(n => _nbFavorites.has(n.id)).length;
   if (c === 'Uncategorized') return notes.filter(n => !n.category).length;
@@ -20215,7 +20733,9 @@ function nbCatPillCount(c, notes) {
 }
 function nbCatCountHtml(c, notes) {
   try { if (window._nbSt('hideLibCount')) return ''; } catch (e) {}
-  return `<i class="cat-count" data-cat="${esc(c)}">${nbAbbrevCount(nbCatPillCount(c, notes))}</i>`;
+  const n = nbCatPillCount(c, notes);
+  if (n === null) return '';
+  return `<i class="cat-count" data-cat="${esc(c)}">${nbAbbrevCount(n)}</i>`;
 }
 function nbUpdateCatCounts() {
   const bar = document.getElementById('feed-cats');
@@ -20224,7 +20744,9 @@ function nbUpdateCatCounts() {
   if (!els.length) return;
   const notes = nbVisibleNotes();
   els.forEach(el => {
-    const t = nbAbbrevCount(nbCatPillCount(el.getAttribute('data-cat'), notes));
+    const n = nbCatPillCount(el.getAttribute('data-cat'), notes);
+    if (n === null) return;
+    const t = nbAbbrevCount(n);
     if (el.textContent !== t) el.textContent = t;
   });
 }
@@ -20256,18 +20778,21 @@ function buildCatBar() {
     if (c === 'Subscribed') {
       const on = _nbActiveCat === 'Subscribed';
       return `<span class="cat-capsule" role="group" aria-label="Subscribed and Liked">`
-        + `<button class="cat-pill${on && _nbSubTab === 'feed' ? ' active' : ''}" onclick="selectCat('Subscribed','feed')">Subscribed</button>`
-        + `<button class="cat-pill${on && _nbSubTab === 'liked' ? ' active' : ''}" onclick="selectCat('Subscribed','liked')">Liked</button></span>`;
+        + `<button class="cat-pill${on && _nbSubTab === 'feed' ? ' active' : ''}" onclick="selectCat('Subscribed','feed')">Subscribed${nbCatCountHtml('Subscribed', notes)}</button>`
+        + `<button class="cat-pill${on && _nbSubTab === 'liked' ? ' active' : ''}" onclick="selectCat('Subscribed','liked')">Liked${nbCatCountHtml('Liked', notes)}</button></span>`;
     }
     if (c === 'Published') {
       const on = _nbActiveCat === 'Published';
       return `<span class="cat-capsule" role="group" aria-label="Published and Stories">`
-        + `<button class="cat-pill${on && _nbPubTab === 'published' ? ' active' : ''}" onclick="selectCat('Published','published')">Published</button>`
-        + `<button class="cat-pill${on && _nbPubTab === 'stories' ? ' active' : ''}" onclick="selectCat('Published','stories')">Stories</button></span>`;
+        + `<button class="cat-pill${on && _nbPubTab === 'published' ? ' active' : ''}" onclick="selectCat('Published','published')">Published${nbCatCountHtml('Published', notes)}</button>`
+        + `<button class="cat-pill${on && _nbPubTab === 'stories' ? ' active' : ''}" onclick="selectCat('Published','stories')">Stories${nbCatCountHtml('Stories', notes)}</button></span>`;
     }
     if (c === 'Alerts') {
-      const badge = _nbAlertUnread > 0 && _nbActiveCat !== 'Alerts' ? `<span class="cat-badge" aria-label="${_nbAlertUnread} unread">${_nbAlertUnread > 9 ? '9+' : _nbAlertUnread}</span>` : '';
-      return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('Alerts')">Alerts${badge}</button>`;
+      // Unread alerts swap the plain total for the red badge; with none unread the pill shows the total like the others.
+      const tail = _nbAlertUnread > 0 && _nbActiveCat !== 'Alerts'
+        ? `<span class="cat-badge" aria-label="${_nbAlertUnread} unread">${_nbAlertUnread > 9 ? '9+' : _nbAlertUnread}</span>`
+        : nbCatCountHtml('Alerts', notes);
+      return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('Alerts')">Alerts${tail}</button>`;
     }
     return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')">${esc(c)}${nbCatCountHtml(c, notes)}</button>`;
   }).join('');
@@ -20305,8 +20830,9 @@ function nbRefreshData() {
   _nbLastDataRefresh = Date.now();
   const tasks = [];
   if (_nbActiveCat === 'All') tasks.push(Promise.resolve(nbRenderStoriesStrip()).catch(e => _nbLog('refresh: stories', e)));
-  if (nbIsSignedIn()) tasks.push(Promise.resolve(nbSyncPullThenPush()).catch(e => _nbLog('refresh: sync', e)));
+  if (nbIsSignedIn()) tasks.push(Promise.resolve(nbSyncPullThenPush()).catch(e => _nbLog('refresh: sync', e)).then(() => _nbFetchPubCounts(true)).catch(e => _nbLog('refresh: pub counts', e))); // counts after the pull, so they and the local notes agree
   tasks.push(_nbFetchAlertUnread());
+  tasks.push(_nbFetchSubUnread(true).catch(e => _nbLog('refresh: unread', e)));
   return Promise.all(tasks);
 }
 // Shimmer, then the category. Notes are local, so the wait is a short minimum; fresh data
@@ -20913,6 +21439,8 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
 }
 buildCatBar();
 _nbFetchAlertUnread();
+_nbFetchPubCounts().catch(e => _nbLog('pub counts', e));
+_nbFetchSubUnread().catch(e => _nbLog('count unread', e));
 nbRenderNotesScreen();
 nbRenderStoriesStrip();
 _nbFetchSubscriberCount(); // warm the cache at boot so the sign-out sheet doesn't flash blank the first time it's opened
@@ -20935,7 +21463,14 @@ setInterval(() => {
   if (!nbIsSignedIn() || document.hidden || _nbSyncPollBusy || !_nbStPollDue()) return;
   if (++_nbPollTick % 3 === 0) _nbReconcileAccountActions(); // follows/likes from another device, about once a minute
   _nbSyncPollBusy = true;
-  nbSyncPullThenPush().finally(() => { _nbSyncPollBusy = false; });
+  nbSyncPullThenPush().finally(() => {
+    _nbSyncPollBusy = false;
+    // After the pull, so a note published or unpublished on another device is already reflected locally; this is what
+    // keeps the Published / Stories / Alerts numbers current without reopening the app.
+    _nbFetchPubCounts(false, 60000).catch(e => _nbLog('pub counts', e)); // these move only when this account acts: a minute is plenty
+    _nbFetchSubUnread().catch(e => _nbLog('count unread', e)); // new notes from people you follow: as often as alerts
+    _nbFetchAlertUnread();
+  });
 }, NB_SYNC_POLL_MS);
 
 /* ===================== Generic key/value store (IndexedDB) =====================
