@@ -776,7 +776,7 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 }
 #story-viewer-back {
   position: absolute;
-  left: .6rem;
+  left: 6.2px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
@@ -793,11 +793,11 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
   font-size: .95rem;
   white-space: nowrap;
   overflow: hidden;
-  padding: 0 2rem
+  margin: 0 2rem
 }
 #story-viewer-sub-btn {
   position: absolute;
-  right: .6rem;
+  right: 6.4px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
@@ -816,7 +816,7 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
    public per-account like on the published note. Turns red when liked. */
 #story-viewer-like-btn {
   position: absolute;
-  right: 2.7rem;
+  right: 40px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
@@ -830,7 +830,7 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 #story-viewer-like-btn svg { transition: transform .12s ease }
 #story-viewer-like-btn:active svg { transform: scale(.85) }
 /* Room for both buttons on the right so the @slug title doesn't run under them. */
-#story-viewer-header.has-actions #story-viewer-title { padding-right: 4.8rem }
+#story-viewer-header.has-actions #story-viewer-title { margin-right: 76.4px }
 #story-viewer-frame {
   flex: 1;
   border: none;
@@ -4419,6 +4419,7 @@ document.body.dataset.lockScrollY = window.scrollY;
 </div>
 
 <div id="nb-app">
+<div id="nb-wash" aria-hidden="true"></div><div id="nb-wash-fade" aria-hidden="true"></div>
 
 <header id="site-header" class="hdr-lib">
   <button id="back-btn" onclick="navBack()" aria-label="Back to pages" style="display:none">
@@ -4560,6 +4561,7 @@ body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;-
 .st-chip.on{background:var(--st-acc);border-color:var(--st-acc);color:var(--st-on);font-weight:600}
 .st-foot{font-size:.72rem;color:var(--st-sub);text-align:center;line-height:1.6;padding:0 1rem}
 body.nb-no-tips #nb-onboard-carousel{display:none!important}
+body.nb-no-mdcount .md-chip i{display:none}
 body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinner)::before,body.nb-reduce-motion *:not(.ptr-spinner)::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 </style>
 <style id="md-css">
@@ -4604,15 +4606,35 @@ body.pink #md-screen{--md-scrim:linear-gradient(rgba(255,248,251,.72),rgba(255,2
 #md-screen button{font-family:inherit}
 /* header: same bar as #site-header (title type, padding, border, shadow, blur) */
 #md-hdr{position:absolute;top:0;left:0;right:0;z-index:3;height:var(--md-hh);box-sizing:border-box;padding:env(safe-area-inset-top,0px) .75rem 0;display:flex;align-items:center;gap:.5rem;background:var(--md-hb);color:var(--md-hf);border-bottom:1px solid var(--md-hbd);box-shadow:var(--md-hsh);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
-#md-htitle{flex:1;min-width:0;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#md-htitle{flex:0 1 auto;margin:-.6rem auto -.6rem -.5rem;padding:.6rem .5rem;cursor:pointer;min-width:0;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .md-ib{min-width:44px;height:44px;border:0;background:none;color:inherit;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;flex-shrink:0;padding:.5rem;transition:background .15s}
 .md-ib:active{background:var(--md-press)}
 body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
-#md-back{position:relative;z-index:1;margin-left:-.9rem;margin-right:-1.06rem}
+#md-back{position:relative;z-index:1;margin-left:-1.125rem;margin-right:-.835rem}
 #md-hact{margin-right:-.54rem}
+/* Notes | Likes: which notes Media reads its links from. Pill tokens, same as the tab chips below. */
+#md-src{display:inline-flex;flex-shrink:0;padding:2px;border-radius:99px;background:var(--md-pill);border:1px solid var(--md-pillb)}
+#md-src[hidden]{display:none}
+.md-srcb{border:0;background:none;color:var(--md-pillf);font-size:.72rem;line-height:1.6;padding:.2rem .7rem;border-radius:99px;cursor:pointer;transition:background .12s,color .12s;-webkit-user-select:none;user-select:none}
+.md-srcb.on{background:var(--md-pa);color:var(--md-paf);font-weight:bold}
+.md-srcb:active{transform:scale(.96)}
+/* Refresh: a round pill-token button just left of the Notes | Likes toggle */
+#md-hdr #md-refresh{min-width:31px;width:31px;height:31px;padding:0;flex-shrink:0;border:1px solid var(--md-pillb);background:var(--md-pill);color:var(--md-pillf);transition:transform .12s}
+#md-hdr #md-refresh:active{background:var(--md-pill);transform:scale(.92)}
+#md-refresh svg{display:block}
+#md-refresh.spin svg{animation:md-spin .8s linear infinite}
+@media (prefers-reduced-motion:reduce){#md-refresh.spin svg{animation-duration:1.8s}}
 .md-ib[hidden]{display:none}
 #md-body{position:absolute;inset:var(--md-hh) 0 0 0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding:0 .9rem calc(env(safe-area-inset-bottom,0px) + 1.5rem)}
 #md-screen.has-mini #md-body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 6rem)}
+/* Playlists tab: New playlist FAB, shown once the "New playlist" tile has scrolled away; sits above the mini player */
+.md-fab{position:absolute;right:1rem;bottom:calc(1.1rem + env(safe-area-inset-bottom,0px));z-index:3;width:56px;height:56px;border:0;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;background:var(--md-pri);color:var(--md-prif);box-shadow:var(--md-msh);cursor:pointer;opacity:0;transform:scale(.6);visibility:hidden;pointer-events:none;transition:opacity .18s,transform .18s,visibility 0s .18s}
+.md-fab.on{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition:opacity .18s,transform .18s}
+.md-fab:active{transform:scale(.94)}
+#md-screen.has-mini .md-fab{bottom:calc(5.4rem + env(safe-area-inset-bottom,0px))}
+#md-screen.fab-tab #md-body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 5.5rem)}
+#md-screen.has-mini.fab-tab #md-body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 9.2rem)}
+@media (prefers-reduced-motion:reduce){.md-fab,.md-fab.on{transition:none}}
 /* search + tab pills: the Library's sticky search block */
 #md-sticky{position:sticky;top:0;z-index:2;margin:0 -.9rem;padding:.5rem .9rem;background:var(--md-stbg);border-bottom:1px solid var(--md-stbd);box-shadow:var(--md-stsh)}
 .md-search{position:relative}
@@ -4626,20 +4648,20 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-chip i{font-style:normal;opacity:.7;margin-left:.3rem;font-weight:normal}
 #md-view{min-height:100%;display:flex;flex-direction:column}
 #md-list{flex:1;display:flex;flex-direction:column;padding-top:.8rem}
+#md-list>.md-acts:first-child{margin-top:-.8rem}
 /* Play / Shuffle */
-.md-acts{display:flex;gap:.6rem;margin:0}
+.md-acts{display:flex;gap:.6rem;margin:0 -.9rem;padding:.5rem .9rem;position:sticky;top:var(--md-sth,0px);z-index:1;background:var(--md-bg)}
 .md-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;height:44px;box-sizing:border-box;border:1px solid transparent;border-radius:12px;font-weight:700;font-size:.9rem;cursor:pointer;background:var(--md-pri);color:var(--md-prif);box-shadow:var(--md-prish)}
 .md-btn.alt{background:var(--md-sec);color:var(--md-secf);border-color:var(--md-secb);box-shadow:none}
 /* large section heads (Apple Music) — also used for the queue sections */
 .md-gh{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin:1.4rem .15rem .55rem}
-.md-acts+.md-card{margin-top:.8rem}
+.md-acts+.md-card{margin-top:.3rem}
 .md-gh small{font-size:.78rem;font-weight:500;letter-spacing:0;color:var(--md-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* grouped list: the Library's card surface, rows divided by an inset hairline */
 .md-card{overflow:hidden}
 .md-row{position:relative;display:flex;align-items:center;gap:.8rem;padding:.55rem 0;cursor:pointer;min-width:0;--md-inset:calc(52px + .8rem)}
 .md-row-wide{--md-inset:calc(92px + .8rem)}
 .md-card>.md-row+.md-row::before{content:'';position:absolute;top:0;right:0;left:var(--md-inset);height:1px;background:var(--md-div)}
-.md-row:active{background:var(--md-tint)}
 .md-th{position:relative;flex-shrink:0;border-radius:6px;overflow:hidden;background:#000}
 .md-th-sq{width:52px;height:52px}
 .md-th-wide{width:92px;height:52px}
@@ -4648,7 +4670,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-pgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem .9rem;padding:.2rem .15rem 0}
 .md-pt{min-width:0;cursor:pointer}
 .md-pc{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#000;box-shadow:var(--md-csh);transition:transform .12s}
-.md-pt:active .md-pc{transform:scale(.97)}
+.md-pt,.md-row{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 .md-pc .md-ph svg{width:30%;height:30%}
 .md-pt .md-t{margin-top:.5rem}
 .md-th-fill{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
@@ -4722,23 +4744,29 @@ body.pink #md-hdr{background:#c8365e}
 #md-np.open{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.4,0,.2,1)}
 #md-np-wash{position:absolute;inset:-30%;background-size:cover;background-position:center;filter:blur(72px) saturate(1.8);transform:translateZ(0);opacity:calc(var(--md-wash) * 1.5);transition:opacity .5s ease;pointer-events:none}
 #md-np::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,transparent 0%,transparent 32%,var(--md-bg) 94%)}
-#md-np-scroll{position:absolute;inset:0;z-index:2;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + .3rem) 1.4rem calc(env(safe-area-inset-bottom,0px) + 1.5rem)}
-#md-np-top{display:flex;align-items:center;justify-content:space-between;height:48px;margin:0 -.7rem}
+#md-np-scroll{position:absolute;inset:0;z-index:2;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;padding:0 1.4rem 0}
+#md-np-top{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:3;box-sizing:border-box;height:calc(48px + env(safe-area-inset-top,0px) + .3rem);padding:calc(env(safe-area-inset-top,0px) + .3rem) .7rem 0;margin:0 -1.4rem;background:var(--md-bg)}
 #md-np-top .md-ib{color:var(--md-fg)}
-.md-np-cap{text-align:center;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--md-sub);line-height:1.3}
-.md-np-cap b{display:block;color:var(--md-fg);letter-spacing:0;text-transform:none;font-size:.82rem;max-width:50vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.md-np-cap{text-align:center;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--md-sub);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#md-np-top .md-np-cap{flex:1;min-width:0}
+.md-np-cap2,#md-np-topfill{display:none}
+.md-np-cap2 span{display:block;font-size:.7rem;font-weight:500;letter-spacing:0;text-transform:none;max-width:50vw;margin:0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#md-np.np-compact .md-np-cap:not(.md-np-cap2){display:none}
+#md-np.np-compact .md-np-cap2{display:block}
+.md-np-cap b{display:block;margin:0 auto;color:var(--md-fg);letter-spacing:0;text-transform:none;font-size:.82rem;max-width:50vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.md-np-cap:not(.md-np-cap2) b{display:inline;margin:0 0 0 .4em;max-width:none}
 #md-np-art{display:none;margin:.7rem auto 1.5rem;width:min(calc(100vw - 3.2rem),40dvh);aspect-ratio:1;border-radius:16px;overflow:hidden;box-shadow:0 26px 60px var(--md-ash),0 2px 8px rgba(0,0,0,.18);position:relative;background:#000}
 #md-np.np-audio #md-np-art{display:block}
 /* the video stage is always dark, whatever the theme */
 #md-stage{position:relative;background:#000;border-radius:12px;overflow:hidden;margin:.7rem 0 1.2rem;display:none}
 #md-np:not(.np-empty) #md-stage{display:block}
 #md-np.np-video #md-stage{aspect-ratio:16/9}
-#md-np.np-social #md-stage{height:min(64dvh,620px)}
+#md-np.np-social #md-stage{height:max(240px,min(64dvh,620px,calc(100dvh - 23rem)))}
 /* Spotify plays from its embed, but the artwork and our own controls are the interface: the embed stays mounted, just not drawn */
 #md-np.np-audio #md-stage{position:absolute;left:0;top:0;width:100%;margin:0;opacity:0;pointer-events:none;z-index:-1}
 #md-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
 #md-np-title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-#md-np-sub{color:var(--md-sub);font-size:1rem;margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#md-np-sub{color:var(--md-sub);font-size:1rem;line-height:1.4;margin-top:.25rem;margin-bottom:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #md-np-seek{margin:1.1rem 0 .2rem;display:none}
 #md-np.has-prog #md-np-seek{display:block}
 .md-bar{position:relative;height:22px;display:flex;align-items:center;touch-action:none;cursor:pointer}
@@ -4754,7 +4782,11 @@ body.pink #md-hdr{background:#c8365e}
 .md-lq b{display:block;width:3px;background:var(--md-cur);border-radius:1px;animation:md-eq .9s ease-in-out infinite}
 .md-lq b:nth-child(2){animation-delay:-.3s}
 .md-lq b:nth-child(3){animation-delay:-.6s}
-#md-np-ctl{display:flex;align-items:center;justify-content:space-between;margin:.8rem 0 .4rem}
+#md-np-dock{position:sticky;bottom:0;z-index:3;display:flow-root;margin:0 -1.4rem;padding:0 1.4rem;background:var(--md-bg)}
+#md-np-dock::before{content:'';position:absolute;left:0;right:0;top:-18px;height:18px;background:linear-gradient(to bottom,transparent,var(--md-bg));pointer-events:none;opacity:0;transition:opacity .2s}
+#md-np.np-docked #md-np-dock::before{opacity:1}
+#md-np-ctl{display:flex;align-items:center;justify-content:space-between;margin:.8rem 0 0;padding:.4rem 0 calc(env(safe-area-inset-bottom,0px) + 1rem)}
+#md-np-queue{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 1rem)}
 .md-cb{position:relative;width:52px;height:52px;border:0;background:none;color:var(--md-fg);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .md-cb.on{color:var(--md-cur)}
 .md-cb.on::after{content:'';position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor}
@@ -4765,30 +4797,528 @@ body.pink #md-hdr{background:#c8365e}
 #md-sheet{position:absolute;inset:0;z-index:8;display:none}
 #md-sheet.open{display:block}
 #md-sheet-scrim{position:absolute;inset:0;background:var(--md-sscrim);animation:md-fade .2s}
-#md-sheet-box{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;box-sizing:border-box;background:var(--md-sheet);color:var(--md-fg);border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--md-ssh);padding:.5rem .9rem calc(env(safe-area-inset-bottom,0px) + 1rem);animation:md-up .28s cubic-bezier(.4,0,.2,1)}
-.md-grab{display:flex;justify-content:center;margin:0 -.9rem;padding:.4rem 0 .8rem;cursor:grab;touch-action:none}
+#md-sheet-box{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;box-sizing:border-box;background:var(--md-sheet);color:var(--md-fg);border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--md-ssh);padding:0 .9rem calc(env(safe-area-inset-bottom,0px) + 1rem);animation:md-up .28s cubic-bezier(.4,0,.2,1)}
+.md-grab{display:flex;justify-content:center;flex-shrink:0;margin:0 -.9rem;padding:.9rem 0 .8rem;cursor:grab;touch-action:none;position:sticky;top:0;z-index:2;background:var(--md-sheet)}
 .md-grab span{width:36px;height:4px;border-radius:99px;background:var(--md-grab)}
 .md-grab:active{cursor:grabbing}
 .md-sh-head{display:flex;align-items:center;gap:.8rem;padding:.2rem .1rem .8rem;min-width:0}
-.md-sh-title{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;margin:.1rem .1rem .6rem}
+.md-sh-head .md-th{flex-shrink:0}
+.md-sh-head .md-t,.md-sh-head .md-s{line-height:1.35}
+.md-sh-title{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;position:sticky;top:calc(1.7rem + 4px);z-index:2;background:var(--md-sheet);margin:0 -.9rem;padding:.1rem 1rem .6rem}
+.md-sh-title.ns{position:static}
+#md-sheet-box.simple{overflow-y:hidden}
+#md-sheet-box.simple .md-grab{position:static}
 .md-sh-row{display:flex;align-items:center;gap:.8rem;width:100%;padding:.85rem .3rem;background:none;border:0;border-top:1px solid var(--md-div);color:var(--md-fg);font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;box-sizing:border-box}
 .md-sh-row.dng{color:#d33}
 .md-sh-row span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .md-sh-row em{font-style:normal;font-weight:400;color:var(--md-sub);font-size:.8rem}
 .md-sh-in{width:100%;box-sizing:border-box;border:1px solid transparent;background:var(--md-field);box-shadow:var(--md-fieldsh);color:var(--md-fg);border-radius:12px;padding:.7rem .9rem;font:inherit;font-size:.95rem;outline:none;margin-bottom:.7rem;transition:all .2s ease}
 .md-sh-in:focus{background:var(--md-fieldf);box-shadow:var(--md-fieldfsh)}
-.md-sh-box-sep{border-top:1px solid var(--md-div);padding-top:.8rem;margin-top:.2rem}
+.md-sh-box-sep{border-top:1px solid var(--md-div);position:sticky;bottom:0;z-index:2;background:var(--md-sheet);margin:.2rem -.9rem calc(-1rem - env(safe-area-inset-bottom,0px));padding:.8rem .9rem calc(env(safe-area-inset-bottom,0px) + 1rem)}
+#md-np-dock{padding-top:.5rem}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+.md-acts{background:color-mix(in srgb,var(--md-bg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+#md-np-top{background:color-mix(in srgb,var(--md-bg) 72%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+#md-np-dock{background:transparent;transition:background .2s}
+#md-np.np-docked #md-np-dock{background:color-mix(in srgb,var(--md-bg) 72%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+#md-np-dock::before{display:none}
+}
+/* top area melts into the list at rest (Spotify / Apple Music style); glass + hairline return once the list scrolls under it */
+/* one glass recipe for every theme: same tint strength + blur, so light no longer reads solid white */
+#md-hdr,body.pink #md-hdr,#md-sticky,.md-acts,#md-np-top,#md-np.np-docked #md-np-dock{background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
+#md-hdr,#md-sticky,.md-acts,#md-np-top,#md-np-dock{transition:background-color .2s,box-shadow .2s,border-color .2s}
+body:not(.pink) #md-screen:not(.md-scrolled) #md-hdr{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+body.pink #md-hdr{color:var(--md-cur);border-bottom-color:var(--md-div);box-shadow:var(--md-stsh)}
+body.pink #md-screen:not(.md-scrolled) #md-hdr{background:transparent;box-shadow:none;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+body.pink #md-hdr .md-ib:active{background:var(--md-press)}
+#md-np:not(.np-scrolled) #md-np-top{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+#md-np-top{transition:background-color .2s}
+#md-hdr{transition:background-color .2s,box-shadow .2s,border-color .2s,color .2s}
+#md-screen:not(.md-scrolled) #md-sticky,#md-screen:not(.md-scrolled) .md-acts{background:transparent;border-bottom-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+/* ===== app tabs share the Media look: wash backdrop, header/search melt into it at rest, glass once scrolled ===== */
+body{--nb-bg:#fff;--nb-wash:.24;--nb-hdr-fg:#3366cc;--nb-hbd:#e8ecf4;--nb-hsh:0 2px 12px rgba(0,0,0,.10);--nb-stbd:#eef1f7}
+body.night{--nb-bg:#080808;--nb-wash:.5;--nb-hdr-fg:#e8e8e8;--nb-hbd:rgba(255,255,255,.06);--nb-hsh:0 4px 8px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.08);--nb-stbd:#232326}
+body.pink{--nb-bg:#fff8fb;--nb-wash:.28;--nb-hdr-fg:#bd2856;--nb-hbd:#f5d5e2;--nb-hsh:0 4px 8px rgba(200,54,94,.12),0 8px 24px rgba(200,54,94,.08);--nb-stbd:#f5c5d8}
+#nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--splash-img,var(--splash-img-0));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
+#nb-wash-fade{position:fixed;left:0;right:0;top:0;height:74%;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--nb-bg) 0%,transparent) 0%,color-mix(in srgb,var(--nb-bg) 10%,transparent) 20%,color-mix(in srgb,var(--nb-bg) 35%,transparent) 40%,color-mix(in srgb,var(--nb-bg) 68%,transparent) 60%,color-mix(in srgb,var(--nb-bg) 92%,transparent) 80%,color-mix(in srgb,var(--nb-bg) 98%,transparent) 90%,var(--nb-bg) 100%)}
+body.reader-mode #nb-wash,body.reader-mode #nb-wash-fade{display:none}
+/* body paints its own opaque bg (html is black), which would hide the wash: hand the page colour to html instead */
+html body:not(.reader-mode){background:transparent!important}
+html:has(body:not(.reader-mode)){background:#fff}
+html:has(body.night:not(.reader-mode)){background:#080808}
+html:has(body.pink:not(.reader-mode)){background:#fff8fb}
+body:not(.reader-mode) #nb-app #site-header,body:not(.reader-mode) #nb-app #feed-search-wrap{background:color-mix(in srgb,var(--nb-bg) 60%,transparent)!important;-webkit-backdrop-filter:blur(22px) saturate(180%)!important;backdrop-filter:blur(22px) saturate(180%)!important;transition:background-color .2s,box-shadow .2s,border-color .2s,gap .3s cubic-bezier(.4,0,.2,1),padding .3s cubic-bezier(.4,0,.2,1)}
+body:not(.reader-mode) #nb-app #site-header{border-bottom:1px solid var(--nb-hbd)!important;box-shadow:var(--nb-hsh)!important}
+body:not(.reader-mode) #nb-app #feed-search-wrap{border-bottom:1px solid var(--nb-stbd)!important;box-shadow:none!important}
+body:not(.reader-mode):not(.nb-scrolled) #nb-app #site-header,body:not(.reader-mode):not(.nb-scrolled) #nb-app #feed-search-wrap{background:transparent!important;border-bottom-color:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+body.pink:not(.reader-mode) #nb-app #header-title,body.pink:not(.reader-mode) #nb-app #header-title .hdr-title-inner,body.pink:not(.reader-mode) #nb-app .hdr-btn,body.pink:not(.reader-mode) #nb-app #back-btn,body.pink:not(.reader-mode) #nb-app .hdr-dashes{color:var(--nb-hdr-fg)}
+body.pink:not(.reader-mode) #nb-app #back-btn svg{stroke:var(--nb-hdr-fg)}
+body:not(.reader-mode) #nb-app #screen-settings{background:transparent}
 @keyframes md-fade{from{opacity:0}to{opacity:1}}
 @keyframes md-up{from{transform:translateY(100%)}to{transform:none}}
+</style>
+<style id="dlg-md">
+/* Confirm dialogs (reset, newer version, delete, unpublish, delete account, sign out), restyled to match the Media
+   panel's sheets: same surface colours per theme, bold tight title, 46px / 14px-radius buttons that share the row,
+   the secondary button in the Media "alt" colours, the same scrim and a short fade/rise on open. The primary
+   button's colours are left to the existing .rdlg-ok rules (red = destructive, blue/pink = neutral). */
+@keyframes dlg-fade{from{opacity:0}to{opacity:1}}
+@keyframes dlg-rise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+#edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay{background:rgba(10,10,12,.5);animation:dlg-fade .2s}
+body.pink #edit-reset-overlay,body.pink #sync-conflict-overlay,body.pink #delete-overlay,body.pink #unpublish-overlay,body.pink #delete-account-overlay,body.pink #signout-overlay{background:rgba(70,12,32,.45)}
+#reset-dialog,
+#sync-conflict-dialog,
+#delete-dialog,
+#unpublish-dialog,
+#delete-account-dialog,
+#signout-dialog {
+  background:#fff;border:none;border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;
+  box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)
+}
+body.night #reset-dialog,
+body.night #sync-conflict-dialog,
+body.night #delete-dialog,
+body.night #unpublish-dialog,
+body.night #delete-account-dialog,
+body.night #signout-dialog {
+  background:#111;border:1px solid rgba(255,255,255,.07);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6)
+}
+body.pink #reset-dialog,
+body.pink #sync-conflict-dialog,
+body.pink #delete-dialog,
+body.pink #unpublish-dialog,
+body.pink #delete-account-dialog,
+body.pink #signout-dialog {
+  background:#fff8fb;border:none;border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22)
+}
+#reset-dialog .rdlg-title,
+#sync-conflict-dialog .rdlg-title,
+#delete-dialog .rdlg-title,
+#unpublish-dialog .rdlg-title,
+#delete-account-dialog .rdlg-title,
+#signout-dialog .rdlg-title {
+  font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5rem
+}
+#reset-dialog .rdlg-body,
+#sync-conflict-dialog .rdlg-body,
+#delete-dialog .rdlg-body,
+#unpublish-dialog .rdlg-body,
+#delete-account-dialog .rdlg-body,
+#signout-dialog .rdlg-body {
+  font-size:.9rem;line-height:1.45;margin-bottom:1.2rem
+}
+body.night #reset-dialog .rdlg-body,
+body.night #sync-conflict-dialog .rdlg-body,
+body.night #delete-dialog .rdlg-body,
+body.night #unpublish-dialog .rdlg-body,
+body.night #delete-account-dialog .rdlg-body,
+body.night #signout-dialog .rdlg-body {color:#8f98a3}
+body.pink #reset-dialog .rdlg-body,
+body.pink #sync-conflict-dialog .rdlg-body,
+body.pink #delete-dialog .rdlg-body,
+body.pink #unpublish-dialog .rdlg-body,
+body.pink #delete-account-dialog .rdlg-body,
+body.pink #signout-dialog .rdlg-body {color:#875068}
+#reset-dialog .rdlg-btns,
+#sync-conflict-dialog .rdlg-btns,
+#delete-dialog .rdlg-btns,
+#unpublish-dialog .rdlg-btns,
+#delete-account-dialog .rdlg-btns,
+#signout-dialog .rdlg-btns {
+  flex-wrap:wrap;gap:.6rem
+}
+#reset-dialog .rdlg-cancel,
+#sync-conflict-dialog .rdlg-cancel,
+#delete-dialog .rdlg-cancel,
+#unpublish-dialog .rdlg-cancel,
+#delete-account-dialog .rdlg-cancel,
+#signout-dialog .rdlg-cancel,
+#reset-dialog .rdlg-ok,
+#sync-conflict-dialog .rdlg-ok,
+#delete-dialog .rdlg-ok,
+#unpublish-dialog .rdlg-ok,
+#delete-account-dialog .rdlg-ok,
+#signout-dialog .rdlg-ok {
+  flex:1 1 0;min-width:0;height:46px;box-sizing:border-box;padding:0 .8rem;border-radius:14px;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center;
+  font-size:.9rem;font-weight:700;line-height:1.1;transition:transform .12s
+}
+#reset-dialog .rdlg-cancel:active,
+#sync-conflict-dialog .rdlg-cancel:active,
+#delete-dialog .rdlg-cancel:active,
+#unpublish-dialog .rdlg-cancel:active,
+#delete-account-dialog .rdlg-cancel:active,
+#signout-dialog .rdlg-cancel:active,
+#reset-dialog .rdlg-ok:active,
+#sync-conflict-dialog .rdlg-ok:active,
+#delete-dialog .rdlg-ok:active,
+#unpublish-dialog .rdlg-ok:active,
+#delete-account-dialog .rdlg-ok:active,
+#signout-dialog .rdlg-ok:active {transform:scale(.97)}
+#reset-dialog .rdlg-cancel,
+#sync-conflict-dialog .rdlg-cancel,
+#delete-dialog .rdlg-cancel,
+#unpublish-dialog .rdlg-cancel,
+#delete-account-dialog .rdlg-cancel,
+#signout-dialog .rdlg-cancel {
+  background:#f6f8fc;color:#3366cc;border:1px solid #e4e9f5
+}
+body.night #reset-dialog .rdlg-cancel,
+body.night #sync-conflict-dialog .rdlg-cancel,
+body.night #delete-dialog .rdlg-cancel,
+body.night #unpublish-dialog .rdlg-cancel,
+body.night #delete-account-dialog .rdlg-cancel,
+body.night #signout-dialog .rdlg-cancel {
+  background:#1c1c1c;color:#b0b0b0;border:1px solid #383838
+}
+body.pink #reset-dialog .rdlg-cancel,
+body.pink #sync-conflict-dialog .rdlg-cancel,
+body.pink #delete-dialog .rdlg-cancel,
+body.pink #unpublish-dialog .rdlg-cancel,
+body.pink #delete-account-dialog .rdlg-cancel,
+body.pink #signout-dialog .rdlg-cancel {
+  background:#ffe0ec;color:#c8365e;border:1px solid #f5c5d8
+}
+@media (prefers-reduced-motion:reduce){
+#edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay,#reset-dialog,#sync-conflict-dialog,#delete-dialog,#unpublish-dialog,#delete-account-dialog,#signout-dialog{animation:none}
+}
+body.nb-reduce-motion #edit-reset-overlay,body.nb-reduce-motion #sync-conflict-overlay,body.nb-reduce-motion #delete-overlay,body.nb-reduce-motion #unpublish-overlay,body.nb-reduce-motion #delete-account-overlay,body.nb-reduce-motion #signout-overlay{animation:none}
+body.nb-reduce-motion #reset-dialog,
+body.nb-reduce-motion #sync-conflict-dialog,
+body.nb-reduce-motion #delete-dialog,
+body.nb-reduce-motion #unpublish-dialog,
+body.nb-reduce-motion #delete-account-dialog,
+body.nb-reduce-motion #signout-dialog {animation:none}
+</style>
+<style id="sheet-md">
+/* Publish sheet and note details (Save note) dialog, restyled to match the Media panel's sheets: same surface colour per
+   theme, plain bold title instead of a coloured header bar, hairline dividers, Media-style fields, 46px / 14px-radius
+   footer buttons that share the row, secondary button in the Media "alt" colours, the same scrim and a slide-up on open.
+   Primary button colours are left to the existing .ebtn-pri rules. Tokens live on the overlays so each theme is one block. */
+@keyframes sh-fade{from{opacity:0}to{opacity:1}}
+@keyframes sh-up{from{transform:translateY(100%)}to{transform:none}}
+#edit-overlay,
+#publish-overlay,
+#backup-overlay,
+#account-overlay,
+#terms-overlay,
+#paywall-overlay,
+#restore-overlay,
+#privacy-overlay,
+#cterms-overlay,
+#einfo-overlay {--sh-bg:#fff;--sh-fg:#202122;--sh-sub:#54595d;--sh-div:#e8ecf4;--sh-shadow:rgba(0,0,0,.25);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:#f6f8fc;--sh-secf:#3366cc;--sh-secb:#e4e9f5;--sh-field:#fff;--sh-fieldsh:inset 0 2px 6px rgba(20,30,50,.12),inset 0 1px 2px rgba(20,30,50,.06);--sh-fieldf:#fff;--sh-fieldfsh:inset 0 1px 2px rgba(51,102,204,.05),0 0 0 3px rgba(51,102,204,.2)}
+body.night #edit-overlay,
+body.night #publish-overlay,
+body.night #backup-overlay,
+body.night #account-overlay,
+body.night #terms-overlay,
+body.night #paywall-overlay,
+body.night #restore-overlay,
+body.night #privacy-overlay,
+body.night #cterms-overlay,
+body.night #einfo-overlay {--sh-bg:#111;--sh-fg:#e8e8e8;--sh-sub:#8f98a3;--sh-div:rgba(255,255,255,.07);--sh-shadow:rgba(0,0,0,.6);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:#1c1c1c;--sh-secf:#b0b0b0;--sh-secb:#383838;--sh-field:#0a0a0c;--sh-fieldsh:inset 0 2px 6px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.05);--sh-fieldf:#141418;--sh-fieldfsh:0 0 0 3px rgba(255,255,255,.1)}
+body.pink #edit-overlay,
+body.pink #publish-overlay,
+body.pink #backup-overlay,
+body.pink #account-overlay,
+body.pink #terms-overlay,
+body.pink #paywall-overlay,
+body.pink #restore-overlay,
+body.pink #privacy-overlay,
+body.pink #cterms-overlay,
+body.pink #einfo-overlay {--sh-bg:#fff8fb;--sh-fg:#1a0a12;--sh-sub:#875068;--sh-div:#f5d5e2;--sh-shadow:rgba(200,54,94,.2);--sh-scrim:rgba(70,12,32,.45);--sh-secbg:#ffe0ec;--sh-secf:#c8365e;--sh-secb:#f5c5d8;--sh-field:#fff2f7;--sh-fieldsh:inset 0 2px 5px rgba(200,54,94,.06),0 1px 0 rgba(255,255,255,.6);--sh-fieldf:#fff;--sh-fieldfsh:0 0 0 3px rgba(200,54,94,.15)}
+#edit-overlay,
+#publish-overlay,
+#backup-overlay,
+#account-overlay,
+#terms-overlay,
+#paywall-overlay,
+#restore-overlay,
+#privacy-overlay,
+#cterms-overlay,
+#einfo-overlay {background:var(--sh-scrim);animation:sh-fade .2s}
+#edit-dialog,
+#publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+body:not(.night):not(.pink) #edit-dialog,
+body:not(.night):not(.pink) #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+body.night #edit-dialog,
+body.night #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+body.pink #edit-dialog,
+body.pink #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+#edit-dialog {max-height:85vh}
+#publish-sheet {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
+#publish-sheet.is-live {height:min(calc(330px + env(safe-area-inset-bottom,0px)),85vh)}
+#edit-dhdr,
+#publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+#edit-dhdr-title,
+#publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+#edit-close,
+#publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .15s}
+body:not(.night):not(.pink) #edit-dhdr,
+body:not(.night):not(.pink) #publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+body:not(.night):not(.pink) #edit-dhdr-title,
+body:not(.night):not(.pink) #publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+body:not(.night):not(.pink) #edit-close,
+body:not(.night):not(.pink) #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .15s}
+body.night #edit-dhdr,
+body.night #publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+body.night #edit-dhdr-title,
+body.night #publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+body.night #edit-close,
+body.night #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .15s}
+body.pink #edit-dhdr,
+body.pink #publish-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+body.pink #edit-dhdr-title,
+body.pink #publish-hdr-title {color:var(--sh-fg) !important;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+body.pink #edit-close,
+body.pink #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .15s}
+#edit-close:active,
+#publish-close:active {background:rgba(127,127,127,.18)}
+#pub-tabs {padding:0 1.2rem !important;gap:1.2rem !important;border-bottom:1px solid var(--sh-div)}
+#publish-body {background:var(--sh-bg) !important;color:var(--sh-fg);padding:1.1rem 1.2rem .8rem}
+#edit-dialog .markup-meta-fields {background:transparent;border:none;padding:.3rem 1.2rem .5rem;gap:.6rem}
+#edit-dialog #edit-meta-row {background:transparent !important;border:none !important;padding:0 1.2rem .9rem !important;gap:.6rem !important}
+#edit-dialog .com-field,
+#publish-sheet .com-field:not(#pub-slug-wrap) {background:var(--sh-field) !important;border:1px solid transparent !important;box-shadow:var(--sh-fieldsh) !important;color:var(--sh-fg) !important;border-radius:12px !important;padding:.7rem .9rem !important;font-size:.95rem !important;transition:all .2s ease}
+#edit-dialog #edit-meta-row .com-field {padding:.7rem .75rem !important;font-size:.88rem !important}
+#edit-dialog .com-field:focus,
+#publish-sheet .com-field:not(#pub-slug-wrap):focus {background:var(--sh-fieldf) !important;box-shadow:var(--sh-fieldfsh) !important;border-color:transparent !important}
+#pub-slug-wrap {background:var(--sh-field) !important;border:1px solid transparent !important;box-shadow:var(--sh-fieldsh) !important;border-radius:12px !important;transition:all .2s ease}
+#pub-slug-wrap:focus-within {background:var(--sh-fieldf) !important;box-shadow:var(--sh-fieldfsh) !important}
+#pub-slug-prefix {padding-left:.9rem;font-size:.95rem}
+#pub-slug-input {padding:.7rem .9rem .7rem .15rem;font-size:.95rem}
+.pub-url {border-radius:12px;padding:.7rem .9rem}
+body:not(.night):not(.pink) .pub-url {background:#f6f8fc;border-color:#e4e9f5}
+#edit-dfooter,
+#pub-footer-new,
+#pub-footer-live,
+#pub-footer-ad-new,
+#pub-footer-ad-live {background:var(--sh-bg) !important;border:none !important;padding:.5rem 1.2rem calc(env(safe-area-inset-bottom,0px) + 1rem);gap:.6rem}
+#edit-dfooter-r,
+#pub-footer-new-r,
+#pub-footer-live-r,
+#pub-footer-ad-new-r,
+#pub-footer-ad-live-r {flex:1;flex-wrap:nowrap;justify-content:stretch;gap:.6rem;margin-left:0}
+#edit-dfooter-r > button,
+#pub-footer-new-r > button,
+#pub-footer-live-r > button,
+#pub-footer-ad-new-r > button,
+#pub-footer-ad-live-r > button {flex:1 1 0;min-width:0;height:46px;box-sizing:border-box;padding:0 .8rem;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;text-align:center;font-size:.9rem;font-weight:700;line-height:1.1;transition:transform .12s}
+#edit-dfooter-r > button:active:not(:disabled),
+#pub-footer-new-r > button:active:not(:disabled),
+#pub-footer-live-r > button:active:not(:disabled),
+#pub-footer-ad-new-r > button:active:not(:disabled),
+#pub-footer-ad-live-r > button:active:not(:disabled) {transform:scale(.97)}
+#edit-dfooter-r > .ebtn-sec,
+#pub-footer-new-r > .ebtn-sec,
+#pub-footer-live-r > .ebtn-sec,
+#pub-footer-ad-new-r > .ebtn-sec,
+#pub-footer-ad-live-r > .ebtn-sec {background:var(--sh-secbg) !important;color:var(--sh-secf) !important;border:1px solid var(--sh-secb) !important;box-shadow:none !important}
+#backup-sheet,
+#account-dialog {border-radius:16px 16px 0 0;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
+#backup-hdr,
+#account-hdr {padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
+#backup-hdr-title,
+#account-hdr-title {font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+#backup-close,
+#account-close,
+.acct-sync-btn {width:36px;height:36px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;opacity:1;transition:background .15s}
+#backup-close:active,
+#account-close:active,
+.acct-sync-btn:active {background:rgba(127,127,127,.18)}
+.acct-sync-btn svg {width:17px;height:17px}
+#backup-body,
+#account-body {padding:1.1rem 1.2rem calc(env(safe-area-inset-bottom,0px) + 1.2rem)}
+body.night #backup-sheet,
+body.night #account-dialog {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+body.night #backup-hdr,
+body.night #account-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;box-shadow:none !important}
+body.night #backup-hdr-title,
+body.night #account-hdr-title {color:var(--sh-fg) !important}
+body.night #backup-close,
+body.night #account-close,
+body.night .acct-sync-btn {color:var(--sh-sub) !important}
+body.night #backup-body,
+body.night #account-body {background:var(--sh-bg) !important;color:var(--sh-fg)}
+body.night #backup-body .bkp-help {color:var(--sh-sub)}
+body.pink #backup-sheet,
+body.pink #account-dialog {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+body.pink #backup-hdr,
+body.pink #account-hdr {background:var(--sh-bg) !important;color:var(--sh-fg) !important;border:none !important;box-shadow:none !important}
+body.pink #backup-hdr-title,
+body.pink #account-hdr-title {color:var(--sh-fg) !important}
+body.pink #backup-close,
+body.pink #account-close,
+body.pink .acct-sync-btn {color:var(--sh-sub) !important}
+body.pink #backup-body,
+body.pink #account-body {background:var(--sh-bg) !important;color:var(--sh-fg)}
+body.pink #backup-body .bkp-help {color:var(--sh-sub)}
+body:not(.night):not(.pink) #backup-hdr,
+body:not(.night):not(.pink) #account-hdr {background:transparent !important;border:none !important;box-shadow:none !important}
+#backup-body .bkp-btn,
+#account-body .bkp-btn {height:46px;box-sizing:border-box;padding:0 .8rem;border-radius:14px;font-size:.9rem;font-weight:700;line-height:1.1;transition:transform .12s}
+#backup-body .bkp-btn:active:not(:disabled),
+#account-body .bkp-btn:active:not(:disabled) {transform:scale(.97)}
+#backup-body .bkp-btn-sec,
+#account-body .bkp-btn-sec {background:var(--sh-secbg) !important;color:var(--sh-secf) !important;border:1px solid var(--sh-secb) !important;box-shadow:none !important;text-shadow:none !important}
+#terms-dialog,
+#paywall-dialog,
+#restore-dialog {background:#fff !important;border:none;border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+body.night #terms-dialog,
+body.night #paywall-dialog,
+body.night #restore-dialog {background:#111 !important;border:1px solid rgba(255,255,255,.07);box-shadow:0 8px 24px rgba(0,0,0,.6)}
+body.pink #terms-dialog,
+body.pink #paywall-dialog,
+body.pink #restore-dialog {background:#fff8fb !important;border:none;box-shadow:0 8px 24px rgba(200,54,94,.22)}
+#terms-dialog .rdlg-title,
+#paywall-dialog .rdlg-title,
+#restore-dialog .rdlg-title {font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5rem}
+#terms-dialog .rdlg-body,
+#paywall-dialog .rdlg-body,
+#restore-dialog .rdlg-body {font-size:.9rem;line-height:1.45;margin-bottom:1.2rem}
+body.night #terms-dialog .rdlg-body,
+body.night #paywall-dialog .rdlg-body,
+body.night #restore-dialog .rdlg-body {color:#8f98a3}
+body.pink #terms-dialog .rdlg-body,
+body.pink #paywall-dialog .rdlg-body,
+body.pink #restore-dialog .rdlg-body {color:#875068}
+#terms-dialog .rdlg-btns,
+#paywall-dialog .rdlg-btns,
+#restore-dialog .rdlg-btns {flex-wrap:wrap;gap:.6rem}
+#terms-dialog .rdlg-cancel,
+#paywall-dialog .rdlg-cancel,
+#restore-dialog .rdlg-cancel,
+#terms-dialog .rdlg-ok,
+#paywall-dialog .rdlg-ok,
+#restore-dialog .rdlg-ok,
+#restore-dialog .ebtn-pri {flex:1 1 0;min-width:0;height:46px;box-sizing:border-box;padding:0 .8rem;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;text-align:center;font-size:.9rem;font-weight:700;line-height:1.1;transition:transform .12s}
+#terms-dialog .rdlg-cancel:active,
+#paywall-dialog .rdlg-cancel:active,
+#restore-dialog .rdlg-cancel:active,
+#terms-dialog .rdlg-ok:active,
+#paywall-dialog .rdlg-ok:active,
+#restore-dialog .rdlg-ok:active,
+#restore-dialog .ebtn-pri:active {transform:scale(.97)}
+#privacy-dialog,
+#cterms-dialog,
+#einfo-dialog {background:#fff !important;border:none;border-radius:20px;box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+#privacy-dhdr,
+#cterms-dhdr,
+#einfo-dhdr {background:#fff;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
+#privacy-dhdr-title,
+#cterms-dhdr-title,
+#einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+#privacy-closebtn,
+#cterms-closebtn,
+#einfo-closebtn {background:rgba(127,127,127,.14);color:var(--sh-sub);width:34px;height:34px}
+#privacy-body,
+#cterms-body,
+#einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
+body.night #privacy-dialog,
+body.night #cterms-dialog,
+body.night #einfo-dialog {background:#111 !important;border:1px solid rgba(255,255,255,.07);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+body.night #privacy-dhdr,
+body.night #cterms-dhdr,
+body.night #einfo-dhdr {background:#111;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
+body.night #privacy-dhdr-title,
+body.night #cterms-dhdr-title,
+body.night #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+body.night #privacy-closebtn,
+body.night #cterms-closebtn,
+body.night #einfo-closebtn {background:rgba(127,127,127,.14);color:var(--sh-sub);width:34px;height:34px}
+body.night #privacy-body,
+body.night #cterms-body,
+body.night #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
+body.pink #privacy-dialog,
+body.pink #cterms-dialog,
+body.pink #einfo-dialog {background:#fff8fb !important;border:none;border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
+body.pink #privacy-dhdr,
+body.pink #cterms-dhdr,
+body.pink #einfo-dhdr {background:#fff8fb;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
+body.pink #privacy-dhdr-title,
+body.pink #cterms-dhdr-title,
+body.pink #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+body.pink #privacy-closebtn,
+body.pink #cterms-closebtn,
+body.pink #einfo-closebtn {background:rgba(127,127,127,.14);color:var(--sh-sub);width:34px;height:34px}
+body.pink #privacy-body,
+body.pink #cterms-body,
+body.pink #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
+#privacy-body h3,
+#cterms-body h3,
+#einfo-body h3 {font-size:.92rem;font-weight:800;letter-spacing:-.01em;margin-top:1.1rem}
+#privacy-body h3:first-child,
+#cterms-body h3:first-child,
+#einfo-body h3:first-child {margin-top:0}
+#delete-dialog-row2:not(:empty) {margin-top:.6rem}
+#delete-dialog #delete-dialog-confirm {margin-top:0 !important}
+.pub-pkg-btn {padding:.75rem .5rem;border-radius:14px;border-width:1px;font-size:13px;font-weight:700;transition:transform .12s}
+.pub-pkg-btn:active:not(:disabled) {transform:scale(.97)}
+.ad-prog {border-width:1px;border-radius:14px;padding:.85rem .9rem}
+.pub-ad-loading .ebtn-sec,
+.ad-prog .ebtn-sec {height:40px;padding:0 1rem;border-radius:12px;font-weight:700}
+.st-card,
+.st-fund-btn,
+#st-signedout-invite,
+#st-invite .ebtn-sec {border-radius:14px}
+#story-viewer-title {font-weight:800;font-size:1.05rem;letter-spacing:-.02em}
+#account-screen-card {border-radius:20px}
+#_wptoast {background:rgba(255,255,255,.92) !important;color:#202122 !important;border:1px solid #e8ecf4;box-shadow:0 8px 24px rgba(20,30,50,.18) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+#_wptoast .toast-ok {background:#f6f8fc;color:#3366cc;border:1px solid #e4e9f5;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
+body.night #_wptoast {background:rgba(30,30,34,.9) !important;color:#f0f0f0 !important;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.6) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+body.night #_wptoast .toast-ok {background:#1c1c1c;color:#b0b0b0;border:1px solid #383838;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
+body.pink #_wptoast {background:rgba(255,242,247,.94) !important;color:#1a0a12 !important;border:1px solid #f5c5d8;box-shadow:0 8px 24px rgba(200,54,94,.22) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+body.pink #_wptoast .toast-ok {background:#ffe0ec;color:#c8365e;border:1px solid #f5c5d8;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
+@media (prefers-reduced-motion:reduce){
+#edit-overlay,
+#publish-overlay,
+#backup-overlay,
+#account-overlay,
+#terms-overlay,
+#paywall-overlay,
+#restore-overlay,
+#privacy-overlay,
+#cterms-overlay,
+#einfo-overlay,
+#edit-dialog,
+#publish-sheet,
+#terms-dialog,
+#paywall-dialog,
+#restore-dialog,
+#privacy-dialog,
+#cterms-dialog,
+#einfo-dialog {animation:none}
+}
+body.nb-reduce-motion #edit-overlay,
+body.nb-reduce-motion #publish-overlay,
+body.nb-reduce-motion #backup-overlay,
+body.nb-reduce-motion #account-overlay,
+body.nb-reduce-motion #terms-overlay,
+body.nb-reduce-motion #paywall-overlay,
+body.nb-reduce-motion #restore-overlay,
+body.nb-reduce-motion #privacy-overlay,
+body.nb-reduce-motion #cterms-overlay,
+body.nb-reduce-motion #einfo-overlay,
+body.nb-reduce-motion #edit-dialog,
+body.nb-reduce-motion #publish-sheet,
+body.nb-reduce-motion #terms-dialog,
+body.nb-reduce-motion #paywall-dialog,
+body.nb-reduce-motion #restore-dialog,
+body.nb-reduce-motion #privacy-dialog,
+body.nb-reduce-motion #cterms-dialog,
+body.nb-reduce-motion #einfo-dialog {animation:none}
 </style>
 <div id="md-screen" aria-hidden="true" role="dialog" aria-label="Media">
   <div id="md-wash"></div><div id="md-wash-fade"></div>
   <div id="md-hdr">
     <button class="md-ib" id="md-back" data-act="back" aria-label="Back"><svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg></button>
-    <div id="md-htitle">Media</div>
+    <div id="md-htitle" data-act="back" role="button">Media</div>
+    <button class="md-ib" id="md-refresh" data-act="refresh" aria-label="Refresh media" type="button"></button>
+    <div id="md-src" role="group" aria-label="Media source"><button type="button" class="md-srcb on" data-act="src" data-v="notes" aria-pressed="true">Notes</button><button type="button" class="md-srcb" data-act="src" data-v="likes" aria-pressed="false">Likes</button></div>
     <button class="md-ib" id="md-hact" data-act="newpl" aria-label="New playlist" hidden></button>
   </div>
   <div id="md-body"><div id="md-view"></div></div>
+  <button class="md-fab" id="md-fab" data-act="newpl" aria-label="New playlist" type="button"></button>
   <div id="md-mini" data-act="npopen" role="button" aria-label="Open player">
     <div id="md-mini-th"></div>
     <div class="md-tx"><div class="md-t" id="md-mini-t"></div><div class="md-s" id="md-mini-s"></div></div>
@@ -4802,12 +5332,15 @@ body.pink #md-hdr{background:#c8365e}
       <div id="md-np-top">
         <button class="md-ib" data-act="npclose" aria-label="Close player"></button>
         <div class="md-np-cap">Playing from<b id="md-np-ctx"></b></div>
+        <div class="md-np-cap md-np-cap2"><b id="md-np-ctitle"></b><span id="md-np-csub"></span></div>
+        <i id="md-np-topfill"></i>
         <button class="md-ib" data-act="npmore" aria-label="More"></button>
       </div>
       <div id="md-np-art"></div>
       <div id="md-stage"></div>
       <div id="md-np-title"></div>
       <div id="md-np-sub"></div>
+      <div id="md-np-dock">
       <div id="md-np-seek"><div class="md-bar" id="md-bar"><i id="md-bar-fill"></i></div><div class="md-times"><span id="md-t-pos">0:00</span><span id="md-t-dur">0:00</span></div></div>
       <div id="md-np-live"><span class="md-lq"><b style="height:40%"></b><b style="height:80%"></b><b style="height:55%"></b></span><span id="md-np-livetx"></span></div>
       <div id="md-np-ctl">
@@ -4816,6 +5349,7 @@ body.pink #md-hdr{background:#c8365e}
         <button class="md-cb big" id="md-c-pp" data-act="playpause" aria-label="Play or pause"></button>
         <button class="md-cb" data-act="next" aria-label="Next"></button>
         <button class="md-cb" id="md-c-rep" data-act="rep" aria-label="Repeat"></button>
+      </div>
       </div>
       <div id="md-np-queue"></div>
     </div>
@@ -5144,7 +5678,7 @@ body.pink #md-hdr{background:#c8365e}
     </div>
     <div id="edit-meta-row" style="display:flex;gap:.5rem;padding:.38rem .9rem .5rem;flex-shrink:0">
       <input id="nb-save-cat" class="com-field" placeholder="Category" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem" oninput="_nbUpdateSaveDialogDirtyState()">
-      <input id="nb-save-tags" class="com-field" placeholder="Tags (use commas)" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem" oninput="_nbUpdateSaveDialogDirtyState()">
+      <input id="nb-save-tags" class="com-field" placeholder="Tags (use comma)" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem" oninput="_nbUpdateSaveDialogDirtyState()">
     </div>
     <div id="edit-dfooter">
       <div id="edit-dfooter-r">
@@ -12059,7 +12593,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 /* ===================== Settings ===================== */
 (function () {
   const KEY = 'nb_settings_v1';
-  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, mediaSwipe: false, hideDashes: false, hideLibCount: false };
+  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, mediaSwipe: false, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
   let S = null, lastPoll = 0;
   function load() {
     try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
@@ -12069,11 +12603,21 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     document.body.classList.toggle('nb-reduce-motion', !!window._nbSt('reduceMotion'));
     document.body.classList.toggle('nb-no-tips', !window._nbSt('tips'));
     document.body.classList.toggle('nb-no-dashes', !!window._nbSt('hideDashes'));
+    document.body.classList.toggle('nb-no-mdcount', !!window._nbSt('hideMdCount'));
   }
   window._nbSt = function (k) {
     if (!S) load();
     if (k === 'reduceMotion' && S.reduceMotion === null) return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     return S[k];
+  };
+  // Best practice for masking: keep the first character and the domain (so the account is still recognisable),
+  // replace the rest of the name with a fixed run of asterisks so its length isn't revealed. Anything that isn't an email is left alone.
+  window._nbMaskEmail = function (e) {
+    e = String(e == null ? '' : e);
+    if (!window._nbSt('maskEmail')) return e;
+    const at = e.lastIndexOf('@');
+    if (at < 1) return e;
+    return e.charAt(0) + '*****' + e.slice(at);
   };
   window._nbStSort = function (list) {
     const s = window._nbSt('sort'); if (s === 'default') return list;
@@ -12107,7 +12651,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'sw', k: 'images', l: 'Image previews', s: 'Show photos on note cards. Off gives a tighter list.' },
       { t: 'sw', k: 'stories', l: 'Stories strip', s: 'Show stories above your notes in All.', after: () => _nbSyncStoriesStripVisibility() },
       { t: 'sw', k: 'tips', l: 'Welcome tips', s: 'Show the intro carousel in the Library.' },
-      { t: 'sw', k: 'hideLibCount', l: 'Hide category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Uncategorized and your own categories).', after: () => buildCatBar() },
+      { t: 'sw', k: 'hideLibCount', l: 'Hide Library category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Uncategorized and your own categories).', after: () => buildCatBar() },
+      { t: 'sw', k: 'hideMdCount', l: 'Hide Media category counts', s: 'Hide the counts on the Media tabs (Songs, Videos, Albums and Playlists).' },
       { t: 'sw', k: 'mediaSwipe', l: 'Swipe from left edge to open Media', s: 'Swipe in from the left edge of the screen, on any screen in the app, to open Media (songs, videos, albums, playlists).' }]],
     ['Writing', [
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
@@ -12117,7 +12662,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Sync now', s: 'Pull and push your notes', go: () => { if (!nbIsSignedIn()) { showToast('Sign in to sync your notes'); return; } nbSyncNow(); } },
       { t: 'link', l: 'Backup & restore', s: 'Save notes to a file, or restore one', go: () => openBackupSheet() }]],
     ['Account', [
-      { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) || 'Not signed in'; }, go: () => nbAccountBtnClick() },
+      { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) ? window._nbMaskEmail(a.email) : 'Not signed in'; }, go: () => nbAccountBtnClick() },
+      { t: 'sw', k: 'maskEmail', l: 'Hide email address', s: 'Show your email as j*****@gmail.com everywhere in the app: Settings, the account sheet, sign-out prompts and sign-in messages.', after: () => { try { if (typeof window._nbStRefresh === 'function') window._nbStRefresh(); } catch (e) {} } },
       { t: 'link', l: 'Display name', show: () => nbIsSignedIn(), s: () => _nbLoadCachedProfileName() || 'Not set', go: () => nbSettingsEditDisplayName() },
       { t: 'info', l: 'Subscribers', show: () => nbIsSignedIn(), s: () => _nbStAcctText('count') },
       { t: 'info', l: 'Likes', show: () => nbIsSignedIn(), s: () => _nbStAcctText('likes') },
@@ -12613,6 +13159,7 @@ const NB_SYNC_MAX_BYTES = 8 * 1024 * 1024;
 // and a timestamp, so they're kept and merely capped by count (newest kept,
 // see _nbSaveDeletedIds) so the list can't grow without bound.
 const NB_DELETED_IDS_KEY = 'nbDeletedNoteIds';
+const NB_DEMO_NOTE_ID = 'n_demo_snowleopard'; // same id as _nbDefaultNotes()
 const NB_TOMBSTONE_MAX_AGE_MS = Infinity; // kept as a constant so the cutoff checks below stay valid (cutoff = -Infinity)
 const NB_TOMBSTONE_MAX_COUNT = 5000;
 const NB_SYNC_POLL_MS = 20 * 1000; // cheap: an unchanged backup answers 304 and an unchanged push is skipped
@@ -12731,14 +13278,21 @@ function _nbBrowserPlugin() {
 // is only a safety net for any Capacitor environment where the plugin
 // isn't registered (e.g. not yet cap sync'd into a build) — normally
 // openInExternalBrowser handles this.
-function _nbCopyLinkFallback(url) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url)
-      .then(() => showToast('Couldn\u2019t open that link. Copied it instead.'))
-      .catch(() => showToast('Couldn\u2019t open that link'));
-  } else {
-    showToast('Couldn\u2019t open that link');
+// Clipboard write that can't silently fail: tries the async API, falls back to execCommand. Resolves true/false.
+function nbCopyText(t) {
+  function fb() {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      var ok = document.execCommand('copy'); ta.remove(); return ok;
+    } catch (e) { return false; }
   }
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).then(function () { return true; }, function () { return fb(); });
+  return Promise.resolve(fb());
+}
+function _nbCopyLinkFallback(url) {
+  nbCopyText(url).then(ok => showToast(ok ? 'Couldn\u2019t open that link. Copied it instead.' : 'Couldn\u2019t open that link'));
 }
 function _nbOpenExternalLink(url) {
   if (!url) return;
@@ -13090,8 +13644,8 @@ async function _nbCompleteGoogleSignIn(idToken) {
     catch (e) { _nbLog('RevenueCat logIn', e); }
   }
   showToast(data.deletionCancelled
-    ? 'Signed in as ' + data.email + '. Account deletion cancelled.'
-    : 'Signed in as ' + data.email);
+    ? 'Signed in as ' + (window._nbMaskEmail ? window._nbMaskEmail(data.email) : data.email) + '. Account deletion cancelled.'
+    : 'Signed in as ' + (window._nbMaskEmail ? window._nbMaskEmail(data.email) : data.email));
   // Sign-in itself has now succeeded — release the button here rather
   // than waiting for nbSignInWithGoogle's finally block, which only runs
   // after the trailing sync below finishes. closeAccountScreen() (and any
@@ -13646,7 +14200,10 @@ async function nbSyncPull(showFeedback) {
     let editorLocalSavedFragment = null;
     let conflictCount = 0, baseTouched = false, copyCount = 0;
     incoming.forEach(n => {
-      if (tombstones.has(n.id)) return; // deleted on another device — don't resurrect it here
+      // Deleted on another device — don't resurrect it here. Exception: a demo note that also exists
+      // locally still goes through the normal merge below (newer wins, conflict copy, editor prompt), so
+      // a customised copy is never silently overwritten and the two are never duplicated (same id).
+      if (tombstones.has(n.id) && !(n.id === NB_DEMO_NOTE_ID && indexById.has(n.id))) return;
       // Came from the account's backup, so it belongs to this account —
       // tag it the same way a push does, so nbVisibleNotes() hides it
       // again if the user later signs out. See nbSyncPush for the tag.
@@ -13729,6 +14286,13 @@ async function nbSyncPull(showFeedback) {
     existing = existing.filter(n => {
       const tomb = tombstones.get(n.id);
       if (!tomb) return true;
+      // The built-in demo note has one fixed id and is re-seeded on every fresh install/browser. A delete
+      // record from another device must not remove an unpublished copy (seeded or customised): that is what
+      // made a new sign-in report "1 note removed". Deleting it on this device is still honoured (the note
+      // is gone locally, so nothing is left to keep) and the delete record keeps it from being pulled back in.
+      // A copy that is still marked published is not exempt: deleting a published note always unpublishes it
+      // first, so that copy's page is already gone and keeping it would leave a dead "published" state here.
+      if (n.id === NB_DEMO_NOTE_ID && !n.publishedSlug) return true;
       const localTs = n.updatedAt || n.createdAt || 0;
       if (localTs > tomb.deletedAt) return true; // edited here after the remote delete — keep it
       // The open sheet's own note just got deleted out from under it by
@@ -13964,11 +14528,19 @@ async function _nbSyncPullThenPushOnce() {
       if (!(pull.ok || pull.reason === 'not-found')) break;
       push = await nbSyncPush(false);
     }
+    // A background push that still fails (network error, or conflicts that outlast the retries) used to be
+    // silent, so a new note could sit on this device without ever reaching the account. Say so, at most once
+    // every 5 minutes. Session expiry and the size cap already have their own messages.
+    if (push && !push.ok && (push.reason === 'error' || push.reason === 'conflict') && Date.now() - _nbPushFailToastAt > 5 * 60 * 1000) {
+      _nbPushFailToastAt = Date.now();
+      showToast('Couldn\u2019t back up your latest changes yet. Will retry.');
+    }
     _nbReconcileStoriesFlags();
     _nbRelinkOrphanPages();
   }
   return pull;
 }
+let _nbPushFailToastAt = 0;
 // The one place a person can deliberately ask "did that actually work?"
 // — everywhere else sync is silent. Feedback is a single toast summarizing
 // both pull and push together (not two separate toasts, which would just
@@ -14053,7 +14625,7 @@ function nbRenderAccountDialog() {
   document.getElementById('account-signedin-body').style.display = signedIn ? '' : 'none';
   document.getElementById('account-signedout-btns').style.display = signedIn ? 'none' : '';
   document.getElementById('account-signedin-btns').style.display = signedIn ? '' : 'none';
-  if (signedIn && acct) document.getElementById('account-email').textContent = acct.email || '';
+  if (signedIn && acct) document.getElementById('account-email').textContent = (window._nbMaskEmail ? window._nbMaskEmail(acct.email || '') : acct.email || '');
 }
 // Header account icon: signed-out taps go straight to the full-screen
 // sign-in view; signed-in taps confirm first (openLogoutConfirm below),
@@ -14116,7 +14688,7 @@ function closeAccountScreen() {
 function openLogoutConfirm() {
   const acct = nbAccount();
   const emailEl = document.getElementById('logout-email');
-  if (emailEl) emailEl.textContent = (acct && acct.email) || 'your account';
+  if (emailEl) emailEl.textContent = (acct && acct.email) ? (window._nbMaskEmail ? window._nbMaskEmail(acct.email) : acct.email) : 'your account';
   const nameInput = document.getElementById('logout-profile-name-input');
   const nameStatus = document.getElementById('logout-profile-name-status');
   const nameEditBtn = document.getElementById('logout-profile-name-edit-btn');
@@ -14197,7 +14769,7 @@ function openSignOutConfirm() {
   const cancelBtn = document.getElementById('signout-dialog-cancel');
   const confirmBtn = document.getElementById('signout-dialog-confirm');
   const acct = nbAccount();
-  document.getElementById('signout-confirm-email').textContent = (acct && acct.email) || 'your account';
+  document.getElementById('signout-confirm-email').textContent = (acct && acct.email) ? (window._nbMaskEmail ? window._nbMaskEmail(acct.email) : acct.email) : 'your account';
   confirmBtn.disabled = false;
   confirmBtn.textContent = 'Sign out';
   acctOv.classList.remove('open');
@@ -16109,11 +16681,23 @@ function _nbPaintStoriesStrip() {
 // against its clipped container and only turns on the horizontal scroll
 // (.hdr-title-inner.marquee, see hdr-marquee keyframes) when it genuinely
 // doesn't fit, so short titles just sit still instead of drifting.
-function nbUpdateTitleMarquee(titleEl, innerEl) {
+function nbUpdateTitleMarquee(titleEl, innerEl, fitSlot) {
   if (!titleEl || !innerEl) return;
   innerEl.classList.remove('marquee');
   innerEl.style.removeProperty('--marquee-x');
   requestAnimationFrame(() => {
+    if (fitSlot) {
+      // Story viewer: the padding is the gap to the chevron / like button.
+      // Scroll exactly far enough that the text's end stops at that same gap.
+      const cs = getComputedStyle(titleEl);
+      const slot = titleEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const ov = innerEl.offsetWidth - slot;
+      if (ov > 4) {
+        innerEl.style.setProperty('--marquee-x', (-ov) + 'px');
+        innerEl.classList.add('marquee');
+      }
+      return;
+    }
     const overflow = innerEl.scrollWidth - titleEl.clientWidth;
     if (overflow > 4) {
       innerEl.style.setProperty('--marquee-x', (-overflow - 12) + 'px');
@@ -16148,7 +16732,7 @@ function nbOpenStory(slug, authorSub, title) {
   const storyTitleEl = document.getElementById('story-viewer-title');
   const storyTitleInner = document.getElementById('story-viewer-title-text');
   storyTitleInner.textContent = '@' + slug;
-  nbUpdateTitleMarquee(storyTitleEl, storyTitleInner);
+  nbUpdateTitleMarquee(storyTitleEl, storyTitleInner, true);
   document.getElementById('story-viewer-frame').src = _pubUrlFor(slug);
   const subBtn = document.getElementById('story-viewer-sub-btn');
   const isSubscribed = _nbSubscribedAuthors().has(authorSub);
@@ -18268,7 +18852,7 @@ function nbUnpublishNote() {
 }
 function _pubCopyUrl() {
   const url = document.getElementById('pub-live-url').textContent;
-  if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => showToast('Link copied')).catch(() => {});
+  nbCopyText(url).then(ok => showToast(ok ? 'Link copied' : 'Couldn\u2019t copy the link'));
 }
 
 /* ===================== Publish as Ad ===================== */
@@ -18375,9 +18959,7 @@ const AD_ELIGIBILITY_MESSAGES = {
   'parse-failed': AD_CHECK_FAILED_MSG
 };
 function nbAdCopyAttribution() {
-  if (navigator.clipboard) navigator.clipboard.writeText(AD_ATTRIBUTION_TEXT)
-    .then(() => showToast('Attribution text copied. Paste it into a new Text block.'))
-    .catch(() => {});
+  nbCopyText(AD_ATTRIBUTION_TEXT).then(ok => showToast(ok ? 'Attribution text copied. Paste it into a new Text block.' : 'Couldn\u2019t copy the attribution text'));
 }
 
 // ---- Earned ad packages ----
@@ -18691,8 +19273,8 @@ async function nbInviteShare() {
     if (e && (e.name === 'AbortError' || /cancel/i.test(String(e.message || '')))) return;
     _nbLog('invite share', e);
   }
-  try { await navigator.clipboard.writeText(text); showToast('Invite copied'); }
-  catch (e) { showToast('Your invite code is ' + code); }
+  if (await nbCopyText(text)) showToast('Invite copied');
+  else showToast('Your invite code is ' + code);
 }
 async function nbInviteRedeem() {
   const input = document.getElementById('st-invite-input');
@@ -20088,7 +20670,6 @@ function nbRenderNotesScreen() {
     const imgUrls = extractImagesFromHtml(_nbRehydrateImages(n.content || ''));
     const imgsHtml = _nbSt('images') ? _buildImgsHtml(imgUrls) : '';
     const nid = escJs(n.id);
-    nbInitOnboardCarousel();
     return `
     <div class="guide-card" data-note-id="${esc(n.id)}" onclick="nbOpenNoteForEdit('${nid}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenNoteForEdit('${nid}')">
       <div class="gc-title">${esc(n.title || 'Untitled note')}</div>
@@ -20099,6 +20680,7 @@ function nbRenderNotesScreen() {
     </div>
   `;
   }).join('');
+  nbInitOnboardCarousel();
 }
 function nbDeleteNote(id) {
   const note = _pubFindNote(id);
@@ -22191,6 +22773,44 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
 </script>
 
 
+<style id="nb-glass-css">
+/* ===== Sign-in screen: clear glass (translucent, edge-lit, no blur, no darkening) ===== */
+#account-screen{font-family:"Inter Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#account-screen-name{font-size:1.85rem;font-weight:800;letter-spacing:-.02em}
+#account-screen-card{max-width:320px;padding:1.3rem 1.15rem 1.1rem;border-radius:20px;background:linear-gradient(155deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 45%,rgba(255,255,255,.12) 100%);border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 1px 0 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.14),0 8px 24px rgba(0,0,0,.14);-webkit-backdrop-filter:none;backdrop-filter:none}
+#account-screen-card .rdlg-body{font-size:.88rem;line-height:1.5;text-align:center;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.45)}
+#account-screen-card .rdlg-body b{color:#fff}
+#account-screen #account-invite-toggle{font-size:.78rem;font-weight:500;color:rgba(255,255,255,.8);text-shadow:0 1px 6px rgba(0,0,0,.45)}
+#account-screen #account-invite-input{height:42px;padding:0 .8rem;border-radius:12px;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+#account-screen #account-invite-input::placeholder{color:rgba(255,255,255,.7)}
+#account-screen #account-invite-follow-row,#account-screen #account-invite-msg{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45)}
+#account-screen-back-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+body #account-screen #account-signin-btn,body #account-screen #account-signout-btn{width:100%;height:46px;padding:0 1.2rem;border-radius:14px;font-size:.92rem;font-weight:700;transition:transform .12s}
+body #account-screen #account-signout-btn{background-color:rgba(255,255,255,.18) !important;color:#fff !important;border:1px solid rgba(255,255,255,.4) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4) !important}
+body #account-screen #account-signin-btn:active,body #account-screen #account-signout-btn:active{transform:scale(.97)}
+
+/* ===== Onboarding carousel: soft glass overlay ===== */
+.nb-carousel-viewport{box-sizing:border-box;border-radius:18px;box-shadow:0 8px 24px rgba(20,30,50,.18),0 1px 3px rgba(20,30,50,.1);isolation:isolate}
+.nb-carousel-viewport::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 40%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.nb-carousel-cap{padding:.6rem .85rem .65rem;font-size:.76rem;font-weight:500;line-height:1.35;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3);background:linear-gradient(to top,rgba(10,16,30,.5),rgba(10,16,30,.22));border-top:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px) saturate(160%);backdrop-filter:blur(12px) saturate(160%)}
+
+/* Carousel design B (the first glass take): floating frosted caption bubble, light border, dots in a glass pill. Design A is the base above. */
+#nb-onboard-carousel.car-b .nb-carousel-viewport{border-radius:22px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);box-shadow:0 14px 36px rgba(20,30,50,.24),0 2px 8px rgba(20,30,50,.12)}
+#nb-onboard-carousel.car-b .nb-carousel-viewport::after{background:linear-gradient(155deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.06) 32%,rgba(255,255,255,0) 55%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 0 0 1px rgba(255,255,255,.1)}
+#nb-onboard-carousel.car-b .nb-carousel-cap{left:.55rem;right:.55rem;bottom:.55rem;padding:.5rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(14,20,34,.34);-webkit-backdrop-filter:blur(14px) saturate(170%);backdrop-filter:blur(14px) saturate(170%)}
+#nb-onboard-carousel.car-b .nb-carousel-dots{width:fit-content;margin:.65rem auto 0;padding:.34rem .6rem;border-radius:99px;background:rgba(255,255,255,.6);border:1px solid rgba(51,102,204,.16);box-shadow:0 1px 4px rgba(20,30,50,.12);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+body.night #nb-onboard-carousel.car-b .nb-carousel-dots{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);box-shadow:none}
+body.pink #nb-onboard-carousel.car-b .nb-carousel-dots{background:rgba(255,255,255,.6);border-color:rgba(200,54,94,.18)}
+/* Dots, both designs: stronger inactive dots so they read on a light background */
+.nb-carousel-dot{width:7px;height:7px;background:#9aa7bf}
+.nb-carousel-dot.active{width:18px;border-radius:4px}
+body.night .nb-carousel-dot{background:#5c5c62}
+body.pink .nb-carousel-dot{background:#d796b0}
+</style>
+<script>
+(function(){try{var k='nb_car_variant',v=localStorage.getItem(k)==='b'?'a':'b';localStorage.setItem(k,v);}catch(e){var v=Math.random()<.5?'a':'b';}
+var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('car-'+v);})();
+</script>
 <script id="md-js">
 /* ===================== Media space =====================
    Opened from the dashes on the Library title. Scans every note's embeds and links (YouTube, Spotify, Streamable, Instagram,
@@ -22230,17 +22850,28 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     edit: function (s) { return S('<path d="M4 20l1-4.2L16.2 4.6a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.2 19z"/><path d="M14.5 6.3l3.2 3.2"/>', s, 1.7); }
   };
 
+  IC.link = function (s) { return S('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', s, 1.8); };
+  IC.refresh = function (s) { return S('<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>', s, 2); };
+  IC.ext = function (s) { return S('<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>', s, 1.8); };
+
   /* ---------- state ---------- */
   var MD = {
-    open: false, tab: 'songs', q: '', stack: [{ n: 'home' }], items: new Map(), pit: new Map(), pl: [], al: [],
+    open: false, tab: 'songs', src: 'notes', q: '', stack: [{ n: 'home' }], items: new Map(), pit: new Map(), pl: [], al: [],
     queue: { list: [], base: [], i: -1, shuffle: false, repeat: 'off', ctx: '' },
     cur: null, ps: { playing: false, pos: 0, dur: 0, real: false, t0: 0 },
     frame: null, fplat: '', dead: true, endFired: false, np: false, dragging: false, dragFrac: 0,
-    viewKeys: [], viewCtx: '', timer: 0, metaTimer: 0, sheetCtx: null, scanning: false
+    viewKeys: [], viewCtx: '', timer: 0, metaTimer: 0, sheetCtx: null, scanning: false,
+    refreshing: false, poll: 0, lastScroll: 0, touching: false, dsig: ''
   };
   var meta = {};
   try { meta = JSON.parse(localStorage.getItem(META_KEY) || '{}') || {}; } catch (e) { meta = {}; }
-  function saveMeta() {
+  // Metadata arrives a few items at a time; writing the whole map to storage for each one is wasteful, so saves are batched.
+  var _smT = 0;
+  function saveMeta() { if (!_smT) _smT = setTimeout(function () { _smT = 0; saveMetaNow(); }, 1200); }
+  function flushMeta() { if (_smT) { clearTimeout(_smT); _smT = 0; saveMetaNow(); } }
+  window.addEventListener('pagehide', flushMeta);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) flushMeta(); });
+  function saveMetaNow() {
     var ks = Object.keys(meta);
     if (ks.length > 1500) ks.slice(0, ks.length - 1200).forEach(function (k) { delete meta[k]; });
     try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch (e) {}
@@ -22256,7 +22887,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     var u;
     try { u = new URL(String(raw || '').trim().replace(/^\/\//, 'https://')); } catch (e) { return null; }
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
-    var host = u.hostname.toLowerCase().replace(/^(www\.|m\.)/, '');
+    var host = u.hostname.toLowerCase().replace(/^(www\.|m\.|mobile\.)/, '');
     var P = u.pathname.split('/').filter(Boolean), id = '', i;
     if (host === 'youtu.be' || host === 'youtube.com' || host === 'music.youtube.com' || host === 'youtube-nocookie.com') {
       if (host === 'youtu.be') id = P[0] || '';
@@ -22267,6 +22898,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     }
     if (host === 'open.spotify.com') {
       P = P.filter(function (s) { return s !== 'embed' && !/^intl-/.test(s); });
+      if (P[0] === 'user' && P[2] === 'playlist') P = P.slice(2); // /user/<name>/playlist/<id>
       var kind = P[0] || '';
       if (!SPK[kind] || !/^[A-Za-z0-9]{10,32}$/.test(P[1] || '')) return null;
       return mk('sp', (kind === 'album' || kind === 'playlist') ? 'album' : 'song', P[1], kind, 'https://open.spotify.com/' + kind + '/' + P[1]);
@@ -22293,22 +22925,32 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
   }
 
   var QUICK = /youtu|spotify|streamable|instagram|instagr\.am|twitter\.com|x\.com/i;
-  function scan() {
-    var out = new Map(), notes = [], al = [];
-    try { notes = nbVisibleNotes(); } catch (e) { notes = []; }
+  // Reads the media links out of a list of { id, title, content } notes.
+  var SCACHE = new Map(); // note id -> { c: content it was parsed from, r: found links }
+  function scanNotes(notes) {
+    var out = new Map(), al = [];
+    if (SCACHE.size > 3000) SCACHE.clear();
     notes.forEach(function (n) {
       var html = n && n.content;
       if (!html || !QUICK.test(html)) return;
+      var found, hit = (n.id != null) ? SCACHE.get(n.id) : null;
+      if (hit && hit.c === html) found = hit.f; else {
       var doc;
       try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return; }
-      var found = [];
+      found = [];
       // The note's own infra scripts/templates mention hosts as plain strings; drop them before reading anything.
       doc.querySelectorAll('script,style,template').forEach(function (el) { el.remove(); });
       doc.querySelectorAll('iframe[src]').forEach(function (f) { found.push(f.getAttribute('src')); });
       doc.querySelectorAll('[data-social-url]').forEach(function (f) { found.push(f.getAttribute('data-social-url')); });
       doc.querySelectorAll('a[href]').forEach(function (a) { found.push(a.getAttribute('href')); });
+      // textContent runs blocks together ("...abc</p><p>next" reads "abcnext"), which corrupts the id. Pad them with a space first.
+      doc.querySelectorAll('br,p,div,li,h1,h2,h3,h4,h5,h6,blockquote,figcaption,td,th,pre').forEach(function (el) {
+        if (el.parentNode) el.parentNode.insertBefore(doc.createTextNode(' '), el.nextSibling);
+      });
       var txt = doc.body ? (doc.body.textContent || '') : '';
-      (txt.match(/https?:\/\/[^\s<>"')]+/g) || []).forEach(function (m) { found.push(m); });
+      (txt.match(/https?:\/\/[^\s<>"'\u201c\u201d\u2018\u2019)]+/g) || []).forEach(function (m) { found.push(m.replace(/[.,;:!?\]}\u2026]+$/, '')); });
+      if (n.id != null) SCACHE.set(n.id, { c: html, f: found });
+      }
       var keys = [];
       found.forEach(function (raw) {
         var it = parseLink(raw);
@@ -22320,8 +22962,115 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
       });
       if (keys.length >= 2) al.push({ id: n.id, title: (n.title || '').trim() || 'Untitled note', keys: keys });
     });
-    MD.items = out;
-    MD.al = al;
+    return { items: out, al: al };
+  }
+  // Notes: every note in the Library (the same list All shows). Likes: the notes this account liked.
+  function scan() {
+    var notes = [], r;
+    if (MD.src === 'likes') notes = likeNotes();
+    else { try { notes = nbVisibleNotes(); } catch (e) { notes = []; } }
+    r = scanNotes(notes);
+    // Whatever is playing or queued stays playable after the source changes underneath it.
+    var keep = {};
+    MD.queue.list.forEach(function (k) { keep[k] = 1; });
+    if (MD.cur) keep[MD.cur.k] = 1;
+    MD.items.forEach(function (it, k) { if (keep[k] && !r.items.has(k)) MD.pit.set(k, it); });
+    MD.items = r.items;
+    MD.al = r.al;
+  }
+
+  /* ---------- Likes source ---------- */
+  var LK = { sub: '', stories: [], html: new Map(), busy: false, at: 0, timer: 0 };
+  function signedIn() { try { return !!nbIsSignedIn(); } catch (e) { return false; } }
+  function acctSub() { try { return (nbAccount() || {}).sub || ''; } catch (e) { return ''; } }
+  function likeNotes() {
+    var o = [];
+    LK.stories.forEach(function (s) { var h = LK.html.get(s.slug); if (h) o.push({ id: s.slug, title: s.title, content: h }); });
+    return o;
+  }
+  function timedFetch(url, opts, ms) {
+    var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
+    opts = opts || {}; if (ctl) opts.signal = ctl.signal;
+    return fetch(url, opts).then(function (r) { clearTimeout(to); return r; }, function (e) { clearTimeout(to); throw e; });
+  }
+  // Re-scan after more liked notes arrive. Only the counts and the list are redrawn, so a search being typed keeps focus.
+  function likesChanged() {
+    if (LK.timer) return;
+    LK.timer = setTimeout(function () {
+      LK.timer = 0;
+      if (!MD.open || MD.src !== 'likes') return;
+      scan();
+      if (LK.quiet && sigOf() === MD.dsig) return; // nothing new: leave the screen alone
+      if (view().n === 'home') { var c = document.querySelector('#md-view .md-cats'); if (c) c.innerHTML = catsHtml(); }
+      fillList(); syncUI(); syncQueue(); queueVisibleMeta();
+    }, 250);
+  }
+  // Pages through the account's liked notes, then reads each published page once (kept for the session) for its media links.
+  function loadLikes(force, quiet) {
+    if (!signedIn() || LK.busy) return;
+    var sub = acctSub();
+    if (LK.sub !== sub) { LK.sub = sub; LK.stories = []; LK.html = new Map(); LK.at = 0; }
+    if (!force && LK.at && Date.now() - LK.at < 90000) return;
+    LK.busy = true;
+    LK.quiet = !!quiet && LK.stories.length > 0; // background refresh: no loading state, no toasts, no redraw unless something changed
+    if (MD.open && MD.src === 'likes' && !LK.quiet) fillList();
+    var base = NB_PUBLISH_API.replace(/\/$/, ''), all = [];
+    function page(cursor, n) {
+      return _nbApiFetch(base + '/account/liked-notes' + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''), { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (d) {
+          ((d && d.stories) || []).forEach(function (st) { if (st && st.slug) all.push(st); });
+          if (d && d.nextCursor && n < 40) return page(d.nextCursor, n + 1);
+        });
+    }
+    page('', 0).then(function () {
+      if (LK.sub !== acctSub()) return;
+      var seen = {};
+      all.forEach(function (st) { seen[st.slug] = 1; });
+      LK.html.forEach(function (v, k) { if (!seen[k]) LK.html.delete(k); }); // unliked since last time
+      LK.stories = all;
+      likesChanged();
+      var todo = all.filter(function (st) { return !LK.html.has(st.slug); }), i = 0, run = 0, failed = 0;
+      return new Promise(function (done) {
+        function pump() {
+          if (i >= todo.length && !run) { done(failed); return; }
+          while (run < 4 && i < todo.length) {
+            (function (st) {
+              run++;
+              timedFetch(_pubUrlFor(st.slug), { referrerPolicy: 'no-referrer' }, 10000)
+                .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+                .then(function (h) { if (LK.sub === sub) { LK.html.set(st.slug, QUICK.test(h) ? h : ''); likesChanged(); } })
+                .catch(function () { failed++; })
+                .then(function () { run--; pump(); });
+            })(todo[i++]);
+          }
+        }
+        pump();
+      }).then(function (failed) {
+        LK.at = failed ? 0 : Date.now();
+        if (failed && !LK.quiet && MD.open && MD.src === 'likes') toast('Couldn\u2019t read ' + (failed === 1 ? 'one liked note' : failed + ' liked notes'));
+      });
+    }).catch(function (e) {
+      LK.at = 0;
+      if (!LK.quiet && MD.open && MD.src === 'likes') toast('Couldn\u2019t load your liked notes');
+    }).then(function () {
+      LK.busy = false;
+      if (MD.open && MD.src === 'likes') { likesChanged(); if (!LK.quiet) fillList(); }
+      setTimeout(function () { LK.quiet = false; }, 600);
+      if (LK.onDone) { var f = LK.onDone; LK.onDone = null; try { f(); } catch (e) {} }
+    });
+  }
+  function syncSrc() {
+    var w = $('md-src'); if (!w) return;
+    w.hidden = view().n !== 'home'; var rb = $('md-refresh'); if (rb) rb.hidden = w.hidden;
+    w.querySelectorAll('.md-srcb').forEach(function (b) { var on = b.getAttribute('data-v') === MD.src; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+  }
+  function setSrc(v) {
+    if (v === MD.src) return;
+    if (v === 'likes' && !signedIn()) { toast('Sign in to see media from notes you\u2019ve liked'); return; }
+    MD.src = v; view().sy = 0;
+    scan(); renderView(); queueVisibleMeta();
+    if (v === 'likes') loadLikes();
   }
 
   /* ---------- metadata ---------- */
@@ -22339,37 +23088,71 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     if (m.th) return m.th;
     return it.p === 'yt' ? 'https://i.ytimg.com/vi/' + it.id + '/hqdefault.jpg' : '';
   }
-  var fq = [], fbusy = 0, ftried = {};
+  var fq = [], fbusy = 0, ftried = {}, fcool = {}, fstreak = {}, fwake = 0;
+  var FRETRY = [4000, 15000, 60000]; // wait before retry 1, 2, 3; then give up until the next session
   function queueMeta(it) {
-    var m = meta[it.k];
-    if (ftried[it.k] || (m && m.t)) return;
-    ftried[it.k] = 1; fq.push(it); pump();
+    var m = meta[it.k], s = ftried[it.k];
+    if (m && m.t) return;
+    if (!s) s = ftried[it.k] = { n: 0, at: 0, q: 0, done: 0 };
+    if (s.q || s.done || NOW() < s.at) return;
+    s.q = 1; fq.push(it); pump();
+  }
+  function retryMeta(it, s, off) {
+    if (!off) {
+      s.n++;
+      if (s.n > FRETRY.length) { s.done = 1; return; }
+      // Three failures in a row on one site: leave that site alone for a bit instead of hammering it.
+      fstreak[it.p] = (fstreak[it.p] || 0) + 1;
+      if (fstreak[it.p] >= 3) { fstreak[it.p] = 0; fcool[it.p] = NOW() + 30000; }
+    }
+    var wait = off ? 10000 : FRETRY[s.n - 1];
+    s.at = NOW() + wait;
+    setTimeout(function () { queueMeta(it); }, wait + 50);
   }
   function pump() {
-    while (fbusy < 3 && fq.length) {
+    var i;
+    while (fbusy < 3) {
+      for (i = 0; i < fq.length; i++) if (!(fcool[fq[i].p] > NOW())) break;
+      if (i >= fq.length) break;
       (function (it) {
+        var s = ftried[it.k];
         fbusy++;
-        fetchMeta(it).then(function (m) {
-          if (m && (m.t || m.th)) { meta[it.k] = Object.assign(meta[it.k] || {}, m); saveMeta(); metaChanged(); }
-        }).catch(function () {}).then(function () { fbusy--; pump(); });
-      })(fq.shift());
+        fetchMeta(it).then(function (r) {
+          s.q = 0;
+          if (r && r.m) {
+            fstreak[it.p] = 0; s.done = 1;
+            if (r.m.t || r.m.th) { meta[it.k] = Object.assign(meta[it.k] || {}, r.m); saveMeta(); metaChanged(); }
+          } else if (!r || r.perm) s.done = 1;
+          else retryMeta(it, s, r.off);
+        }).catch(function () { s.q = 0; retryMeta(it, s, false); }).then(function () { fbusy--; pump(); });
+      })(fq.splice(i, 1)[0]);
+    }
+    if (fq.length && fbusy < 3 && !fwake) { // everything left is cooling down
+      var soon = Infinity;
+      fq.forEach(function (x) { soon = Math.min(soon, fcool[x.p] || 0); });
+      fwake = setTimeout(function () { fwake = 0; pump(); }, Math.max(500, soon - NOW()));
     }
   }
+  window.addEventListener('online', function () {
+    Object.keys(ftried).forEach(function (k) { if (!ftried[k].done) ftried[k].at = 0; });
+    fcool = {}; queueVisibleMeta();
+  });
+  // Resolves { m } on success, { perm } when retrying can't help (private/removed/no oEmbed for this site), { off } for a retryable failure.
   function fetchMeta(it) {
     var url = '';
     if (it.p === 'yt') url = 'https://www.youtube.com/oembed?format=json&url=' + encodeURIComponent(it.u);
     else if (it.p === 'sp') url = 'https://open.spotify.com/oembed?url=' + encodeURIComponent(it.u);
     else if (it.p === 'st') url = 'https://api.streamable.com/oembed.json?url=' + encodeURIComponent(it.u);
-    if (!url) return Promise.resolve(null);
+    if (!url) return Promise.resolve({ perm: true });
     var ctl = window.AbortController ? new AbortController() : null;
     var to = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
     return fetch(url, ctl ? { signal: ctl.signal } : undefined).then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
+      if (!r.ok) { var e = new Error('HTTP ' + r.status); e.perm = r.status >= 400 && r.status < 500 && r.status !== 408 && r.status !== 429; throw e; }
       return r.json();
     }).then(function (j) {
       clearTimeout(to);
-      return { t: String(j.title || '').slice(0, 200), a: String(j.author_name || '').slice(0, 120), th: j.thumbnail_url || '' };
-    }).catch(function (e) { clearTimeout(to); return null; });
+      return { m: { t: String(j.title || '').slice(0, 200), a: String(j.author_name || '').slice(0, 120), th: j.thumbnail_url || '' } };
+    }).catch(function (e) { clearTimeout(to); return (e && e.perm) ? { perm: true } : { off: navigator.onLine === false }; });
   }
   function metaChanged() {
     if (MD.metaTimer) return;
@@ -22412,6 +23195,14 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     if (ch) syncUI(); else uiProg();
   }
   function onEnded() { if (MD.endFired) return; MD.endFired = true; setPs({ playing: false }); step(1, true); }
+  // YouTube player error codes -> what to tell the person.
+  var YTERR = {
+    2: 'This video link isn\u2019t valid',
+    5: 'This video can\u2019t play in the embedded player',
+    100: 'This video was removed or is private',
+    101: 'The owner doesn\u2019t allow this video to play here',
+    150: 'The owner doesn\u2019t allow this video to play here'
+  };
   var AD = {
     yt: {
       cap: true, reuse: true,
@@ -22435,13 +23226,16 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
         var inf = d.info;
         if (d.event === 'onError') {
           setPs({ playing: false });
-          toast('This video can\u2019t play here');
+          toast(YTERR[inf] || 'This video can\u2019t play here');
           var it = MD.cur, q = MD.queue;
           if (q.i + 1 < q.list.length) setTimeout(function () { if (MD.cur === it) step(1, true); }, 1200);
           return;
         }
         if (d.event === 'onStateChange' && typeof inf === 'number') { stateYt(inf); return; }
         if ((d.event === 'infoDelivery' || d.event === 'initialDelivery') && inf && typeof inf === 'object') {
+          var vid = inf.videoData && inf.videoData.video_id;
+          if (vid && MD.cur && vid !== MD.cur.id) return; // late message from the video we just left: don't let it set position or title
+          if (vid && WD.pend && vid === WD.pend.id) WD.pend = null; // the new video answered, so loadVideoById did land
           var patch = {};
           if (typeof inf.duration === 'number' && inf.duration > 0) { patch.dur = inf.duration; patch.real = true; }
           if (typeof inf.currentTime === 'number') { patch.pos = inf.currentTime; patch.real = true; }
@@ -22516,7 +23310,8 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     else if (s === 0) onEnded();
   }
   window.addEventListener('message', function (e) {
-    if (!MD.frame || e.source !== MD.frame.contentWindow || !MD.cur) return;
+    if (!MD.frame || e.source !== MD.frame.contentWindow || !MD.cur || MD.dead) return;
+    WD.last = NOW();
     var ad = AD[MD.fplat];
     if (ad && ad.msg) ad.msg(e.data);
   });
@@ -22529,14 +23324,43 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     np.classList.toggle('np-nocap', !AD[it.p].cap);
     $('md-stage').style.height = it.p === 'sp' ? ((it.spk === 'track' || it.spk === 'episode') ? '80px' : '152px') : '';
   }
-  function mount(it) {
+  /* Frame watchdog. An embed can stall without saying so: the page never finishes loading, loadVideoById is dropped because the
+     player isn't ready, or the frame goes quiet mid-playback. Each is recovered once by reloading, then reported. */
+  var WD = { mt: 0, loaded: false, tries: 0, last: 0, pend: null };
+  function wdGiveUp(msg) { toast(msg); killFrame(); WD.tries = 0; syncUI(); }
+  function wdTick() {
+    var it = MD.cur;
+    if (!it || MD.dead || document.hidden) return;
+    var now = NOW();
+    if (WD.pend && now - WD.pend.t > 6000) {
+      WD.pend = null;
+      if (WD.tries < 1) { WD.tries++; mount(it, true); syncUI(); } else wdGiveUp('This video isn\u2019t responding. Tap play to retry.');
+      return;
+    }
+    if (!WD.loaded && now - WD.mt > 15000) {
+      if (WD.tries < 1) { WD.tries++; mount(it, true); syncUI(); } else wdGiveUp('This ' + (it.p === 'sp' ? 'track' : 'video') + ' isn\u2019t loading. Check your connection, then tap play.');
+      return;
+    }
+    if (AD[it.p].cap && MD.ps.real && MD.ps.playing && WD.last && now - WD.last > 20000) wdGiveUp('Playback stopped responding. Tap play to retry.');
+  }
+  setInterval(wdTick, 2000);
+  // Timers stall while the app is in the background; don't read that silence as a dead frame.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    var n = NOW(); WD.last = n; if (!WD.loaded) WD.mt = n; if (WD.pend) WD.pend.t = n;
+  });
+  function mount(it, retry) {
     var ad = AD[it.p], f = MD.frame;
+    if (!retry) WD.tries = 0;
+    WD.pend = null; WD.last = 0;
     MD.cur = it; MD.endFired = false; MD.wantPlay = (it.p === 'sp');
     MD.ps = { playing: false, pos: 0, dur: 0, real: false, t0: NOW() };
     layoutStage(it);
-    if (f && !MD.dead && ad.reuse && MD.fplat === it.p && f.src && f.src.indexOf('about:blank') !== 0) {
+    if (!retry && f && !MD.dead && ad.reuse && MD.fplat === it.p && f.src && f.src.indexOf('about:blank') !== 0) {
+      WD.pend = { id: it.id, t: NOW() };
       ad.load(it); MD.dead = false; return;
     }
+    WD.loaded = false; WD.mt = NOW();
     if (!f) {
       f = document.createElement('iframe');
       f.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture');
@@ -22545,6 +23369,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
       f.setAttribute('title', 'Media player');
       f.addEventListener('load', function () {
         var a = AD[MD.fplat];
+        if (!MD.dead) WD.loaded = true;
         if (a && a.onload && MD.cur && !MD.dead) a.onload();
       });
       $('md-stage').appendChild(f);
@@ -22619,6 +23444,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     var f = has ? Math.max(0, Math.min(1, pos / p.dur)) : 0;
     $('md-bar-fill').style.width = (f * 100) + '%';
     $('md-mini-fill').style.width = (f * 100) + '%';
+    $('md-np-topfill').style.width = (f * 100) + '%';
     $('md-t-pos').textContent = fmt(pos);
     $('md-t-dur').textContent = fmt(p.dur);
   }
@@ -22635,6 +23461,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
       $('md-mini-th').innerHTML = thumbHtml(it, 'sm', true);
       $('md-mini-t').textContent = title; $('md-mini-s').textContent = sub;
       $('md-np-title').textContent = title; $('md-np-sub').textContent = sub;
+      $('md-np-ctitle').textContent = title; $('md-np-csub').textContent = sub;
       $('md-np-art').innerHTML = thumbHtml(it, 'fill', true);
       var wsh = $('md-np-wash'), wv = th ? 'url("' + th.replace(/"/g, '%22') + '")' : bg(it.k);
       wsh.style.opacity = '0'; clearTimeout(MD.wt);
@@ -22680,6 +23507,11 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     list.forEach(function (it) { (g[it.p] = g[it.p] || []).push(it); });
     return PORD.filter(function (p) { return g[p]; }).map(function (p) { return { p: p, items: g[p] }; });
   }
+  // Likes has no Scan button: the list loads when you switch to it. While it loads the empty state shows the scanning animation.
+  function likesEmpty(icon, title, body) {
+    if (LK.busy && !LK.quiet) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Loading your likes\u2026</b><span>Looking for media in notes you\u2019ve liked.</span></div>';
+    return emptyHtml(icon, title, body);
+  }
   function rowHtml(it, ctx) {
     var wide = it.type === 'video';
     return '<div class="md-row' + (wide ? ' md-row-wide' : '') + (MD.cur && MD.cur.k === it.k ? ' is-cur' : '') + '" data-k="' + esc(it.k) + '" role="button" tabindex="0">' + thumbHtml(it, wide ? 'wide' : 'sq') +
@@ -22689,16 +23521,20 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
   function actsHtml() {
     return '<div class="md-acts"><button class="md-btn alt" data-act="playall">' + IC.play(16) + 'Play</button><button class="md-btn alt" data-act="shuffleall">' + IC.shuf(16) + 'Shuffle</button></div>';
   }
-  function renderView() {
+  function catsHtml() {
+    var counts = {};
+    TABS.forEach(function (t) { counts[t[0]] = t[0] === 'playlists' ? MD.pl.length : t[0] === 'albums' ? MD.al.length + itemsOfType('album').length : itemsOfType(t[2]).length; });
+    return TABS.map(function (t) { return '<button class="md-chip' + (MD.tab === t[0] ? ' on' : '') + '" data-act="tab" data-v="' + t[0] + '">' + t[1] + '<i>' + (typeof nbAbbrevCount === 'function' ? nbAbbrevCount(counts[t[0]]) : counts[t[0]]) + '</i></button>'; }).join('');
+  }
+  // keep: re-drawing the same page (not navigating), so hold the current scroll position.
+  function renderView(keep) {
     var v = view(), el = $('md-view'), hact = $('md-hact'), scr = $('md-screen');
-    $('md-body').scrollTop = v.sy || 0;
+    if (keep) v.sy = $('md-body').scrollTop;
     if (v.n === 'home') {
-      var counts = {};
-      TABS.forEach(function (t) { counts[t[0]] = t[0] === 'playlists' ? MD.pl.length : t[0] === 'albums' ? MD.al.length + itemsOfType('album').length : itemsOfType(t[2]).length; });
       el.innerHTML = '<div id="md-sticky">' +
         '<div class="md-search"><svg class="md-sico" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' +
-        '<input id="md-q" type="search" placeholder="' + (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : 'Search your media') + '\u2026" value="' + esc(MD.q) + '" autocomplete="off" spellcheck="false"></div>' +
-        '<div class="md-cats">' + TABS.map(function (t) { return '<button class="md-chip' + (MD.tab === t[0] ? ' on' : '') + '" data-act="tab" data-v="' + t[0] + '">' + t[1] + '<i>' + (typeof nbAbbrevCount === 'function' ? nbAbbrevCount(counts[t[0]]) : counts[t[0]]) + '</i></button>'; }).join('') + '</div></div>' +
+        '<input id="md-q" type="search" placeholder="' + (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : MD.src === 'likes' ? 'Search liked media' : 'Search your media') + '\u2026" value="' + esc(MD.q) + '" autocomplete="off" spellcheck="false"></div>' +
+        '<div class="md-cats">' + catsHtml() + '</div></div>' +
         '<div id="md-list"></div>';
       $('md-htitle').textContent = 'Media';
       hact.hidden = true;
@@ -22716,10 +23552,42 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     }
     fillList();
     syncUI();
+    $('md-body').scrollTop = v.sy || 0; // after the list exists, or it clamps against the old page's height
+    syncFab();
+    syncTitle();
+    syncSrc();
+  }
+  /* Playlists tab: once the "New playlist" tile scrolls out of view a FAB takes its place; it hides again when the tile is back */
+  function syncFab() {
+    var f = $('md-fab'), scr = $('md-screen'); if (!f || !scr) return;
+    var onTab = view().n === 'home' && MD.tab === 'playlists', show = false;
+    if (onTab) {
+      var t = document.querySelector('#md-list .md-pt[data-act="newpl"]');
+      if (t) { var st = $('md-sticky'); show = t.getBoundingClientRect().bottom <= $('md-hdr').getBoundingClientRect().bottom + (st ? st.offsetHeight : 0); }
+    }
+    scr.classList.toggle('fab-tab', onTab);
+    f.classList.toggle('on', show);
+  }
+  /* Album / Playlist: the header says "Album" / "Playlist" until the big title scrolls away, then it shows the name */
+  function syncTitle() {
+    var v = view(); if (v.n === 'home') return;
+    var lt = document.querySelector('#md-list .md-lt'), ht = $('md-htitle'), gen = v.n === 'al' ? 'Album' : 'Playlist';
+    var out = lt && lt.getBoundingClientRect().bottom <= $('md-hdr').getBoundingClientRect().bottom;
+    var want = out ? lt.textContent : gen;
+    if (ht.textContent !== want) ht.textContent = want;
+  }
+  /* Now Playing: once the big title/artist scroll under the pinned top bar, the bar shows them */
+  function syncNpTop() {
+    var np = $('md-np'), tt = $('md-np-title'), top = $('md-np-top'); if (!np || !tt || !top) return;
+    np.classList.toggle('np-compact', tt.getBoundingClientRect().bottom <= top.getBoundingClientRect().bottom);
+    np.classList.toggle('np-scrolled', $('md-np-scroll').scrollTop > 2);
+    var sc = $('md-np-scroll'), dk = $('md-np-dock');
+    if (sc && dk) np.classList.toggle('np-docked', dk.getBoundingClientRect().bottom >= sc.getBoundingClientRect().bottom - 1);
   }
   function fillList() {
     var v = view(), box = $('md-list'), artIt = null;
     if (!box) return;
+    MD.dsig = sigOf();
     var h = '';
     if (v.n === 'home') {
       if (MD.tab === 'playlists') {
@@ -22740,7 +23608,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
           atiles += '<div class="md-pt" data-act="openal" data-id="' + esc(a.id) + '" role="button"><div class="md-pc">' + (f0 ? thumbHtml(f0, 'fill', true) : '<div class="md-th md-th-fill"><div class="md-ph" style="background:' + bg(a.id) + '">' + IC.disc(22) + '</div></div>') + '</div>' +
             '<div class="md-t">' + esc(a.title) + '</div><div class="md-s">' + a.keys.length + ' items</div></div>';
         });
-        if (!MD.al.length && !itemsOfType('album').length) h = emptyHtml(IC.disc(40), 'No albums yet', 'A note with two or more media links, or a Spotify album or playlist link, shows up here.', 'Scan library');
+        if (!MD.al.length && !itemsOfType('album').length) h = MD.src === 'likes' ? likesEmpty(IC.disc(40), 'No albums in your likes', 'A liked note with two or more media links, or a Spotify album or playlist link, shows up here.') : emptyHtml(IC.disc(40), 'No albums yet', 'A note with two or more media links, or a Spotify album or playlist link, shows up here.', 'Scan library');
         else if (!atiles && !spa.length) h = emptyHtml(IC.note(40), 'No matches', 'Try a different search.');
         else h = (atiles ? '<div class="md-pgrid">' + atiles + '</div>' : '') +
           (spa.length ? '<div class="md-gh">Spotify albums &amp; playlists<small>' + spa.length + (spa.length === 1 ? ' item' : ' items') + '</small></div><div class="md-card">' + spa.map(function (it) { return rowHtml(it); }).join('') + '</div>' : '');
@@ -22749,7 +23617,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
         MD.viewKeys = []; groups.forEach(function (g) { g.items.forEach(function (it) { MD.viewKeys.push(it.k); }); });
         MD.viewCtx = TABS.filter(function (t) { return t[0] === MD.tab; })[0][1];
         if (!all.length) {
-          h = emptyHtml(MD.tab === 'songs' ? IC.note(40) : MD.tab === 'albums' ? IC.disc(40) : IC.vid(40), (MD.tab === 'songs' ? 'No songs yet' : 'No videos yet'), 'Add YouTube, Spotify, Streamable, Instagram or X links to a note and they show up here.', 'Scan library');
+          h = MD.src === 'likes' ? likesEmpty(MD.tab === 'songs' ? IC.note(40) : IC.vid(40), MD.tab === 'songs' ? 'No songs in your likes' : 'No videos in your likes', 'YouTube, Spotify, Streamable, Instagram and X links in notes you\u2019ve liked show up here.') : emptyHtml(MD.tab === 'songs' ? IC.note(40) : MD.tab === 'albums' ? IC.disc(40) : IC.vid(40), (MD.tab === 'songs' ? 'No songs yet' : 'No videos yet'), 'Add YouTube, Spotify, Streamable, Instagram or X links to a note and they show up here.', 'Scan library');
         } else if (!list.length) {
           h = emptyHtml(IC.note(40), 'No matches', 'Try a different search.');
         } else {
@@ -22782,6 +23650,13 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     if (au) msc.style.setProperty('--md-art', 'url("' + au.replace(/"/g, '%22') + '")'); else msc.style.removeProperty('--md-art');
     box.innerHTML = h;
     markCur(box);
+    syncFab();
+    var st = $('md-sticky');
+    if (st) {
+      var sy = function () { $('md-view').style.setProperty('--md-sth', st.offsetHeight + 'px'); };
+      sy();
+      if (window.ResizeObserver && !st._ro) { st._ro = new ResizeObserver(sy); st._ro.observe(st); }
+    }
   }
   function markCur(box) { var it = MD.cur; if (it) { var r = box.querySelectorAll('.md-row[data-k]'); r.forEach(function (x) { x.classList.toggle('is-cur', x.getAttribute('data-k') === it.k); }); } }
   function fromStored(o) { return { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '' }; }
@@ -22791,7 +23666,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
   function queueVisibleMeta() { MD.items.forEach(function (it) { queueMeta(it); }); MD.pl.forEach(function (p) { p.items.forEach(function (o) { queueMeta(MD.items.get(o.k) || fromStored(o)); }); }); }
 
   /* ---------- sheets ---------- */
-  function openSheet(html) { $('md-sheet-box').innerHTML = '<div class="md-grab"><span></span></div>' + html; $('md-sheet').classList.add('open'); var i = $('md-sheet-box').querySelector('input'); if (i) setTimeout(function () { try { i.focus({ preventScroll: true }); i.select(); $('md-screen').scrollTop = 0; } catch (e) {} }, 320); }
+  function openSheet(html) { $('md-sheet-box').innerHTML = '<div class="md-grab"><span></span></div>' + html; $('md-sheet-box').classList.toggle('simple', !!$('md-sheet-box').querySelector('.md-sh-title.ns')); $('md-sheet-box').scrollTop = 0; $('md-sheet').classList.add('open'); var i = $('md-sheet-box').querySelector('input'); if (i) setTimeout(function () { try { i.focus({ preventScroll: true }); i.select(); $('md-screen').scrollTop = 0; } catch (e) {} }, 320); }
   function closeSheet() { $('md-sheet').classList.remove('open'); var bx = $('md-sheet-box'); bx.innerHTML = ''; bx.style.transform = ''; bx.style.transition = ''; MD.sheetCtx = null; }
   function sheetRow(act, attrs, icon, label, extra, cls) { return '<button class="md-sh-row' + (cls ? ' ' + cls : '') + '" data-act="' + act + '" ' + attrs + '>' + icon + '<span>' + esc(label) + '</span>' + (extra || '') + '</button>'; }
   function itemSheet(k, inPl) {
@@ -22799,7 +23674,12 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     MD.sheetCtx = { k: k, pl: inPl || '' };
     var h = '<div class="md-sh-head">' + thumbHtml(it, 'sm', true) + '<div class="md-tx"><div class="md-t">' + esc(titleOf(it)) + '</div><div class="md-s">' + esc(subOf(it)) + '</div></div></div>';
     h += sheetRow('addpl', 'data-k="' + esc(k) + '"', IC.plus(18), 'Add to playlist');
-    if (MD.queue.list.length) h += sheetRow('playnext', 'data-k="' + esc(k) + '"', IC.next(18), 'Play next');
+    if (MD.queue.list.length) {
+      h += sheetRow('playnext', 'data-k="' + esc(k) + '"', IC.next(18), 'Play next');
+      h += sheetRow('addq', 'data-k="' + esc(k) + '"', IC.list(18), 'Add to queue');
+    }
+    h += sheetRow('openorig', 'data-k="' + esc(k) + '"', IC.ext(18), 'Open on ' + PN[it.p]);
+    h += sheetRow('copylink', 'data-k="' + esc(k) + '"', IC.link(18), 'Copy link');
     if (inPl) h += sheetRow('rmfrom', 'data-k="' + esc(k) + '" data-id="' + esc(inPl) + '"', IC.trash(18), 'Remove from this playlist', '', 'dng');
     openSheet(h);
   }
@@ -22813,7 +23693,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     openSheet(h);
   }
   function newPlSheet() {
-    openSheet('<div class="md-sh-title">New playlist</div><input class="md-sh-in" id="md-new-name" placeholder="Playlist name" maxlength="60" autocomplete="off"><button class="md-btn" data-act="plcreate" data-k="" style="width:100%">Create</button>');
+    openSheet('<div class="md-sh-title ns">New playlist</div><input class="md-sh-in" id="md-new-name" placeholder="Playlist name" maxlength="60" autocomplete="off"><button class="md-btn" data-act="plcreate" data-k="" style="width:100%">Create</button>');
   }
   function plMenuSheet(id) {
     var p = plById(id); if (!p) return;
@@ -22835,6 +23715,19 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
   }
 
   /* ---------- actions ---------- */
+  function copyText(t) {
+    function fb() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        var ok = document.execCommand('copy'); ta.remove(); return ok;
+      } catch (e) { return false; }
+    }
+    var done = function (ok) { toast(ok ? 'Link copied' : 'Couldn\u2019t copy the link'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(fb()); });
+    else done(fb());
+  }
   function playFromRow(k) {
     var i = MD.viewKeys.indexOf(k);
     if (i < 0) { playKeys([k], 0, '', false); return; }
@@ -22880,11 +23773,61 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
       }, Math.max(0, min - (NOW() - t0)));
     }, 80);
   }
+  /* ---------- refresh: manual button, on open, and a quiet background poll ---------- */
+  function sigOf() {
+    var a = [];
+    MD.items.forEach(function (it, k) { a.push(k + '~' + (it.noteTitle || '')); });
+    return a.join(',') + '#' + MD.al.map(function (x) { return x.id + ':' + x.keys.length; }).join(',');
+  }
+  // Redraws only what a changed library can touch (tab counts + list), so a search being typed keeps focus and the scroll position holds.
+  function redrawQuiet() {
+    var v = view();
+    if ((v.n === 'al' && !alById(v.id)) || (v.n === 'pl' && !plById(v.id))) renderView(true);
+    else {
+      if (v.n === 'home') { var c = document.querySelector('#md-view .md-cats'); if (c) c.innerHTML = catsHtml(); }
+      fillList();
+    }
+    syncUI(); syncQueue(); queueVisibleMeta();
+  }
+  function softRefresh() {
+    if (!MD.open || MD.scanning || MD.refreshing || document.hidden || MD.touching || MD.dragging) return;
+    if (NOW() - MD.lastScroll < 700) return; // never under a finger or a fling
+    try { scan(); } catch (e) { return; }
+    if (sigOf() !== MD.dsig) redrawQuiet();
+    if (MD.src === 'likes' && signedIn() && (!LK.at || Date.now() - LK.at > 55000)) loadLikes(true, true);
+  }
+  function refreshNow() {
+    if (MD.refreshing || MD.scanning) return;
+    MD.refreshing = true;
+    var b = $('md-refresh'), t0 = NOW(), before = MD.dsig, likes = MD.src === 'likes' && signedIn(), ended = false;
+    if (b) { b.classList.add('spin'); b.setAttribute('aria-busy', 'true'); }
+    function end() {
+      if (ended) return; ended = true; LK.onDone = null;
+      setTimeout(function () {
+        MD.refreshing = false;
+        if (b) { b.classList.remove('spin'); b.removeAttribute('aria-busy'); }
+        if (MD.open) toast(MD.dsig !== before ? 'Media updated' : 'Already up to date');
+      }, Math.max(350, 700 - (NOW() - t0)));
+    }
+    try { scan(); } catch (e) {}
+    if (sigOf() !== MD.dsig) redrawQuiet();
+    queueVisibleMeta();
+    if (likes) {
+      LK.onDone = end;
+      loadLikes(true, true);
+      if (!LK.busy) end();
+      setTimeout(end, 25000);
+    } else end();
+  }
+  function startPoll() { stopPoll(); MD.poll = setInterval(softRefresh, 25000); }
+  function stopPoll() { if (MD.poll) { clearInterval(MD.poll); MD.poll = 0; } }
   function act(a, el) {
     var k = el.getAttribute('data-k'), id = el.getAttribute('data-id'), i, p;
     switch (a) {
       case 'back': nbMediaBack(); break;
       case 'scan': startScan(el); break;
+      case 'refresh': refreshNow(); break;
+      case 'src': setSrc(el.getAttribute('data-v')); break;
       case 'tab': MD.tab = el.getAttribute('data-v'); view().sy = 0; renderView(); break;
       case 'more': itemSheet(k, view().n === 'pl' ? view().id : ''); break;
       case 'playall': if (MD.viewKeys.length) playKeys(MD.viewKeys, 0, MD.viewCtx, false); break;
@@ -22897,30 +23840,42 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
       case 'pladd': if (addTo(id, k)) { closeSheet(); fillList(); } else closeSheet(); break;
       case 'plcreate':
         p = createPl($('md-new-name') ? $('md-new-name').value : '');
-        if (p) { if (k) addTo(p.id, k); closeSheet(); renderView(); }
+        if (p) { if (k) addTo(p.id, k); closeSheet(); renderView(true); }
         break;
       case 'plrename':
         p = plById(id); if (!p) break;
-        openSheet('<div class="md-sh-title">Rename playlist</div><input class="md-sh-in" id="md-new-name" maxlength="60" value="' + esc(p.name) + '" autocomplete="off"><button class="md-btn" data-act="plrenamego" data-id="' + esc(id) + '" style="width:100%">Save</button>');
+        openSheet('<div class="md-sh-title ns">Rename playlist</div><input class="md-sh-in" id="md-new-name" maxlength="60" value="' + esc(p.name) + '" autocomplete="off"><button class="md-btn" data-act="plrenamego" data-id="' + esc(id) + '" style="width:100%">Save</button>');
         break;
       case 'plrenamego':
         p = plById(id); var nm = ($('md-new-name').value || '').trim().slice(0, 60);
         if (!p || !nm) { toast('Name your playlist'); break; }
-        p.name = nm; savePl(); closeSheet(); renderView(); break;
+        p.name = nm; savePl(); closeSheet(); renderView(true); break;
       case 'pldelask':
         p = plById(id); if (!p) break;
         openSheet('<div class="md-sh-title">Delete \u201c' + esc(p.name) + '\u201d?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">Your songs and videos stay in your notes. Only the playlist is removed.</div>' + sheetRow('pldel', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete', '', 'dng') + sheetRow('sheetclose', '', IC.check(18), 'Cancel'));
         break;
       case 'pldel':
         MD.pl = MD.pl.filter(function (x) { return x.id !== id; }); savePl(); closeSheet();
-        if (view().n === 'pl') MD.stack.pop();
-        renderView(); break;
+        var wasPl = view().n === 'pl';
+        if (wasPl) MD.stack.pop();
+        renderView(!wasPl); break;
       case 'rmfrom':
         p = plById(id); if (!p) break;
         p.items = p.items.filter(function (o) { return o.k !== k; }); savePl(); closeSheet(); fillList(); break;
       case 'playnext':
         var q = MD.queue;
         q.list.splice(q.i + 1, 0, k); q.base.push(k); closeSheet(); syncQueue(); toast('Playing next'); break;
+      case 'addq':
+        if (!getIt(k)) { closeSheet(); break; }
+        MD.queue.list.push(k); MD.queue.base.push(k); closeSheet(); syncQueue(); toast('Added to queue'); break;
+      case 'openorig':
+        var oi = getIt(k); closeSheet();
+        if (oi && oi.u) { try { _nbOpenExternalLink(oi.u); } catch (e) { toast('Couldn\u2019t open that link'); } }
+        break;
+      case 'copylink':
+        var ci = getIt(k); closeSheet();
+        if (ci && ci.u) copyText(ci.u);
+        break;
       case 'sheetclose': closeSheet(); break;
       case 'npopen': openNP(); break;
       case 'npclose': closeNP(); break;
@@ -22948,16 +23903,19 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     MD.pl = loadPl();
     MD.pit = new Map();
     MD.pl.forEach(function (p) { p.items.forEach(function (o) { MD.pit.set(o.k, fromStored(o)); }); });
+    if (MD.src === 'likes' && !signedIn()) MD.src = 'notes'; // signed out since last time
     scan();
     MD.open = true;
     var st = $('md-body').scrollTop;
     renderView(); syncQueue(); queueVisibleMeta(); syncUI(); uiProg();
+    if (MD.src === 'likes') loadLikes(true, true); // always check for new likes on open
     $('md-body').scrollTop = st;
   }
   function finishOpen() {
     try { lockScroll(); } catch (e) {}
     clearInterval(MD.timer);
     MD.timer = setInterval(function () { if (MD.ps.playing) uiProg(); }, 250);
+    startPoll();
   }
   function open() {
     if (MD.open) return;
@@ -22967,7 +23925,7 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
   }
   function close() {
     if (!MD.open) return;
-    MD.open = false; clearInterval(MD.timer);
+    MD.open = false; clearInterval(MD.timer); stopPoll();
     $('md-screen').classList.remove('open'); $('md-screen').setAttribute('aria-hidden', 'true');
     try { unlockScroll(); } catch (e) {}
   }
@@ -23032,7 +23990,19 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
     var scr = $('md-screen');
     if (!scr) return;
     $('md-mini-pp').innerHTML = IC.play(22);
-    $('md-body').addEventListener('scroll', function () { scr.classList.toggle('md-scrolled', this.scrollTop > 2); }, { passive: true });
+    $('md-body').addEventListener('scroll', function () { scr.classList.toggle('md-scrolled', this.scrollTop > 2); MD.lastScroll = NOW(); syncFab(); syncTitle(); }, { passive: true });
+    $('md-np-scroll').addEventListener('scroll', syncNpTop, { passive: true });
+    window.addEventListener('resize', function () { syncFab(); syncTitle(); syncNpTop(); }, { passive: true });
+    (function () { var f = function () { document.body.classList.toggle('nb-scrolled', (window.pageYOffset || document.documentElement.scrollTop || 0) > 2); }; window.addEventListener('scroll', f, { passive: true }); f(); })();
+    $('md-fab').innerHTML = IC.plus(26);
+    $('md-refresh').innerHTML = IC.refresh(16);
+    (function () {
+      var bd = $('md-body'), on = function () { MD.touching = true; MD.lastScroll = NOW(); }, off = function () { MD.touching = false; MD.lastScroll = NOW(); };
+      bd.addEventListener('touchstart', on, { passive: true });
+      bd.addEventListener('touchend', off, { passive: true });
+      bd.addEventListener('touchcancel', off, { passive: true });
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) softRefresh(); });
+    })();
     scr.querySelector('[data-act="next"]').innerHTML = IC.next(22);
     scr.querySelector('#md-np-ctl [data-act="prev"]').innerHTML = IC.prev(28);
     scr.querySelector('#md-np-ctl [data-act="next"]').innerHTML = IC.next(28);
