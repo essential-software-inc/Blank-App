@@ -22955,6 +22955,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function extractLinks(html) {
       var doc, found = [];
+      html = html.replace(/\b(src|href|poster)=("|')data:[^"']*\2/gi, ''); // inline base64 images can be megabytes; don't parse them on the main thread
       try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return null; }
       // The note's own infra scripts/templates mention hosts as plain strings; drop them before reading anything.
       doc.querySelectorAll('script,style,template').forEach(function (el) { el.remove(); });
@@ -22970,10 +22971,12 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       return found;
   }
   // Notes: every note in the Library (the same list All shows). Likes: the notes this account liked.
+  // What the last Notes read was based on (stored notes + signed-in account), so the background poll can tell nothing changed without re-parsing them.
+  function notesStamp() { try { return { a: (nbAccount() || {}).sub || '', r: localStorage.getItem(NB_NOTES_KEY) }; } catch (e) { return null; } }
   function scan() {
     var notes = [], r;
     if (MD.src === 'likes') notes = likeNotes();
-    else { try { notes = nbVisibleNotes(); } catch (e) { notes = []; } }
+    else { MD.nst = notesStamp(); try { notes = nbVisibleNotes(); } catch (e) { notes = []; } }
     applyScan(scanNotes(notes));
   }
   function applyScan(r) {
@@ -22995,6 +22998,20 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (!QUICK.test(h)) return '';
     return (extractLinks(h) || []).filter(function (u) { return !!parseLink(u); }).map(function (u) { return '<a href="' + esc(u) + '"></a>'; }).join('');
   }
+  // Liked pages are parsed one at a time in ~8ms slices (at least one page per slice), so several responses landing together can't stall a frame.
+  var PQ = [], pqBusy = false;
+  function parseLater(h) {
+    return new Promise(function (res) { PQ.push({ h: h, res: res }); if (!pqBusy) { pqBusy = true; setTimeout(drainPQ, 0); } });
+  }
+  function drainPQ() {
+    var t0 = NOW();
+    do {
+      var j = PQ.shift(), out = '';
+      try { out = compactLinks(j.h); } catch (e) {}
+      j.res(out);
+    } while (PQ.length && NOW() - t0 < 8);
+    if (PQ.length) setTimeout(drainPQ, 0); else pqBusy = false;
+  }
   function likeNotes() {
     var o = [];
     LK.stories.forEach(function (s) { var h = LK.html.get(s.slug); if (h) o.push({ id: s.slug, title: s.title, content: h }); });
@@ -23012,7 +23029,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       LK.timer = 0;
       if (!MD.open || MD.src !== 'likes') return;
       scan();
-      if (LK.quiet && sigOf() === MD.dsig) return; // nothing new: leave the screen alone
+      if (sigOf() === MD.dsig) return; // nothing new: leave the screen alone (no list rebuild, so no flicker or wasted frames)
       if (view().n === 'home') { var c = document.querySelector('#md-view .md-cats'); if (c) c.innerHTML = catsHtml(); }
       fillList(); syncUI(); syncQueue(); queueVisibleMeta();
     }, 250);
@@ -23043,7 +23060,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
             run++;
             timedFetch(_pubUrlFor(st.slug), { referrerPolicy: 'no-referrer' }, 10000)
               .then(function (r) { if (r.status === 404 || r.status === 410) return ''; if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }) // gone/unpublished: nothing to read, not a failure
-              .then(function (h) { if (LK.sub === sub) { LK.html.set(st.slug, compactLinks(h)); likesChanged(); } })
+              .then(function (h) { return parseLater(h); })
+              .then(function (c) { if (LK.sub === sub) { LK.html.set(st.slug, c); likesChanged(); } })
               .catch(function () { failed++; })
               .then(function () { run--; pump(); });
           })(todo[i++]);
@@ -23671,7 +23689,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     }
     var au = artIt ? thumbOf(artIt) : '', msc = $('md-screen');
     if (au) msc.style.setProperty('--md-art', 'url("' + au.replace(/"/g, '%22') + '")'); else msc.style.removeProperty('--md-art');
-    box.innerHTML = h;
+    // Same scanning state already on screen: leave it be. Re-writing it on every streamed result restarts the CSS animation (the glitch).
+    var curScan = box.querySelector(':scope > .md-empty.scanning'), newScan = /^<div class="md-empty scanning">.*?<b>([^<]*)<\/b>/.exec(h);
+    if (!(curScan && newScan && curScan.querySelector('b') && curScan.querySelector('b').textContent === newScan[1])) box.innerHTML = h;
     markCur(box);
     syncFab();
     var st = $('md-sticky');
@@ -23769,19 +23789,25 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   // Notes (All): reads the library in slices of 25, yielding between them, so media shows while the rest is still being read.
   var SCANTOK = 0;
-  function scanStream(done) {
-    var tok = ++SCANTOK, notes = [], items = new Map(), al = [], pos = 0, SL = 25;
+  // quiet: keep the current list untouched while reading and swap in the result once at the end (used by refresh, so the list never shrinks mid-way).
+  function scanStream(done, quiet) {
+    var tok = ++SCANTOK, notes = [], items = new Map(), al = [], pos = 0, lastDraw = 0;
+    MD.nst = notesStamp();
     try { notes = nbVisibleNotes(); } catch (e) { notes = []; }
     (function step() {
       if (tok !== SCANTOK || !MD.open || MD.src === 'likes') { done(tok !== SCANTOK); return; } // done(true): a newer scan took over
-      var r;
-      try { r = scanNotes(notes.slice(pos, pos + SL)); } catch (e) { r = { items: new Map(), al: [] }; }
-      pos += SL;
-      r.items.forEach(function (it, k) { if (!items.has(k)) items.set(k, it); });
-      al = al.concat(r.al);
-      applyScan({ items: items, al: al });
+      // Work in ~8ms slices so the animation and scrolling keep their frames.
+      var t0 = NOW();
+      do {
+        var r;
+        try { r = scanNotes(notes.slice(pos, pos + 1)); } catch (e) { r = { items: new Map(), al: [] }; }
+        pos++;
+        r.items.forEach(function (it, k) { if (!items.has(k)) items.set(k, it); });
+        al = al.concat(r.al);
+      } while (pos < notes.length && NOW() - t0 < 8);
+      if (!quiet || pos >= notes.length) applyScan({ items: items, al: al });
       if (pos < notes.length) {
-        if (items.size) redrawQuiet();
+        if (!quiet && items.size && NOW() - lastDraw > 250 && sigOf() !== MD.dsig) { lastDraw = NOW(); redrawQuiet(); } // not on every slice: re-drawing rows is the costly part
         setTimeout(step, 0);
       } else done(false);
     })();
@@ -23846,8 +23872,12 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function softRefresh() {
     if (!MD.open || MD.scanning || MD.refreshing || document.hidden || MD.touching || MD.dragging) return;
     if (NOW() - MD.lastScroll < 700) return; // never under a finger or a fling
-    try { scan(); } catch (e) { return; }
-    if (sigOf() !== MD.dsig) redrawQuiet();
+    var same = false;
+    if (MD.src !== 'likes') { var ns = notesStamp(); same = !!(ns && MD.nst && ns.a === MD.nst.a && ns.r === MD.nst.r); } // notes untouched since the last read: skip the parse
+    if (!same) {
+      try { scan(); } catch (e) { return; }
+      if (sigOf() !== MD.dsig) redrawQuiet();
+    }
     if (MD.src === 'likes' && signedIn() && (!LK.at || Date.now() - LK.at > 55000)) loadLikes(true, true);
   }
   function refreshNow() {
@@ -23863,15 +23893,19 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         if (MD.open) toast(MD.dsig !== before ? 'Media updated' : 'Already up to date');
       }, Math.max(350, 700 - (NOW() - t0)));
     }
-    try { scan(); } catch (e) {}
-    if (sigOf() !== MD.dsig) redrawQuiet();
-    queueVisibleMeta();
-    if (likes) {
-      LK.onDone = end;
-      loadLikes(true, true);
-      if (!LK.busy) end();
-      setTimeout(end, 25000);
-    } else end();
+    function after() {
+      if (MD.open && sigOf() !== MD.dsig) redrawQuiet();
+      queueVisibleMeta();
+      if (likes) {
+        LK.onDone = end;
+        loadLikes(true, true);
+        if (!LK.busy) end();
+        setTimeout(end, 25000);
+      } else end();
+    }
+    // Likes: what's already loaded is cached, so a plain scan is cheap. Notes: read in budgeted slices like the Scan button.
+    if (likes) { try { scan(); } catch (e) {} after(); }
+    else scanStream(function (stale) { if (stale) end(); else after(); }, true);
   }
   function startPoll() { stopPoll(); MD.poll = setInterval(softRefresh, 25000); }
   function stopPoll() { if (MD.poll) { clearInterval(MD.poll); MD.poll = 0; } }
