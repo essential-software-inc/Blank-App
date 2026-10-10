@@ -4796,8 +4796,8 @@ body.pink #md-hdr{background:#c8365e}
 /* bottom sheet */
 #md-sheet{position:absolute;inset:0;z-index:8;display:none}
 #md-sheet.open{display:block}
-#md-sheet-scrim{position:absolute;inset:0;background:var(--md-sscrim);animation:md-fade .2s}
-#md-sheet-box{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;box-sizing:border-box;background:var(--md-sheet);color:var(--md-fg);border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--md-ssh);padding:0 .9rem calc(env(safe-area-inset-bottom,0px) + 1rem);animation:md-up .28s cubic-bezier(.4,0,.2,1)}
+#md-sheet-scrim{position:absolute;inset:0;background:var(--md-sscrim);animation:md-fade .2s;will-change:opacity}
+#md-sheet-box{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;box-sizing:border-box;background:var(--md-sheet);color:var(--md-fg);border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--md-ssh);padding:0 .9rem calc(env(safe-area-inset-bottom,0px) + 1rem);animation:md-up .28s cubic-bezier(.4,0,.2,1);will-change:transform;backface-visibility:hidden}
 .md-grab{display:flex;justify-content:center;flex-shrink:0;margin:0 -.9rem;padding:.9rem 0 .8rem;cursor:grab;touch-action:none;position:sticky;top:0;z-index:2;background:var(--md-sheet)}
 .md-grab span{width:36px;height:4px;border-radius:99px;background:var(--md-grab)}
 .md-grab:active{cursor:grabbing}
@@ -23205,10 +23205,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function hue(k) { var h = 0; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0; return Math.abs(h) % 360; }
   function bg(k) { var h = hue(k); return 'linear-gradient(135deg,hsl(' + h + ',52%,46%),hsl(' + ((h + 42) % 360) + ',58%,28%))'; }
   function typeIcon(it, s) { return it.type === 'song' ? IC.note(s) : it.type === 'album' ? IC.disc(s) : IC.vid(s); }
-  function thumbHtml(it, kind, noEq) {
+  function thumbHtml(it, kind, noEq, eager) {
     var th = thumbOf(it);
     return '<div class="md-th md-th-' + (kind || 'sq') + '"><div class="md-ph" style="background:' + bg(it.k) + '">' + typeIcon(it, 24) + '</div>' +
-      (th ? '<img src="' + esc(th) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') +
+      (th ? '<img src="' + esc(th) + '" alt="" loading="' + (eager ? 'eager" decoding="sync' : 'lazy') + '" referrerpolicy="no-referrer" onerror="this.remove()">' : '') +
       (noEq ? '' : '<i class="md-eq"><b></b><b></b><b></b></i>') + '</div>';
   }
   function fmt(s) {
@@ -23716,7 +23716,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function itemSheet(k, inPl) {
     var it = getIt(k); if (!it) return;
     MD.sheetCtx = { k: k, pl: inPl || '' };
-    var h = '<div class="md-sh-head">' + thumbHtml(it, 'sm', true) + '<div class="md-tx"><div class="md-t">' + esc(titleOf(it)) + '</div><div class="md-s">' + esc(subOf(it)) + '</div></div></div>';
+    var h = '<div class="md-sh-head">' + thumbHtml(it, 'sm', true, true) + '<div class="md-tx"><div class="md-t">' + esc(titleOf(it)) + '</div><div class="md-s">' + esc(subOf(it)) + '</div></div></div>';
     h += sheetRow('addpl', 'data-k="' + esc(k) + '"', IC.plus(18), 'Add to playlist');
     if (MD.queue.list.length) {
       h += sheetRow('playnext', 'data-k="' + esc(k) + '"', IC.next(18), 'Play next');
