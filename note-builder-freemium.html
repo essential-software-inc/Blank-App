@@ -766,6 +766,7 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
   flex-direction: column
 }
 #story-viewer-overlay.open { display: flex }
+#story-viewer-overlay.over-media { z-index: 9100 }
 #story-viewer-header {
   position: relative;
   display: flex;
@@ -793,7 +794,7 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
   font-size: .95rem;
   white-space: nowrap;
   overflow: hidden;
-  margin: 0 2rem
+  margin: 0 calc(6.4px + .3rem) 0 2rem /* right = the Subscribe icon's inset from the screen edge (its right + padding), so the text ends that far from the edge */
 }
 #story-viewer-sub-btn {
   position: absolute;
@@ -829,8 +830,8 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 }
 #story-viewer-like-btn svg { transition: transform .12s ease }
 #story-viewer-like-btn:active svg { transform: scale(.85) }
-/* Room for both buttons on the right so the @slug title doesn't run under them. */
-#story-viewer-header.has-actions #story-viewer-title { margin-right: 76.4px }
+/* Room for both buttons on the right so the @slug title doesn't run under them: the Like icon's left edge (40px + .3rem + 19px) plus the same gap the Subscribe icon has to the screen edge. */
+#story-viewer-header.has-actions #story-viewer-title { margin-right: calc(40px + .3rem + 19px + 6.4px + .3rem) }
 #story-viewer-frame {
   flex: 1;
   border: none;
@@ -16756,7 +16757,10 @@ function nbOpenStory(slug, authorSub, title) {
   document.getElementById('story-viewer-header').classList.toggle('has-actions', !isOwnStory);
   _nbSetLikeBtnState(likeBtn, _nbLikedSlugs().has(slug));
   if (!isOwnStory) _nbRefreshLikeState(slug);
-  document.getElementById('story-viewer-overlay').classList.add('open');
+  const _svOv = document.getElementById('story-viewer-overlay');
+  const _mdScr = document.getElementById('md-screen');
+  _svOv.classList.toggle('over-media', !!(_mdScr && _mdScr.classList.contains('open'))); // the Media screen (z 9000) sits above the viewer's normal layer
+  _svOv.classList.add('open');
   lockScroll();
   // The iframe opens optimistically above — cross-origin navigations
   // don't reliably raise a JS error event on failure, so a dead link or
@@ -16804,10 +16808,13 @@ function _nbCheckStoryReachable(slug) {
     });
 }
 function nbCloseStory() {
-  document.getElementById('story-viewer-overlay').classList.remove('open');
+  const _ov = document.getElementById('story-viewer-overlay');
+  const _wasOverMedia = _ov.classList.contains('over-media');
+  _ov.classList.remove('open', 'over-media');
   document.getElementById('story-viewer-frame').src = 'about:blank';
   _nbCurrentStorySlug = null;
   unlockScroll();
+  if (_wasOverMedia) lockScroll(); // Media screen is still open underneath
   _nbPaintStoriesStrip(); // reflect the ring just going grey, if it did
 }
 // ---- Likes ----------------------------------------------------------
@@ -20355,38 +20362,38 @@ function nbSearchInputChanged(value) {
 // { found: true, slug, title, authorSub } for a live published note, or
 // { found: false } with a 404 otherwise (unpublished, never existed, or
 // taken down). The route is handled by handleMeta in the worker.
+// Opens a published note in the story viewer from just its slug: the stories cache first (already has the authorSub), else /meta/:slug.
+// Shared by the feed's paste-a-link box and the Media screen's "Go to note". Resolves true once the viewer is open.
+async function _nbOpenStoryBySlug(slug, opts) {
+  opts = opts || {};
+  const cached = _nbStoriesCache.find(s => s.slug === slug);
+  if (cached) { nbOpenStory(cached.slug, cached.authorSub || '', cached.title || ''); return true; }
+  if (_pubOfflineGuard()) return false;
+  if (opts.btn) _pubSetBtnLoading(opts.btn, true, '');
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(slug));
+    if (res.status === 404) { showToast(opts.notFound || 'No note found at that link'); return false; }
+    if (!res.ok) throw new Error('note meta fetch failed: ' + res.status);
+    const data = await res.json();
+    if (!data || !data.found) { showToast(opts.notFound || 'No note found at that link'); return false; }
+    nbOpenStory(data.slug || slug, data.authorSub || '', data.title || '');
+    return true;
+  } catch (e) {
+    _nbLog('note link open', e);
+    showToast((opts.failMsg || 'Couldn\u2019t open that link') + _nbFailureReason(e));
+    return false;
+  } finally {
+    if (opts.btn) _pubSetBtnLoading(opts.btn, false);
+  }
+}
 async function nbGoToNoteLink() {
   const input = document.getElementById('feed-search-input');
   const goBtn = document.getElementById('feed-search-go');
   const slug = _nbParseNoteLinkSlug(input ? input.value : '');
   if (!slug || !_pubValidSlugFormat(slug)) { showToast('That link doesn\u2019t look right'); return; }
-  // Free shortcut: if this slug is already sitting in the stories cache
-  // (i.e. GET /stories already handed us its authorSub for the strip),
-  // use that straight away rather than round-tripping to /meta/:slug for
-  // a note we already have full info on.
-  const cached = _nbStoriesCache.find(s => s.slug === slug);
-  if (cached) {
-    nbOpenStory(cached.slug, cached.authorSub || '', cached.title || '');
+  if (await _nbOpenStoryBySlug(slug, { btn: goBtn })) {
     if (input) input.value = '';
     nbSearchInputChanged('');
-    return;
-  }
-  if (_pubOfflineGuard()) return;
-  _pubSetBtnLoading(goBtn, true, '');
-  try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(slug));
-    if (res.status === 404) { showToast('No note found at that link'); return; }
-    if (!res.ok) throw new Error('note meta fetch failed: ' + res.status);
-    const data = await res.json();
-    if (!data || !data.found) { showToast('No note found at that link'); return; }
-    nbOpenStory(data.slug || slug, data.authorSub || '', data.title || '');
-    if (input) input.value = '';
-    nbSearchInputChanged('');
-  } catch (e) {
-    _nbLog('note link open', e);
-    showToast('Couldn\u2019t open that link' + _nbFailureReason(e));
-  } finally {
-    _pubSetBtnLoading(goBtn, false);
   }
 }
 // Onboarding carousel under the Notes empty state — see its markup/CSS
@@ -22872,6 +22879,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
 
   IC.link = function (s) { return S('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', s, 1.8); };
   IC.refresh = function (s) { return S('<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>', s, 2); };
+  IC.doc = function (s) { return S('<path d="M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V7z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/>', s, 1.8); };
   IC.ext = function (s) { return S('<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>', s, 1.8); };
 
   /* ---------- state ---------- */
@@ -22967,6 +22975,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         if (keys.indexOf(it.k) < 0) keys.push(it.k);
         if (out.has(it.k)) return;
         it.noteTitle = (n.title || '').trim();
+        // Where the note can be opened in the story viewer: liked notes carry their slug + author, your own notes only if published ('me').
+        if (n.slug) { it.ns = n.slug; it.na = n.authorSub || ''; } else if (n.publishedSlug) { it.ns = n.publishedSlug; it.na = 'me'; }
         out.set(it.k, it);
       });
       if (keys.length >= 2) al.push({ id: n.id, title: (n.title || '').trim() || 'Untitled note', keys: keys });
@@ -23036,7 +23046,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function likeNotes() {
     var o = [];
-    LK.stories.forEach(function (s) { var h = LK.html.get(s.slug); if (h) o.push({ id: s.slug, title: s.title, content: h }); });
+    LK.stories.forEach(function (s) { var h = LK.html.get(s.slug); if (h) o.push({ id: s.slug, title: s.title, content: h, slug: s.slug, authorSub: s.authorSub || '' }); });
     return o;
   }
   function timedFetch(url, opts, ms) {
@@ -23781,8 +23791,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     }
   }
   function markCur(box) { var it = MD.cur; if (it) { var r = box.querySelectorAll('.md-row[data-k]'); r.forEach(function (x) { x.classList.toggle('is-cur', x.getAttribute('data-k') === it.k); }); } }
-  function fromStored(o) { return { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '' }; }
-  function strip(it) { return { k: it.k, p: it.p, type: it.type, id: it.id, spk: it.spk || '', u: it.u, nt: it.noteTitle || '' }; }
+  function fromStored(o) { return { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '', ns: o.ns || '', na: o.na || '' }; }
+  function strip(it) { return { k: it.k, p: it.p, type: it.type, id: it.id, spk: it.spk || '', u: it.u, nt: it.noteTitle || '', ns: it.ns || '', na: it.na || '' }; }
   function alById(id) { for (var i = 0; i < MD.al.length; i++) if (MD.al[i].id === id) return MD.al[i]; return null; }
   function plById(id) { for (var i = 0; i < MD.pl.length; i++) if (MD.pl[i].id === id) return MD.pl[i]; return null; }
   function queueVisibleMeta() { MD.items.forEach(function (it) { queueMeta(it); }); MD.pl.forEach(function (p) { p.items.forEach(function (o) { queueMeta(MD.items.get(o.k) || fromStored(o)); }); }); }
@@ -23800,10 +23810,18 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       h += sheetRow('playnext', 'data-k="' + esc(k) + '"', IC.next(18), 'Play next');
       h += sheetRow('addq', 'data-k="' + esc(k) + '"', IC.list(18), 'Add to queue');
     }
+    if (it.ns) h += sheetRow('opennote', 'data-k="' + esc(k) + '"', IC.doc(18), 'Go to note');
     h += sheetRow('openorig', 'data-k="' + esc(k) + '"', IC.ext(18), 'Open on ' + PN[it.p]);
     h += sheetRow('copylink', 'data-k="' + esc(k) + '"', IC.link(18), 'Copy link');
     if (inPl) h += sheetRow('rmfrom', 'data-k="' + esc(k) + '" data-id="' + esc(inPl) + '"', IC.trash(18), 'Remove from this playlist', '', 'dng');
     openSheet(h);
+  }
+  // Opens the note a media item came from through the normal story viewer path, on top of this screen (back lands exactly here).
+  function openNoteOf(k) {
+    var it = getIt(k); if (!it || !it.ns) return;
+    var au = it.na === 'me' ? _nbMyAuthorRef() : it.na; // your own note: your own author ref, so the viewer hides Like/Subscribe like it does for your story in the strip
+    if (au) nbOpenStory(it.ns, au, it.noteTitle || '');
+    else _nbOpenStoryBySlug(it.ns, { notFound: 'That note isn\u2019t available anymore', failMsg: 'Couldn\u2019t open that note' });
   }
   function addPlSheet(k) {
     var h = '<div class="md-sh-title">Add to playlist</div>';
@@ -24035,6 +24053,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       case 'addq':
         if (!getIt(k)) { closeSheet(); break; }
         MD.queue.list.push(k); MD.queue.lm.push(true); MD.queue.base.push(k); MD.queue.bm.push(true); closeSheet(); syncQueue(); toast('Added to queue'); break;
+      case 'opennote': closeSheet(); openNoteOf(k); break;
       case 'openorig':
         var oi = getIt(k); closeSheet();
         if (oi && oi.u) { try { _nbOpenExternalLink(oi.u); } catch (e) { toast('Couldn\u2019t open that link'); } }
@@ -24112,6 +24131,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   // Called first by the Android back handler. Returns true when it consumed the press.
   window.nbMediaBack = function () {
     if (!MD.open) return false;
+    var sv = $('story-viewer-overlay'); if (sv && sv.classList.contains('open')) { nbCloseStory(); return true; }
     if ($('md-sheet').classList.contains('open')) { closeSheet(); return true; }
     if (MD.np) { closeNP(); return true; }
     if (MD.stack.length > 1) { MD.stack.pop(); renderView(); return true; }
