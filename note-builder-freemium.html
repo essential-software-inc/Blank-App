@@ -566,6 +566,7 @@ body.pink #_wptoast .toast-ok {
   border-radius: 50%;
   vertical-align: -2px;
   margin-right: 6px;
+  flex: none; /* inside a flex button (e.g. the unpublish dialog's long label) it was squeezed to 4px wide and spun as a thin oval */
   animation: com-spin .6s linear infinite
 }
 
@@ -5965,6 +5966,131 @@ let _nbLoadbarTimer = null;
 const NB_MAX_TAGS = 10;
 
 
+// Single source for the Classic slot layout (12-col grid, data-row/data-col/data-w -> pixel top/left/width).
+// Used by the editor (embedded into NB_PRISTINE_TEMPLATE) AND by the published/exported page
+// (nbBuildStaticNoteHtml) via Function.prototype.toString(), so both lay a note out identically.
+// Must stay self-contained: no references to anything outside its own body (it is serialized into
+// other documents), and no backticks or dollar-brace sequences (it is embedded in template literals).
+function nbClassicLayoutKit(canvas) {
+  var CLASSIC_COLS = 12;
+  var CLASSIC_COLSPAN = { 25: 3, 33: 4, 50: 6, 66: 8, 75: 9, 100: 12 };
+  var CLASSIC_ROW_GAP = 6; // px, vertical gap between rows
+  function classicColSpan(block) {
+    var w = parseInt(block.dataset.w, 10);
+    return CLASSIC_COLSPAN[w] || 12;
+  }
+
+  function classicPadding() {
+    var cs = getComputedStyle(canvas);
+    return {
+      left: parseFloat(cs.paddingLeft) || 0,
+      right: parseFloat(cs.paddingRight) || 0,
+      top: parseFloat(cs.paddingTop) || 0,
+      bottom: parseFloat(cs.paddingBottom) || 0
+    };
+  }
+
+  // One-time backfill for blocks that predate this slot system — a note
+  // restored from before this feature, or (defensively) any block that
+  // somehow reaches layout without row/col already assigned. Simulates
+  // the old left-to-right flex-wrap packing once so existing notes keep
+  // their current look instead of collapsing to one block per row.
+  // Blocks that already carry row/col (the normal case once a note has
+  // been through this system) are left untouched; if some blocks have
+  // them and others don't, the new ones are packed in starting below
+  // everything already placed rather than colliding with it.
+  function migrateClassicPositions() {
+    var blocks = Array.prototype.slice.call(canvas.querySelectorAll(':scope > .blk'));
+    var missing = blocks.filter(function(b) { return b.dataset.row === undefined || b.dataset.col === undefined; });
+    if (!missing.length) return;
+    var row = 0;
+    var haveAny = blocks.some(function(b) { return b.dataset.row !== undefined; });
+    if (haveAny) {
+      var maxRow = -1;
+      blocks.forEach(function(b) {
+        var r = parseFloat(b.dataset.row);
+        if (!isNaN(r) && r > maxRow) maxRow = r;
+      });
+      row = maxRow + 1;
+    }
+    var used = 0;
+    var rowBlocks = [];
+    var singleRowGroups = [];
+    missing.forEach(function(b) {
+      var span = classicColSpan(b);
+      if (used + span > CLASSIC_COLS) {
+        if (rowBlocks.length === 1) singleRowGroups.push(rowBlocks[0]);
+        row++; used = 0; rowBlocks = [];
+      }
+      b.dataset.row = String(row);
+      b.dataset.col = String(used);
+      used += span;
+      rowBlocks.push(b);
+    });
+    if (rowBlocks.length === 1) singleRowGroups.push(rowBlocks[0]);
+    // A row that only ended up holding one block reads as flush-left
+    // rather than centered, unlike the flex-wrap layout these notes were
+    // saved with. Nudge its start column to floor((cols-span)/2) instead.
+    // Rows with more than one block keep their original left-packed
+    // positions untouched, so migrated multi-block rows keep the look they
+    // were saved with.
+    singleRowGroups.forEach(function(b) {
+      var span = classicColSpan(b);
+      b.dataset.col = String(Math.floor((CLASSIC_COLS - span) / 2));
+    });
+  }
+
+  // Recomputes every Classic block's top/left/width in plain pixels from
+  // its data-row/data-col, and caches the resulting row bands on the
+  // canvas (canvas._classicRows) for hit-testing during drags and
+  // resizes.
+  function layoutClassicCanvas() {
+    migrateClassicPositions();
+    var blocks = Array.prototype.slice.call(canvas.querySelectorAll(':scope > .blk'));
+    var pad = classicPadding();
+    var contentWidth = Math.max(1, canvas.clientWidth - pad.left - pad.right);
+    var colWidth = contentWidth / CLASSIC_COLS;
+    if (!blocks.length) {
+      canvas.style.height = '';
+      canvas._classicRows = [];
+      return;
+    }
+    var rowMap = {};
+    blocks.forEach(function(b) {
+      var r = parseFloat(b.dataset.row);
+      (rowMap[r] || (rowMap[r] = [])).push(b);
+    });
+    var rowKeys = Object.keys(rowMap).map(parseFloat).sort(function(a, b) { return a - b; });
+    var top = 0;
+    var bands = [];
+    rowKeys.forEach(function(key) {
+      var rowBlocks = rowMap[key].sort(function(a, b) {
+        return (parseInt(a.dataset.col, 10) || 0) - (parseInt(b.dataset.col, 10) || 0);
+      });
+      var rowH = 0;
+      rowBlocks.forEach(function(b) {
+        var col = parseInt(b.dataset.col, 10) || 0;
+        var span = classicColSpan(b);
+        b.style.left = (pad.left + col * colWidth) + 'px';
+        b.style.width = (span * colWidth) + 'px';
+        rowH = Math.max(rowH, b.offsetHeight);
+      });
+      bands.push({ row: key, blocks: rowBlocks, top: top, height: rowH });
+      top += rowH + CLASSIC_ROW_GAP;
+    });
+    bands.forEach(function(band) {
+      band.blocks.forEach(function(b) { b.style.top = (pad.top + band.top) + 'px'; });
+    });
+    var contentHeight = Math.max(0, top - CLASSIC_ROW_GAP);
+    canvas.style.height = (pad.top + contentHeight + pad.bottom) + 'px';
+    canvas._classicRows = bands;
+  }
+  return {
+    COLS: CLASSIC_COLS, COLSPAN: CLASSIC_COLSPAN, ROW_GAP: CLASSIC_ROW_GAP,
+    colSpan: classicColSpan, padding: classicPadding,
+    migrate: migrateClassicPositions, layout: layoutClassicCanvas
+  };
+}
 const NB_PRISTINE_TEMPLATE = `<style>
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0}
@@ -7497,9 +7623,17 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
      dimensions, not its content-box — which would otherwise quietly
      shift every block by the canvas's own padding.
   */
-  var CLASSIC_COLS = 12;
-  var CLASSIC_COLSPAN = { 25: 3, 33: 4, 50: 6, 66: 8, 75: 9, 100: 12 };
-  var CLASSIC_ROW_GAP = 6; // px, vertical gap between rows
+  // Layout engine (constants, colSpan, padding, migrate, layout) is shared with the published page:
+  // see nbClassicLayoutKit() above NB_PRISTINE_TEMPLATE.
+  var nbClassicLayoutKit = ${nbClassicLayoutKit.toString()};
+  var _classicKit = nbClassicLayoutKit(canvas);
+  var CLASSIC_COLS = _classicKit.COLS;
+  var CLASSIC_COLSPAN = _classicKit.COLSPAN;
+  var CLASSIC_ROW_GAP = _classicKit.ROW_GAP;
+  var classicColSpan = _classicKit.colSpan;
+  var classicPadding = _classicKit.padding;
+  var migrateClassicPositions = _classicKit.migrate;
+  var layoutClassicCanvas = _classicKit.layout;
   // Extra scroll room reserved below the last row for the duration of a
   // Classic drag. Without this, canvas.style.height (set in
   // layoutClassicCanvas() below) ends exactly at the last block plus its
@@ -7510,10 +7644,6 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // pointerdown and always cleared by the layoutClassicCanvas() call in
   // endDrag() below, whether or not the drag actually moved the block.
   var CLASSIC_DRAG_BOTTOM_ROOM = 140;
-  function classicColSpan(block) {
-    var w = parseInt(block.dataset.w, 10);
-    return CLASSIC_COLSPAN[w] || 12;
-  }
 
   // Classic stacking order: blocks are absolutely positioned
   // (see .cv-page .blk above) and can be tilted via
@@ -7555,111 +7685,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     block.style.zIndex = String(classicZIndexCounter);
   }
 
-  function classicPadding() {
-    var cs = getComputedStyle(canvas);
-    return {
-      left: parseFloat(cs.paddingLeft) || 0,
-      right: parseFloat(cs.paddingRight) || 0,
-      top: parseFloat(cs.paddingTop) || 0,
-      bottom: parseFloat(cs.paddingBottom) || 0
-    };
-  }
 
-  // One-time backfill for blocks that predate this slot system — a note
-  // restored from before this feature, or (defensively) any block that
-  // somehow reaches layout without row/col already assigned. Simulates
-  // the old left-to-right flex-wrap packing once so existing notes keep
-  // their current look instead of collapsing to one block per row.
-  // Blocks that already carry row/col (the normal case once a note has
-  // been through this system) are left untouched; if some blocks have
-  // them and others don't, the new ones are packed in starting below
-  // everything already placed rather than colliding with it.
-  function migrateClassicPositions() {
-    var blocks = Array.prototype.slice.call(canvas.querySelectorAll(':scope > .blk'));
-    var missing = blocks.filter(function(b) { return b.dataset.row === undefined || b.dataset.col === undefined; });
-    if (!missing.length) return;
-    var row = 0;
-    var haveAny = blocks.some(function(b) { return b.dataset.row !== undefined; });
-    if (haveAny) {
-      var maxRow = -1;
-      blocks.forEach(function(b) {
-        var r = parseFloat(b.dataset.row);
-        if (!isNaN(r) && r > maxRow) maxRow = r;
-      });
-      row = maxRow + 1;
-    }
-    var used = 0;
-    var rowBlocks = [];
-    var singleRowGroups = [];
-    missing.forEach(function(b) {
-      var span = classicColSpan(b);
-      if (used + span > CLASSIC_COLS) {
-        if (rowBlocks.length === 1) singleRowGroups.push(rowBlocks[0]);
-        row++; used = 0; rowBlocks = [];
-      }
-      b.dataset.row = String(row);
-      b.dataset.col = String(used);
-      used += span;
-      rowBlocks.push(b);
-    });
-    if (rowBlocks.length === 1) singleRowGroups.push(rowBlocks[0]);
-    // A row that only ended up holding one block reads as flush-left
-    // rather than centered, unlike the flex-wrap layout these notes were
-    // saved with. Nudge its start column to floor((cols-span)/2) instead.
-    // Rows with more than one block keep their original left-packed
-    // positions untouched, so migrated multi-block rows keep the look they
-    // were saved with.
-    singleRowGroups.forEach(function(b) {
-      var span = classicColSpan(b);
-      b.dataset.col = String(Math.floor((CLASSIC_COLS - span) / 2));
-    });
-  }
-
-  // Recomputes every Classic block's top/left/width in plain pixels from
-  // its data-row/data-col, and caches the resulting row bands on the
-  // canvas (canvas._classicRows) for hit-testing during drags and
-  // resizes.
-  function layoutClassicCanvas() {
-    migrateClassicPositions();
-    var blocks = Array.prototype.slice.call(canvas.querySelectorAll(':scope > .blk'));
-    var pad = classicPadding();
-    var contentWidth = Math.max(1, canvas.clientWidth - pad.left - pad.right);
-    var colWidth = contentWidth / CLASSIC_COLS;
-    if (!blocks.length) {
-      canvas.style.height = '';
-      canvas._classicRows = [];
-      return;
-    }
-    var rowMap = {};
-    blocks.forEach(function(b) {
-      var r = parseFloat(b.dataset.row);
-      (rowMap[r] || (rowMap[r] = [])).push(b);
-    });
-    var rowKeys = Object.keys(rowMap).map(parseFloat).sort(function(a, b) { return a - b; });
-    var top = 0;
-    var bands = [];
-    rowKeys.forEach(function(key) {
-      var rowBlocks = rowMap[key].sort(function(a, b) {
-        return (parseInt(a.dataset.col, 10) || 0) - (parseInt(b.dataset.col, 10) || 0);
-      });
-      var rowH = 0;
-      rowBlocks.forEach(function(b) {
-        var col = parseInt(b.dataset.col, 10) || 0;
-        var span = classicColSpan(b);
-        b.style.left = (pad.left + col * colWidth) + 'px';
-        b.style.width = (span * colWidth) + 'px';
-        rowH = Math.max(rowH, b.offsetHeight);
-      });
-      bands.push({ row: key, blocks: rowBlocks, top: top, height: rowH });
-      top += rowH + CLASSIC_ROW_GAP;
-    });
-    bands.forEach(function(band) {
-      band.blocks.forEach(function(b) { b.style.top = (pad.top + band.top) + 'px'; });
-    });
-    var contentHeight = Math.max(0, top - CLASSIC_ROW_GAP);
-    canvas.style.height = (pad.top + contentHeight + pad.bottom) + 'px';
-    canvas._classicRows = bands;
-  }
 
   var _classicLayoutRaf = null;
   function scheduleClassicLayout() {
@@ -15716,22 +15742,23 @@ ${_nbGetPristineCanvasStyle()}
   (function() {
     var canvas = document.querySelector('.cv-canvas');
     if (!canvas) return;
-    function sizeCanvas() {
-      var blocks = canvas.querySelectorAll(':scope > .blk');
-      var maxBottom = 0;
-      blocks.forEach(function(b) {
-        var bottom = b.offsetTop + b.offsetHeight;
-        if (bottom > maxBottom) maxBottom = bottom;
-      });
-      var padBottom = parseFloat(getComputedStyle(canvas).paddingBottom) || 0;
-      canvas.style.height = (maxBottom + padBottom) + 'px';
-    }
+    // Same layout engine as the editor (nbClassicLayoutKit, serialized in). Blocks are
+    // position:absolute, so without it any block lacking baked top/left/width stacks at 0,0,
+    // and baked pixels go stale at any other viewport width.
+    var kit = (${nbClassicLayoutKit.toString()})(canvas);
+    function sizeCanvas() { kit.layout(); }
+    var raf = null;
+    function schedule() { if (raf) return; raf = requestAnimationFrame(function() { raf = null; sizeCanvas(); }); }
     sizeCanvas();
-    // Images, video/social iframes, and web fonts can all still be
-    // loading at this point and change block heights once they finish,
-    // so resize again after everything's settled rather than locking
-    // in a height measured against still-loading content.
+    // Images, video/social iframes, and web fonts can still be loading and change block
+    // heights, so re-layout once everything settles, on resize, and as blocks resize.
     window.addEventListener('load', sizeCanvas);
+    window.addEventListener('resize', schedule);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(schedule);
+      canvas.querySelectorAll(':scope > .blk').forEach(function(b) { ro.observe(b); });
+    }
   })();
   <\/script>
   <script>
@@ -17275,7 +17302,19 @@ let _nbSubFeedTotal = null; // size of the whole list, as the worker reports it 
 // so their own note count plays no part here.
 // Same lead sentence the other categories' empty-state subtext opens with
 // (see _nbFilteredEmptyMessage); the title stays specific to each state.
-const NB_SUB_EMPTY_LEAD = 'Mix text, photos, checklists, and more into scrapbook-style notes. ';
+const NB_EMPTY_LEADS = [
+  'Mix text, photos, checklists, and more into scrapbook-style notes. ',
+  'Paste posts, videos, and songs into one note on the Share screen. ',
+  'Play the songs and videos from your notes in the Media panel. '
+];
+// Rotates so the empty states cover the whole app, not just Write: starts on the next one each launch
+// and moves on whenever a category is picked, so it stays put across re-renders of the same list.
+let _nbEmptyLeadIdx = 0;
+try {
+  _nbEmptyLeadIdx = ((parseInt(localStorage.getItem('nb_empty_lead_v1'), 10) || 0) + 1) % NB_EMPTY_LEADS.length;
+  localStorage.setItem('nb_empty_lead_v1', String(_nbEmptyLeadIdx));
+} catch (e) {}
+function nbEmptyLead() { return NB_EMPTY_LEADS[_nbEmptyLeadIdx % NB_EMPTY_LEADS.length]; }
 // Three placeholder cards mirroring a loaded Subscribed card (author line,
 // title, thumbnail row) — swapped out wholesale when the first page lands.
 function _nbAlertSkeletonHtml() {
@@ -17315,7 +17354,7 @@ async function nbRenderSubscribedFeed() {
   if (!nbIsSignedIn()) {
     _nbRevealFade(empty); grid.style.display = 'none';
     emptyTitle.textContent = 'Sign in to see this';
-    emptySub.textContent = NB_SUB_EMPTY_LEAD + (_nbActiveCat === 'Published'
+    emptySub.textContent = nbEmptyLead() + (_nbActiveCat === 'Published'
       ? 'Stories and published notes are tied to your account, so this needs you to be signed in.'
       : _nbActiveCat === 'Alerts'
         ? 'Alerts bring you announcements and messages about your account, so this needs you to be signed in.'
@@ -17915,7 +17954,7 @@ function _nbAlertCardHtml(s) {
         </div>
       </div>`;
 }
-const NB_ALERTS_EMPTY_SUB = NB_SUB_EMPTY_LEAD + 'Announcements from us and messages about your account will show up here.';
+function nbAlertsEmptySub() { return nbEmptyLead() + 'Announcements from us and messages about your account will show up here.'; }
 // Same confirmation dialog as deleting a note (#delete-dialog), reworded for an alert.
 function nbDeleteAlert(id) {
   const ov = document.getElementById('delete-overlay');
@@ -17957,7 +17996,7 @@ async function _nbDeleteAlertNow(id) {
   if (!_nbSubFeedStories.length && _nbSubFeedDone) {
     grid.style.display = 'none'; grid.innerHTML = '';
     document.getElementById('notes-empty-title').textContent = 'No alerts';
-    document.getElementById('notes-empty-sub').textContent = NB_ALERTS_EMPTY_SUB;
+    document.getElementById('notes-empty-sub').textContent = nbAlertsEmptySub();
     _nbRevealFade(document.getElementById('notes-empty-state'));
     _nbSubCarousel(true);
     return;
@@ -18025,7 +18064,7 @@ function _nbLikedTabDrop(slug) {
   if (!_nbSubFeedStories.length && _nbSubFeedDone) {
     grid.style.display = 'none'; grid.innerHTML = '';
     document.getElementById('notes-empty-title').textContent = 'No liked notes yet';
-    document.getElementById('notes-empty-sub').textContent = NB_SUB_EMPTY_LEAD + 'Tap the heart on a story, or on a note you opened from a link, and it will be kept here.';
+    document.getElementById('notes-empty-sub').textContent = nbEmptyLead() + 'Tap the heart on a story, or on a note you opened from a link, and it will be kept here.';
     _nbRevealFade(document.getElementById('notes-empty-state'));
     _nbSubCarousel(true);
     return;
@@ -18181,19 +18220,19 @@ async function _nbLoadSubFeedPage() {
       _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       if (tab === 'stories') {
         emptyTitle.textContent = 'No stories showing';
-        emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Turn on \u201cShow in stories\u201d from a published note\u2019s Publish sheet and it\u2019ll show up here.';
+        emptySub.textContent = nbEmptyLead() + 'Turn on \u201cShow in stories\u201d from a published note\u2019s Publish sheet and it\u2019ll show up here.';
       } else if (tab === 'published') {
         emptyTitle.textContent = 'No published notes yet';
-        emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Notes you publish from the web icon on a note will show up here, with how many likes each has received.';
+        emptySub.textContent = nbEmptyLead() + 'Notes you publish from the web icon on a note will show up here, with how many likes each has received.';
       } else if (tab === 'alerts') {
         emptyTitle.textContent = 'No alerts';
-        emptySub.textContent = NB_ALERTS_EMPTY_SUB;
+        emptySub.textContent = nbAlertsEmptySub();
       } else if (tab === 'liked') {
         emptyTitle.textContent = 'No liked notes yet';
-        emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Tap the heart on a story, or on a note you opened from a link, and it will be kept here.';
+        emptySub.textContent = nbEmptyLead() + 'Tap the heart on a story, or on a note you opened from a link, and it will be kept here.';
       } else {
         emptyTitle.textContent = 'No new stories';
-        emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Notes the people you subscribe to publish (from when you subscribed onward) will show up here.';
+        emptySub.textContent = nbEmptyLead() + 'Notes the people you subscribe to publish (from when you subscribed onward) will show up here.';
       }
       _nbSubFeedDone = true;
       _nbSubFeedPaintKey = null;
@@ -18226,7 +18265,7 @@ async function _nbLoadSubFeedPage() {
       _nbSubFeedPaintKey = null;
       _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       emptyTitle.textContent = 'Could not load';
-      emptySub.textContent = NB_SUB_EMPTY_LEAD + 'Something went wrong loading ' + (tab === 'stories' ? 'your stories' : tab === 'published' ? 'your published notes' : tab === 'alerts' ? 'your alerts' : (tab === 'liked' ? 'your liked notes' : 'the Subscribed feed')) + '. Try again.';
+      emptySub.textContent = nbEmptyLead() + 'Something went wrong loading ' + (tab === 'stories' ? 'your stories' : tab === 'published' ? 'your published notes' : tab === 'alerts' ? 'your alerts' : (tab === 'liked' ? 'your liked notes' : 'the Subscribed feed')) + '. Try again.';
       _nbSubCarousel(true);
     } else {
       showToast('Couldn\u2019t load more' + _nbFailureReason(e));
@@ -20265,6 +20304,7 @@ function selectCat(cat, tab) {
   if (cat === 'Subscribed') _nbSubTab = tab === 'liked' ? 'liked' : 'feed';
   if (cat === 'Published') _nbPubTab = tab === 'stories' ? 'stories' : 'published';
   _nbActiveCat = cat;
+  if (!same) _nbEmptyLeadIdx = (_nbEmptyLeadIdx + 1) % NB_EMPTY_LEADS.length;
   if (!_nbIsFeedCat(cat)) nbUpdateLibraryTitle(); // instant, before any shimmer/fetch (feed lists update from their own render)
   buildCatBar();
   _nbSyncStoriesStripVisibility();
@@ -20521,7 +20561,7 @@ function nbStartCarouselAutoplay() {
   _nbCarouselTimer = setInterval(() => nbGoToCarouselSlide(_nbCarouselIdx + 1, false), 4500);
 }
 function _nbFilteredEmptyMessage() {
-  const lead = 'Mix text, photos, checklists, and more into scrapbook-style notes. ';
+  const lead = nbEmptyLead();
   const q = (document.getElementById('feed-search-input') || {}).value || '';
   if (q && _nbLooksLikeNoteLink(q)) {
     return { title: 'No matches', sub: lead + 'Tap GO to open this note link.' };
@@ -20647,7 +20687,7 @@ function nbRenderNotesScreen() {
   if (!all.length) {
     // True first-run: no notes anywhere yet, regardless of filter/search.
     emptyTitle.textContent = 'Welcome to Bluebook';
-    emptySub.textContent = 'Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one. It\u2019ll show up here, sorted by category.';
+    emptySub.textContent = nbEmptyLead() + 'Tap the + button to create your first one. It\u2019ll show up here, sorted by category.';
     _nbRevealFade(empty);
     _nbRevealFade(carousel);
     grid.style.display = 'none';
