@@ -23394,8 +23394,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var ad = AD[it.p], f = MD.frame;
     if (!retry) WD.tries = 0;
     WD.pend = null; WD.last = 0;
+    var keepDur = (MD.cur && MD.cur.k === it.k) ? (MD.ps.dur || 0) : 0; // same track reloading: keep its length so the seek bar stays up
     MD.cur = it; MD.endFired = false; MD.wantPlay = (it.p === 'sp');
-    MD.ps = { playing: false, pos: 0, dur: 0, real: false, t0: NOW() };
+    MD.ps = { playing: false, pos: 0, dur: keepDur, real: false, t0: NOW() };
     layoutStage(it);
     if (!retry && f && !MD.dead && ad.reuse && MD.fplat === it.p && f.src && f.src.indexOf('about:blank') !== 0) {
       WD.pend = { id: it.id, t: NOW() };
@@ -23480,7 +23481,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   /* ---------- player UI ---------- */
   function uiProg() {
     if (!MD.open) return;
-    var p = MD.ps, has = p.real && p.dur > 0;
+    var p = MD.ps, has = p.dur > 0;
     var pos = MD.dragging ? MD.dragFrac * p.dur : curPos();
     var f = has ? Math.max(0, Math.min(1, pos / p.dur)) : 0;
     $('md-bar-fill').style.width = (f * 100) + '%';
@@ -23509,7 +23510,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       MD.wt = setTimeout(function () { wsh.style.backgroundImage = wv; wsh.style.opacity = ''; }, 220);
     }
     var pp = $('md-mini-pp'); pp.hidden = !ad.cap; pp.innerHTML = ps.playing ? IC.pause(22) : IC.play(22);
-    np.classList.toggle('has-prog', ps.real && ps.dur > 0);
+    np.classList.toggle('has-prog', ps.dur > 0); // not tied to a live player: a stopped or reloading track keeps its bar (at 0)
     $('md-np-ctx').textContent = MD.queue.ctx || 'Media';
     $('md-np-livetx').textContent = it.p === 'ig' ? 'Playing in the post. Use the video\u2019s own controls.' : 'Playing in the post. Use its own controls.';
     var big = $('md-c-pp'); big.hidden = !ad.cap; big.innerHTML = ps.playing ? IC.pause(30) : IC.play(30);
@@ -23980,7 +23981,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         else { qq.list = qq.base.slice(); i = qq.list.indexOf(cur); if (i < 0) { qq.list.unshift(cur); i = 0; } qq.i = i; }
         syncUI(); syncQueue(); break;
       case 'rep': MD.queue.repeat = MD.queue.repeat === 'off' ? 'all' : MD.queue.repeat === 'all' ? 'one' : 'off'; syncUI(); break;
-      case 'qjump': i = parseInt(el.getAttribute('data-i'), 10); if (i >= 0 && i < MD.queue.list.length) { MD.queue.i = i; loadCur(); } break;
+      case 'qjump': i = parseInt(el.getAttribute('data-i'), 10); if (i >= 0 && i < MD.queue.list.length) { if (i === MD.queue.i && MD.cur && !MD.dead) break; MD.queue.i = i; loadCur(); } break;
     }
   }
 
