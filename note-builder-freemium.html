@@ -5966,6 +5966,78 @@ let _nbLoadbarTimer = null;
 const NB_MAX_TAGS = 10;
 
 
+// Single source for embed-retry bookkeeping. Used by the editor (serialized into NB_PRISTINE_TEMPLATE via
+// Function.prototype.toString(), same as nbClassicLayoutKit) AND by the Media panel, so a stuck embed or
+// thumbnail is flagged, confirmed and re-fetched the same way in both. Must stay self-contained (it is
+// serialized into another document): no references outside its own body, no backticks, no dollar-brace
+// sequences and no backslashes (it is embedded in a template literal).
+function nbEmbedRetryKit() {
+  var SWEEP_MS = 15000, MIN_LOAD_MS = 400;
+  // Flag an element as "attempt in flight, not confirmed yet". Re-stamped on every retry so the load check
+  // below times the attempt actually running, not a stale one.
+  function mark(el) {
+    el.dataset.embedRetryPending = '1';
+    el.dataset.embedLoadStartedAt = String(Date.now());
+  }
+  function isPending(el) { return !!el && el.dataset.embedRetryPending === '1'; }
+  function clear(el) { delete el.dataset.embedRetryPending; }
+  // Drops only our own cache-buster, keeping any other query the URL needs (signed or sized thumbnails).
+  function stripBust(src) {
+    var q = src.indexOf('?');
+    if (q < 0) return src;
+    var keep = src.slice(q + 1).split('&').filter(function (p) { return p && p.indexOf('_t=') !== 0; });
+    return src.slice(0, q) + (keep.length ? '?' + keep.join('&') : '');
+  }
+  // Re-attempts a broken <img>. Re-assigning the same src is a no-op once the URL is cached as failed, so a
+  // cache-busting param is added (data: URIs can't fail from the network and are skipped).
+  function reloadImage(img) {
+    var src = img.getAttribute('src') || '';
+    if (!src || src.indexOf('data:') === 0) return;
+    mark(img);
+    var base = stripBust(src);
+    img.src = base + (base.indexOf('?') < 0 ? '?' : '&') + '_t=' + Date.now();
+  }
+  // Re-attempts a stuck cross-origin iframe. The interim about:blank navigation is what makes it re-fetch.
+  function reloadFrame(frame) {
+    var src = frame.getAttribute('src');
+    if (!src) return;
+    mark(frame);
+    frame.src = 'about:blank';
+    frame.src = src;
+  }
+  // True only when a 'load' event looks like a real load. A navigation made while offline still fires 'load'
+  // (near-instantly, on the browser's own error page), so both being online and a minimum elapsed time are
+  // required before the pending flag is cleared.
+  function loadedOk(frame) {
+    if (navigator.onLine === false) return false;
+    var startedAt = Number(frame.dataset.embedLoadStartedAt) || 0;
+    if (Date.now() - startedAt < MIN_LOAD_MS) return false;
+    clear(frame);
+    return true;
+  }
+  // Call from a frame's 'load' listener. A genuinely fast load (cached embed) is re-checked once the minimum
+  // time has passed, instead of staying flagged and getting reloaded mid-playback by the next sweep.
+  function confirmLoad(frame, onConfirm) {
+    if (loadedOk(frame)) { if (onConfirm) onConfirm(); return; }
+    if (navigator.onLine === false) return;
+    var started = frame.dataset.embedLoadStartedAt;
+    var wait = MIN_LOAD_MS - (Date.now() - (Number(started) || 0)) + 30;
+    if (!started || wait <= 0 || wait > MIN_LOAD_MS + 100) return;
+    setTimeout(function () {
+      if (frame.dataset.embedLoadStartedAt !== started) return;
+      if (loadedOk(frame) && onConfirm) onConfirm();
+    }, wait);
+  }
+  // Runs sweep when the connection returns, and every SWEEP_MS while online, since 'online' can fire before the
+  // connection is usable and some webviews never fire it.
+  function watch(sweep) {
+    window.addEventListener('online', sweep);
+    setInterval(function () { if (navigator.onLine !== false) sweep(); }, SWEEP_MS);
+  }
+  return { mark: mark, isPending: isPending, clear: clear, reloadImage: reloadImage, reloadFrame: reloadFrame,
+           loadedOk: loadedOk, confirmLoad: confirmLoad, watch: watch };
+}
+
 // Single source for the Classic slot layout (12-col grid, data-row/data-col/data-w -> pixel top/left/width).
 // Used by the editor (embedded into NB_PRISTINE_TEMPLATE) AND by the published/exported page
 // (nbBuildStaticNoteHtml) via Function.prototype.toString(), so both lay a note out identically.
@@ -8939,12 +9011,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     // on their own, but an error page's near-instant, offline 'load'
     // fails both checks together, while a real embed (even a slow one)
     // passes both — so requiring both is enough to tell them apart here.
-    frame.addEventListener('load', function() {
-      if (navigator.onLine === false) return;
-      var startedAt = Number(container.dataset.embedLoadStartedAt) || 0;
-      if (Date.now() - startedAt < 400) return;
-      delete container.dataset.embedRetryPending;
-    });
+    frame.addEventListener('load', function() { _embedRetryKit.confirmLoad(container); });
     container.appendChild(frame);
   }
 
@@ -9192,48 +9259,13 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   // stay flagged rather than being marked "done" while still broken —
   // otherwise there's no future retry to fix it, which is exactly how a
   // video post could stay unplayable until the whole note was reopened.
-  function _markEmbedRetryPending(el) {
-    el.dataset.embedRetryPending = '1';
-    // Recorded fresh every time this is called — including on each
-    // retry, not just the first attempt — so the 'load' listeners below
-    // are always checking elapsed time against the attempt actually in
-    // flight right now, not a stale timestamp left over from whenever
-    // the listener was originally attached.
-    el.dataset.embedLoadStartedAt = String(Date.now());
-  }
-
-  // Forces a broken <img> to actually re-attempt the network request. A
-  // bare re-assignment of the same src is a no-op in most browsers once
-  // that URL is already cached as failed, so a cache-busting query param
-  // is appended (data: URIs are skipped — they can't fail from a network
-  // issue, so retrying one would only ever be a wasted decode). This is
-  // the one place that reloads a broken image — used identically while
-  // actively editing and in read-only preview, since both run this same
-  // script (see nbBuildSafeHtml's htmlSrc, which bakes the whole canvas
-  // script in verbatim) — so a note behaves the same way either way.
-  function _forceImageReload(img) {
-    var src = img.getAttribute('src') || '';
-    if (!src || src.indexOf('data:') === 0) return;
-    _markEmbedRetryPending(img);
-    img.src = src.split('?')[0] + '?_t=' + Date.now();
-  }
-
-  // Forces a stuck/broken video iframe to re-attempt its request. The
-  // interim 'about:blank' navigation (rather than just re-setting the
-  // same src) is what actually makes a cross-origin iframe re-fetch —
-  // re-assigning an identical src is a no-op in most browsers. Shared by
-  // the automatic sweep below and wireMedia's own manual-retry tap in
-  // preview, so both paths behave identically.
-  function _forceMediaReload(frame) {
-    var src = frame.getAttribute('src');
-    if (!src) return;
-    // Re-marked (not just re-flagged — this also refreshes
-    // embedLoadStartedAt) so the 'load' listener times this attempt, not
-    // the original one from whenever the note first opened.
-    _markEmbedRetryPending(frame);
-    frame.src = 'about:blank';
-    frame.src = src;
-  }
+  // Flag/reload/confirm bookkeeping lives in nbEmbedRetryKit (above NB_PRISTINE_TEMPLATE) so the Media panel
+  // runs the exact same logic. These wrappers keep the names the rest of this script already uses.
+  var _embedRetryKit = (${nbEmbedRetryKit.toString()})();
+  function _markEmbedRetryPending(el) { _embedRetryKit.mark(el); }
+  function _forceImageReload(img) { _embedRetryKit.reloadImage(img); }
+  // Shared by the automatic sweep below and wireMedia's manual-retry tap in preview.
+  function _forceMediaReload(frame) { _embedRetryKit.reloadFrame(frame); }
 
   // Forces a stuck/broken social post to re-attempt its request.
   // renderSocialEmbed always rebuilds from scratch (see its own
@@ -9285,12 +9317,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
     // on their own, but an error page's near-instant, offline 'load'
     // fails both checks together, while a real embed (even a slow one)
     // passes both — so requiring both is enough to tell them apart here.
-    frame.addEventListener('load', function() {
-      if (navigator.onLine === false) return;
-      var startedAt = Number(frame.dataset.embedLoadStartedAt) || 0;
-      if (Date.now() - startedAt < 400) return;
-      delete frame.dataset.embedRetryPending;
-    });
+    frame.addEventListener('load', function() { _embedRetryKit.confirmLoad(frame); });
 
     wrap.addEventListener('click', function() {
       if (document.querySelector('.cv-page.cv-preview')) {
@@ -9385,15 +9412,12 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       if (embedEl && embedEl.dataset.embedRetryPending === '1') _forceSocialReload(wrap);
     });
   }
-  window.addEventListener('online', _retryPendingEmbeds);
   // Belt-and-suspenders, same reasoning as the font loader near the top of
   // this file: 'online' firing isn't proof the connection is actually
   // usable yet, and some webviews don't fire it reliably at all — so keep
   // checking for anything still stuck rather than relying on a single
   // one-shot attempt.
-  setInterval(function() {
-    if (navigator.onLine !== false) _retryPendingEmbeds();
-  }, 15000);
+  _embedRetryKit.watch(_retryPendingEmbeds);
 
   function wireCaption(block) {
     var capWrap = block.querySelector('.blk-caption');
@@ -15762,6 +15786,31 @@ ${_nbGetPristineCanvasStyle()}
   })();
   <\/script>
   <script>
+  // Same embed/image retry as the editor and Media panel (nbEmbedRetryKit, serialized in): an embed or image
+  // that failed while offline or on a bad connection is re-fetched when the connection returns, instead of
+  // staying blank until the page is reloaded.
+  (function() {
+    var kit = (${nbEmbedRetryKit.toString()})();
+    var frames = Array.prototype.slice.call(document.querySelectorAll('.blk-media-frame iframe, .blk-social-embed iframe'));
+    var imgs = Array.prototype.slice.call(document.querySelectorAll('.blk-img img'));
+    frames.forEach(function(f) {
+      if (!f.getAttribute('src')) return;
+      kit.mark(f);
+      f.addEventListener('load', function() { kit.confirmLoad(f); });
+    });
+    imgs.forEach(function(img) {
+      img.addEventListener('load', function() { kit.clear(img); });
+      img.addEventListener('error', function() { kit.mark(img); });
+      if (img.complete && !img.naturalWidth && img.getAttribute('src')) kit.mark(img);
+    });
+    kit.watch(function() {
+      if (document.hidden) return;
+      imgs.forEach(function(i) { if (kit.isPending(i)) kit.reloadImage(i); });
+      frames.forEach(function(f) { if (kit.isPending(f)) kit.reloadFrame(f); });
+    });
+  })();
+  <\/script>
+  <script>
   // Relays a tap on any link in the note out to whatever's hosting this
   // page, instead of letting the browser's own target="_blank" handling
   // run — which is silently a no-op inside the app's own story/search
@@ -19109,10 +19158,20 @@ function _nbLockSigninInvite(on) {
 (function () {
   const w = document.getElementById('account-invite-wrap');
   if (!w) return;
+  // The toast can't wait for 'click': preventDefault on touchstart (needed to stop focus and the toggle) cancels the
+  // click that would follow, so on a phone it never arrived. Fire on the first of pointerdown/touchstart/click and
+  // let the debounce swallow the rest of the same tap. Tapping here also means the launch toast hold (which parks
+  // ordinary toasts until the sign-in screen is closed) must let go, or the toast would just be queued.
+  let lastToast = 0;
   const block = e => {
     if (!w.classList.contains('signing-in')) return;
     e.preventDefault(); e.stopPropagation();
-    if (e.type === 'click') showToast('Signing in. Invite code is locked until it finishes.');
+    if (e.type !== 'click' && e.type !== 'touchstart' && e.type !== 'pointerdown') return;
+    const now = Date.now();
+    if (now - lastToast < 800) return;
+    lastToast = now;
+    try { _nbReleaseToastHold(false); } catch (x) {}
+    showToast('Signing in. Invite code is locked until it finishes.');
   };
   ['pointerdown', 'mousedown', 'touchstart', 'focusin', 'click', 'keydown'].forEach(t => w.addEventListener(t, block, true));
 })();
@@ -21944,6 +22003,7 @@ function nbRenderCanvas(forcePreview) {
     doc.open();
     doc.write(safeHtml);
     doc.close();
+    try { if (window.nbMediaHookFrame) window.nbMediaHookFrame(); } catch (e) {}
     wrap.classList.add('show');
     unmaskAfterSettle();
     nbSyncUndoRedoButtons();
@@ -21955,6 +22015,7 @@ function nbRenderCanvas(forcePreview) {
     const reveal = function(timedOut) {
       if (_revealed) return;
       _revealed = true;
+      try { if (window.nbMediaHookFrame) window.nbMediaHookFrame(); } catch (e) {}
       wrap.classList.add('show');
       unmaskAfterSettle();
       nbSyncUndoRedoButtons();
@@ -22888,6 +22949,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var NOW = function () { return (window.performance && performance.now) ? performance.now() : Date.now(); };
+  var RK = nbEmbedRetryKit(); // shared with the editor's embed retry (host script, above NB_PRISTINE_TEMPLATE)
   var META_KEY = 'nb_media_meta_v1';
   var PN = { yt: 'YouTube', sp: 'Spotify', st: 'Streamable', ig: 'Instagram', x: 'X' };
   var PORD = ['sp', 'yt', 'st', 'ig', 'x'];
@@ -22898,7 +22960,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function S(inner, sz, sw) { return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>'; }
   function F(inner, sz) { return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="currentColor">' + inner + '</svg>'; }
   var IC = {
-    play: function (s) { return F('<path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>', s); },
+    play: function (s) { return F('<path d="M7 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L8.5 4.64A1 1 0 0 0 7 5.5z"/>', s); },
     pause: function (s) { return F('<rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/>', s); },
     next: function (s) { return F('<path d="M6 6.2v11.6a.8.8 0 0 0 1.25.66l8.2-5.8a.8.8 0 0 0 0-1.32l-8.2-5.8A.8.8 0 0 0 6 6.2z"/><rect x="16.5" y="5.5" width="2.2" height="13" rx="1"/>', s); },
     prev: function (s) { return '<span style="display:inline-flex;transform:scaleX(-1)">' + IC.next(s) + '</span>'; },
@@ -22909,7 +22971,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     more: function (s) { return F('<circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>', s); },
     plus: function (s) { return S('<line x1="12" y1="5.5" x2="12" y2="18.5"/><line x1="5.5" y1="12" x2="18.5" y2="12"/>', s, 2); },
     note: function (s) { return F('<path d="M17.6 3.1 9.9 4.7C9.4 4.8 9 5.3 9 5.8v9.6a3.4 3.4 0 1 0 2 3.1V9.2l5.6-1.2v5.4a3.4 3.4 0 1 0 2 3.1V4.3c0-.8-.7-1.4-1.5-1.2z"/>', s); },
-    vid: function (s) { return F('<path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>', s); },
+    vid: function (s) { return F('<path d="M7 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L8.5 4.64A1 1 0 0 0 7 5.5z"/>', s); },
     disc: function (s) { return S('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>', s, 1.6); },
     list: function (s) { return S('<path d="M3.5 6.5h13M3.5 11.5h13M3.5 16.5h6.5"/><path d="M14.5 14.2v6l5-3z" fill="currentColor" stroke-width="1.2"/>', s, 1.8); },
     check: function (s) { return S('<polyline points="5 12.5 10 17.5 19 7"/>', s, 2.2); },
@@ -23280,7 +23342,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function thumbHtml(it, kind, noEq, eager) {
     var th = thumbOf(it);
     return '<div class="md-th md-th-' + (kind || 'sq') + '"><div class="md-ph" style="background:' + bg(it.k) + '">' + typeIcon(it, 24) + '</div>' +
-      (th ? '<img src="' + esc(th) + '" alt="" loading="' + (eager ? 'eager" decoding="sync' : 'lazy') + '" referrerpolicy="no-referrer" onerror="this.remove()">' : '') +
+      (th ? '<img src="' + esc(th) + '" alt="" loading="' + (eager ? 'eager" decoding="sync' : 'lazy') + '" referrerpolicy="no-referrer" onerror="nbMdThumbErr(this)" onload="nbMdThumbOk(this)">' : '') +
       (noEq ? '' : '<i class="md-eq"><b></b><b></b><b></b></i>') + '</div>';
   }
   function fmt(s) {
@@ -23440,7 +23502,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   /* Frame watchdog. An embed can stall without saying so: the page never finishes loading, loadVideoById is dropped because the
      player isn't ready, or the frame goes quiet mid-playback. Each is recovered once by reloading, then reported. */
   var WD = { mt: 0, loaded: false, tries: 0, last: 0, pend: null };
-  function wdGiveUp(msg) { toast(msg); killFrame(); WD.tries = 0; syncUI(); }
+  function wdGiveUp(msg) { toast(msg); killFrame(); WD.tries = 0; WD.gaveUp = true; syncUI(); }
   function wdTick() {
     var it = MD.cur;
     if (!it || MD.dead || document.hidden) return;
@@ -23462,9 +23524,31 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (document.hidden) return;
     var n = NOW(); WD.last = n; if (!WD.loaded) WD.mt = n; if (WD.pend) WD.pend.t = n;
   });
+  /* Retry sweep (same helpers and cadence as the editor): thumbnails that failed to load, and a player frame that
+     never confirmed loading. Never touches a frame that is playing. */
+  window.nbMdThumbErr = function (img) {
+    var n = Number(img.dataset.retryN) || 0;
+    if (n >= 3) { img.remove(); return; } // gave up: the gradient placeholder underneath stays
+    img.dataset.retryN = String(n + 1);
+    RK.mark(img);
+    img.style.opacity = '0'; // hidden, not display:none (a lazy image that isn't rendered won't reload)
+  };
+  window.nbMdThumbOk = function (img) { RK.clear(img); img.style.opacity = ''; };
+  // A give-up leaves the player blank with a 'tap play' toast. Coming back online is the one moment worth
+  // retrying that by itself (not on the 15s sweep, which would loop give-up toasts while it stays broken).
+  window.addEventListener('online', function () {
+    if (WD.gaveUp && MD.cur && MD.open && MD.dead && !document.hidden) { WD.tries = 0; mount(MD.cur); syncUI(); }
+  });
+  function retryPending() {
+    var scr = $('md-screen'); if (!scr) return;
+    Array.prototype.forEach.call(scr.querySelectorAll('.md-th img'), function (img) { if (RK.isPending(img) && img.isConnected) RK.reloadImage(img); });
+    var f = MD.frame, it = MD.cur;
+    if (f && it && !MD.dead && !WD.loaded && !MD.ps.playing && !document.hidden && RK.isPending(f)) { WD.tries = 0; mount(it, true); syncUI(); }
+  }
   function mount(it, retry) {
     var ad = AD[it.p], f = MD.frame;
     if (!retry) WD.tries = 0;
+    WD.gaveUp = false;
     WD.pend = null; WD.last = 0;
     var keepDur = (MD.cur && MD.cur.k === it.k) ? (MD.ps.dur || 0) : 0; // same track reloading: keep its length so the seek bar stays up
     MD.cur = it; MD.endFired = false; MD.wantPlay = (it.p === 'sp');
@@ -23483,13 +23567,15 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       f.setAttribute('title', 'Media player');
       f.addEventListener('load', function () {
         var a = AD[MD.fplat];
-        if (!MD.dead) WD.loaded = true;
+        // An offline navigation still fires 'load' on the browser's error page; only a real load counts.
+        if (!MD.dead) RK.confirmLoad(f, function () { if (!MD.dead) WD.loaded = true; });
         if (a && a.onload && MD.cur && !MD.dead) a.onload();
       });
       $('md-stage').appendChild(f);
       MD.frame = f;
     }
     MD.fplat = it.p; MD.dead = false;
+    RK.mark(f); // pending until a real 'load' confirms it (see the load listener above)
     f.src = ad.src(it);
   }
   function killFrame() {
@@ -24195,20 +24281,31 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       setTimeout(function () { if (!MD.open) scr.style.visibility = ''; }, 360);
     }
   }
-  document.addEventListener('touchstart', function (e) {
+  // mx maps a touch's clientX to app-screen px: identity for the app itself; for an iframe (the editor canvas, the
+  // story viewer), whose touches never reach the app's document, its on-screen left plus any CSS scale.
+  function hScrolled(el) { while (el && el.nodeType === 1) { if (el.scrollLeft > 0) return true; el = el.parentElement; } return false; }
+  function egStart(e, mx, inner) {
     if (EG || MD.open || !e.touches || e.touches.length !== 1) return;
     var on = false; try { on = !!window._nbSt('mediaSwipe'); } catch (x) {}
-    var t = e.touches[0];
-    if (!on || t.clientX > 24 || !$('md-screen')) return;
-    EG = { x: t.clientX, y: t.clientY, px: t.clientX, pt: Date.now(), dx: 0, v: 0, drag: false };
-  }, { capture: true, passive: true });
-  document.addEventListener('touchmove', function (e) {
+    var t = e.touches[0], X = mx(t.clientX);
+    if (!on || X > 24 || !$('md-screen')) return;
+    // Block drag/resize handles in the editor own their own drag, even in the edge zone.
+    if (inner && e.target && e.target.closest && e.target.closest('.blk-handle, .blk-resize')) return;
+    if (inner && hScrolled(e.target)) return; // a zoomed/panned canvas that can still scroll left keeps its own pan
+    EG = { x: X, y: t.clientY, px: X, pt: Date.now(), dx: 0, v: 0, drag: false };
+  }
+  function egMove(e, mx) {
     if (!EG) return;
     if (e.touches.length !== 1) { edgeEnd(true); return; }
-    var t = e.touches[0], dx = t.clientX - EG.x, dy = t.clientY - EG.y, scr = $('md-screen'), now = Date.now();
+    var t = e.touches[0], X = mx(t.clientX), dx = X - EG.x, dy = t.clientY - EG.y, scr = $('md-screen'), now = Date.now();
     if (!EG.drag) {
       if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { EG = null; return; }
-      if (dx < 12 || dx < Math.abs(dy) * 1.5) return;
+      if (dx < 12 || dx < Math.abs(dy) * 1.5) {
+        // Still undecided. A scroller (the editor canvas pans both ways) takes over as soon as a move goes
+        // uncancelled, so hold it off while the gesture looks rightward.
+        if (dx > 0 && dx >= Math.abs(dy) && e.cancelable) e.preventDefault();
+        return;
+      }
       EW = scr.offsetWidth || window.innerWidth;
       openPrep();
       scr.style.transition = 'none'; scr.style.visibility = 'visible';
@@ -24216,18 +24313,41 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     }
     if (e.cancelable) e.preventDefault();
     EG.dx = Math.max(0, Math.min(EW, dx));
-    if (now > EG.pt) EG.v = (t.clientX - EG.px) / (now - EG.pt);
-    EG.px = t.clientX; EG.pt = now;
+    if (now > EG.pt) EG.v = (X - EG.px) / (now - EG.pt);
+    EG.px = X; EG.pt = now;
     scr.style.transform = 'translateX(' + (EG.dx - EW) + 'px)';
-  }, { capture: true, passive: false });
-  document.addEventListener('touchend', function () { edgeEnd(false); }, { capture: true, passive: true });
-  document.addEventListener('touchcancel', function () { edgeEnd(true); }, { capture: true, passive: true });
+  }
+  function hookEdge(doc, mx, inner) {
+    doc.addEventListener('touchstart', function (e) { egStart(e, mx, inner); }, { capture: true, passive: true });
+    doc.addEventListener('touchmove', function (e) { egMove(e, mx); }, { capture: true, passive: false });
+    doc.addEventListener('touchend', function () { edgeEnd(false); }, { capture: true, passive: true });
+    doc.addEventListener('touchcancel', function () { edgeEnd(true); }, { capture: true, passive: true });
+  }
+  hookEdge(document, function (x) { return x; }, false);
+  // The editor canvas is its own (same-origin) iframe document. It is rebuilt on every note open (srcdoc, or
+  // document.open/write for big notes), which drops listeners, so this is re-run after each build; the flag
+  // sits on documentElement because that is replaced by a rebuild while the Document object can survive one.
+  var EDGE_FRAMES = ['markup-iframe', 'story-viewer-frame'];
+  function hookFrame(fr) {
+    var doc;
+    try { doc = fr && fr.contentDocument; } catch (x) { return; }
+    if (!doc || !doc.documentElement || doc.documentElement.__nbMdEdge) return;
+    doc.documentElement.__nbMdEdge = 1;
+    hookEdge(doc, function (x) {
+      try { var r = fr.getBoundingClientRect(), w = fr.clientWidth || r.width; return r.left + x * (r.width / (w || 1)); } catch (e) { return x; }
+    }, true);
+  }
+  function hookEditorFrame() { EDGE_FRAMES.forEach(function (id) { hookFrame($(id)); }); }
+  window.nbMediaHookFrame = hookEditorFrame;
 
   /* ---------- wiring ---------- */
   function init() {
     var scr = $('md-screen');
     if (!scr) return;
+    RK.watch(retryPending);
     $('md-mini-pp').innerHTML = IC.play(22);
+    EDGE_FRAMES.forEach(function (id) { var fr = $(id); if (fr) fr.addEventListener('load', hookEditorFrame); });
+    hookEditorFrame();
     $('md-body').addEventListener('scroll', function () { scr.classList.toggle('md-scrolled', this.scrollTop > 2); MD.lastScroll = NOW(); syncFab(); syncTitle(); }, { passive: true });
     $('md-np-scroll').addEventListener('scroll', syncNpTop, { passive: true });
     window.addEventListener('resize', function () { syncFab(); syncTitle(); syncNpTop(); }, { passive: true });
