@@ -22932,23 +22932,12 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (SCACHE.size > 3000) SCACHE.clear();
     notes.forEach(function (n) {
       var html = n && n.content;
-      if (!html || !QUICK.test(html)) return;
+      if (!html) return;
       var found, hit = (n.id != null) ? SCACHE.get(n.id) : null;
+      if (!(hit && hit.c === html) && !QUICK.test(html)) return;
       if (hit && hit.c === html) found = hit.f; else {
-      var doc;
-      try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return; }
-      found = [];
-      // The note's own infra scripts/templates mention hosts as plain strings; drop them before reading anything.
-      doc.querySelectorAll('script,style,template').forEach(function (el) { el.remove(); });
-      doc.querySelectorAll('iframe[src]').forEach(function (f) { found.push(f.getAttribute('src')); });
-      doc.querySelectorAll('[data-social-url]').forEach(function (f) { found.push(f.getAttribute('data-social-url')); });
-      doc.querySelectorAll('a[href]').forEach(function (a) { found.push(a.getAttribute('href')); });
-      // textContent runs blocks together ("...abc</p><p>next" reads "abcnext"), which corrupts the id. Pad them with a space first.
-      doc.querySelectorAll('br,p,div,li,h1,h2,h3,h4,h5,h6,blockquote,figcaption,td,th,pre').forEach(function (el) {
-        if (el.parentNode) el.parentNode.insertBefore(doc.createTextNode(' '), el.nextSibling);
-      });
-      var txt = doc.body ? (doc.body.textContent || '') : '';
-      (txt.match(/https?:\/\/[^\s<>"'\u201c\u201d\u2018\u2019)]+/g) || []).forEach(function (m) { found.push(m.replace(/[.,;:!?\]}\u2026]+$/, '')); });
+      found = extractLinks(html);
+      if (!found) return;
       if (n.id != null) SCACHE.set(n.id, { c: html, f: found });
       }
       var keys = [];
@@ -22964,12 +22953,30 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     });
     return { items: out, al: al };
   }
+  function extractLinks(html) {
+      var doc, found = [];
+      try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return null; }
+      // The note's own infra scripts/templates mention hosts as plain strings; drop them before reading anything.
+      doc.querySelectorAll('script,style,template').forEach(function (el) { el.remove(); });
+      doc.querySelectorAll('iframe[src]').forEach(function (f) { found.push(f.getAttribute('src')); });
+      doc.querySelectorAll('[data-social-url]').forEach(function (f) { found.push(f.getAttribute('data-social-url')); });
+      doc.querySelectorAll('a[href]').forEach(function (a) { found.push(a.getAttribute('href')); });
+      // textContent runs blocks together ("...abc</p><p>next" reads "abcnext"), which corrupts the id. Pad them with a space first.
+      doc.querySelectorAll('br,p,div,li,h1,h2,h3,h4,h5,h6,blockquote,figcaption,td,th,pre').forEach(function (el) {
+        if (el.parentNode) el.parentNode.insertBefore(doc.createTextNode(' '), el.nextSibling);
+      });
+      var txt = doc.body ? (doc.body.textContent || '') : '';
+      (txt.match(/https?:\/\/[^\s<>"'\u201c\u201d\u2018\u2019)]+/g) || []).forEach(function (m) { found.push(m.replace(/[.,;:!?\]}\u2026]+$/, '')); });
+      return found;
+  }
   // Notes: every note in the Library (the same list All shows). Likes: the notes this account liked.
   function scan() {
     var notes = [], r;
     if (MD.src === 'likes') notes = likeNotes();
     else { try { notes = nbVisibleNotes(); } catch (e) { notes = []; } }
-    r = scanNotes(notes);
+    applyScan(scanNotes(notes));
+  }
+  function applyScan(r) {
     // Whatever is playing or queued stays playable after the source changes underneath it.
     var keep = {};
     MD.queue.list.forEach(function (k) { keep[k] = 1; });
@@ -22983,6 +22990,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   var LK = { sub: '', stories: [], html: new Map(), busy: false, at: 0, timer: 0 };
   function signedIn() { try { return !!nbIsSignedIn(); } catch (e) { return false; } }
   function acctSub() { try { return (nbAccount() || {}).sub || ''; } catch (e) { return ''; } }
+  // A liked page is kept as just its media links (not the whole page), so a long likes list doesn't hold every page in memory.
+  function compactLinks(h) {
+    if (!QUICK.test(h)) return '';
+    return (extractLinks(h) || []).filter(function (u) { return !!parseLink(u); }).map(function (u) { return '<a href="' + esc(u) + '"></a>'; }).join('');
+  }
   function likeNotes() {
     var o = [];
     LK.stories.forEach(function (s) { var h = LK.html.get(s.slug); if (h) o.push({ id: s.slug, title: s.title, content: h }); });
@@ -23014,45 +23026,53 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     LK.busy = true;
     LK.quiet = !!quiet && LK.stories.length > 0; // background refresh: no loading state, no toasts, no redraw unless something changed
     if (MD.open && MD.src === 'likes' && !LK.quiet) fillList();
-    var base = NB_PUBLISH_API.replace(/\/$/, ''), all = [];
-    function page(cursor, n) {
-      return _nbApiFetch(base + '/account/liked-notes' + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''), { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } })
-        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (d) {
-          ((d && d.stories) || []).forEach(function (st) { if (st && st.slug) all.push(st); });
-          if (d && d.nextCursor && n < 40) return page(d.nextCursor, n + 1);
-        });
-    }
-    page('', 0).then(function () {
-      if (LK.sub !== acctSub()) return;
+    var base = NB_PUBLISH_API.replace(/\/$/, ''), all = [], prev = LK.stories.slice(), todo = [], queued = {}, i = 0, run = 0, failed = 0, listDone = false, listErr = false;
+    // Streams: each page of the liked list is queued for reading as soon as it arrives, and results show while later pages still load.
+    function publish(final) {
       var seen = {};
       all.forEach(function (st) { seen[st.slug] = 1; });
-      LK.html.forEach(function (v, k) { if (!seen[k]) LK.html.delete(k); }); // unliked since last time
-      LK.stories = all;
-      likesChanged();
-      var todo = all.filter(function (st) { return !LK.html.has(st.slug); }), i = 0, run = 0, failed = 0;
-      return new Promise(function (done) {
-        function pump() {
-          if (i >= todo.length && !run) { done(failed); return; }
-          while (run < 4 && i < todo.length) {
-            (function (st) {
-              run++;
-              timedFetch(_pubUrlFor(st.slug), { referrerPolicy: 'no-referrer' }, 10000)
-                .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-                .then(function (h) { if (LK.sub === sub) { LK.html.set(st.slug, QUICK.test(h) ? h : ''); likesChanged(); } })
-                .catch(function () { failed++; })
-                .then(function () { run--; pump(); });
-            })(todo[i++]);
-          }
+      // Until the whole list is in, keep last load's notes that haven't been seen again so nothing flickers away.
+      LK.stories = final ? all.slice() : all.concat(prev.filter(function (st) { return !seen[st.slug]; }));
+      if (final) LK.html.forEach(function (v, k) { if (!seen[k]) LK.html.delete(k); }); // unliked since last time
+    }
+    new Promise(function (finish) {
+      function pump() {
+        if (listDone && i >= todo.length && !run) { finish(); return; }
+        while (run < 4 && i < todo.length) {
+          (function (st) {
+            run++;
+            timedFetch(_pubUrlFor(st.slug), { referrerPolicy: 'no-referrer' }, 10000)
+              .then(function (r) { if (r.status === 404 || r.status === 410) return ''; if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }) // gone/unpublished: nothing to read, not a failure
+              .then(function (h) { if (LK.sub === sub) { LK.html.set(st.slug, compactLinks(h)); likesChanged(); } })
+              .catch(function () { failed++; })
+              .then(function () { run--; pump(); });
+          })(todo[i++]);
         }
-        pump();
-      }).then(function (failed) {
-        LK.at = failed ? 0 : Date.now();
-        if (failed && !LK.quiet && MD.open && MD.src === 'likes') toast('Couldn\u2019t read ' + (failed === 1 ? 'one liked note' : failed + ' liked notes'));
-      });
-    }).catch(function (e) {
-      LK.at = 0;
-      if (!LK.quiet && MD.open && MD.src === 'likes') toast('Couldn\u2019t load your liked notes');
+      }
+      function page(cursor) {
+        return _nbApiFetch(base + '/account/liked-notes' + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''), { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } })
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function (d) {
+            if (LK.sub !== sub) return;
+            ((d && d.stories) || []).forEach(function (st) {
+              if (!st || !st.slug || queued[st.slug]) return;
+              queued[st.slug] = 1; all.push(st);
+              if (!LK.html.has(st.slug)) todo.push(st);
+            });
+            publish(false); likesChanged(); pump();
+            if (d && d.nextCursor && d.nextCursor !== cursor) return page(d.nextCursor); // no page cap; only stops on the last page or a repeated cursor
+          });
+      }
+      page('').then(function () { if (LK.sub === sub) { publish(true); likesChanged(); } })
+        .catch(function () { listErr = true; })
+        .then(function () { listDone = true; pump(); });
+    }).then(function () {
+      if (LK.sub !== acctSub()) return;
+      LK.at = (failed || listErr) ? 0 : Date.now();
+      if (!LK.quiet && MD.open && MD.src === 'likes') {
+        if (listErr) toast('Couldn\u2019t load your liked notes');
+        else if (failed) toast('Couldn\u2019t read ' + (failed === 1 ? 'one liked note' : failed + ' liked notes'));
+      }
     }).then(function () {
       LK.busy = false;
       if (MD.open && MD.src === 'likes') { likesChanged(); if (!LK.quiet) fillList(); }
@@ -23179,7 +23199,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     return (h ? h + ':' + (m < 10 ? '0' : '') : '') + m + ':' + (x < 10 ? '0' : '') + x;
   }
   function shuf(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function emptyHtml(icon, title, body, cta) { return '<div class="md-empty"><div class="md-ei">' + icon + '</div><b>' + esc(title) + '</b><span>' + esc(body) + '</span>' + (cta ? '<button class="md-btn" data-act="scan">' + esc(cta) + '</button>' : '') + '</div>'; }
+  function emptyHtml(icon, title, body, cta) {
+    if (cta && MD.scanning) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Scanning your notes\u2026</b><span>Looking for YouTube, Spotify, Streamable, Instagram and X links.</span><button class="md-btn busy" data-act="scan" aria-busy="true"><i class="md-spin" aria-hidden="true"></i>Scanning\u2026</button></div>';
+    return '<div class="md-empty"><div class="md-ei">' + icon + '</div><b>' + esc(title) + '</b><span>' + esc(body) + '</span>' + (cta ? '<button class="md-btn" data-act="scan">' + esc(cta) + '</button>' : '') + '</div>';
+  }
 
   /* ---------- source adapters ---------- */
   function post(msg, origin) {
@@ -23507,10 +23530,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     list.forEach(function (it) { (g[it.p] = g[it.p] || []).push(it); });
     return PORD.filter(function (p) { return g[p]; }).map(function (p) { return { p: p, items: g[p] }; });
   }
-  // Likes has no Scan button: the list loads when you switch to it. While it loads the empty state shows the scanning animation.
+  // Likes empty states match Notes: same Scan library button and the same scanning state (also shown while the list first loads).
   function likesEmpty(icon, title, body) {
-    if (LK.busy && !LK.quiet) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Loading your likes\u2026</b><span>Looking for media in notes you\u2019ve liked.</span></div>';
-    return emptyHtml(icon, title, body);
+    if ((LK.busy && !LK.quiet) || MD.scanning) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Scanning your likes\u2026</b><span>Looking for YouTube, Spotify, Streamable, Instagram and X links.</span><button class="md-btn busy" data-act="scan" aria-busy="true"><i class="md-spin" aria-hidden="true"></i>Scanning\u2026</button></div>';
+    return emptyHtml(icon, title, body, 'Scan library');
   }
   function rowHtml(it, ctx) {
     var wide = it.type === 'video';
@@ -23744,23 +23767,44 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var v = view(); v.sy = $('md-body').scrollTop;
     MD.stack.push({ n: n, id: id }); renderView();
   }
+  // Notes (All): reads the library in slices of 25, yielding between them, so media shows while the rest is still being read.
+  var SCANTOK = 0;
+  function scanStream(done) {
+    var tok = ++SCANTOK, notes = [], items = new Map(), al = [], pos = 0, SL = 25;
+    try { notes = nbVisibleNotes(); } catch (e) { notes = []; }
+    (function step() {
+      if (tok !== SCANTOK || !MD.open || MD.src === 'likes') { done(tok !== SCANTOK); return; } // done(true): a newer scan took over
+      var r;
+      try { r = scanNotes(notes.slice(pos, pos + SL)); } catch (e) { r = { items: new Map(), al: [] }; }
+      pos += SL;
+      r.items.forEach(function (it, k) { if (!items.has(k)) items.set(k, it); });
+      al = al.concat(r.al);
+      applyScan({ items: items, al: al });
+      if (pos < notes.length) {
+        if (items.size) redrawQuiet();
+        setTimeout(step, 0);
+      } else done(false);
+    })();
+  }
   // Scan library: show the scanning state first, let it paint, then do the (synchronous) scan, and hold the animation
   // for a minimum time so it reads as a scan instead of a flicker. Re-entrant taps are ignored while it runs.
   function startScan(btn) {
-    if (MD.scanning) return;
+    if (MD.scanning || MD.refreshing) return;
+    var lk = MD.src === 'likes' && signedIn();
     MD.scanning = true;
     var box = btn && btn.closest ? btn.closest('.md-empty') : null;
     if (box) {
       box.classList.add('scanning');
       var tt = box.querySelector('b'), ss = box.querySelector('span');
-      if (tt) tt.textContent = 'Scanning your notes\u2026';
+      if (tt) tt.textContent = lk ? 'Scanning your likes\u2026' : 'Scanning your notes\u2026';
       if (ss) ss.textContent = 'Looking for YouTube, Spotify, Streamable, Instagram and X links.';
     }
     if (btn) { btn.classList.add('busy'); btn.setAttribute('aria-busy', 'true'); btn.innerHTML = '<i class="md-spin" aria-hidden="true"></i>Scanning\u2026'; }
     var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    var min = reduce ? 450 : 1500, t0 = NOW();
-    setTimeout(function () {
-      try { scan(); } catch (e) {}
+    var min = reduce ? 450 : 1500, t0 = NOW(), fin = false;
+    function finish(late) {
+      if (fin) return; fin = true; LK.onDone = null;
+      if (lk) { try { scan(); } catch (e) {} }
       setTimeout(function () {
         MD.scanning = false;
         if (!MD.open) return;
@@ -23769,9 +23813,19 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
           for (var ti = 0; ti < 3; ti++) { if (tcnt(TABS[ti][0])) { MD.tab = TABS[ti][0]; view().sy = 0; break; } }
         }
         queueVisibleMeta(); renderView();
-        toast(MD.items.size ? 'Media updated' : 'No media found in your notes');
+        if (lk && (!LK.at || (late === true && LK.busy))) return; // load failed (it already toasted) or is still running (it redraws when done)
+        toast(MD.items.size ? 'Media updated' : (MD.src === 'likes' ? 'No media found in your likes' : 'No media found in your notes'));
       }, Math.max(0, min - (NOW() - t0)));
-    }, 80);
+    }
+    if (lk) {
+      // Likes: re-fetch the liked notes and read their pages, then scan what came back.
+      LK.onDone = function () { finish(false); };
+      loadLikes(true);
+      if (!LK.busy) finish(false);
+      setTimeout(function () { finish(true); }, 25000);
+    } else {
+      scanStream(function (stale) { if (!stale) finish(false); });
+    }
   }
   /* ---------- refresh: manual button, on open, and a quiet background poll ---------- */
   function sigOf() {
@@ -23904,11 +23958,15 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     MD.pit = new Map();
     MD.pl.forEach(function (p) { p.items.forEach(function (o) { MD.pit.set(o.k, fromStored(o)); }); });
     if (MD.src === 'likes' && !signedIn()) MD.src = 'notes'; // signed out since last time
-    scan();
+    SCANTOK++; MD.scanning = false; // any scan still running from before is stale
+    var bigNotes = 0;
+    if (MD.src === 'notes' && !MD.items.size) { try { bigNotes = nbVisibleNotes().length > 50; } catch (e) {} }
+    if (!bigNotes) scan();
     MD.open = true;
     var st = $('md-body').scrollTop;
     renderView(); syncQueue(); queueVisibleMeta(); syncUI(); uiProg();
     if (MD.src === 'likes') loadLikes(true, true); // always check for new likes on open
+    else if (bigNotes) { MD.scanning = true; scanStream(function (stale) { if (stale) return; MD.scanning = false; if (MD.open) { queueVisibleMeta(); redrawQuiet(); } }); } // first open of a big library: render now, fill in as it reads
     $('md-body').scrollTop = st;
   }
   function finishOpen() {
