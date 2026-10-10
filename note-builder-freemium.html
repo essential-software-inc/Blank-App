@@ -3442,6 +3442,8 @@ body.pink .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
 #st-invite .ebtn-sec { background: var(--st-bg); border-color: var(--st-line); color: var(--st-fg); font-weight: 700; padding: .5rem .9rem; border-radius: 10px }
 #st-invite-input { flex: 1; min-width: 0; box-sizing: border-box; padding: .5rem .6rem; border-radius: 10px; border: 1px solid var(--st-line); background: var(--st-bg); color: var(--st-fg); font: inherit; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; outline: none }
 #account-invite-wrap { margin-bottom: .8rem; text-align: center }
+#account-invite-wrap.signing-in { opacity: .45; transition: opacity .15s }
+#account-invite-wrap.signing-in input { caret-color: transparent }
 #account-invite-toggle { display: inline-block; color: rgba(255, 255, 255, 0.4); font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 0.7rem; font-weight: 400; letter-spacing: 0.05em; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; padding: .3rem .5rem; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: color .15s }
 #account-invite-toggle:active { color: rgba(255, 255, 255, 0.7) }
 #account-invite-fields { display: none; margin-top: .55rem }
@@ -15918,6 +15920,7 @@ function _pubSetBtnLoading(btn, loading, loadingLabel) {
   if (!btn) return;
   const isFormControl = 'disabled' in btn;
   _pubLockSiblingSecondaries(btn, loading);
+  if (btn.id === 'account-signin-btn') _nbLockSigninInvite(loading);
   if (loading) {
     btn.dataset.origLabel = btn.textContent;
     btn.innerHTML = '<span class="com-spinner"></span>' + loadingLabel;
@@ -19049,6 +19052,24 @@ const NB_PENDING_INVITE_KEY = 'nbPendingInvite';
 // Whether the person ticked "Also subscribe" while they could see it. Saved with the code, so a code redeemed later (after a restart,
 // with the sign-in panel closed) never subscribes anyone to anyone unless they actually chose that.
 const NB_PENDING_INVITE_FOLLOW_KEY = 'nbPendingInviteFollow';
+// While Google sign-in is in flight the invite UI is inert: dimmed, can't focus/toggle/edit, and any tap shows a toast.
+// (Not `disabled`, which would swallow the click before we could toast.)
+function _nbLockSigninInvite(on) {
+  const w = document.getElementById('account-invite-wrap');
+  if (!w) return;
+  w.classList.toggle('signing-in', !!on);
+  if (on) { const a = document.activeElement; if (a && w.contains(a)) try { a.blur(); } catch (e) {} }
+}
+(function () {
+  const w = document.getElementById('account-invite-wrap');
+  if (!w) return;
+  const block = e => {
+    if (!w.classList.contains('signing-in')) return;
+    e.preventDefault(); e.stopPropagation();
+    if (e.type === 'click') showToast('Signing in. Invite code is locked until it finishes.');
+  };
+  ['pointerdown', 'mousedown', 'touchstart', 'focusin', 'click', 'keydown'].forEach(t => w.addEventListener(t, block, true));
+})();
 function nbToggleSigninInvite() {
   const f = document.getElementById('account-invite-fields');
   const open = f.style.display === 'block';
@@ -22856,7 +22877,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   /* ---------- state ---------- */
   var MD = {
     open: false, tab: 'songs', src: 'notes', q: '', stack: [{ n: 'home' }], items: new Map(), pit: new Map(), pl: [], al: [],
-    queue: { list: [], base: [], i: -1, shuffle: false, repeat: 'off', ctx: '' },
+    queue: { list: [], base: [], lm: [], bm: [], gone: {}, i: -1, shuffle: false, repeat: 'off', ctx: '', src: null },
     cur: null, ps: { playing: false, pos: 0, dur: 0, real: false, t0: 0 },
     frame: null, fplat: '', dead: true, endFired: false, np: false, dragging: false, dragFrac: 0,
     viewKeys: [], viewCtx: '', timer: 0, metaTimer: 0, sheetCtx: null, scanning: false,
@@ -22986,6 +23007,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     MD.items.forEach(function (it, k) { if (keep[k] && !r.items.has(k)) MD.pit.set(k, it); });
     MD.items = r.items;
     MD.al = r.al;
+    // A half-read library or a still-loading Likes list says nothing about what's gone, so only a full read may drop queued items.
+    syncLiveQueue(r.full !== false && !(MD.src === 'likes' && LK.busy));
   }
 
   /* ---------- Likes source ---------- */
@@ -23425,18 +23448,73 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     MD.ps = { playing: false, pos: MD.ps.pos, dur: MD.ps.dur, real: false, t0: NOW() };
   }
   function loadCur() {
-    var q = MD.queue, it = getIt(q.list[q.i]);
+    var q = MD.queue, it;
+    settleGone();
+    it = getIt(q.list[q.i]);
     if (!it) return;
     mount(it); queueMeta(it); syncUI(); syncQueue();
   }
-  function playKeys(keys, idx, ctx, shuffle) {
+  // Where the queue came from, so media that shows up later (a scan, a playlist add) can join it.
+  function curSrc() { var v = view(); return { n: v.n, id: v.id || '', tab: MD.tab, from: MD.src, q: MD.q }; }
+  function srcKeys(s) {
+    if (!s || s.from !== MD.src) return null;
+    if (s.n === 'al') { var a = alById(s.id); return a ? a.keys.filter(function (k) { return MD.items.has(k); }) : null; }
+    if (s.n === 'pl') { var pl = plById(s.id); return pl ? pl.items.map(function (o) { return o.k; }) : null; }
+    var out = [];
+    groupBy(filtBy(itemsOfType(s.tab === 'albums' ? 'album' : typeOfTab(s.tab)), s.q)).forEach(function (g) { g.items.forEach(function (it) { out.push(it.k); }); });
+    return out;
+  }
+  // Removes source copies of the given keys. Entries picked by hand (Add to queue / Play next) and the playing entry are never touched.
+  function qDrop(gone) {
+    var q = MD.queue, out = [], om = [], bo = [], bm = [], ni = q.i, curK = q.list[q.i], curSrc = !q.lm[q.i], n = 0;
+    q.list.forEach(function (k, j) {
+      if (j !== q.i && gone[k] && !q.lm[j]) { n++; if (j < q.i) ni--; } else { out.push(k); om.push(q.lm[j]); }
+    });
+    q.base.forEach(function (k, j) { if (!(gone[k] && !q.bm[j] && !(curSrc && k === curK))) { bo.push(k); bm.push(q.bm[j]); } });
+    q.list = out; q.lm = om; q.i = ni; q.base = bo; q.bm = bm;
+    return n > 0;
+  }
+  // A track that left its source while playing is dropped as soon as something else is current.
+  function settleGone() {
+    var q = MD.queue, g = {}, any = false;
+    Object.keys(q.gone).forEach(function (k) { g[k] = 1; any = true; });
+    if (!any) return;
+    qDrop(g);
+    // Still protected only while the entry now playing is itself the source's copy.
+    Object.keys(g).forEach(function (k) { if (!(q.list[q.i] === k && !q.lm[q.i])) delete q.gone[k]; });
+  }
+  function syncLiveQueue(prune) {
+    var q = MD.queue, ks = q.list.length ? srcKeys(q.src) : null;
+    if (!ks) return;
+    var have = {}, inSrc = {}, gone = {}, curK = q.list[q.i], changed = false, any = false, fresh;
+    ks.forEach(function (k) { inSrc[k] = 1; if (q.gone[k]) delete q.gone[k]; });
+    q.list.forEach(function (k) { have[k] = 1; }); q.base.forEach(function (k) { have[k] = 1; });
+    fresh = ks.filter(function (k) { return !have[k]; });
+    if (fresh.length) {
+      q.base = q.base.concat(fresh); q.bm = q.bm.concat(fresh.map(function () { return false; }));
+      var add = q.shuffle ? shuf(fresh.slice()) : fresh;
+      q.list = q.list.concat(add); q.lm = q.lm.concat(add.map(function () { return false; }));
+      changed = true;
+    }
+    if (prune) {
+      q.list.forEach(function (k, j) {
+        if (q.lm[j] || inSrc[k]) return;
+        if (j === q.i) q.gone[k] = 1; else { gone[k] = 1; any = true; }
+      });
+      if (any && qDrop(gone)) changed = true;
+    }
+    if (changed) syncQueue();
+  }
+  function playKeys(keys, idx, ctx, shuffle, src) {
     if (!keys.length) return;
     var q = MD.queue;
-    q.base = keys.slice(); q.ctx = ctx || ''; q.shuffle = !!shuffle;
+    q.base = keys.slice(); q.ctx = ctx || ''; q.shuffle = !!shuffle; q.src = src || null;
+    q.gone = {};
     if (shuffle) {
       var first = keys[idx], rest = keys.filter(function (k, i) { return i !== idx; });
       q.list = [first].concat(shuf(rest)); q.i = 0;
     } else { q.list = keys.slice(); q.i = idx; }
+    q.lm = q.list.map(function () { return false; }); q.bm = q.base.map(function () { return false; });
     loadCur();
   }
   function restartCur() {
@@ -23538,8 +23616,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function view() { return MD.stack[MD.stack.length - 1]; }
   function typeOfTab(t) { for (var i = 0; i < TABS.length; i++) if (TABS[i][0] === t) return TABS[i][2]; return ''; }
   function itemsOfType(t) { var o = []; MD.items.forEach(function (it) { if (it.type === t) o.push(it); }); return o; }
-  function filt(list) {
-    var q = MD.q.trim().toLowerCase();
+  function filt(list) { return filtBy(list, MD.q); }
+  function filtBy(list, qs) {
+    var q = String(qs || '').trim().toLowerCase();
     if (!q) return list;
     return list.filter(function (it) { return (titleOf(it) + ' ' + subOf(it)).toLowerCase().indexOf(q) >= 0; });
   }
@@ -23753,7 +23832,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var p = plById(pid), it = getIt(k);
     if (!p || !it) return false;
     if (p.items.some(function (o) { return o.k === k; })) { toast('Already in ' + p.name); return false; }
-    p.items.push(strip(it)); savePl(); toast('Added to ' + p.name);
+    p.items.push(strip(it)); savePl(); toast('Added to ' + p.name); syncLiveQueue(false);
     return true;
   }
 
@@ -23773,8 +23852,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function playFromRow(k) {
     var i = MD.viewKeys.indexOf(k);
-    if (i < 0) { playKeys([k], 0, '', false); return; }
-    playKeys(MD.viewKeys, i, MD.viewCtx, false);
+    if (i < 0) { playKeys([k], 0, MD.viewCtx, false, curSrc()); syncLiveQueue(false); return; }
+    playKeys(MD.viewKeys, i, MD.viewCtx, false, curSrc());
   }
   function openNP() {
     if (!MD.cur) return;
@@ -23805,7 +23884,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         r.items.forEach(function (it, k) { if (!items.has(k)) items.set(k, it); });
         al = al.concat(r.al);
       } while (pos < notes.length && NOW() - t0 < 8);
-      if (!quiet || pos >= notes.length) applyScan({ items: items, al: al });
+      if (!quiet || pos >= notes.length) applyScan({ items: items, al: al, full: pos >= notes.length });
       if (pos < notes.length) {
         if (!quiet && items.size && NOW() - lastDraw > 250 && sigOf() !== MD.dsig) { lastDraw = NOW(); redrawQuiet(); } // not on every slice: re-drawing rows is the costly part
         setTimeout(step, 0);
@@ -23918,8 +23997,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       case 'src': setSrc(el.getAttribute('data-v')); break;
       case 'tab': MD.tab = el.getAttribute('data-v'); view().sy = 0; renderView(); break;
       case 'more': itemSheet(k, view().n === 'pl' ? view().id : ''); break;
-      case 'playall': if (MD.viewKeys.length) playKeys(MD.viewKeys, 0, MD.viewCtx, false); break;
-      case 'shuffleall': if (MD.viewKeys.length) playKeys(MD.viewKeys, Math.floor(Math.random() * MD.viewKeys.length), MD.viewCtx, true); break;
+      case 'playall': if (MD.viewKeys.length) playKeys(MD.viewKeys, 0, MD.viewCtx, false, curSrc()); break;
+      case 'shuffleall': if (MD.viewKeys.length) playKeys(MD.viewKeys, Math.floor(Math.random() * MD.viewKeys.length), MD.viewCtx, true, curSrc()); break;
       case 'newpl': newPlSheet(k); break;
       case 'openpl': go('pl', id); break;
       case 'openal': go('al', id); break;
@@ -23949,13 +24028,13 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         renderView(!wasPl); break;
       case 'rmfrom':
         p = plById(id); if (!p) break;
-        p.items = p.items.filter(function (o) { return o.k !== k; }); savePl(); closeSheet(); fillList(); break;
+        p.items = p.items.filter(function (o) { return o.k !== k; }); savePl(); closeSheet(); fillList(); syncLiveQueue(true); break;
       case 'playnext':
         var q = MD.queue;
-        q.list.splice(q.i + 1, 0, k); q.base.push(k); closeSheet(); syncQueue(); toast('Playing next'); break;
+        q.list.splice(q.i + 1, 0, k); q.lm.splice(q.i + 1, 0, true); q.base.push(k); q.bm.push(true); closeSheet(); syncQueue(); toast('Playing next'); break;
       case 'addq':
         if (!getIt(k)) { closeSheet(); break; }
-        MD.queue.list.push(k); MD.queue.base.push(k); closeSheet(); syncQueue(); toast('Added to queue'); break;
+        MD.queue.list.push(k); MD.queue.lm.push(true); MD.queue.base.push(k); MD.queue.bm.push(true); closeSheet(); syncQueue(); toast('Added to queue'); break;
       case 'openorig':
         var oi = getIt(k); closeSheet();
         if (oi && oi.u) { try { _nbOpenExternalLink(oi.u); } catch (e) { toast('Couldn\u2019t open that link'); } }
@@ -23974,10 +24053,17 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         if (MD.cur && AD[MD.cur.p].cap && MD.ps.real && curPos() > 3) { AD[MD.cur.p].seek(0); setPs({ pos: 0 }); } else step(-1, false);
         break;
       case 'shuf':
-        var qq = MD.queue, cur = qq.list[qq.i];
+        var qq = MD.queue, cur = qq.list[qq.i], cm = qq.lm[qq.i];
         qq.shuffle = !qq.shuffle;
-        if (qq.shuffle) { var rest = qq.list.filter(function (x, j) { return j !== qq.i; }); qq.list = [cur].concat(shuf(rest)); qq.i = 0; }
-        else { qq.list = qq.base.slice(); i = qq.list.indexOf(cur); if (i < 0) { qq.list.unshift(cur); i = 0; } qq.i = i; }
+        if (qq.shuffle) {
+          var rest = []; qq.list.forEach(function (x, j) { if (j !== qq.i) rest.push({ k: x, m: qq.lm[j] }); });
+          shuf(rest);
+          qq.list = [cur].concat(rest.map(function (r) { return r.k; })); qq.lm = [cm].concat(rest.map(function (r) { return r.m; })); qq.i = 0;
+        } else {
+          qq.list = qq.base.slice(); qq.lm = qq.bm.slice(); i = qq.list.indexOf(cur);
+          if (i < 0) { qq.list.unshift(cur); qq.lm.unshift(cm); i = 0; }
+          qq.i = i;
+        }
         syncUI(); syncQueue(); break;
       case 'rep': MD.queue.repeat = MD.queue.repeat === 'off' ? 'all' : MD.queue.repeat === 'all' ? 'one' : 'off'; syncUI(); break;
       case 'qjump': i = parseInt(el.getAttribute('data-i'), 10); if (i >= 0 && i < MD.queue.list.length) { if (i === MD.queue.i && MD.cur && !MD.dead) break; MD.queue.i = i; loadCur(); } break;
