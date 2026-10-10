@@ -5031,6 +5031,9 @@ body.pink #md-hdr .md-ib:active{background:var(--md-press)}
 #md-np-top{transition:background-color .2s}
 #md-hdr{transition:background-color .2s,box-shadow .2s,border-color .2s,color .2s}
 #md-screen:not(.md-scrolled) #md-sticky,#md-screen:not(.md-scrolled) .md-acts{background:transparent;border-bottom-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+/* page swap inside Media (Albums / Playlists / tabs): the header, search row and action bar snap to the new scroll state instead of fading through the old one */
+#md-screen.md-nav #md-hdr,#md-screen.md-nav #md-sticky,#md-screen.md-nav .md-acts{transition:none!important}
+body.nb-nav #nb-app #site-header,body.nb-nav #nb-app #feed-search-wrap{transition:none!important}
 /* ===== app tabs share the Media look: wash backdrop, header/search melt into it at rest, glass once scrolled ===== */
 body{--nb-bg:#fff;--nb-wash:.24;--nb-hdr-fg:#3366cc;--nb-hbd:rgba(20,30,50,.1);--nb-hsh:0 2px 12px rgba(0,0,0,.10);--nb-stbd:rgba(20,30,50,.08)}
 body.night{--nb-bg:#080808;--nb-wash:.5;--nb-hdr-fg:#e8e8e8;--nb-hbd:rgba(255,255,255,.06);--nb-hsh:0 4px 8px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.08);--nb-stbd:#232326}
@@ -5083,13 +5086,18 @@ body:not(.reader-mode) #nb-app #screen-settings{background:transparent}
 /* Story strip: the solid white gap between the gradient ring and the avatar becomes a page-tinted glass gap, and the seen ring / empty avatar fill turn translucent */
 .nb-story-ring-inner,.nb-story-ring-img{border-color:color-mix(in srgb,var(--nb-bg) 40%,transparent)}
 /* Unseen ring: same hues, softened to glass (translucent so the wash shows through, a little less saturated, hairline edge like the cards) */
-.nb-story-ring:not(.seen){background:linear-gradient(45deg,rgba(245,166,35,.72),rgba(225,48,108,.72),rgba(193,53,132,.72),rgba(131,58,180,.72));box-shadow:0 0 0 1px var(--nb-card-ring),0 1px 3px var(--nb-card-lift);filter:saturate(.85)}
+.nb-story-ring:not(.seen){background:linear-gradient(45deg,#f5a623,#e1306c,#c13584,#833ab4);box-shadow:none;filter:none}
 body:not(.night):not(.pink) .nb-story-ring.seen{background:rgba(20,30,50,.16)}
 body.pink .nb-story-ring.seen{background:rgba(200,54,94,.2)}
 body.night .nb-story-ring.seen{background:rgba(255,255,255,.18)}
 body:not(.night):not(.pink) .nb-story-ring-inner{background:rgba(233,237,243,.6)}
 body.pink .nb-story-ring-inner{background:rgba(251,225,236,.6)}
 body.night .nb-story-ring-inner{background:rgba(17,17,17,.6)}
+/* Unseen ring reads as the normal solid gradient: opaque gap and avatar fill so the gradient can't bleed through */
+body .nb-story-ring:not(.seen) .nb-story-ring-img,body .nb-story-ring:not(.seen) .nb-story-ring-inner{border-color:var(--nb-bg)}
+body:not(.night):not(.pink) .nb-story-ring:not(.seen) .nb-story-ring-inner{background:#e9edf3}
+body.pink .nb-story-ring:not(.seen) .nb-story-ring-inner{background:#fbe1ec}
+body.night .nb-story-ring:not(.seen) .nb-story-ring-inner{background:#111111}
 #screen-settings{--st-line:rgba(20,30,50,.1)}
 /* Switches / progress tracks: the pale off-track vanished on the translucent surfaces, so it gets a firmer tint + hairline edge (on = unchanged) */
 body:not(.night):not(.pink) .nb-switch-track{background:rgba(20,30,50,.28);box-shadow:inset 0 0 0 1px rgba(20,30,50,.12)}
@@ -17028,7 +17036,7 @@ async function _pubSendStoriesToggle(noteId, checked) {
     const sw = document.getElementById('pub-stories-switch');
     if (sw && _pubNoteId === noteId) sw.checked = !!note.showInStories; // put the switch back to what's actually saved
     nbRenderStoriesStrip().catch(err => _nbLog('stories toggle: strip refresh', err));
-    showToast('Couldn\u2019t update' + _nbFailureReason(e) + '. Change undone.');
+    showToast('Couldn\u2019t ' + (checked ? 'add to stories' : 'remove from stories') + _nbFailureReason(e) + '. Change undone.');
   }
 }
 // Sends the flag. Preferred route: PUT /publish/:slug/stories, which carries only the flag (no page
@@ -17300,6 +17308,12 @@ function _nbPaintStoriesStrip() {
 // doesn't fit, so short titles just sit still instead of drifting.
 function nbUpdateTitleMarquee(titleEl, innerEl, fitSlot) {
   if (!titleEl || !innerEl) return;
+  // Nothing that affects the fit changed (same text, same container and
+  // text widths): leave the running animation alone instead of removing
+  // and re-adding the class, which restarts the scroll from the start.
+  const key = innerEl.textContent + '|' + titleEl.clientWidth + '|' + innerEl.scrollWidth + '|' + (fitSlot ? 1 : 0);
+  if (innerEl._nbMqKey === key) return;
+  innerEl._nbMqKey = key;
   innerEl.classList.remove('marquee');
   innerEl.style.removeProperty('--marquee-x');
   requestAnimationFrame(() => {
@@ -17328,6 +17342,7 @@ let _nbCurrentStoryAuthorSub = null;
 // away to a different story (or closed the viewer) knows to keep quiet
 // instead of surfacing a toast about a story that's no longer on screen.
 let _nbCurrentStorySlug = null;
+let _nbStoryNoAuthorSlug = null; // the note open in the viewer was published without an account (the worker's /meta sends authorSub: null): nobody to subscribe to
 // Icon-only Subscribe/Subscribed states for #story-viewer-sub-btn (see
 // _nbSetSubBtnState). Plain person+plus / person+check outlines, styled
 // to match the back button's stroke-based icon rather than app text.
@@ -17346,6 +17361,7 @@ function _nbSetSubBtnState(subBtn, isSubscribed) {
 function nbOpenStory(slug, authorSub, title) {
   _nbCurrentStoryAuthorSub = authorSub;
   _nbCurrentStorySlug = slug;
+  _nbStoryNoAuthorSlug = null;
   const storyTitleEl = document.getElementById('story-viewer-title');
   const storyTitleInner = document.getElementById('story-viewer-title-text');
   storyTitleInner.textContent = '@' + slug;
@@ -17363,7 +17379,9 @@ function nbOpenStory(slug, authorSub, title) {
   // error toast.
   const acct = nbAccount();
   const isOwnStory = _nbIsOwnAuthor(authorSub);
-  subBtn.style.display = isOwnStory ? 'none' : '';
+  // No author known at open (a note published without an account, e.g. from the Liked list or a pasted link): nobody to subscribe to,
+  // so the button stays hidden from the first frame. If /meta turns out to know an author after all, _nbAdoptStoryAuthor brings it back.
+  subBtn.style.display = (isOwnStory || !authorSub) ? 'none' : '';
   // Like button follows the same rule (no liking your own note) and reserves
   // header room for both buttons only while they're showing.
   const likeBtn = document.getElementById('story-viewer-like-btn');
@@ -17414,6 +17432,7 @@ function _nbCheckStoryReachable(slug) {
       return res.json().then(data => {
         if (_nbCurrentStorySlug !== slug) return;
         if (!data || !data.found) showToast('Couldn\u2019t load that note. It isn\u2019t available anymore.');
+        else _nbApplyStoryMeta(slug, data);
       });
     })
     .catch(e => {
@@ -17700,7 +17719,7 @@ async function nbToggleStoryLike() {
   } catch (e) {
     _nbLog('like toggle', e);
     if (_nbIsNetworkError(e)) { _nbApplyQueuedLike(slug, !wasLiked); return; } // connection dropped — queue it
-    showToast('Couldn\u2019t update' + (e && e.serverMsg ? ': ' + e.serverMsg : _nbFailureReason(e)));
+    showToast('Couldn\u2019t ' + (wasLiked ? 'unlike' : 'like') + (e && e.serverMsg ? ': ' + e.serverMsg : _nbFailureReason(e)));
   } finally {
     btn.disabled = false;
     _nbLikeTapsInFlight--; _nbLikeMutationSeq++;
@@ -17812,13 +17831,53 @@ document.addEventListener('visibilitychange', () => {
   nbSyncPullThenPush();
   _nbReconcileAccountActions();
 });
+// A note opened from a pasted link only knows the slug up front; the author comes from /meta/:slug. If that hasn't landed
+// (or the open path had no author), the viewer's author is filled in here, from the same lookup, as soon as it is known.
+function _nbAdoptStoryAuthor(slug, authorSub) {
+  if (!authorSub || _nbCurrentStorySlug !== slug || _nbCurrentStoryAuthorSub) return;
+  _nbCurrentStoryAuthorSub = authorSub;
+  const subBtn = document.getElementById('story-viewer-sub-btn');
+  const likeBtn = document.getElementById('story-viewer-like-btn');
+  const own = _nbIsOwnAuthor(authorSub);
+  if (subBtn) { _nbSetSubBtnState(subBtn, _nbSubscribedAuthors().has(authorSub)); subBtn.style.display = own ? 'none' : ''; }
+  if (likeBtn) likeBtn.style.display = own ? 'none' : '';
+  document.getElementById('story-viewer-header').classList.toggle('has-actions', !own);
+}
+// What /meta/:slug said about the note on screen. authorSub is null for a note published without an account.
+function _nbApplyStoryMeta(slug, data) {
+  if (_nbCurrentStorySlug !== slug || !data || !data.found) return;
+  if (typeof data.authorSub === 'string' && data.authorSub) { _nbAdoptStoryAuthor(slug, data.authorSub); return; }
+  if (_nbCurrentStoryAuthorSub) return;
+  _nbStoryNoAuthorSlug = slug;
+  const subBtn = document.getElementById('story-viewer-sub-btn');
+  if (subBtn) subBtn.style.display = 'none'; // a button that can never work is better gone (Like still applies)
+}
+async function _nbResolveStoryAuthor(slug) {
+  const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(slug));
+  if (res.status === 404) return;
+  if (!res.ok) throw new Error('note meta fetch failed: ' + res.status);
+  _nbApplyStoryMeta(slug, await res.json());
+}
 async function nbToggleStorySubscribe() {
-  const authorSub = _nbCurrentStoryAuthorSub;
-  if (!authorSub) return;
+  const subBtn = document.getElementById('story-viewer-sub-btn');
   if (!nbIsSignedIn()) { showToast('Sign in to subscribe'); return; }
+  if (!_nbCurrentStoryAuthorSub && _nbCurrentStorySlug && _nbStoryNoAuthorSlug !== _nbCurrentStorySlug) {
+    const slug = _nbCurrentStorySlug;
+    subBtn.disabled = true;
+    try { await _nbResolveStoryAuthor(slug); }
+    catch (e) { _nbLog('story author lookup', e); showToast('Couldn\u2019t subscribe' + _nbFailureReason(e)); return; }
+    finally { subBtn.disabled = false; }
+    if (_nbCurrentStorySlug !== slug) return; // moved on to another note while looking it up
+  }
+  const authorSub = _nbCurrentStoryAuthorSub;
+  if (!authorSub) {
+    showToast(_nbStoryNoAuthorSlug && _nbStoryNoAuthorSlug === _nbCurrentStorySlug
+      ? 'This note was published without an account, so there\u2019s no one to subscribe to'
+      : 'Couldn\u2019t subscribe. This note isn\u2019t available anymore');
+    return;
+  }
   const acct = nbAccount();
   if (_nbIsOwnAuthor(authorSub)) return; // own story — button is hidden, but guard anyway
-  const subBtn = document.getElementById('story-viewer-sub-btn');
   const set = _nbSubscribedAuthors();
   const wasSubscribed = set.has(authorSub);
   const method = wasSubscribed ? 'DELETE' : 'POST';
@@ -17855,7 +17914,7 @@ async function nbToggleStorySubscribe() {
   } catch (e) {
     _nbLog('subscribe toggle', e);
     if (_nbIsNetworkError(e)) { _nbApplyQueuedSub(authorSub, !wasSubscribed); return; } // connection dropped — queue it
-    showToast('Couldn\u2019t update' + (e && e.serverMsg ? ': ' + e.serverMsg : _nbFailureReason(e)));
+    showToast('Couldn\u2019t ' + (wasSubscribed ? 'unsubscribe' : 'subscribe') + (e && e.serverMsg ? ': ' + e.serverMsg : _nbFailureReason(e)));
   } finally {
     subBtn.disabled = false;
     _nbSubTapsInFlight--; _nbSubMutationSeq++;
@@ -17924,6 +17983,19 @@ function _nbSubCarousel(show) {
   if (!c) return;
   if (show) _nbRevealFade(c); else c.style.display = 'none';
   if (show) nbInitOnboardCarousel();
+}
+// Same rule as the local categories: the carousel stays up through the first item and only a list with more than one
+// retires it. The count is the whole list (the worker's total), never narrowed by the search box.
+function _nbSubListCount() {
+  if (_nbSubFeedTotal !== null) return _nbSubFeedTotal;
+  const n = new Set(_nbSubFeedStories.filter(r => r && r.slug).map(r => r.slug)).size;
+  return _nbSubFeedDone ? n : Math.max(n, 2); // pages still to come means there is more than one
+}
+function _nbSubCarouselByCount() {
+  const c = document.getElementById('nb-onboard-carousel');
+  if (!c) return;
+  if (_nbSubListCount() > 1) _nbSubCarousel(false);
+  else if (c.style.display === 'none') _nbSubCarousel(true); // already up: leave it (and its autoplay) alone
 }
 async function nbRenderSubscribedFeed() {
   const empty = document.getElementById('notes-empty-state');
@@ -18574,9 +18646,11 @@ async function _nbDeleteAlertNow(id) {
   _nbSubCardCache.delete(key);
   const grid = document.getElementById('nb-notes-grid');
   grid.querySelectorAll('.guide-card[data-slug]').forEach(el => { if (el.getAttribute('data-slug') === key) el.remove(); });
-  if (_nbSubFeedTotal !== null) _nbSubFeedTotal = Math.max(0, _nbSubFeedTotal - 1);
+  const _hadSubTotal = _nbSubFeedTotal !== null;
+  if (_hadSubTotal) _nbSubFeedTotal = Math.max(0, _nbSubFeedTotal - 1);
   if (_nbAlertTotal !== null) _nbAlertTotal = Math.max(0, _nbAlertTotal - 1);
   nbUpdateLibraryTitle();
+  _nbSubCarouselByCount();
   try {
     const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/alerts/' + encodeURIComponent(id), {
       method: 'DELETE', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
@@ -18585,8 +18659,9 @@ async function _nbDeleteAlertNow(id) {
     showToast('Alert deleted');
   } catch (e) {
     _nbLog('delete alert', e);
-    if (_nbAlertTotal !== null) { _nbAlertTotal++; try { nbUpdateCatCounts(); } catch (err) {} } // the delete didn't happen: put the count back
-    showToast('Couldn\u2019t delete' + _nbFailureReason(e));
+    if (_hadSubTotal && _nbSubFeedTotal !== null) _nbSubFeedTotal++; // the delete didn't happen: put both counts back
+    if (_nbAlertTotal !== null) { _nbAlertTotal++; try { nbUpdateCatCounts(); } catch (err) {} }
+    showToast('Couldn\u2019t delete alert' + _nbFailureReason(e));
     if (_nbActiveCat === 'Alerts') { _nbSubFeedPaintKey = null; nbRenderNotesScreen(); }
     return;
   }
@@ -18654,10 +18729,22 @@ function _nbSubAttachSentinel() {
 function _nbLikedTabDrop(slug) {
   if (_nbActiveCat !== 'Subscribed' || _nbSubTab !== 'liked') return;
   const i = _nbSubFeedStories.findIndex(x => x.slug === slug);
-  if (i < 0) return;
+  if (i < 0) {
+    // Not among the pages loaded so far (unliked from the story viewer, or on another device, while a long list is only part-loaded):
+    // it can still be on a later page, so the list's total (header count, carousel rule) drops all the same.
+    if (!_nbSubFeedDone && _nbSubFeedTotal !== null && !_nbSubFeedLoading) {
+      _nbSubFeedTotal = Math.max(0, _nbSubFeedTotal - 1);
+      nbUpdateLibraryTitle();
+      _nbSubCarouselByCount();
+    }
+    return;
+  }
   _nbSubFeedStories.splice(i, 1);
+  if (_nbSubFeedTotal !== null) _nbSubFeedTotal = Math.max(0, _nbSubFeedTotal - 1);
   const grid = document.getElementById('nb-notes-grid');
   grid.querySelectorAll('.guide-card[data-slug]').forEach(el => { if (el.getAttribute('data-slug') === slug) el.remove(); });
+  nbUpdateLibraryTitle();
+  _nbSubCarouselByCount();
   if (grid.querySelector('.guide-card:not(.nb-skel-card)')) return;
   if (!_nbSubFeedStories.length && _nbSubFeedDone) {
     grid.style.display = 'none'; grid.innerHTML = '';
@@ -18699,7 +18786,7 @@ function _nbSubApplySearch() {
   grid.innerHTML = matches.map(_nbSubCardHtml).join('');
   if (matches.length) {
     empty.style.display = 'none'; grid.style.display = '';
-    _nbSubCarousel(false); // cards are showing
+    _nbSubCarouselByCount(); // cards are showing
     _nbSubAttachSentinel();
     return;
   }
@@ -18737,6 +18824,7 @@ function _nbSubReconcile(rows) {
   });
   existing.forEach((el, slug) => { if (!keep.has(slug)) el.remove(); });
   nbUpdateLibraryTitle();
+  if (_nbIsFeedCat(_nbActiveCat) && grid.querySelector('.guide-card[data-slug]')) _nbSubCarouselByCount();
 }
 // Re-render for Published/Stories while its cards are already on screen: repaint from the rows we
 // have (so local edits show at once), then silently re-fetch the pages already loaded and patch the
@@ -18844,7 +18932,6 @@ async function _nbLoadSubFeedPage() {
     }
     empty.style.display = 'none';
     grid.style.display = '';
-    if (isFirstPage) _nbSubCarousel(false); // stories are on screen (the empty case returned above)
     if (isFirstPage) _nbSubFeedStories = [];
     _nbSubFeedStories.push(...stories);
     _nbSubFeedPages = isFirstPage ? 1 : _nbSubFeedPages + 1;
@@ -18852,6 +18939,7 @@ async function _nbLoadSubFeedPage() {
     const shown = stories.filter(_nbSubStoryMatches);
     _nbSubFeedCursor = data.nextCursor || null;
     if (!_nbSubFeedCursor) _nbSubFeedDone = true;
+    if (isFirstPage) _nbSubCarouselByCount(); // cards are on screen: the carousel stays only while the list holds one item or none
     // Keep the skeleton up while a search is still hunting for its first match.
     if (shown.length || _nbSubFeedDone) grid.querySelectorAll('.nb-skel-card').forEach(el => el.remove());
     const oldSentinel = document.getElementById('nb-subfeed-sentinel');
@@ -21202,6 +21290,7 @@ async function _nbOpenStoryBySlug(slug, opts) {
     const data = await res.json();
     if (!data || !data.found) { showToast(opts.notFound || 'No note found at that link'); return false; }
     nbOpenStory(data.slug || slug, data.authorSub || '', data.title || '');
+    _nbApplyStoryMeta(data.slug || slug, data); // already known here: a note with no author never shows Subscribe, not even for the moment before the reachability check lands
     return true;
   } catch (e) {
     _nbLog('note link open', e);
@@ -21910,10 +21999,16 @@ function nbGoScreen(name) {
   document.getElementById('bn-create-icon-plus').style.display = _onEditor ? 'none' : '';
   document.getElementById('bn-create').setAttribute('aria-label', _onEditor ? 'Write' : 'New note');
   const hdrTitleTextEl = document.getElementById('hdr-title-text');
-  hdrTitleTextEl.textContent = (name === 'create') ? (_nbRepostMode ? 'Share' : 'Write') : name === 'settings' ? 'Settings' : nbLibraryTitleText(name === 'notes');
+  { const _hdrT = (name === 'create') ? (_nbRepostMode ? 'Share' : 'Write') : name === 'settings' ? 'Settings' : nbLibraryTitleText(name === 'notes'); if (hdrTitleTextEl.textContent !== _hdrT) hdrTitleTextEl.textContent = _hdrT; }
   document.getElementById('site-header').classList.toggle('hdr-lib', hdrTitleTextEl.textContent.indexOf('Library') === 0); // the dashes belong to the Library title
   nbUpdateTitleMarquee(document.getElementById('header-title'), hdrTitleTextEl);
-  window.scrollTo(0, 0);
+  // Page is smooth-scrolling by default, which left the header in its "scrolled" glass state (fading out under the new title) until the animation ended.
+  // Jump to the top, flip the state in the same pass, and hold the header's transitions until the swap has painted.
+  document.body.classList.add('nb-nav');
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  document.body.classList.toggle('nb-scrolled', (window.pageYOffset || document.documentElement.scrollTop || 0) > 2);
+  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('nb-nav')));
+  setTimeout(() => document.body.classList.remove('nb-nav'), 400);
   // Auto-sync on leaving the Editor, or on landing on the Notes screen
   // from anywhere else — the two moments a person is either about to
   // look at their notes or just finished changing one, so it's worth
@@ -24498,15 +24593,26 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     return TABS.map(function (t) { return '<button class="md-chip' + (MD.tab === t[0] ? ' on' : '') + '" data-act="tab" data-v="' + t[0] + '">' + t[1] + '<i>' + (typeof nbAbbrevCount === 'function' ? nbAbbrevCount(counts[t[0]]) : counts[t[0]]) + '</i></button>'; }).join('');
   }
   // keep: re-drawing the same page (not navigating), so hold the current scroll position.
+  // Header title: only ever written when the text really changes (re-assigning identical text rebuilds the node and the title blinks).
+  function setHT(t) { var h = $('md-htitle'); if (h && h.textContent !== t) h.textContent = t; }
+  // The header's glass / hairline follows the list's scroll position. A page swap resets that position without waiting for the
+  // (async) scroll event, so the state is synced in the same pass and the header's own transitions are held off until it has painted.
+  var NAVT = 0;
+  function holdHeaderFx(scr) {
+    scr.classList.add('md-nav'); clearTimeout(NAVT);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { scr.classList.remove('md-nav'); }); });
+    NAVT = setTimeout(function () { scr.classList.remove('md-nav'); }, 400);
+  }
   function renderView(keep) {
     var v = view(), el = $('md-view'), hact = $('md-hact'), scr = $('md-screen');
+    holdHeaderFx(scr);
     if (keep) v.sy = $('md-body').scrollTop;
     var _qi = v.n === 'home' && el.querySelector('#md-sticky') && $('md-list') ? $('md-q') : null;
     if (_qi) {
       // already on the home page (a tab/source change): keep the search box and chip row, just update them
       _qi.placeholder = (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : MD.src === 'likes' ? 'Search liked media' : 'Search your media') + '\u2026';
       setChips(el.querySelector('.md-cats'), catsHtml());
-      $('md-htitle').textContent = 'Media';
+      setHT('Media');
       hact.hidden = true;
     } else if (v.n === 'home') {
       el.innerHTML = '<div id="md-sticky">' +
@@ -24514,23 +24620,24 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         '<input id="md-q" type="search" placeholder="' + (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : MD.src === 'likes' ? 'Search liked media' : 'Search your media') + '\u2026" value="' + esc(MD.q) + '" autocomplete="off" spellcheck="false"></div>' +
         '<div class="md-cats">' + catsHtml() + '</div></div>' +
         '<div id="md-list"></div>';
-      $('md-htitle').textContent = 'Media';
+      setHT('Media');
       hact.hidden = true;
     } else if (v.n === 'al') {
       if (!alById(v.id)) { MD.stack.pop(); renderView(); return; }
       el.innerHTML = '<div id="md-list"></div>';
-      $('md-htitle').textContent = 'Album';
+      setHT('Album');
       hact.hidden = true;
     } else {
       var p = plById(v.id);
       if (!p) { MD.stack.pop(); renderView(); return; }
       el.innerHTML = '<div id="md-list"></div>';
-      $('md-htitle').textContent = 'Playlist';
+      setHT('Playlist');
       hact.hidden = false; hact.setAttribute('data-act', 'plmenu'); hact.setAttribute('aria-label', 'Playlist options'); hact.innerHTML = IC.more(22);
     }
     fillList();
     syncUI();
     $('md-body').scrollTop = v.sy || 0; // after the list exists, or it clamps against the old page's height
+    scr.classList.toggle('md-scrolled', $('md-body').scrollTop > 2); // same pass as the swap, not on the later scroll event
     syncFab();
     syncTitle();
     syncSrc();
@@ -24552,7 +24659,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var lt = document.querySelector('#md-list .md-lt'), ht = $('md-htitle'), gen = v.n === 'al' ? 'Album' : 'Playlist';
     var out = lt && lt.getBoundingClientRect().bottom <= $('md-hdr').getBoundingClientRect().bottom;
     var want = out ? lt.textContent : gen;
-    if (ht.textContent !== want) ht.textContent = want;
+    setHT(want);
   }
   /* Now Playing: once the big title/artist scroll under the pinned top bar, the bar shows them */
   function syncNpTop() {
@@ -25007,14 +25114,15 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   // story viewer), whose touches never reach the app's document, its on-screen left plus any CSS scale.
   function hScrolled(el) { while (el && el.nodeType === 1) { if (el.scrollLeft > 0) return true; el = el.parentElement; } return false; }
   function egStart(e, mx, inner) {
+    if (EG && Date.now() - EG.t0 > 5000) EG = null; // a gesture whose touchend never arrived (its frame was rebuilt mid-touch) must not leave the swipe dead until a reload
     if (EG || MD.open || !e.touches || e.touches.length !== 1) return;
     var on = false; try { on = !!window._nbSt('mediaSwipe'); } catch (x) {}
     var t = e.touches[0], X = mx(t.clientX);
     if (!on || X > 24 || !$('md-screen')) return;
     // Block drag/resize handles in the editor own their own drag, even in the edge zone.
     if (inner && e.target && e.target.closest && e.target.closest('.blk-handle, .blk-resize')) return;
-    if (inner && hScrolled(e.target)) return; // a zoomed/panned canvas that can still scroll left keeps its own pan
-    EG = { x: X, y: t.clientY, px: X, pt: Date.now(), dx: 0, v: 0, drag: false };
+    if (hScrolled(e.target)) return; // anything that can still scroll left (a panned canvas, a scrolled chip row or stories strip) keeps its own pan
+    EG = { t0: Date.now(), x: X, y: t.clientY, px: X, pt: Date.now(), dx: 0, v: 0, drag: false };
   }
   function egMove(e, mx) {
     if (!EG) return;
