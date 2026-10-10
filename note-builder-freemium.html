@@ -5590,7 +5590,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
   <div id="md-wash"></div><div id="md-wash-fade"></div>
   <div id="md-hdr">
     <button class="md-ib" id="md-back" data-act="back" aria-label="Back"><svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg></button>
-    <div id="md-htitle" data-act="back" role="button">Media</div>
+    <div id="md-htitle" data-act="back" role="button" data-nomorph>Media</div>
     <button class="md-ib" id="md-refresh" data-act="refresh" aria-label="Refresh media" type="button"></button>
     <div id="md-src" role="group" aria-label="Media source"><button type="button" class="md-srcb on" data-act="src" data-v="notes" aria-pressed="true">Notes</button><button type="button" class="md-srcb" data-act="src" data-v="likes" aria-pressed="false">Likes</button></div>
     <button class="md-ib" id="md-hact" data-act="newpl" aria-label="New playlist" hidden></button>
@@ -16440,7 +16440,7 @@ function _pubClearMorph(el) {
       const t = touched.get(el);
       if (!t || now - t > 100) continue; // resized by layout/rotation/etc., not by its own content changing
       touched.delete(el);
-      if (_nbMotionOff() || el.classList.contains('nb-morphing') || (el._nbMorphAt && now - el._nbMorphAt < 500)) continue;
+      if (_nbMotionOff() || el.hasAttribute('data-nomorph') || el.classList.contains('nb-morphing') || (el._nbMorphAt && now - el._nbMorphAt < 500)) continue;
       const col = el.parentElement && _nbIsColumnFlex(el.parentElement); // column: flex-basis would size the height, so animate width only
       const kf = w => col
         ? { width: w + 'px', overflow: 'hidden', whiteSpace: 'nowrap' }
