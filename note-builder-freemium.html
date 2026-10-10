@@ -194,6 +194,17 @@ pre {
   transition: gap .3s cubic-bezier(.4,0,.2,1), padding .3s cubic-bezier(.4,0,.2,1)
 }
 
+#site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, .32) 0%, rgba(0, 0, 0, .58) 100%);
+  opacity: .38;
+  transition: opacity .6s cubic-bezier(.4,0,.2,1)
+}
+
 #site-header > * {
   position: relative;
   z-index: 1
@@ -689,8 +700,8 @@ body .cat-pill.active, body .md-chip.on, body .md-srcb.on, body .st-chip.on, bod
   font-family: inherit;
   cursor: pointer;
   color: #54595d;
-  background: rgba(246, 248, 252, .5);
-  border: 1px solid rgba(213, 222, 242, .75);
+  background: #f6f8fc;
+  border: 1px solid #e4e9f5;
   white-space: nowrap;
   transition: background .12s, color .12s;
   user-select: none;
@@ -3570,6 +3581,10 @@ body.pink #pub-slug-input::placeholder {
   -webkit-backdrop-filter: saturate(180%) blur(20px)
 }
 
+body:not(.night):not(.pink) #site-header::before {
+  display: none
+}
+
 body:not(.night):not(.pink) #site-header,
 body:not(.night):not(.pink) #backup-sheet,
 body:not(.night):not(.pink) #account-dialog {
@@ -3698,30 +3713,18 @@ body:not(.night):not(.pink) .ebtn-pri:disabled {
 }
 
 body:not(.night):not(.pink) .guide-card {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.72) 0%, rgba(246, 248, 252, 0.6) 100%) !important;
+  background: linear-gradient(160deg, #ffffff 0%, #f6f8fc 100%) !important;
   border: none !important;
-  box-shadow: 0 1px 3px rgba(20, 30, 50, 0.09), 0 1px 2px rgba(20, 30, 50, 0.04), 0 0 0 1px rgba(213, 222, 242, 0.5) !important;
+  box-shadow: 0 1px 3px rgba(20, 30, 50, 0.12), 0 1px 2px rgba(20, 30, 50, 0.06) !important;
   border-radius: 16px !important;
   transition: box-shadow 0.2s ease
 }
 
-/* Light theme: the bottom nav melts into the page like the header does (frosted glass instead of a solid white bar) */
-body:not(.night):not(.pink):not(.reader-mode) #bottom-nav {
-  background: color-mix(in srgb, var(--nb-bg, #fff) 68%, transparent) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  backdrop-filter: blur(22px) saturate(180%);
-  border-top-color: rgba(213, 222, 242, 0.6);
-  box-shadow: 0 -1px 6px rgba(20, 30, 50, 0.05)
-}
-
-/* Light theme: small boxes inside Settings cards */
-body:not(.night):not(.pink) .ad-prog { background: rgba(248, 249, 252, 0.6); border-color: rgba(213, 222, 242, 0.75) }
-body:not(.night):not(.pink) #st-signedout-invite { background: rgba(244, 246, 251, 0.6); border-color: rgba(213, 222, 242, 0.75) }
-
 body:not(.night):not(.pink) .guide-card:active {
-  box-shadow: 0 2px 6px rgba(20, 30, 50, 0.13), 0 1px 3px rgba(20, 30, 50, 0.08), 0 0 0 1px rgba(213, 222, 242, 0.6) !important
+  box-shadow: 0 2px 6px rgba(20, 30, 50, 0.16), 0 1px 3px rgba(20, 30, 50, 0.10) !important
 }
 
+body:not(.night):not(.pink) input[type="search"],
 body:not(.night):not(.pink) .com-field {
   background: #ffffff !important;
   border: 1px solid transparent !important;
@@ -3730,22 +3733,9 @@ body:not(.night):not(.pink) .com-field {
   transition: all 0.2s ease
 }
 
+body:not(.night):not(.pink) input[type="search"]:focus,
 body:not(.night):not(.pink) .com-field:focus {
   background: #ffffff !important;
-  box-shadow: inset 0 1px 2px rgba(51, 102, 204, 0.05), 0 0 0 3px rgba(51, 102, 204, 0.2) !important
-}
-
-/* Search bars: translucent rather than pure white, so they pick up the page wash instead of glaring against it */
-body:not(.night):not(.pink) input[type="search"] {
-  background: rgba(255, 255, 255, 0.55) !important;
-  border: 1px solid transparent !important;
-  box-shadow: inset 0 1px 3px rgba(20, 30, 50, 0.07), 0 0 0 1px rgba(213, 222, 242, 0.6) !important;
-  border-radius: 12px;
-  transition: all 0.2s ease
-}
-
-body:not(.night):not(.pink) input[type="search"]:focus {
-  background: rgba(255, 255, 255, 0.85) !important;
   box-shadow: inset 0 1px 2px rgba(51, 102, 204, 0.05), 0 0 0 3px rgba(51, 102, 204, 0.2) !important
 }
 
@@ -4164,18 +4154,13 @@ body.backup-transparent:not(.night):not(.pink) #backup-overlay {
 
 #site-header #hdr-title-text { white-space: nowrap; }
 
-/* Three short dashes left of the Library title. They open the Media space. They are positioned over the header's left padding, outside the flex flow, so
-   the title never moves. They grow out of the left screen edge when Library is showing, spread evenly between an inset from the
-   top and the same inset from the bottom of the header. */
-#site-header > .hdr-dashes { position: absolute; z-index: 2; left: 0; top: .6rem; bottom: .6rem; width: 6px; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; opacity: 0; transform: translateX(-100%); transition: transform .32s cubic-bezier(.4,0,.2,1), opacity .2s ease; }
-#site-header.hdr-lib > .hdr-dashes { opacity: 1; transform: none; pointer-events: auto; cursor: pointer; }
-#site-header > .hdr-dashes::before { content: ""; position: absolute; left: 0; top: -.6rem; bottom: -.6rem; width: 20px; } /* tap target; the dashes themselves stay 6px */
-#site-header.hdr-lib > .hdr-dashes:active i,
-#site-header.hdr-lib:has(.hdr-title-inner:active) > .hdr-dashes i { opacity: .55; }
+/* Sidebar icon left of the Library title (opens the Media space). In the header flow, shown only while Library is showing. */
+#site-header > .hdr-dashes { display: none; -webkit-tap-highlight-color: transparent; }
+#site-header.hdr-lib > .hdr-dashes { display: inline-flex; margin-left: -13px; margin-right: -11px; } /* glyph's left edge = 12px, the same inset as the Write/Share titles; 18px like the other header icons */
+#site-header.hdr-lib > .hdr-dashes:active svg,
+#site-header.hdr-lib:has(.hdr-title-inner:active) > .hdr-dashes svg { opacity: .55; }
 #site-header.hdr-lib #header-title { -webkit-tap-highlight-color: transparent; }
-body.nb-reduce-motion #site-header > .hdr-dashes { transition: none; }
 body.nb-no-dashes #site-header > .hdr-dashes { display: none; }
-.hdr-dashes i { display: block; width: 6px; height: 2.5px; /* a little heavier than the header icons' 1.88px drawn stroke, which read as thin next to the bold title */ border-radius: 0 1px 1px 0; background: currentColor; }
 .hdr-dashes { color: #fff; }
 body:not(.night):not(.pink) .hdr-dashes { color: #3366cc; }
 body.night .hdr-dashes { color: #e8e8e8; }
@@ -4252,7 +4237,9 @@ body.pink .nb-carousel-dot.active { background: #c8365e; }
    desktop-width windows, so the card dropdown's edge-clamping (identical
    logic to the original's _gcOpenDropdown) ends up clamping against the
    true viewport edge on nearly every open instead of only near it. */
-#nb-notes-grid { max-width: 760px; margin: 0 auto; padding: .6rem .9rem 5.5rem; display: grid; gap: .6rem; }
+#nb-notes-grid { max-width: 760px; margin: 0 auto; padding: .6rem .9rem 5.5rem; display: grid; gap: .45rem; }
+/* .guide-card carries its own .55rem vertical margin, which grid items don't collapse — it stacked on top of the gap and doubled the spacing. Gap alone now sets card spacing. */
+#nb-notes-grid > .guide-card { margin: 0; }
 
 /* Bluebook canvas (Create screen) */
 #screen-create { padding: 0; }
@@ -4333,6 +4320,11 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 </style>
 </head>
 <body>
+<script>
+// One-time: glass mode became default-on. Settings used to persist glassMode:false for everyone who ever changed any setting,
+// which silently overrode the new default (classic splash/sign-in). Drop that stale false once; later toggles are respected.
+try{if(!localStorage.getItem('nb_glass_def1')){var _s=JSON.parse(localStorage.getItem('nb_settings_v1')||'null');if(_s&&_s.glassMode===false){delete _s.glassMode;localStorage.setItem('nb_settings_v1',JSON.stringify(_s))}localStorage.setItem('nb_glass_def1','1')}}catch(e){}
+</script>
 <script>
 // Locks scroll before any layout happens, so the WebView never sees a
 // scrollable page on first paint — this is what was causing the native
@@ -4438,6 +4430,42 @@ document.body.dataset.lockScrollY = window.scrollY;
 })();
 </script>
 
+<!-- sign-in + onboarding glass: kept ahead of #splash so the launch sign-in is glass from first paint, not after the whole file parses -->
+<style id="nb-glass-css" data-nb-glass media="not all">
+/* ===== Sign-in screen: clear glass (translucent, edge-lit, no blur, no darkening) ===== */
+#account-screen{font-family:"Inter Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#account-screen-name{font-size:1.85rem;font-weight:800;letter-spacing:-.02em}
+#account-screen-card{max-width:320px;padding:1.3rem 1.15rem 1.1rem;border-radius:20px;background:linear-gradient(155deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 45%,rgba(255,255,255,.12) 100%);border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 1px 0 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.14),0 8px 24px rgba(0,0,0,.14);-webkit-backdrop-filter:none;backdrop-filter:none}
+#account-screen-card .rdlg-body{font-size:.88rem;line-height:1.5;text-align:center;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.45)}
+#account-screen-card .rdlg-body b{color:#fff}
+#account-screen #account-invite-toggle{font-size:.78rem;font-weight:500;color:rgba(255,255,255,.8);text-shadow:0 1px 6px rgba(0,0,0,.45)}
+#account-screen #account-invite-input{height:42px;padding:0 .8rem;border-radius:12px;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+#account-screen #account-invite-input::placeholder{color:rgba(255,255,255,.7)}
+#account-screen #account-invite-follow-row,#account-screen #account-invite-msg{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45)}
+#account-screen-back-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+body #account-screen #account-signin-btn,body #account-screen #account-signout-btn{width:100%;height:46px;padding:0 1.2rem;border-radius:14px;font-size:.92rem;font-weight:700;transition:transform .12s}
+body #account-screen #account-signout-btn{background-color:rgba(255,255,255,.18) !important;color:#fff !important;border:1px solid rgba(255,255,255,.4) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4) !important}
+body #account-screen #account-signin-btn:active,body #account-screen #account-signout-btn:active{transform:scale(.97)}
+
+/* ===== Onboarding carousel: soft glass overlay ===== */
+.nb-carousel-viewport{box-sizing:border-box;border-radius:18px;box-shadow:0 8px 24px rgba(20,30,50,.18),0 1px 3px rgba(20,30,50,.1);isolation:isolate}
+.nb-carousel-viewport::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 40%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.nb-carousel-cap{padding:.6rem .85rem .65rem;font-size:.76rem;font-weight:500;line-height:1.35;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3);background:linear-gradient(to top,rgba(10,16,30,.5),rgba(10,16,30,.22));border-top:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px) saturate(160%);backdrop-filter:blur(12px) saturate(160%)}
+
+/* Carousel design B (the first glass take): floating frosted caption bubble, light border, dots in a glass pill. Design A is the base above. */
+#nb-onboard-carousel.car-b .nb-carousel-viewport{border-radius:22px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);box-shadow:0 14px 36px rgba(20,30,50,.24),0 2px 8px rgba(20,30,50,.12)}
+#nb-onboard-carousel.car-b .nb-carousel-viewport::after{background:linear-gradient(155deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.06) 32%,rgba(255,255,255,0) 55%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 0 0 1px rgba(255,255,255,.1)}
+#nb-onboard-carousel.car-b .nb-carousel-cap{left:.55rem;right:.55rem;bottom:.55rem;padding:.5rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(14,20,34,.34);-webkit-backdrop-filter:blur(14px) saturate(170%);backdrop-filter:blur(14px) saturate(170%)}
+#nb-onboard-carousel.car-b .nb-carousel-dots{width:fit-content;margin:.65rem auto 0;padding:.34rem .6rem;border-radius:99px;background:rgba(255,255,255,.6);border:1px solid rgba(51,102,204,.16);box-shadow:0 1px 4px rgba(20,30,50,.12);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+body.night #nb-onboard-carousel.car-b .nb-carousel-dots{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);box-shadow:none}
+body.pink #nb-onboard-carousel.car-b .nb-carousel-dots{background:rgba(255,255,255,.6);border-color:rgba(200,54,94,.18)}
+/* Dots, both designs: stronger inactive dots so they read on a light background */
+.nb-carousel-dot{width:7px;height:7px;background:#9aa7bf}
+.nb-carousel-dot.active{width:18px;border-radius:4px}
+body.night .nb-carousel-dot{background:#5c5c62}
+body.pink .nb-carousel-dot{background:#d796b0}
+</style>
+<script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 <div id="splash">
   <canvas id="splash-bg-3d" aria-hidden="true"></canvas>
   <div id="splash-inner">
@@ -4527,7 +4555,7 @@ document.body.dataset.lockScrollY = window.scrollY;
   <button id="back-btn" onclick="navBack()" aria-label="Back to pages" style="display:none">
     <svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg>
   </button>
-  <span class="hdr-dashes" role="button" tabindex="0" aria-label="Open Media" onclick="nbOpenMedia()" onkeydown="if(event.key==='Enter')nbOpenMedia()"><i></i><i></i><i></i></span>
+  <button class="hdr-btn hdr-dashes" type="button" aria-label="Open Media" title="Media" onclick="nbOpenMedia()"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/><line x1="8" y1="3.5" x2="8" y2="16.5"/></svg></button>
   <span id="header-title" onclick="if(event.target.closest('.hdr-title-inner')&&this.parentNode.classList.contains('hdr-lib'))nbOpenMedia()"><span class="hdr-title-inner" id="hdr-title-text">Library</span></span>
   <button class="hdr-btn" id="editor-info-btn" aria-label="Guide" title="Guide" onclick="openEditorInfo()" style="display:none">
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="7"/><line x1="9" y1="8" x2="9" y2="13"/><circle cx="9" cy="5.2" r="0.9" fill="currentColor" stroke="none"/></svg>
@@ -4651,9 +4679,6 @@ body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;-
 .st-grp{margin-bottom:1.2rem}
 .st-h{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--st-sub);margin:0 .3rem .45rem}
 .st-card{background:var(--st-card);border:1px solid var(--st-line);border-radius:12px;overflow:hidden}
-/* Light theme: Settings cards (and the amount buttons inside them) are translucent, like the Library cards, pills and search bars */
-body:not(.night):not(.pink) .st-card{background:rgba(255,255,255,.68);border-color:rgba(213,222,242,.7);box-shadow:0 1px 3px rgba(20,30,50,.06)}
-body:not(.night):not(.pink) .st-fund-btn{background:rgba(244,246,251,.6);border-color:rgba(213,222,242,.75)}
 .st-row{display:flex;align-items:center;gap:.8rem;width:100%;padding:.8rem .9rem;background:none;border:0;border-top:1px solid var(--st-line);color:var(--st-fg);font:inherit;text-align:left;cursor:pointer}
 .st-row:first-child{border-top:0}
 .st-col{flex-direction:column;align-items:stretch;gap:.55rem;cursor:default}
@@ -4716,11 +4741,11 @@ body.pink #md-screen{--md-scrim:linear-gradient(rgba(255,248,251,.72),rgba(255,2
 #md-screen button{font-family:inherit}
 /* header: same bar as #site-header (title type, padding, border, shadow, blur) */
 #md-hdr{position:absolute;top:0;left:0;right:0;z-index:3;height:var(--md-hh);box-sizing:border-box;padding:env(safe-area-inset-top,0px) .75rem 0;display:flex;align-items:center;gap:.5rem;background:var(--md-hb);color:var(--md-hf);border-bottom:1px solid var(--md-hbd);box-shadow:var(--md-hsh);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
-#md-htitle{flex:0 1 auto;margin:-.6rem auto -.6rem -.5rem;padding:.6rem .5rem;cursor:pointer;min-width:0;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#md-htitle{flex:0 1 auto;margin:-.6rem auto -.6rem -.5rem;padding:calc(.6rem + .9px) .5rem calc(.6rem - .9px);cursor:pointer;min-width:0;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .md-ib{min-width:44px;height:44px;border:0;background:none;color:inherit;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;flex-shrink:0;padding:.5rem;transition:background .15s}
 .md-ib:active{background:var(--md-press)}
 body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
-#md-back{position:relative;z-index:1;margin-left:-1.125rem;margin-right:-.835rem}
+#md-back{position:relative;z-index:1;margin-left:-1.125rem;margin-right:-.875rem}
 #md-hact{margin-right:-.54rem}
 /* Notes | Likes: which notes Media reads its links from. Pill tokens, same as the tab chips below. */
 #md-src{display:inline-flex;flex-shrink:0;padding:2px;border-radius:99px;background:var(--md-pill);border:1px solid var(--md-pillb)}
@@ -4825,18 +4850,6 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-mbtn[hidden]{display:none}
 .md-minibar{position:absolute;left:0;right:0;bottom:0;height:2px}
 .md-minibar b{display:block;height:100%;width:0;background:var(--md-bar)}
-/* premium pass: ambient backdrop (splash, or the open album's cover), glass bars, softer surfaces */
-#md-wash{position:absolute;left:-20%;right:-20%;top:-10%;height:62%;background-image:var(--md-art,var(--splash-img,var(--splash-img-0)));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--md-wash) * 1.5);pointer-events:none}
-#md-wash-fade{position:absolute;left:0;right:0;top:0;height:74%;background:linear-gradient(to bottom,transparent 0%,var(--md-bg) 100%);pointer-events:none}
-#md-hdr{transition:box-shadow .2s,border-color .2s}
-#md-screen:not(.md-scrolled) #md-hdr{box-shadow:none;border-bottom-color:transparent}
-body.pink #md-screen:not(.md-scrolled) #md-hdr{box-shadow:var(--md-hsh);border-bottom-color:var(--md-hbd)}
-@supports (color:color-mix(in srgb,red 50%,blue)){
-#md-wash-fade{background:linear-gradient(to bottom,color-mix(in srgb,var(--md-bg) 0%,transparent) 0%,color-mix(in srgb,var(--md-bg) 10%,transparent) 20%,color-mix(in srgb,var(--md-bg) 35%,transparent) 40%,color-mix(in srgb,var(--md-bg) 68%,transparent) 60%,color-mix(in srgb,var(--md-bg) 92%,transparent) 80%,color-mix(in srgb,var(--md-bg) 98%,transparent) 90%,color-mix(in srgb,var(--md-bg) 100%,transparent) 100%)}
-#md-hdr{background:color-mix(in srgb,var(--md-hb) 84%,transparent)}
-body.pink #md-hdr{background:#c8365e}
-#md-sticky{background:color-mix(in srgb,var(--md-stbg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
-}
 .md-chip{flex:1 1 auto;min-width:0;padding:.22rem .55rem;text-align:center}
 .md-chip i{margin-left:.22rem;font-size:.88em}
 .md-chip:active{transform:scale(.96)}
@@ -4852,7 +4865,6 @@ body.pink #md-hdr{background:#c8365e}
 /* now playing: theme background, softly tinted by the artwork */
 #md-np{position:absolute;inset:0;z-index:6;background:var(--md-bg);color:var(--md-fg);transform:translateY(100%);visibility:hidden;transition:transform .36s cubic-bezier(.4,0,.2,1),visibility 0s .36s}
 #md-np.open{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.4,0,.2,1)}
-#md-np-wash{position:absolute;inset:-30%;background-size:cover;background-position:center;filter:blur(72px) saturate(1.8);transform:translateZ(0);opacity:calc(var(--md-wash) * 1.5);transition:opacity .5s ease;pointer-events:none}
 #md-np::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,transparent 0%,transparent 32%,var(--md-bg) 94%)}
 #md-np-scroll{position:absolute;inset:0;z-index:2;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;padding:0 1.4rem 0}
 #md-np-top{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:3;box-sizing:border-box;height:calc(48px + env(safe-area-inset-top,0px) + .3rem);padding:calc(env(safe-area-inset-top,0px) + .3rem) .7rem 0;margin:0 -1.4rem;background:var(--md-bg)}
@@ -4925,6 +4937,73 @@ body.pink #md-hdr{background:#c8365e}
 .md-sh-in{width:100%;box-sizing:border-box;border:1px solid transparent;background:var(--md-field);box-shadow:var(--md-fieldsh);color:var(--md-fg);border-radius:12px;padding:.7rem .9rem;font:inherit;font-size:.95rem;outline:none;margin-bottom:.7rem;transition:all .2s ease}
 .md-sh-in:focus{background:var(--md-fieldf);box-shadow:var(--md-fieldfsh)}
 #md-np-dock{padding-top:.5rem}
+#md-wash,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-fade{display:none}
+@keyframes md-fade{from{opacity:0}to{opacity:1}}
+@keyframes md-up{from{transform:translateY(100%)}to{transform:none}}
+</style>
+<style id="nb-glass-core" data-nb-glass media="not all">
+/* Glass mode (Settings > Appearance): every rule here only applies while glass mode is on. This sheet is switched on/off
+   by window._nbStApplyClasses (Settings IIFE) and pre-enabled at parse time by the script right after it. */
+/* header: no dark overlay in glass mode (it is see-through) */
+#site-header::before{display:none}
+.cat-pill{background:rgba(246,248,252,.5);border:1px solid rgba(213,222,242,.75)}
+body:not(.night):not(.pink) .guide-card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.72) 0%, rgba(246, 248, 252, 0.6) 100%) !important;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(20, 30, 50, 0.09), 0 1px 2px rgba(20, 30, 50, 0.04), 0 0 0 1px rgba(213, 222, 242, 0.5) !important;
+  border-radius: 16px !important;
+  transition: box-shadow 0.2s ease
+}
+body:not(.night):not(.pink) .guide-card:active {
+  box-shadow: 0 2px 6px rgba(20, 30, 50, 0.13), 0 1px 3px rgba(20, 30, 50, 0.08), 0 0 0 1px rgba(213, 222, 242, 0.6) !important
+}
+/* Light theme: the bottom nav melts into the page like the header does (frosted glass instead of a solid white bar) */
+body:not(.night):not(.pink):not(.reader-mode) #bottom-nav {
+  background: color-mix(in srgb, var(--nb-bg, #fff) 68%, transparent) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border-top-color: rgba(213, 222, 242, 0.6);
+  box-shadow: 0 -1px 6px rgba(20, 30, 50, 0.05)
+}
+
+/* Light theme: small boxes inside Settings cards */
+body:not(.night):not(.pink) .ad-prog { background: rgba(248, 249, 252, 0.6); border-color: rgba(213, 222, 242, 0.75) }
+body:not(.night):not(.pink) #st-signedout-invite { background: rgba(244, 246, 251, 0.6); border-color: rgba(213, 222, 242, 0.75) }
+
+
+/* Search bars: translucent rather than pure white, so they pick up the page wash instead of glaring against it */
+body:not(.night):not(.pink) input[type="search"] {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid transparent !important;
+  box-shadow: inset 0 1px 3px rgba(20, 30, 50, 0.07), 0 0 0 1px rgba(213, 222, 242, 0.6) !important;
+  border-radius: 12px;
+  transition: all 0.2s ease
+}
+
+body:not(.night):not(.pink) input[type="search"]:focus {
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: inset 0 1px 2px rgba(51, 102, 204, 0.05), 0 0 0 3px rgba(51, 102, 204, 0.2) !important
+}
+
+
+/* Light theme: Settings cards (and the amount buttons inside them) are translucent, like the Library cards, pills and search bars */
+body:not(.night):not(.pink) .st-card{background:rgba(255,255,255,.68);border-color:rgba(213,222,242,.7);box-shadow:0 1px 3px rgba(20,30,50,.06)}
+body:not(.night):not(.pink) .st-fund-btn{background:rgba(244,246,251,.6);border-color:rgba(213,222,242,.75)}
+
+/* premium pass: ambient backdrop (splash, or the open album's cover), glass bars, softer surfaces */
+#md-wash{position:absolute;left:-20%;right:-20%;top:-10%;height:62%;background-image:var(--md-art,var(--splash-img,var(--splash-img-0)));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--md-wash) * 1.5);pointer-events:none}
+#md-wash-fade{position:absolute;left:0;right:0;top:0;height:74%;background:linear-gradient(to bottom,transparent 0%,var(--md-bg) 100%);pointer-events:none}
+#md-hdr{transition:box-shadow .2s,border-color .2s}
+#md-screen:not(.md-scrolled) #md-hdr{box-shadow:none;border-bottom-color:transparent}
+body.pink #md-screen:not(.md-scrolled) #md-hdr{box-shadow:var(--md-hsh);border-bottom-color:var(--md-hbd)}
+@supports (color:color-mix(in srgb,red 50%,blue)){
+#md-wash-fade{background:linear-gradient(to bottom,color-mix(in srgb,var(--md-bg) 0%,transparent) 0%,color-mix(in srgb,var(--md-bg) 10%,transparent) 20%,color-mix(in srgb,var(--md-bg) 35%,transparent) 40%,color-mix(in srgb,var(--md-bg) 68%,transparent) 60%,color-mix(in srgb,var(--md-bg) 92%,transparent) 80%,color-mix(in srgb,var(--md-bg) 98%,transparent) 90%,color-mix(in srgb,var(--md-bg) 100%,transparent) 100%)}
+#md-hdr{background:color-mix(in srgb,var(--md-hb) 84%,transparent)}
+body.pink #md-hdr{background:#c8365e}
+#md-sticky{background:color-mix(in srgb,var(--md-stbg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+}
+#md-np-wash{position:absolute;inset:-30%;background-size:cover;background-position:center;filter:blur(72px) saturate(1.8);transform:translateZ(0);opacity:calc(var(--md-wash) * 1.5);transition:opacity .5s ease;pointer-events:none}
+#md-wash,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-fade{display:block}
 @supports (color:color-mix(in srgb,red 50%,blue)){
 .md-acts{background:color-mix(in srgb,var(--md-bg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 #md-np-top{background:color-mix(in srgb,var(--md-bg) 72%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
@@ -4958,15 +5037,60 @@ html:has(body.night:not(.reader-mode)){background:#080808}
 html:has(body.pink:not(.reader-mode)){background:#fff8fb}
 body:not(.reader-mode) #nb-app #site-header,body:not(.reader-mode) #nb-app #feed-search-wrap{background:color-mix(in srgb,var(--nb-bg) 60%,transparent)!important;-webkit-backdrop-filter:blur(22px) saturate(180%)!important;backdrop-filter:blur(22px) saturate(180%)!important;transition:background-color .2s,box-shadow .2s,border-color .2s,gap .3s cubic-bezier(.4,0,.2,1),padding .3s cubic-bezier(.4,0,.2,1)}
 body:not(.reader-mode) #nb-app #site-header{border-bottom:1px solid var(--nb-hbd)!important;box-shadow:var(--nb-hsh)!important}
+/* Note cards are lightly tinted glass: the fixed wash behind the page (strong at the top, fading to the page colour toward the
+   bottom) shows through them (35% page-colour tint keeps text contrast and body), so each card is a patch of the same surface and gets whiter as it nears the bottom
+   and more washed as it rises. Only a hairline ring + faint lift keeps the edges readable. */
+body:not(.reader-mode) #nb-notes-grid .guide-card{background:color-mix(in srgb,var(--nb-bg) 35%,transparent)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:none!important;box-shadow:0 0 0 1px var(--nb-card-ring),0 1px 3px var(--nb-card-lift)!important}
+body:not(.reader-mode) #nb-notes-grid .guide-card:active{background:color-mix(in srgb,var(--nb-bg) 55%,transparent)!important}
+body{--nb-card-ring:rgba(213,222,242,.6);--nb-card-lift:rgba(20,30,50,.05);--nb-card-press:rgba(51,102,204,.06)}
+body.night{--nb-card-ring:rgba(255,255,255,.08);--nb-card-lift:rgba(0,0,0,.35);--nb-card-press:rgba(255,255,255,.05)}
+body.pink{--nb-card-ring:rgba(200,54,94,.18);--nb-card-lift:rgba(200,54,94,.08);--nb-card-press:rgba(200,54,94,.06)}
+/* Same glass for everything that sits on the wash next to the cards, in Notes and Media: search fields, idle category/tab/
+   source pills, the Media Play / Shuffle buttons. Rest = the cards' 35% page-colour tint + their hairline ring; a focused
+   field firms up to a stronger fill with the accent ring. Selected (active/on) pills and primary buttons are untouched. */
+body{--nb-fill:color-mix(in srgb,var(--nb-bg) 35%,transparent);--nb-fill-hi:color-mix(in srgb,var(--nb-bg) 78%,transparent);--nb-in-sh:rgba(20,30,50,.07);--nb-focus:rgba(51,102,204,.2)}
+body.night{--nb-fill-hi:color-mix(in srgb,#1a1a1e 82%,transparent);--nb-in-sh:rgba(0,0,0,.55);--nb-focus:rgba(255,255,255,.14)}
+body.pink{--nb-in-sh:rgba(200,54,94,.06);--nb-focus:rgba(200,54,94,.2)}
+body:not(.reader-mode) #nb-app #feed-search-input,#md-screen .md-search input{background:var(--nb-fill)!important;border:1px solid transparent!important;box-shadow:inset 0 1px 3px var(--nb-in-sh),0 0 0 1px var(--nb-card-ring)!important}
+body:not(.reader-mode) #nb-app #feed-search-input:focus,#md-screen .md-search input:focus{background:var(--nb-fill-hi)!important;box-shadow:inset 0 1px 2px var(--nb-in-sh),0 0 0 3px var(--nb-focus)!important}
+body:not(.reader-mode) #feed-cats .cat-pill:not(.active),#md-screen .md-chip:not(.on),#md-screen #md-src{background:var(--nb-fill);border-color:var(--nb-card-ring)}
+#md-screen #md-src .md-srcb:not(.on){background:none}
+#md-screen .md-btn.alt{background:var(--nb-fill);border-color:var(--nb-card-ring);box-shadow:0 1px 3px var(--nb-card-lift)}
+#md-screen .md-btn.alt:active{background:var(--nb-fill-hi)}
+#md-screen #md-hdr #md-refresh{background:var(--nb-fill);border-color:var(--nb-card-ring)}
+#md-screen #md-hdr #md-refresh:active{background:var(--nb-fill-hi)}
+body:not(.reader-mode) #nb-notes-grid .gc-tag{background:var(--nb-fill-hi);box-shadow:0 0 0 1px var(--nb-card-ring)}
+/* Settings sits on the same wash, so its cards (and the small controls inside them) get the same glass as the note cards */
+body:not(.reader-mode) #nb-app #screen-settings .st-card{background:var(--nb-fill);border-color:transparent;box-shadow:0 0 0 1px var(--nb-card-ring),0 1px 3px var(--nb-card-lift)}
+body:not(.reader-mode) #nb-app #screen-settings #st-signedout-invite,body:not(.reader-mode) #nb-app #screen-settings .st-fund-btn,body:not(.reader-mode) #nb-app #screen-settings #st-invite .ebtn-sec,body:not(.reader-mode) #nb-app #screen-settings #st-invite-input{background:var(--nb-fill-hi)}
+/* Header + search bar keep their original glass. On the notes screen the two stack, so only the search bar's bottom edge
+   should draw a line: the header's own border/shadow stopped at the seam between them and read as a stray divider. */
+#nb-app:has(#feed-search-wrap:not([style*="display: none"])) #site-header{border-bottom-color:transparent!important;box-shadow:none!important}
+body.nb-scrolled #nb-app:has(#feed-search-wrap:not([style*="display: none"])) #feed-search-wrap{border-bottom-color:var(--nb-hbd)!important}
 body:not(.reader-mode) #nb-app #feed-search-wrap{border-bottom:1px solid var(--nb-stbd)!important;box-shadow:none!important}
 body:not(.reader-mode):not(.nb-scrolled) #nb-app #site-header,body:not(.reader-mode):not(.nb-scrolled) #nb-app #feed-search-wrap{background:transparent!important;border-bottom-color:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 body.pink:not(.reader-mode) #nb-app #header-title,body.pink:not(.reader-mode) #nb-app #header-title .hdr-title-inner,body.pink:not(.reader-mode) #nb-app .hdr-btn,body.pink:not(.reader-mode) #nb-app #back-btn,body.pink:not(.reader-mode) #nb-app .hdr-dashes{color:var(--nb-hdr-fg)}
 body.pink:not(.reader-mode) #nb-app #back-btn svg{stroke:var(--nb-hdr-fg)}
 body:not(.reader-mode) #nb-app #screen-settings{background:transparent}
-@keyframes md-fade{from{opacity:0}to{opacity:1}}
-@keyframes md-up{from{transform:translateY(100%)}to{transform:none}}
+
+/* ===== Glass + dark: legibility over the wash ===== */
+/* The wash is an image, so it is kept dim in dark themes: white titles/icons and the greys on top of it stay readable. */
+body.night{--nb-wash:.3}
+body.night #md-screen{--md-wash:.3}
+/* Greys that were tuned for a solid #080808 page, lifted so they hold up on the wash and on the see-through cards. */
+body.night #feed-search-logo{color:#aab4c5}
+body.night #feed-search-input::placeholder{color:#a9afb8}
+body.night #feed-cats .cat-pill:not(.active){color:#c6c6c6}
+body.night .gc-author-name{color:#b4bcc6}
+body.night .gc-desc{color:#b2b2b2}
+body.night .gc-tag{color:#c2c2c2}
+body.night .gc-play-icon,body.night .gc-trash,body.night .gc-edit,body.night .gc-img-more,body.night .gc-desc-time,body.night .gc-fav:not(.active){color:#a6a6a6}
+body.night #screen-settings{--st-sub:#b8bfc8}
+body.night #md-screen{--md-sub:#b8c0ca;--md-sub2:#9ca3ab;--md-pillf:#c8c8c8;--md-ico:#aab4c5;--md-ph:#a9afb8}
 </style>
-<style id="dlg-md">
+<script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
+
+<style id="dlg-md" data-nb-glass media="not all">
 /* Confirm dialogs (reset, newer version, delete, unpublish, delete account, sign out), restyled to match the Media
    panel's sheets: same surface colours per theme, bold tight title, 46px / 14px-radius buttons that share the row,
    the secondary button in the Media "alt" colours, the same scrim and a short fade/rise on open. The primary
@@ -5099,7 +5223,8 @@ body.nb-reduce-motion #unpublish-dialog,
 body.nb-reduce-motion #delete-account-dialog,
 body.nb-reduce-motion #signout-dialog {animation:none}
 </style>
-<style id="sheet-md">
+<script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
+<style id="sheet-md" data-nb-glass media="not all">
 /* Publish sheet and note details (Save note) dialog, restyled to match the Media panel's sheets: same surface colour per
    theme, plain bold title instead of a coloured header bar, hairline dividers, Media-style fields, 46px / 14px-radius
    footer buttons that share the row, secondary button in the Media "alt" colours, the same scrim and a slide-up on open.
@@ -5417,6 +5542,7 @@ body.nb-reduce-motion #privacy-dialog,
 body.nb-reduce-motion #cterms-dialog,
 body.nb-reduce-motion #einfo-dialog {animation:none}
 </style>
+<script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 <div id="md-screen" aria-hidden="true" role="dialog" aria-label="Media">
   <div id="md-wash"></div><div id="md-wash-fade"></div>
   <div id="md-hdr">
@@ -12751,7 +12877,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 /* ===================== Settings ===================== */
 (function () {
   const KEY = 'nb_settings_v1';
-  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, mediaSwipe: false, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
+  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, glassMode: true, mediaSwipe: false, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
   let S = null, lastPoll = 0;
   function load() {
     try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
@@ -12762,6 +12888,10 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     document.body.classList.toggle('nb-no-tips', !window._nbSt('tips'));
     document.body.classList.toggle('nb-no-dashes', !!window._nbSt('hideDashes'));
     document.body.classList.toggle('nb-no-mdcount', !!window._nbSt('hideMdCount'));
+    // Glass mode: the glass styling lives in <style data-nb-glass> sheets that stay disabled (media="not all") unless this is on.
+    const glass = !!window._nbSt('glassMode');
+    document.body.classList.toggle('glass', glass);
+    document.querySelectorAll('style[data-nb-glass]').forEach(el => { el.media = glass ? 'all' : 'not all'; });
   }
   window._nbSt = function (k) {
     if (!S) load();
@@ -12802,8 +12932,9 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   const GROUPS = [
     ['Appearance', [
       { t: 'chips', k: 'theme', l: 'Theme', o: [['light', 'Light'], ['dark', 'Dark'], ['pink', 'Pink']], get: curTheme, set: setTheme },
+      { t: 'sw', k: 'glassMode', l: 'Glass mode', s: 'Frosted, see-through bars, cards and sheets over a soft colour wash. Off keeps the classic solid look.' },
       { t: 'sw', k: 'reduceMotion', l: 'Reduce motion', s: 'Fewer animations and transitions. Starts on if your phone has animations turned off.' },
-      { t: 'sw', k: 'hideDashes', l: 'Hide Media dashes', s: 'Hide the three dashes at the left of the Library screen\u2019s header, next to the title. Tapping the Library title still opens Media.' }]],
+      { t: 'sw', k: 'hideDashes', l: 'Hide Media sidebar icon', s: 'Hide the sidebar icon at the left of the Library screen\u2019s header, next to the title. Tapping the Library title still opens Media.' }]],
     ['Library', [
       { t: 'chips', k: 'sort', l: 'Sort notes', o: [['default', 'Default'], ['edited', 'Recently edited'], ['newest', 'Newest'], ['oldest', 'Oldest'], ['az', 'A\u2013Z']] },
       { t: 'sw', k: 'images', l: 'Image previews', s: 'Show photos on note cards. Off gives a tighter list.' },
@@ -16304,6 +16435,7 @@ function _pubClearMorph(el) {
   const isOn = el => el.classList.contains('active') || el.classList.contains('on');
   const colours = el => { const c = getComputedStyle(el); return { backgroundColor: c.backgroundColor, color: c.color, borderColor: c.borderTopColor }; };
   const state = new Map();
+  const seen = new WeakSet();
   let queued = false;
   function scan() {
     queued = false;
@@ -16319,7 +16451,7 @@ function _pubClearMorph(el) {
       const idle = pills.find(x => !isOn(x));
       const prev = state.get(key);
       const cur = { label, idx, on: colours(act) };
-      if (prev && prev.label !== label && !off) {
+      if (prev && prev.label !== label && !off && !seen.has(act)) { // a pill already on screen that just flipped is eased by CSS; only a freshly drawn one needs the script animation
         if (idle) {
           const from = colours(idle);
           // label first, fill behind it (fill: 'backwards' holds the old fill during the short delay)
@@ -16335,11 +16467,13 @@ function _pubClearMorph(el) {
         }
       }
       state.set(key, cur);
+      pills.forEach(x => seen.add(x));
     });
   }
   const queue = () => { if (!queued) { queued = true; requestAnimationFrame(scan); } };
-  const mo = new MutationObserver(queue);
-  const start = () => { mo.observe(document.documentElement, { childList: true, subtree: true }); queue(); };
+  // Redraws (childList) and in-place highlight flips (class on a pill) both keep the recorded state current.
+  const mo = new MutationObserver(recs => { if (recs.some(r => r.type === 'childList' || (r.target.matches && r.target.matches(PILL)))) queue(); });
+  const start = () => { mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] }); queue(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
 function _pubSetBtnLoading(btn, loading, loadingLabel) {
@@ -20774,7 +20908,7 @@ function buildCatBar() {
     ...NB_BASE_CATS.slice(2)
   ];
   const allCats = [...withFeeds, ...customCats.values()];
-  bar.innerHTML = allCats.map(c => {
+  const _catHtml = allCats.map(c => {
     if (c === 'Subscribed') {
       const on = _nbActiveCat === 'Subscribed';
       return `<span class="cat-capsule" role="group" aria-label="Subscribed and Liked">`
@@ -20796,6 +20930,23 @@ function buildCatBar() {
     }
     return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')">${esc(c)}${nbCatCountHtml(c, notes)}</button>`;
   }).join('');
+  // Only the highlighted pill changed (a tap): flip the classes on the existing buttons so the CSS colour
+  // transitions run on live elements. Tearing the bar down and redrawing it restarted every pill's
+  // transition and the pop animation from scratch, and any redraw landing mid-animation (counts, alert
+  // badge, sync) made the pills visibly flash.
+  const _stripped = _catHtml.replace(/ active"/g, '"');
+  if (bar._nbCatSig === _stripped) {
+    const btns = bar.querySelectorAll('.cat-pill');
+    const want = [...new DOMParser().parseFromString(_catHtml, 'text/html').querySelectorAll('.cat-pill')];
+    if (btns.length === want.length) {
+      btns.forEach((b, k) => b.classList.toggle('active', want[k].classList.contains('active')));
+      return;
+    }
+  }
+  const _sl = bar.scrollLeft;
+  bar.innerHTML = _catHtml;
+  bar.scrollLeft = _sl;
+  bar._nbCatSig = _stripped;
 }
 // The Subscribed | Liked capsule shows once signed in with a follow or a like (liked notes
 // can come from a searched link, with no follow), and stays while it's the open category.
@@ -23436,40 +23587,6 @@ window.nbStart3DMark = function (bgCanvas, iconCanvas, iconSvg) {
 </script>
 
 
-<style id="nb-glass-css">
-/* ===== Sign-in screen: clear glass (translucent, edge-lit, no blur, no darkening) ===== */
-#account-screen{font-family:"Inter Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
-#account-screen-name{font-size:1.85rem;font-weight:800;letter-spacing:-.02em}
-#account-screen-card{max-width:320px;padding:1.3rem 1.15rem 1.1rem;border-radius:20px;background:linear-gradient(155deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 45%,rgba(255,255,255,.12) 100%);border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 1px 0 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.14),0 8px 24px rgba(0,0,0,.14);-webkit-backdrop-filter:none;backdrop-filter:none}
-#account-screen-card .rdlg-body{font-size:.88rem;line-height:1.5;text-align:center;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.45)}
-#account-screen-card .rdlg-body b{color:#fff}
-#account-screen #account-invite-toggle{font-size:.78rem;font-weight:500;color:rgba(255,255,255,.8);text-shadow:0 1px 6px rgba(0,0,0,.45)}
-#account-screen #account-invite-input{height:42px;padding:0 .8rem;border-radius:12px;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
-#account-screen #account-invite-input::placeholder{color:rgba(255,255,255,.7)}
-#account-screen #account-invite-follow-row,#account-screen #account-invite-msg{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45)}
-#account-screen-back-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
-body #account-screen #account-signin-btn,body #account-screen #account-signout-btn{width:100%;height:46px;padding:0 1.2rem;border-radius:14px;font-size:.92rem;font-weight:700;transition:transform .12s}
-body #account-screen #account-signout-btn{background-color:rgba(255,255,255,.18) !important;color:#fff !important;border:1px solid rgba(255,255,255,.4) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4) !important}
-body #account-screen #account-signin-btn:active,body #account-screen #account-signout-btn:active{transform:scale(.97)}
-
-/* ===== Onboarding carousel: soft glass overlay ===== */
-.nb-carousel-viewport{box-sizing:border-box;border-radius:18px;box-shadow:0 8px 24px rgba(20,30,50,.18),0 1px 3px rgba(20,30,50,.1);isolation:isolate}
-.nb-carousel-viewport::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 40%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-.nb-carousel-cap{padding:.6rem .85rem .65rem;font-size:.76rem;font-weight:500;line-height:1.35;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3);background:linear-gradient(to top,rgba(10,16,30,.5),rgba(10,16,30,.22));border-top:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px) saturate(160%);backdrop-filter:blur(12px) saturate(160%)}
-
-/* Carousel design B (the first glass take): floating frosted caption bubble, light border, dots in a glass pill. Design A is the base above. */
-#nb-onboard-carousel.car-b .nb-carousel-viewport{border-radius:22px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);box-shadow:0 14px 36px rgba(20,30,50,.24),0 2px 8px rgba(20,30,50,.12)}
-#nb-onboard-carousel.car-b .nb-carousel-viewport::after{background:linear-gradient(155deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.06) 32%,rgba(255,255,255,0) 55%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 0 0 1px rgba(255,255,255,.1)}
-#nb-onboard-carousel.car-b .nb-carousel-cap{left:.55rem;right:.55rem;bottom:.55rem;padding:.5rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(14,20,34,.34);-webkit-backdrop-filter:blur(14px) saturate(170%);backdrop-filter:blur(14px) saturate(170%)}
-#nb-onboard-carousel.car-b .nb-carousel-dots{width:fit-content;margin:.65rem auto 0;padding:.34rem .6rem;border-radius:99px;background:rgba(255,255,255,.6);border:1px solid rgba(51,102,204,.16);box-shadow:0 1px 4px rgba(20,30,50,.12);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-body.night #nb-onboard-carousel.car-b .nb-carousel-dots{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);box-shadow:none}
-body.pink #nb-onboard-carousel.car-b .nb-carousel-dots{background:rgba(255,255,255,.6);border-color:rgba(200,54,94,.18)}
-/* Dots, both designs: stronger inactive dots so they read on a light background */
-.nb-carousel-dot{width:7px;height:7px;background:#9aa7bf}
-.nb-carousel-dot.active{width:18px;border-radius:4px}
-body.night .nb-carousel-dot{background:#5c5c62}
-body.pink .nb-carousel-dot{background:#d796b0}
-</style>
 <script>
 (function(){try{var k='nb_car_variant',v=localStorage.getItem(k)==='b'?'a':'b';localStorage.setItem(k,v);}catch(e){var v=Math.random()<.5?'a':'b';}
 var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('car-'+v);})();
@@ -23699,7 +23816,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       if (!MD.open || MD.src !== 'likes') return;
       scan();
       if (sigOf() === MD.dsig) return; // nothing new: leave the screen alone (no list rebuild, so no flicker or wasted frames)
-      if (view().n === 'home') { var c = document.querySelector('#md-view .md-cats'); if (c) c.innerHTML = catsHtml(); }
+      if (view().n === 'home') { setChips(document.querySelector('#md-view .md-cats'), catsHtml()); }
       fillList(); syncUI(); syncQueue(); queueVisibleMeta();
     }, 250);
   }
@@ -24312,6 +24429,20 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function actsHtml() {
     return '<div class="md-acts"><button class="md-btn alt" data-act="playall">' + IC.play(16) + 'Play</button><button class="md-btn alt" data-act="shuffleall">' + IC.shuf(16) + 'Shuffle</button></div>';
   }
+  // Updates the chip row without tearing it down when only the highlight / counts changed, so the colour
+  // transition runs on the live chips (a redraw restarts it and the chips flash). Keeps scroll position on a real redraw.
+  function setChips(box, html) {
+    if (!box) return;
+    var tmp = document.createElement('div'); tmp.innerHTML = html;
+    var want = tmp.children, have = box.children, same = want.length === have.length, i;
+    for (i = 0; same && i < want.length; i++) same = want[i].getAttribute('data-v') === have[i].getAttribute('data-v');
+    if (!same) { var sl = box.scrollLeft; box.innerHTML = html; box.scrollLeft = sl; return; }
+    for (i = 0; i < want.length; i++) {
+      have[i].classList.toggle('on', want[i].classList.contains('on'));
+      var a = have[i].querySelector('i'), b = want[i].querySelector('i');
+      if (a && b && a.textContent !== b.textContent) a.textContent = b.textContent;
+    }
+  }
   function catsHtml() {
     var counts = {};
     TABS.forEach(function (t) { counts[t[0]] = t[0] === 'playlists' ? MD.pl.length : t[0] === 'albums' ? MD.al.length + itemsOfType('album').length : itemsOfType(t[2]).length; });
@@ -24321,7 +24452,14 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function renderView(keep) {
     var v = view(), el = $('md-view'), hact = $('md-hact'), scr = $('md-screen');
     if (keep) v.sy = $('md-body').scrollTop;
-    if (v.n === 'home') {
+    var _qi = v.n === 'home' && el.querySelector('#md-sticky') && $('md-list') ? $('md-q') : null;
+    if (_qi) {
+      // already on the home page (a tab/source change): keep the search box and chip row, just update them
+      _qi.placeholder = (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : MD.src === 'likes' ? 'Search liked media' : 'Search your media') + '\u2026';
+      setChips(el.querySelector('.md-cats'), catsHtml());
+      $('md-htitle').textContent = 'Media';
+      hact.hidden = true;
+    } else if (v.n === 'home') {
       el.innerHTML = '<div id="md-sticky">' +
         '<div class="md-search"><svg class="md-sico" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' +
         '<input id="md-q" type="search" placeholder="' + (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : MD.src === 'likes' ? 'Search liked media' : 'Search your media') + '\u2026" value="' + esc(MD.q) + '" autocomplete="off" spellcheck="false"></div>' +
@@ -24622,7 +24760,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var v = view();
     if ((v.n === 'al' && !alById(v.id)) || (v.n === 'pl' && !plById(v.id))) renderView(true);
     else {
-      if (v.n === 'home') { var c = document.querySelector('#md-view .md-cats'); if (c) c.innerHTML = catsHtml(); }
+      if (v.n === 'home') { setChips(document.querySelector('#md-view .md-cats'), catsHtml()); }
       fillList();
     }
     syncUI(); syncQueue(); queueVisibleMeta();
