@@ -4706,7 +4706,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 @keyframes md-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.md-empty.scanning .md-ei,.md-empty.scanning .md-ei svg{animation:none}.md-empty.scanning .md-ei::after{animation:none;opacity:0}.md-spin{animation-duration:1.6s}}
 .md-plhead{display:flex;flex-direction:column;gap:1rem;align-items:center;text-align:center;margin:.9rem 0 1.1rem}
-.md-lt{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:0 0 .2rem;word-break:break-word}
+.md-lt{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:0 0 .2rem;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .md-lsub{color:var(--md-sub);font-size:.85rem;margin:0}
 /* mini-player */
 #md-mini{position:absolute;left:.6rem;right:.6rem;bottom:calc(.6rem + env(safe-area-inset-bottom,0px));z-index:4;display:none;align-items:center;gap:.7rem;padding:.5rem .3rem .5rem .5rem;border-radius:16px;background:var(--md-mini);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);color:var(--md-fg);border:1px solid var(--md-div);box-shadow:var(--md-msh);overflow:hidden;cursor:pointer}
@@ -4765,7 +4765,7 @@ body.pink #md-hdr{background:#c8365e}
 /* Spotify plays from its embed, but the artwork and our own controls are the interface: the embed stays mounted, just not drawn */
 #md-np.np-audio #md-stage{position:absolute;left:0;top:0;width:100%;margin:0;opacity:0;pointer-events:none;z-index:-1}
 #md-stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-#md-np-title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#md-np-title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #md-np-sub{color:var(--md-sub);font-size:1rem;line-height:1.4;margin-top:.25rem;margin-bottom:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #md-np-seek{margin:1.1rem 0 .2rem;display:none}
 #md-np.has-prog #md-np-seek{display:block}
@@ -4797,14 +4797,14 @@ body.pink #md-hdr{background:#c8365e}
 #md-sheet{position:absolute;inset:0;z-index:8;display:none}
 #md-sheet.open{display:block}
 #md-sheet-scrim{position:absolute;inset:0;background:var(--md-sscrim);animation:md-fade .2s;will-change:opacity}
-#md-sheet-box{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;box-sizing:border-box;background:var(--md-sheet);color:var(--md-fg);border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--md-ssh);padding:0 .9rem calc(env(safe-area-inset-bottom,0px) + 1rem);animation:md-up .28s cubic-bezier(.4,0,.2,1);will-change:transform;backface-visibility:hidden}
-.md-grab{display:flex;justify-content:center;flex-shrink:0;margin:0 -.9rem;padding:.9rem 0 .8rem;cursor:grab;touch-action:none;position:sticky;top:0;z-index:2;background:var(--md-sheet)}
+#md-sheet-box{--md-gpt:.9rem;--md-gpb:.8rem;--md-gh:calc(var(--md-gpt) + var(--md-gpb) + 4px);position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;box-sizing:border-box;background:var(--md-sheet);color:var(--md-fg);border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--md-ssh);padding:0 .9rem calc(env(safe-area-inset-bottom,0px) + 1rem);animation:md-up .28s cubic-bezier(.4,0,.2,1);will-change:transform;backface-visibility:hidden}
+.md-grab{display:flex;justify-content:center;flex-shrink:0;margin:0 -.9rem;padding:var(--md-gpt) 0 var(--md-gpb);cursor:grab;touch-action:none;position:sticky;top:0;z-index:2;background:var(--md-sheet)}
 .md-grab span{width:36px;height:4px;border-radius:99px;background:var(--md-grab)}
 .md-grab:active{cursor:grabbing}
 .md-sh-head{display:flex;align-items:center;gap:.8rem;padding:.2rem .1rem .8rem;min-width:0}
 .md-sh-head .md-th{flex-shrink:0}
 .md-sh-head .md-t,.md-sh-head .md-s{line-height:1.35}
-.md-sh-title{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;position:sticky;top:calc(1.7rem + 4px);z-index:2;background:var(--md-sheet);margin:0 -.9rem;padding:.1rem 1rem .6rem}
+.md-sh-title{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;position:sticky;top:var(--md-gh);z-index:2;background:var(--md-sheet);margin:0 -.9rem;padding:.1rem 1rem .6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .md-sh-title.ns{position:static}
 #md-sheet-box.simple{overflow-y:hidden}
 #md-sheet-box.simple .md-grab{position:static}
@@ -4814,7 +4814,6 @@ body.pink #md-hdr{background:#c8365e}
 .md-sh-row em{font-style:normal;font-weight:400;color:var(--md-sub);font-size:.8rem}
 .md-sh-in{width:100%;box-sizing:border-box;border:1px solid transparent;background:var(--md-field);box-shadow:var(--md-fieldsh);color:var(--md-fg);border-radius:12px;padding:.7rem .9rem;font:inherit;font-size:.95rem;outline:none;margin-bottom:.7rem;transition:all .2s ease}
 .md-sh-in:focus{background:var(--md-fieldf);box-shadow:var(--md-fieldfsh)}
-.md-sh-box-sep{border-top:1px solid var(--md-div);position:sticky;bottom:0;z-index:2;background:var(--md-sheet);margin:.2rem -.9rem calc(-1rem - env(safe-area-inset-bottom,0px));padding:.8rem .9rem calc(env(safe-area-inset-bottom,0px) + 1rem)}
 #md-np-dock{padding-top:.5rem}
 @supports (color:color-mix(in srgb,red 50%,blue)){
 .md-acts{background:color-mix(in srgb,var(--md-bg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
@@ -12498,7 +12497,7 @@ function showToast(msg, opts) {
   if (!t) {
     t = document.createElement('div');
     t.id = '_wptoast';
-    t.style.cssText = 'position:fixed;bottom:1.3rem;left:50%;transform:translateX(-50%) translateY(1.2rem);background:#202122;color:#fff;font-family:inherit;font-size:.82rem;line-height:1.4;padding:.5rem 1.1rem;border-radius:12px;opacity:0;transition:opacity .18s,transform .18s;z-index:1000000;pointer-events:none;max-width:88vw;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.2),0 1px 3px rgba(0,0,0,.12)';
+    t.style.cssText = 'position:fixed;bottom:1.3rem;left:50%;transform:translateX(-50%) translateY(1.2rem);background:#202122;color:#fff;font-family:inherit;font-size:.82rem;line-height:1.4;padding:.5rem 1.1rem;border-radius:12px;opacity:0;transition:opacity .18s,transform .18s;z-index:1000000;pointer-events:none;max-width:88vw;overflow-wrap:anywhere;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.2),0 1px 3px rgba(0,0,0,.12)';
     document.body.appendChild(t);
   }
   clearTimeout(t._timer);
@@ -23729,19 +23728,19 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function addPlSheet(k) {
     var h = '<div class="md-sh-title">Add to playlist</div>';
+    h += sheetRow('newpl', 'data-k="' + esc(k) + '"', IC.plus(18), 'New playlist');
     MD.pl.forEach(function (p) {
       var has = p.items.some(function (o) { return o.k === k; });
       h += sheetRow('pladd', 'data-id="' + esc(p.id) + '" data-k="' + esc(k) + '"', IC.list(18), p.name, has ? IC.check(18) : '<em>' + p.items.length + '</em>');
     });
-    h += '<div class="md-sh-box-sep"><input class="md-sh-in" id="md-new-name" placeholder="New playlist name" maxlength="60" autocomplete="off"><button class="md-btn" data-act="plcreate" data-k="' + esc(k) + '" style="width:100%">Create and add</button></div>';
     openSheet(h);
   }
-  function newPlSheet() {
-    openSheet('<div class="md-sh-title ns">New playlist</div><input class="md-sh-in" id="md-new-name" placeholder="Playlist name" maxlength="60" autocomplete="off"><button class="md-btn" data-act="plcreate" data-k="" style="width:100%">Create</button>');
+  function newPlSheet(k) {
+    openSheet('<div class="md-sh-title ns">New playlist</div><input class="md-sh-in" id="md-new-name" placeholder="Playlist name" maxlength="60" autocomplete="off"><button class="md-btn" data-act="plcreate" data-k="' + esc(k || '') + '" style="width:100%">Create</button>');
   }
   function plMenuSheet(id) {
     var p = plById(id); if (!p) return;
-    openSheet('<div class="md-sh-title">' + esc(p.name) + '</div>' + sheetRow('plrename', 'data-id="' + esc(id) + '"', IC.edit(18), 'Rename') + sheetRow('pldelask', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete playlist', '', 'dng'));
+    openSheet('<div class="md-sh-title ns">' + esc(p.name) + '</div>' + sheetRow('plrename', 'data-id="' + esc(id) + '"', IC.edit(18), 'Rename') + sheetRow('pldelask', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete playlist', '', 'dng'));
   }
   function createPl(name) {
     name = (name || '').trim().slice(0, 60);
@@ -23921,7 +23920,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       case 'more': itemSheet(k, view().n === 'pl' ? view().id : ''); break;
       case 'playall': if (MD.viewKeys.length) playKeys(MD.viewKeys, 0, MD.viewCtx, false); break;
       case 'shuffleall': if (MD.viewKeys.length) playKeys(MD.viewKeys, Math.floor(Math.random() * MD.viewKeys.length), MD.viewCtx, true); break;
-      case 'newpl': newPlSheet(); break;
+      case 'newpl': newPlSheet(k); break;
       case 'openpl': go('pl', id); break;
       case 'openal': go('al', id); break;
       case 'plmenu': plMenuSheet(view().id); break;
@@ -23941,7 +23940,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         p.name = nm; savePl(); closeSheet(); renderView(true); break;
       case 'pldelask':
         p = plById(id); if (!p) break;
-        openSheet('<div class="md-sh-title">Delete \u201c' + esc(p.name) + '\u201d?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">Your songs and videos stay in your notes. Only the playlist is removed.</div>' + sheetRow('pldel', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete', '', 'dng') + sheetRow('sheetclose', '', IC.check(18), 'Cancel'));
+        openSheet('<div class="md-sh-title ns">Delete playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">\u201c' + esc(p.name) + '\u201d will be removed. Your songs and videos stay in your notes.</div>' + sheetRow('pldel', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete', '', 'dng') + sheetRow('sheetclose', '', IC.check(18), 'Cancel'));
         break;
       case 'pldel':
         MD.pl = MD.pl.filter(function (x) { return x.id !== id; }); savePl(); closeSheet();
