@@ -24174,17 +24174,20 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       if (!found) return;
       if (n.id != null) SCACHE.set(n.id, { c: html, f: found });
       }
-      var keys = [];
+      var keys = [], mine = [];
       found.forEach(function (raw) {
         var it = parseLink(raw);
         if (!it) return;
         if (keys.indexOf(it.k) < 0) keys.push(it.k);
         if (out.has(it.k)) return;
         it.noteTitle = (n.title || '').trim();
+        it.nc = 0; // set below once all of this note's links are counted
+        mine.push(it);
         // Where the note can be opened in the story viewer: liked notes carry their slug + author, your own notes only if published ('me').
         if (n.slug) { it.ns = n.slug; it.na = n.authorSub || ''; } else if (n.publishedSlug) { it.ns = n.publishedSlug; it.na = 'me'; }
         out.set(it.k, it);
       });
+      mine.forEach(function (x) { x.nc = keys.length; });
       if (keys.length >= 2) al.push({ id: n.id, title: (n.title || '').trim() || 'Untitled note', keys: keys });
     });
     return { items: out, al: al };
@@ -24354,7 +24357,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function getIt(k) { return MD.items.get(k) || MD.pit.get(k) || null; }
   function metaOf(it) { return meta[it.k] || {}; }
   function kindLabel(it) { return it.p === 'sp' ? (SPK[it.spk] || 'Spotify') : (it.p === 'ig' || it.p === 'x') ? 'Post' : 'Video'; }
-  function titleOf(it) { var m = metaOf(it); return m.t || it.noteTitle || (PN[it.p] + ' ' + kindLabel(it).toLowerCase()); }
+  // The note's title only stands in for a missing video/post title when the note holds just that one item; with several, each would show the same name.
+  function titleOf(it) { var m = metaOf(it); return m.t || (it.nc > 1 ? '' : it.noteTitle) || (PN[it.p] + ' ' + kindLabel(it).toLowerCase()); }
   function subOf(it) {
     var m = metaOf(it), a = m.a || PN[it.p];
     if (it.noteTitle && it.noteTitle !== titleOf(it)) a += ' \u00b7 ' + it.noteTitle;
@@ -24508,7 +24512,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
           setPs({ playing: false });
           toast(YTERR[inf] || 'This video can\u2019t play here');
           var it = MD.cur, q = MD.queue;
-          if (q.i + 1 < q.list.length) setTimeout(function () { if (MD.cur === it) step(1, true); }, 1200);
+          // Auto-skip only to the next item that can actually play here. A social post (Instagram/X) can't play, so skipping onto it
+          // would load the post into the video frame as if the tapped video had turned into it. Otherwise stay on the error.
+          var nx = -1, j, xi;
+          for (j = q.i + 1; j < q.list.length; j++) { xi = getIt(q.list[j]); if (xi && AD[xi.p] && AD[xi.p].cap) { nx = j; break; } }
+          if (nx >= 0) setTimeout(function () { if (MD.cur === it) { q.i = nx; loadCur(); } }, 1200);
           return;
         }
         if (d.event === 'onStateChange' && typeof inf === 'number') { stateYt(inf); return; }
@@ -24659,7 +24667,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     MD.cur = it; MD.endFired = false; MD.wantPlay = (it.p === 'sp');
     MD.ps = { playing: false, pos: 0, dur: keepDur, real: false, t0: NOW() };
     layoutStage(it);
-    if (!retry && f && !MD.dead && ad.reuse && MD.fplat === it.p && f.src && f.src.indexOf('about:blank') !== 0) {
+    // Reuse only a frame that has finished loading this same platform's player. A frame still navigating (e.g. from an Instagram post) would drop loadVideoById and keep showing the old page.
+    if (!retry && f && !MD.dead && ad.reuse && MD.fplat === it.p && f._plat === it.p && WD.loaded && f.src && f.src.indexOf('about:blank') !== 0) {
       WD.pend = { id: it.id, t: NOW() };
       ad.load(it); MD.dead = false; return;
     }
@@ -24679,7 +24688,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       $('md-stage').appendChild(f);
       MD.frame = f;
     }
-    MD.fplat = it.p; MD.dead = false;
+    MD.fplat = it.p; f._plat = it.p; MD.dead = false;
     RK.mark(f); // pending until a real 'load' confirms it (see the load listener above)
     f.src = ad.src(it);
   }
@@ -25084,8 +25093,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     hs.forEach(function (h) { h.classList.toggle('is-stuck', h.getBoundingClientRect().top <= top + 1); });
   }
   function markCur(box) { var it = MD.cur; if (it) { var r = box.querySelectorAll('.md-row[data-k]'); r.forEach(function (x) { x.classList.toggle('is-cur', x.getAttribute('data-k') === it.k); }); } }
-  function fromStored(o) { return { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '', ns: o.ns || '', na: o.na || '' }; }
-  function strip(it) { return { k: it.k, p: it.p, type: it.type, id: it.id, spk: it.spk || '', u: it.u, nt: it.noteTitle || '', ns: it.ns || '', na: it.na || '' }; }
+  function fromStored(o) { return { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '', nc: o.nc || 0, ns: o.ns || '', na: o.na || '' }; }
+  function strip(it) { return { k: it.k, p: it.p, type: it.type, id: it.id, spk: it.spk || '', u: it.u, nt: it.noteTitle || '', nc: it.nc || 0, ns: it.ns || '', na: it.na || '' }; }
   function alById(id) { for (var i = 0; i < MD.al.length; i++) if (MD.al[i].id === id) return MD.al[i]; return null; }
   function plById(id) { for (var i = 0; i < MD.pl.length; i++) if (MD.pl[i].id === id) return MD.pl[i]; return null; }
   function queueVisibleMeta() { MD.items.forEach(function (it) { queueMeta(it); }); MD.pl.forEach(function (p) { p.items.forEach(function (o) { queueMeta(MD.items.get(o.k) || fromStored(o)); }); }); }
