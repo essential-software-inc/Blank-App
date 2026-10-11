@@ -4551,7 +4551,7 @@ body.pink .nb-carousel-dot{background:#d796b0}
 </div>
 
 <div id="nb-app">
-<div id="nb-wash" aria-hidden="true"></div><div id="nb-wash-sweep" aria-hidden="true"></div><div id="nb-wash-fade" aria-hidden="true"></div>
+<div id="nb-wash" aria-hidden="true"></div><div id="nb-wash-sweep" aria-hidden="true"><div class="wash-sweep-in"></div></div><div id="nb-wash-fade" aria-hidden="true"></div>
 
 <header id="site-header" class="hdr-lib">
   <button id="back-btn" onclick="navBack()" aria-label="Back to pages" style="display:none">
@@ -5047,12 +5047,13 @@ body{--nb-g1:rgba(60,115,235,.95);--nb-g2:rgba(255,212,110,.95);--nb-g3:rgba(255
 body.night{--nb-g1:rgba(70,110,255,.9);--nb-g2:rgba(190,140,255,.8);--nb-g3:rgba(255,120,150,.75);--nb-g4:rgba(60,150,200,.7);--nb-g5:rgba(60,210,150,.75)}
 body.pink{--nb-g1:rgba(255,110,150,.95);--nb-g2:rgba(255,200,140,.9);--nb-g3:rgba(200,120,230,.8);--nb-g4:rgba(255,160,190,.8);--nb-g5:rgba(120,210,170,.7)}
 #nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
-#nb-wash-sweep,#md-wash-sweep{left:-60%;right:-60%;top:-18%;height:70%;pointer-events:none;background-image:radial-gradient(ellipse 38% 62% at 18% 42%,var(--nb-g1) 0%,transparent 72%),radial-gradient(ellipse 34% 55% at 52% 28%,var(--nb-g2) 0%,transparent 72%),radial-gradient(ellipse 36% 60% at 84% 55%,var(--nb-g3) 0%,transparent 72%),radial-gradient(ellipse 30% 50% at 36% 72%,var(--nb-g5) 0%,transparent 72%),linear-gradient(115deg,var(--nb-g4) 0%,transparent 55%);filter:blur(30px) saturate(1.5);opacity:0;transform:translate3d(-8%,0,0) scale(1.1);will-change:transform,opacity;transition:transform var(--d1,14s) ease-in-out,opacity var(--do,4s) ease-in-out}
-#nb-wash-sweep::before,#md-wash-sweep::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g5) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g1) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);will-change:transform;transition:transform var(--d2,12s) ease-in-out}
-#nb-wash-sweep::after,#md-wash-sweep::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at 62% 52%,var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at 20% 30%,var(--gx,transparent) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);will-change:transform,opacity;transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
-#nb-wash-sweep{position:fixed;z-index:-1;--sw:var(--nb-wash)}
-#md-wash-sweep{position:absolute;--sw:var(--md-wash)}
-@media (prefers-reduced-motion:reduce){#nb-wash-sweep,#md-wash-sweep{transition:none;opacity:calc(var(--sw) * .8)}}
+.wash-sweep-in{position:absolute;left:-60%;right:-60%;top:-24%;height:95%;pointer-events:none;background-image:radial-gradient(ellipse 38% 62% at 18% 42%,var(--nb-g1) 0%,transparent 72%),radial-gradient(ellipse 34% 55% at 52% 28%,var(--nb-g2) 0%,transparent 72%),radial-gradient(ellipse 36% 60% at 84% 55%,var(--nb-g3) 0%,transparent 72%),radial-gradient(ellipse 30% 50% at 36% 72%,var(--nb-g5) 0%,transparent 72%),linear-gradient(115deg,var(--nb-g4) 0%,transparent 55%);filter:blur(30px) saturate(1.5);opacity:0;transform:translate3d(-8%,0,0) scale(1.1);will-change:transform,opacity;transition:transform var(--d1,14s) ease-in-out,opacity var(--do,4s) ease-in-out}
+.wash-sweep-in::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g5) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g1) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);will-change:transform;transition:transform var(--d2,12s) ease-in-out}
+.wash-sweep-in::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at 62% 52%,var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at 20% 30%,var(--gx,transparent) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);will-change:transform,opacity;transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
+/* The wrapper clips the oversized, drifting layers at 74% of the screen: exactly where the fade into the page colour ends. Anything drawn lower would sit below the fade and show as a hard-edged tint at the bottom. */
+#nb-wash-sweep{position:fixed;left:0;right:0;top:0;height:74%;overflow:hidden;z-index:-1;pointer-events:none;--sw:var(--nb-wash)}
+#md-wash-sweep{position:absolute;left:0;right:0;top:0;height:74%;overflow:hidden;pointer-events:none;--sw:var(--md-wash)}
+@media (prefers-reduced-motion:reduce){.wash-sweep-in{transition:none;opacity:calc(var(--sw) * .8)}}
 #nb-wash-fade{position:fixed;left:0;right:0;top:0;height:74%;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--nb-bg) 0%,transparent) 0%,color-mix(in srgb,var(--nb-bg) 10%,transparent) 20%,color-mix(in srgb,var(--nb-bg) 35%,transparent) 40%,color-mix(in srgb,var(--nb-bg) 68%,transparent) 60%,color-mix(in srgb,var(--nb-bg) 92%,transparent) 80%,color-mix(in srgb,var(--nb-bg) 98%,transparent) 90%,var(--nb-bg) 100%)}
 body.reader-mode #nb-wash,body.reader-mode #nb-wash-sweep,body.reader-mode #nb-wash-fade{display:none}
 /* body paints its own opaque bg (html is black), which would hide the wash: hand the page colour to html instead */
@@ -5606,7 +5607,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 <div id="md-screen" aria-hidden="true" role="dialog" aria-label="Media">
-  <div id="md-wash"></div><div id="md-wash-sweep" aria-hidden="true"></div><div id="md-wash-fade"></div>
+  <div id="md-wash"></div><div id="md-wash-sweep" aria-hidden="true"><div class="wash-sweep-in"></div></div><div id="md-wash-fade"></div>
   <div id="md-hdr">
     <button class="md-ib" id="md-back" data-act="back" aria-label="Back"><svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg></button>
     <div id="md-htitle" data-act="back" role="button" data-nomorph>Media</div>
@@ -6883,7 +6884,6 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 .img-pick-handle{width:100%;display:flex;justify-content:center;padding:.15rem 0 .6rem;margin:-.2rem 0 0;cursor:grab;touch-action:none}
 .img-pick-handle span{width:36px;height:4px;border-radius:99px;background:#d9d9d3}
 .img-pick-handle:active{cursor:grabbing}
-html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
 .link-info-url{width:100%;border:1px solid #e5e5e0;border-radius:10px;background:#fafaf8;color:#2c2c29;font-size:.85rem;padding:.75rem .9rem;word-break:break-all;box-sizing:border-box}
 .link-info-copy{width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;border:none;border-radius:10px;background:#5b5bd6;color:#fff;font-size:.85rem;font-weight:700;padding:.7rem 0;cursor:pointer;font-family:inherit;transition:background .12s}
 .link-info-copy svg{width:17px;height:17px;flex-shrink:0}
@@ -7517,19 +7517,17 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       handle.addEventListener('pointercancel', endDrag);
     }
 
-    var lockedScrollY = 0;
+    // Scroll locking is the app's shared lockScroll()/unlockScroll(); this only remembers whether this picker took the lock.
     var scrollLocked = false;
     function lockScroll() {
       if (scrollLocked) return;
       scrollLocked = true;
-      lockedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      document.documentElement.classList.add('img-pick-noscroll');
+      window.lockScroll();
     }
     function unlockScroll() {
       if (!scrollLocked) return;
       scrollLocked = false;
-      document.documentElement.classList.remove('img-pick-noscroll');
-      window.scrollTo(0, lockedScrollY);
+      window.unlockScroll();
     }
     function close() {
       overlay.classList.remove('img-pick-open');
@@ -7918,7 +7916,6 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   document.querySelectorAll('.img-pick-overlay, .img-pick-file-input').forEach(function(el) {
     el.remove();
   });
-  document.documentElement.classList.remove('img-pick-noscroll');
 
   function selectAllText(el) {
     var range = document.createRange();
@@ -8781,19 +8778,17 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
         targetImg.src = src;
       }
     }
-    var lockedScrollY = 0;
+    // Scroll locking is the app's shared lockScroll()/unlockScroll(); this only remembers whether this picker took the lock.
     var scrollLocked = false;
     function lockScroll() {
       if (scrollLocked) return;
       scrollLocked = true;
-      lockedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      document.documentElement.classList.add('img-pick-noscroll');
+      window.lockScroll();
     }
     function unlockScroll() {
       if (!scrollLocked) return;
       scrollLocked = false;
-      document.documentElement.classList.remove('img-pick-noscroll');
-      window.scrollTo(0, lockedScrollY);
+      window.unlockScroll();
     }
     var histBefore = null;
     function close() {
@@ -8994,19 +8989,17 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       }
     }
 
-    var lockedScrollY = 0;
+    // Scroll locking is the app's shared lockScroll()/unlockScroll(); this only remembers whether this picker took the lock.
     var scrollLocked = false;
     function lockScroll() {
       if (scrollLocked) return;
       scrollLocked = true;
-      lockedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      document.documentElement.classList.add('img-pick-noscroll');
+      window.lockScroll();
     }
     function unlockScroll() {
       if (!scrollLocked) return;
       scrollLocked = false;
-      document.documentElement.classList.remove('img-pick-noscroll');
-      window.scrollTo(0, lockedScrollY);
+      window.unlockScroll();
     }
     var histBefore = null;
     function close() {
@@ -9429,19 +9422,17 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       }
     }
 
-    var lockedScrollY = 0;
+    // Scroll locking is the app's shared lockScroll()/unlockScroll(); this only remembers whether this picker took the lock.
     var scrollLocked = false;
     function lockScroll() {
       if (scrollLocked) return;
       scrollLocked = true;
-      lockedScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      document.documentElement.classList.add('img-pick-noscroll');
+      window.lockScroll();
     }
     function unlockScroll() {
       if (!scrollLocked) return;
       scrollLocked = false;
-      document.documentElement.classList.remove('img-pick-noscroll');
-      window.scrollTo(0, lockedScrollY);
+      window.unlockScroll();
     }
     var histBefore = null;
     function close() {
@@ -9980,7 +9971,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
   function closeVariantSheet(result) {
     if (variantOverlay) variantOverlay.classList.remove('img-pick-open');
     if (variantSheet) { variantSheet.style.transform = ''; variantSheet.style.transition = ''; }
-    document.documentElement.classList.remove('img-pick-noscroll');
+    window.unlockScroll();
     if (variantResolve) { var r = variantResolve; variantResolve = null; r(result); }
   }
   // Every sheet type built on the shared variantSheet node must wipe every
@@ -10017,7 +10008,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       variantSheet.querySelector('[data-variant-idx="' + i + '"]').addEventListener('click', function() { closeVariantSheet(opt); });
     });
     variantSheet.querySelector('.img-pick-cancel').addEventListener('click', function() { closeVariantSheet(null); });
-    document.documentElement.classList.add('img-pick-noscroll');
+    window.lockScroll();
     requestAnimationFrame(function() { variantOverlay.classList.add('img-pick-open'); });
     return new Promise(function(resolve) { variantResolve = resolve; });
   }
@@ -10154,7 +10145,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       });
     });
     variantSheet.querySelector('.img-pick-cancel').addEventListener('click', function() { closeVariantSheet(null); });
-    document.documentElement.classList.add('img-pick-noscroll');
+    window.lockScroll();
     requestAnimationFrame(function() { variantOverlay.classList.add('img-pick-open'); });
     return new Promise(function(resolve) { variantResolve = resolve; });
   }
@@ -10321,7 +10312,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       if (btn === removeBtn) return;
       btn.addEventListener('click', function() { closeVariantSheet(null); });
     });
-    document.documentElement.classList.add('img-pick-noscroll');
+    window.lockScroll();
     requestAnimationFrame(function() {
       variantOverlay.classList.add('img-pick-open');
       input.focus();
@@ -10370,7 +10361,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       });
     });
     variantSheet.querySelector('.img-pick-cancel').addEventListener('click', function() { closeVariantSheet(null); });
-    document.documentElement.classList.add('img-pick-noscroll');
+    window.lockScroll();
     requestAnimationFrame(function() { variantOverlay.classList.add('img-pick-open'); });
     return new Promise(function(resolve) { variantResolve = resolve; });
   }
@@ -10858,7 +10849,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       refresh(true);
     });
 
-    document.documentElement.classList.add('img-pick-noscroll');
+    window.lockScroll();
     requestAnimationFrame(function() { overlay.classList.add('img-pick-open'); });
 
     return new Promise(function(resolve) {
@@ -10866,7 +10857,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
         overlay.classList.remove('img-pick-open');
         box.style.transform = '';
         box.style.transition = '';
-        document.documentElement.classList.remove('img-pick-noscroll');
+        window.unlockScroll();
         setTimeout(function() { overlay.remove(); }, 200);
         resolve(result);
       }
@@ -11030,7 +11021,7 @@ html.img-pick-noscroll,html.img-pick-noscroll body{overflow:hidden;height:100%}
       closeVariantSheet(result);
     });
     variantSheet.querySelector('.img-pick-cancel').addEventListener('click', function() { closeVariantSheet(null); });
-    document.documentElement.classList.add('img-pick-noscroll');
+    window.lockScroll();
     requestAnimationFrame(function() { variantOverlay.classList.add('img-pick-open'); });
     return new Promise(function(resolve) { variantResolve = resolve; });
   }
@@ -12805,7 +12796,7 @@ function lockScroll() {
 }
 function unlockScroll() {
   let isLocked = false;
-  document.querySelectorAll('div[id$="-overlay"].open').forEach(ov => { isLocked = true; });
+  document.querySelectorAll('div[id$="-overlay"].open, .img-pick-open').forEach(ov => { isLocked = true; });
   if (!isLocked) {
     // Where the page actually is now wins over the position saved when the dialog opened (that can be stale), and the
     // jump is instant: the page's smooth-scroll would otherwise animate it across the screen.
@@ -21847,6 +21838,7 @@ function nbToggleFav(id, btn) {
   }
   showToast(isFav ? 'Added to favorites' : 'Removed from favorites');
   if (_nbActiveCat === 'Favorites') nbRenderNotesScreen();
+  else { try { nbUpdateCatCounts(); } catch (e) {} } // the pill count follows right away, not only once Favorites is opened
 }
 
 /* ===================== Card image preview + dropdown ===================== */
@@ -25330,7 +25322,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
 <script>
 /* wash sweep controller: ONE random, never-repeating state (drift / strength / fade-outs / accent colours) driving every gradient sweep layer at once, so the app tabs and Media always show the same sweep and switching screens is seamless */
 (function(){
-  var els=[document.getElementById('nb-wash-sweep'),document.getElementById('md-wash-sweep')].filter(Boolean);
+  var els=Array.prototype.slice.call(document.querySelectorAll('.wash-sweep-in'));
   if(!els.length)return;
   var reduce=false;try{reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
   if(reduce)return;
