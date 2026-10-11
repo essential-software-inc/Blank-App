@@ -4551,7 +4551,7 @@ body.pink .nb-carousel-dot{background:#d796b0}
 </div>
 
 <div id="nb-app">
-<div id="nb-wash" aria-hidden="true"></div><div id="nb-wash-fade" aria-hidden="true"></div>
+<div id="nb-wash" aria-hidden="true"></div><div id="nb-wash-sweep" aria-hidden="true"></div><div id="nb-wash-fade" aria-hidden="true"></div>
 
 <header id="site-header" class="hdr-lib">
   <button id="back-btn" onclick="navBack()" aria-label="Back to pages" style="display:none">
@@ -4939,7 +4939,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-sh-in{width:100%;box-sizing:border-box;border:1px solid transparent;background:var(--md-field);box-shadow:var(--md-fieldsh);color:var(--md-fg);border-radius:12px;padding:.7rem .9rem;font:inherit;font-size:.95rem;outline:none;margin-bottom:.7rem;transition:all .2s ease}
 .md-sh-in:focus{background:var(--md-fieldf);box-shadow:var(--md-fieldfsh)}
 #md-np-dock{padding-top:.5rem}
-#md-wash,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-fade{display:none}
+#md-wash,#md-wash-sweep,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-sweep,#nb-wash-fade{display:none}
 @keyframes md-fade{from{opacity:0}to{opacity:1}}
 @keyframes md-up{from{transform:translateY(100%)}to{transform:none}}
 </style>
@@ -4993,7 +4993,7 @@ body:not(.night):not(.pink) .st-card{background:rgba(255,255,255,.68);border-col
 body:not(.night):not(.pink) .st-fund-btn{background:rgba(244,246,251,.6);border-color:rgba(213,222,242,.75)}
 
 /* premium pass: ambient backdrop (splash, or the open album's cover), glass bars, softer surfaces */
-#md-wash{position:absolute;left:-20%;right:-20%;top:-10%;height:62%;background-image:var(--md-art,var(--splash-img,var(--splash-img-0)));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--md-wash) * 1.5);pointer-events:none}
+#md-wash{position:absolute;left:-20%;right:-20%;top:-10%;height:62%;background-image:var(--md-art,var(--wash-img));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--md-wash) * 1.5);pointer-events:none}
 #md-wash-fade{position:absolute;left:0;right:0;top:0;height:74%;background:linear-gradient(to bottom,transparent 0%,var(--md-bg) 100%);pointer-events:none}
 #md-hdr{transition:box-shadow .2s,border-color .2s}
 #md-screen:not(.md-scrolled) #md-hdr{box-shadow:none;border-bottom-color:transparent}
@@ -5005,7 +5005,7 @@ body.pink #md-hdr{background:#c8365e}
 #md-sticky{background:color-mix(in srgb,var(--md-stbg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 }
 #md-np-wash{position:absolute;inset:-30%;background-size:cover;background-position:center;filter:blur(72px) saturate(1.8);transform:translateZ(0);opacity:calc(var(--md-wash) * 1.5);transition:opacity .5s ease;pointer-events:none}
-#md-wash,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-fade{display:block}
+#md-wash,#md-wash-sweep,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-sweep,#nb-wash-fade{display:block}
 @supports (color:color-mix(in srgb,red 50%,blue)){
 .md-acts{background:color-mix(in srgb,var(--md-bg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 #md-np-top{background:color-mix(in srgb,var(--md-bg) 72%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
@@ -5022,6 +5022,8 @@ body.pink #md-hdr{background:#c8365e}
 .md-grab,.md-sh-title{background:transparent}
 /* hairlines between rows / tiles: the solid near-white ones read as white lines on glass, so they become translucent */
 #md-screen{--md-div:rgba(20,30,50,.1)}
+/* Media header edge: the light theme's solid pale-blue hairline reads as a white line over the colour sweep; use the same translucent dark hairline the app header uses so it takes on the colours behind it */
+body:not(.night):not(.pink) #md-screen{--md-hbd:rgba(20,30,50,.1)}
 body.pink #md-screen{--md-div:rgba(200,54,94,.16)}
 body:not(.pink) #md-screen:not(.md-scrolled) #md-hdr{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
 body.pink #md-hdr{color:var(--md-cur);border-bottom-color:var(--md-div);box-shadow:var(--md-stsh)}
@@ -5035,12 +5037,24 @@ body.pink #md-hdr .md-ib:active{background:var(--md-press)}
 #md-screen.md-nav #md-hdr,#md-screen.md-nav #md-sticky,#md-screen.md-nav .md-acts{transition:none!important}
 body.nb-nav #nb-app #site-header,body.nb-nav #nb-app #feed-search-wrap{transition:none!important}
 /* ===== app tabs share the Media look: wash backdrop, header/search melt into it at rest, glass once scrolled ===== */
+/* The wash follows the splash photo this launch rotated to (data-splash); an open album's cover still wins in Media. */
+html{--wash-img:var(--splash-img,var(--splash-img-0))}
 body{--nb-bg:#fff;--nb-wash:.24;--nb-hdr-fg:#3366cc;--nb-hbd:rgba(20,30,50,.1);--nb-hsh:0 2px 12px rgba(0,0,0,.10);--nb-stbd:rgba(20,30,50,.08)}
 body.night{--nb-bg:#080808;--nb-wash:.5;--nb-hdr-fg:#e8e8e8;--nb-hbd:rgba(255,255,255,.06);--nb-hsh:0 4px 8px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.08);--nb-stbd:#232326}
 body.pink{--nb-bg:#fff8fb;--nb-wash:.28;--nb-hdr-fg:#bd2856;--nb-hbd:rgba(200,54,94,.16);--nb-hsh:0 4px 8px rgba(200,54,94,.12),0 8px 24px rgba(200,54,94,.08);--nb-stbd:rgba(200,54,94,.16)}
-#nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--splash-img,var(--splash-img-0));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
+/* The rotating splash photo stays as the wash. A separate gradient layer (#nb-wash-sweep in the app tabs, #md-wash-sweep in Media) sweeps over it: soft colour fields that slide sideways and diagonally. Nothing here loops: a small script (search 'wash sweep controller') keeps picking new random drift targets, speeds, strengths, fade-outs and occasional accent colours, so the pattern never repeats. */
+body{--nb-g1:rgba(60,115,235,.95);--nb-g2:rgba(255,212,110,.95);--nb-g3:rgba(255,140,170,.85);--nb-g4:rgba(150,165,215,.8);--nb-g5:rgba(70,200,140,.85)}
+body.night{--nb-g1:rgba(70,110,255,.9);--nb-g2:rgba(190,140,255,.8);--nb-g3:rgba(255,120,150,.75);--nb-g4:rgba(60,150,200,.7);--nb-g5:rgba(60,210,150,.75)}
+body.pink{--nb-g1:rgba(255,110,150,.95);--nb-g2:rgba(255,200,140,.9);--nb-g3:rgba(200,120,230,.8);--nb-g4:rgba(255,160,190,.8);--nb-g5:rgba(120,210,170,.7)}
+#nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
+#nb-wash-sweep,#md-wash-sweep{left:-60%;right:-60%;top:-18%;height:70%;pointer-events:none;background-image:radial-gradient(ellipse 38% 62% at 18% 42%,var(--nb-g1) 0%,transparent 72%),radial-gradient(ellipse 34% 55% at 52% 28%,var(--nb-g2) 0%,transparent 72%),radial-gradient(ellipse 36% 60% at 84% 55%,var(--nb-g3) 0%,transparent 72%),radial-gradient(ellipse 30% 50% at 36% 72%,var(--nb-g5) 0%,transparent 72%),linear-gradient(115deg,var(--nb-g4) 0%,transparent 55%);filter:blur(30px) saturate(1.5);opacity:0;transform:translate3d(-8%,0,0) scale(1.1);will-change:transform,opacity;transition:transform var(--d1,14s) ease-in-out,opacity var(--do,4s) ease-in-out}
+#nb-wash-sweep::before,#md-wash-sweep::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g5) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g1) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);will-change:transform;transition:transform var(--d2,12s) ease-in-out}
+#nb-wash-sweep::after,#md-wash-sweep::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at 62% 52%,var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at 20% 30%,var(--gx,transparent) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);will-change:transform,opacity;transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
+#nb-wash-sweep{position:fixed;z-index:-1;--sw:var(--nb-wash)}
+#md-wash-sweep{position:absolute;--sw:var(--md-wash)}
+@media (prefers-reduced-motion:reduce){#nb-wash-sweep,#md-wash-sweep{transition:none;opacity:calc(var(--sw) * .8)}}
 #nb-wash-fade{position:fixed;left:0;right:0;top:0;height:74%;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--nb-bg) 0%,transparent) 0%,color-mix(in srgb,var(--nb-bg) 10%,transparent) 20%,color-mix(in srgb,var(--nb-bg) 35%,transparent) 40%,color-mix(in srgb,var(--nb-bg) 68%,transparent) 60%,color-mix(in srgb,var(--nb-bg) 92%,transparent) 80%,color-mix(in srgb,var(--nb-bg) 98%,transparent) 90%,var(--nb-bg) 100%)}
-body.reader-mode #nb-wash,body.reader-mode #nb-wash-fade{display:none}
+body.reader-mode #nb-wash,body.reader-mode #nb-wash-sweep,body.reader-mode #nb-wash-fade{display:none}
 /* body paints its own opaque bg (html is black), which would hide the wash: hand the page colour to html instead */
 html body:not(.reader-mode){background:transparent!important}
 html:has(body:not(.reader-mode)){background:#fff}
@@ -5112,13 +5126,14 @@ body.night #screen-settings{--st-line:#282828}
 body.pink #screen-settings{--st-line:rgba(200,54,94,.16)}
 /* Story viewer: header is the same see-through glass as the app header, over the same colour wash (the iframe below stays opaque) */
 #story-viewer-overlay{overflow:hidden}
-#story-viewer-overlay::before{content:'';position:absolute;left:-20%;right:-20%;top:-10%;height:180px;background-image:var(--splash-img,var(--splash-img-0));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
+#story-viewer-overlay::before{content:'';position:absolute;left:-20%;right:-20%;top:-10%;height:180px;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
 #story-viewer-header{z-index:1;background:color-mix(in srgb,var(--nb-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border-bottom-color:var(--nb-hbd)}
 #story-viewer-frame{position:relative;z-index:1}
 
 /* ===== Glass + dark: legibility over the wash ===== */
 /* The wash is an image, so it is kept dim in dark themes: white titles/icons and the greys on top of it stay readable. */
 body.night{--nb-wash:.3}
+body.pink #md-screen{--md-field:rgba(255,242,247,.55);--md-fieldsh:inset 0 1px 4px rgba(200,54,94,.06),0 0 0 1px rgba(200,54,94,.18);--md-fieldf:rgba(255,255,255,.8)}
 body.night #md-screen{--md-wash:.3}
 /* Greys that were tuned for a solid #080808 page, lifted so they hold up on the wash and on the see-through cards. */
 body.night #feed-search-logo{color:#aab4c5}
@@ -5129,7 +5144,7 @@ body.night .gc-desc{color:#b2b2b2}
 body.night .gc-tag{color:#c2c2c2}
 body.night .gc-play-icon,body.night .gc-trash,body.night .gc-edit,body.night .gc-img-more,body.night .gc-desc-time,body.night .gc-fav:not(.active){color:#a6a6a6}
 body.night #screen-settings{--st-sub:#b8bfc8}
-body.night #md-screen{--md-sub:#b8c0ca;--md-sub2:#9ca3ab;--md-pillf:#c8c8c8;--md-ico:#aab4c5;--md-ph:#a9afb8}
+body.night #md-screen{--md-field:rgba(0,0,0,.3);--md-fieldsh:inset 0 2px 6px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.07);--md-fieldf:rgba(0,0,0,.45);--md-sub:#b8c0ca;--md-sub2:#9ca3ab;--md-pillf:#c8c8c8;--md-ico:#aab4c5;--md-ph:#a9afb8}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 
@@ -5283,7 +5298,7 @@ body.nb-reduce-motion #signout-dialog {animation:none}
 #restore-overlay,
 #privacy-overlay,
 #cterms-overlay,
-#einfo-overlay {--sh-bg:rgba(255,255,255,.7);--sh-fg:#202122;--sh-sub:#54595d;--sh-div:rgba(20,30,50,.1);--sh-shadow:rgba(0,0,0,.25);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(246,248,252,.6);--sh-secf:#3366cc;--sh-secb:rgba(20,30,50,.12);--sh-field:#fff;--sh-fieldsh:inset 0 2px 6px rgba(20,30,50,.12),inset 0 1px 2px rgba(20,30,50,.06);--sh-fieldf:#fff;--sh-fieldfsh:inset 0 1px 2px rgba(51,102,204,.05),0 0 0 3px rgba(51,102,204,.2)}
+#einfo-overlay {--sh-bg:rgba(255,255,255,.7);--sh-fg:#202122;--sh-sub:#54595d;--sh-div:rgba(20,30,50,.1);--sh-shadow:rgba(0,0,0,.25);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(246,248,252,.6);--sh-secf:#3366cc;--sh-secb:rgba(20,30,50,.12);--sh-field:var(--nb-fill);--sh-fieldsh:inset 0 1px 3px var(--nb-in-sh),0 0 0 1px var(--nb-card-ring);--sh-fieldf:var(--nb-fill-hi);--sh-fieldfsh:inset 0 1px 2px var(--nb-in-sh),0 0 0 3px var(--nb-focus)}
 body.night #edit-overlay,
 body.night #publish-overlay,
 body.night #backup-overlay,
@@ -5293,7 +5308,7 @@ body.night #paywall-overlay,
 body.night #restore-overlay,
 body.night #privacy-overlay,
 body.night #cterms-overlay,
-body.night #einfo-overlay {--sh-bg:rgba(17,17,17,.72);--sh-fg:#e8e8e8;--sh-sub:#8f98a3;--sh-div:rgba(255,255,255,.07);--sh-shadow:rgba(0,0,0,.6);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(28,28,28,.6);--sh-secf:#b0b0b0;--sh-secb:#383838;--sh-field:#0a0a0c;--sh-fieldsh:inset 0 2px 6px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.05);--sh-fieldf:#141418;--sh-fieldfsh:0 0 0 3px rgba(255,255,255,.1)}
+body.night #einfo-overlay {--sh-bg:rgba(17,17,17,.72);--sh-fg:#e8e8e8;--sh-sub:#8f98a3;--sh-div:rgba(255,255,255,.07);--sh-shadow:rgba(0,0,0,.6);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(28,28,28,.6);--sh-secf:#b0b0b0;--sh-secb:#383838;--sh-field:var(--nb-fill);--sh-fieldsh:inset 0 1px 3px var(--nb-in-sh),0 0 0 1px var(--nb-card-ring);--sh-fieldf:var(--nb-fill-hi);--sh-fieldfsh:inset 0 1px 2px var(--nb-in-sh),0 0 0 3px var(--nb-focus)}
 body.pink #edit-overlay,
 body.pink #publish-overlay,
 body.pink #backup-overlay,
@@ -5303,7 +5318,7 @@ body.pink #paywall-overlay,
 body.pink #restore-overlay,
 body.pink #privacy-overlay,
 body.pink #cterms-overlay,
-body.pink #einfo-overlay {--sh-bg:rgba(255,248,251,.72);--sh-fg:#1a0a12;--sh-sub:#875068;--sh-div:rgba(200,54,94,.16);--sh-shadow:rgba(200,54,94,.2);--sh-scrim:rgba(70,12,32,.45);--sh-secbg:rgba(255,224,236,.6);--sh-secf:#c8365e;--sh-secb:rgba(200,54,94,.2);--sh-field:#fff2f7;--sh-fieldsh:inset 0 2px 5px rgba(200,54,94,.06),0 1px 0 rgba(255,255,255,.6);--sh-fieldf:#fff;--sh-fieldfsh:0 0 0 3px rgba(200,54,94,.15)}
+body.pink #einfo-overlay {--sh-bg:rgba(255,248,251,.72);--sh-fg:#1a0a12;--sh-sub:#875068;--sh-div:rgba(200,54,94,.16);--sh-shadow:rgba(200,54,94,.2);--sh-scrim:rgba(70,12,32,.45);--sh-secbg:rgba(255,224,236,.6);--sh-secf:#c8365e;--sh-secb:rgba(200,54,94,.2);--sh-field:var(--nb-fill);--sh-fieldsh:inset 0 1px 3px var(--nb-in-sh),0 0 0 1px var(--nb-card-ring);--sh-fieldf:var(--nb-fill-hi);--sh-fieldfsh:inset 0 1px 2px var(--nb-in-sh),0 0 0 3px var(--nb-focus)}
 #edit-overlay,
 #publish-overlay,
 #backup-overlay,
@@ -5364,8 +5379,9 @@ body.pink #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;he
 #pub-slug-wrap:focus-within {background:var(--sh-fieldf) !important;box-shadow:var(--sh-fieldfsh) !important}
 #pub-slug-prefix {padding-left:.9rem;font-size:.95rem}
 #pub-slug-input {padding:.7rem .9rem .7rem .15rem;font-size:.95rem}
-.pub-url {border-radius:12px;padding:.7rem .9rem}
-body:not(.night):not(.pink) .pub-url {background:rgba(246,248,252,.6);border-color:rgba(20,30,50,.12)}
+#publish-sheet .pub-url {border-radius:12px;padding:.7rem .9rem;background:var(--nb-fill);border-color:var(--nb-card-ring)}
+body.night #publish-sheet .pub-url {background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.07)}
+body.pink #publish-sheet .pub-url {background:rgba(255,242,247,.55);border-color:rgba(200,54,94,.18)}
 #edit-dfooter,
 #pub-footer-new,
 #pub-footer-live,
@@ -5391,6 +5407,9 @@ body:not(.night):not(.pink) .pub-url {background:rgba(246,248,252,.6);border-col
 #pub-footer-live-r > .ebtn-sec,
 #pub-footer-ad-new-r > .ebtn-sec,
 #pub-footer-ad-live-r > .ebtn-sec {background:var(--sh-secbg) !important;color:var(--sh-secf) !important;border:1px solid var(--sh-secb) !important;box-shadow:none !important}
+#publish-sheet #publish-body .ebtn-sec {background:var(--sh-secbg) !important;color:var(--sh-secf) !important;border:1px solid var(--sh-secb) !important;box-shadow:none !important;border-radius:12px}
+#account-dialog .com-field {background:var(--sh-field);border:1px solid transparent;box-shadow:var(--sh-fieldsh);transition:all .2s ease}
+#account-dialog .com-field:focus {background:var(--sh-fieldf);box-shadow:var(--sh-fieldfsh);border-color:transparent}
 #backup-sheet,
 #account-dialog {border-radius:16px 16px 0 0;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
 #backup-hdr,
@@ -5541,11 +5560,11 @@ body.pink #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:
 #story-viewer-title {font-weight:800;font-size:1.05rem;letter-spacing:-.02em}
 #account-screen-card {border-radius:20px}
 #_wptoast {background:rgba(255,255,255,.7) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:#202122 !important;border:1px solid #e8ecf4;box-shadow:0 8px 24px rgba(20,30,50,.18) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
-#_wptoast .toast-ok {background:#f6f8fc;color:#3366cc;border:1px solid #e4e9f5;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
+#_wptoast .toast-ok {background:rgba(246,248,252,.6);color:#3366cc;border:1px solid #e4e9f5;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
 body.night #_wptoast {background:rgba(30,30,34,.72) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:#f0f0f0 !important;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.6) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
-body.night #_wptoast .toast-ok {background:#1c1c1c;color:#b0b0b0;border:1px solid #383838;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
+body.night #_wptoast .toast-ok {background:rgba(28,28,28,.6);color:#b0b0b0;border:1px solid #383838;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
 body.pink #_wptoast {background:rgba(255,242,247,.72) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:#1a0a12 !important;border:1px solid #f5c5d8;box-shadow:0 8px 24px rgba(200,54,94,.22) !important;border-radius:18px !important;padding:.7rem 1.1rem !important;font-size:.88rem !important;font-weight:600;line-height:1.35 !important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
-body.pink #_wptoast .toast-ok {background:#ffe0ec;color:#c8365e;border:1px solid #f5c5d8;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
+body.pink #_wptoast .toast-ok {background:rgba(255,224,236,.6);color:#c8365e;border:1px solid #f5c5d8;border-radius:10px;padding:.2rem .75rem;font-weight:700;font-size:.78rem}
 @media (prefers-reduced-motion:reduce){
 #edit-overlay,
 #publish-overlay,
@@ -5587,7 +5606,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 <div id="md-screen" aria-hidden="true" role="dialog" aria-label="Media">
-  <div id="md-wash"></div><div id="md-wash-fade"></div>
+  <div id="md-wash"></div><div id="md-wash-sweep" aria-hidden="true"></div><div id="md-wash-fade"></div>
   <div id="md-hdr">
     <button class="md-ib" id="md-back" data-act="back" aria-label="Back"><svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg></button>
     <div id="md-htitle" data-act="back" role="button" data-nomorph>Media</div>
@@ -14613,6 +14632,10 @@ async function nbSyncPull(showFeedback) {
           // unchanged carry-over uiState.full set in nbRenderCanvas.
           editorLocalSavedFragment = _nbExtractCanvasFragment(existing[idx].content);
         }
+        // Unpublished on another device: its story must leave the strip here too, not only on the device that did it.
+        if (existing[idx].publishedSlug && !n.publishedSlug) {
+          try { _nbStoryOptimistic(existing[idx], false); } catch (e) { _nbLog('pull: strip', e); }
+        }
         existing[idx] = n;
         updatedCount++;
       }
@@ -16974,6 +16997,7 @@ async function nbUpdatePublishedNote() {
     // Changes" attempt would 404 forever with no way for the person to
     // learn the page is actually gone and needs a fresh Publish instead.
     if (res.status === 404) {
+      try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('update 404: strip', e); }
       _pubSaveNoteFields(note.id, {
         publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
       });
@@ -19537,6 +19561,8 @@ async function _pubUnpublish(note) {
     body: JSON.stringify({ token: note.publishToken })
   });
   if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
+  // Drop it from the story strip now, while the slug is still on the note; the strip otherwise only catches up on the next fetch.
+  try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('unpublish: strip', e); }
   _pubSaveNoteFields(note.id, {
     publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
   });
@@ -24590,6 +24616,13 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       if (a && b && a.textContent !== b.textContent) a.textContent = b.textContent;
     }
   }
+  // Search box hint follows the page: Songs and Videos each name themselves (they used to fall through to a generic "media").
+  function searchPh() {
+    if (MD.tab === 'playlists') return 'Search playlists';
+    if (MD.tab === 'albums') return 'Search albums';
+    var what = MD.tab === 'videos' ? 'videos' : MD.tab === 'songs' ? 'songs' : 'media';
+    return MD.src === 'likes' ? 'Search liked ' + what : 'Search your ' + what;
+  }
   function catsHtml() {
     var counts = {};
     TABS.forEach(function (t) { counts[t[0]] = t[0] === 'playlists' ? MD.pl.length : t[0] === 'albums' ? MD.al.length + itemsOfType('album').length : itemsOfType(t[2]).length; });
@@ -24613,14 +24646,14 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var _qi = v.n === 'home' && el.querySelector('#md-sticky') && $('md-list') ? $('md-q') : null;
     if (_qi) {
       // already on the home page (a tab/source change): keep the search box and chip row, just update them
-      _qi.placeholder = (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : MD.src === 'likes' ? 'Search liked media' : 'Search your media') + '\u2026';
+      _qi.placeholder = searchPh() + '\u2026';
       setChips(el.querySelector('.md-cats'), catsHtml());
       setHT('Media');
       hact.hidden = true;
     } else if (v.n === 'home') {
       el.innerHTML = '<div id="md-sticky">' +
         '<div class="md-search"><svg class="md-sico" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' +
-        '<input id="md-q" type="search" placeholder="' + (MD.tab === 'playlists' ? 'Search playlists' : MD.tab === 'albums' ? 'Search albums' : MD.src === 'likes' ? 'Search liked media' : 'Search your media') + '\u2026" value="' + esc(MD.q) + '" autocomplete="off" spellcheck="false"></div>' +
+        '<input id="md-q" type="search" placeholder="' + searchPh() + '\u2026" value="' + esc(MD.q) + '" autocomplete="off" spellcheck="false"></div>' +
         '<div class="md-cats">' + catsHtml() + '</div></div>' +
         '<div id="md-list"></div>';
       setHT('Media');
@@ -25286,5 +25319,54 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
 })();
 </script>
 
+<script>
+/* wash sweep controller: ONE random, never-repeating state (drift / strength / fade-outs / accent colours) driving every gradient sweep layer at once, so the app tabs and Media always show the same sweep and switching screens is seamless */
+(function(){
+  var els=[document.getElementById('nb-wash-sweep'),document.getElementById('md-wash-sweep')].filter(Boolean);
+  if(!els.length)return;
+  var reduce=false;try{reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+  if(reduce)return;
+  var R=Math.random;
+  function rr(a,b){return a+R()*(b-a)}
+  function pick(a){return a[Math.floor(R()*a.length)]}
+  function setVar(k,v){els.forEach(function(el){el.style.setProperty(k,v)})}
+  function setStyle(k,v){els.forEach(function(el){el.style[k]=v})}
+  var ACCENTS=['rgba(255,150,60,.9)','rgba(170,110,255,.85)','rgba(60,200,205,.85)','rgba(240,90,200,.8)','rgba(190,235,80,.75)','rgba(255,115,105,.85)','rgba(255,205,70,.9)','rgba(90,190,255,.85)','rgba(120,230,190,.8)','rgba(255,170,210,.85)','rgba(130,120,255,.85)'];
+  function tf(bx,by){return 'translate3d('+rr(-bx,bx).toFixed(1)+'%,'+rr(-by,by).toFixed(1)+'%,0) rotate('+rr(-11,11).toFixed(1)+'deg) scale('+rr(1,1.38).toFixed(2)+')'}
+  function drift(prop,durProp,bx,by,lo,hi){
+    (function go(){
+      var d=rr(lo,hi);setVar(durProp,d.toFixed(1)+'s');
+      var t=tf(bx,by);
+      if(prop==='transform')setStyle('transform',t);else setVar(prop,t);
+      setTimeout(go,d*1000*rr(.55,1.1));
+    })();
+  }
+  drift('transform','--d1',22,8,9,20);
+  drift('--t2','--d2',26,10,7,17);
+  drift('--t3','--d3',30,9,10,24);
+  var last='mild';
+  (function strength(){
+    var r=R(),kind,k;
+    if(last!=='off'&&r<.15){kind='off';k=0}
+    else if(r<.4){kind='strong';k=rr(2,2.8)}
+    else if(r<.6){kind='low';k=rr(.5,.95)}
+    else{kind='mild';k=rr(1.1,1.6)}
+    var d=rr(2.5,6.5);setVar('--do',d.toFixed(1)+'s');
+    setStyle('opacity',kind==='off'?'0':'calc(var(--sw) * '+k.toFixed(2)+')');
+    last=kind;
+    setTimeout(strength,(d+(kind==='off'?rr(1,3):rr(1.5,8)))*1000);
+  })();
+  var on=false;
+  (function accent(){
+    if(!on){
+      setVar('--gx',pick(ACCENTS));setVar('--gd',rr(3.5,7).toFixed(1)+'s');
+      setTimeout(function(){setVar('--ga',rr(.45,.95).toFixed(2))},60);
+      on=true;setTimeout(accent,rr(7,16)*1000);
+    }else{
+      setVar('--ga','0');on=false;setTimeout(accent,rr(4,18)*1000);
+    }
+  })();
+})();
+</script>
 </body>
 </html>
