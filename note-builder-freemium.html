@@ -24096,6 +24096,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   };
   var meta = {};
   try { meta = JSON.parse(localStorage.getItem(META_KEY) || '{}') || {}; } catch (e) { meta = {}; }
+  // Instagram/X have no title source, so nothing legitimate is ever stored for them; drop entries an earlier mix-up may have saved.
+  Object.keys(meta).forEach(function (k) { if (/^(ig|x):/.test(k)) delete meta[k]; });
   // Metadata arrives a few items at a time; writing the whole map to storage for each one is wasteful, so saves are batched.
   var _smT = 0;
   function saveMeta() { if (!_smT) _smT = setTimeout(function () { _smT = 0; saveMetaNow(); }, 1200); }
@@ -24355,7 +24357,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
 
   /* ---------- metadata ---------- */
   function getIt(k) { return MD.items.get(k) || MD.pit.get(k) || null; }
-  function metaOf(it) { return meta[it.k] || {}; }
+  function metaOf(it) { return (it.p === 'ig' || it.p === 'x') ? {} : (meta[it.k] || {}); }
   function kindLabel(it) { return it.p === 'sp' ? (SPK[it.spk] || 'Spotify') : (it.p === 'ig' || it.p === 'x') ? 'Post' : 'Video'; }
   // The note's title only stands in for a missing video/post title when the note holds just that one item; with several, each would show the same name.
   function titleOf(it) { var m = metaOf(it); return m.t || (it.nc > 1 ? '' : it.noteTitle) || (PN[it.p] + ' ' + kindLabel(it).toLowerCase()); }
@@ -24529,7 +24531,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
           if (typeof inf.currentTime === 'number') { patch.pos = inf.currentTime; patch.real = true; }
           if (Object.keys(patch).length) setPs(patch);
           if (typeof inf.playerState === 'number') stateYt(inf.playerState);
-          if (inf.videoData && inf.videoData.title && MD.cur) {
+          if (inf.videoData && inf.videoData.title && MD.cur && MD.cur.p === 'yt' && vid === MD.cur.id) {
             var m = meta[MD.cur.k] || {};
             if (m.t !== inf.videoData.title) {
               meta[MD.cur.k] = Object.assign(m, { t: String(inf.videoData.title).slice(0, 200), a: String(inf.videoData.author || m.a || '').slice(0, 120) });
@@ -24600,6 +24602,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   window.addEventListener('message', function (e) {
     if (!MD.frame || e.source !== MD.frame.contentWindow || !MD.cur || MD.dead) return;
     WD.last = NOW();
+    if (MD.fplat !== MD.cur.p) return; // frame and current item disagree mid-switch: ignore, don't let the old page's messages touch the new item
     var ad = AD[MD.fplat];
     if (ad && ad.msg) ad.msg(e.data);
   });
