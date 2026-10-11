@@ -4941,7 +4941,8 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-cb.on::after{content:'';position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor}
 .md-cb.big{width:72px;height:72px;background:var(--md-npb);color:var(--md-npbf)}
 .md-cb[hidden]{display:none}
-#md-np-queue .md-gh{margin-left:0;margin-right:0}
+#md-np-queue .md-gh{margin-left:0;margin-right:0;white-space:nowrap}
+#md-np-queue .md-gh small{min-width:0;flex:0 1 auto}
 /* bottom sheet */
 #md-sheet{position:absolute;inset:0;z-index:8;display:none}
 #md-sheet.open{display:block}
@@ -15642,6 +15643,7 @@ function nbLoadNotes() {
 }
 function nbSaveNotesArr(arr) {
   try { localStorage.setItem(NB_NOTES_KEY, JSON.stringify(arr)); } catch (e) { _nbLog('notes save', e); showToast('Couldn\u2019t save. Storage may be full.'); }
+  try { if (window.nbMdNotesChanged) window.nbMdNotesChanged(); } catch (e) {}
 }
 // Notes tagged with the account they've been synced to (see the `acct`
 // field set in nbSyncPush/nbSyncPull) shouldn't appear on the notes
@@ -24228,6 +24230,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     MD.items.forEach(function (it, k) { if (keep[k] && !r.items.has(k)) MD.pit.set(k, it); });
     MD.items = r.items;
     MD.al = r.al;
+    // The playing item is a long-lived object from an earlier scan; carry the note's current title onto it so a rename shows up.
+    if (MD.cur) { var fr = r.items.get(MD.cur.k); if (fr) { MD.cur.noteTitle = fr.noteTitle; MD.cur.nc = fr.nc; MD.cur.ns = fr.ns; MD.cur.na = fr.na; } }
+    var qs = MD.queue.src;
+    if (qs && qs.n === 'al' && qs.from === MD.src) { var qa = alById(qs.id); if (qa) MD.queue.ctx = qa.title; }
     // A half-read library or a still-loading Likes list says nothing about what's gone, so only a full read may drop queued items.
     syncLiveQueue(r.full !== false && !(MD.src === 'likes' && LK.busy));
   }
@@ -25377,7 +25383,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function sigOf() {
     var a = [];
     MD.items.forEach(function (it, k) { a.push(k + '~' + (it.noteTitle || '')); });
-    return a.join(',') + '#' + MD.al.map(function (x) { return x.id + ':' + x.keys.length; }).join(',');
+    return a.join(',') + '#' + MD.al.map(function (x) { return x.id + ':' + x.keys.length + ':' + x.title; }).join(',');
   }
   // Redraws only what a changed library can touch (tab counts + list), so a search being typed keeps focus and the scroll position holds.
   function redrawQuiet() {
@@ -25427,6 +25433,19 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (likes) { try { scan(); } catch (e) {} after(); }
     else scanStream(function (stale) { if (stale) end(); else after(); }, true);
   }
+  // A note was saved (e.g. renamed): re-read the notes shortly after instead of waiting for the next poll.
+  var _nmT = 0;
+  window.nbMdNotesChanged = function () {
+    if (!MD.open || MD.src === 'likes') return;
+    clearTimeout(_nmT);
+    _nmT = setTimeout(function () {
+      _nmT = 0;
+      if (!MD.open || MD.scanning || MD.refreshing) return;
+      try { scan(); } catch (e) { return; }
+      if (sigOf() !== MD.dsig) redrawQuiet();
+      else { syncUI(); syncQueue(); }
+    }, 500);
+  };
   function startPoll() { stopPoll(); MD.poll = setInterval(softRefresh, 25000); }
   function stopPoll() { if (MD.poll) { clearInterval(MD.poll); MD.poll = 0; } }
   function act(a, el) {
