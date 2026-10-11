@@ -735,7 +735,7 @@ body.pink #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active
 .alert-card .gc-desc-time { display: inline; margin: 0; text-align: left }
 .alert-card .gc-desc-text { overflow-wrap: anywhere }
 .alert-link { color: #3366cc; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent }
-body.night .alert-link { color: #7da7f0 }
+body.night .alert-link { color: #e8e8e8 }
 body.pink .alert-link { color: #bd2856 }
 .alert-md > * + * { margin-top: .45em }
 .alert-md li > * + * { margin-top: .35em }
@@ -754,7 +754,7 @@ ul.alert-md-list ul.alert-md-list ul.alert-md-list { list-style: square }
 .alert-md-task { display: inline-block; box-sizing: border-box; width: 1em; height: 1em; margin-right: .45em; border: 1.5px solid currentColor; border-radius: 3px; opacity: .6; vertical-align: -.12em; position: relative }
 .alert-md-task.on { background: #3366cc; border-color: #3366cc; opacity: 1 }
 .alert-md-task.on::after { content: ""; position: absolute; left: 28%; top: 6%; width: 28%; height: 56%; border: solid #fff; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg) }
-body.night .alert-md-task.on { background: #7da7f0; border-color: #7da7f0 }
+body.night .alert-md-task.on { background: #e8e8e8; border-color: #e8e8e8 }
 body.night .alert-md-task.on::after { border-color: #1c1c1e }
 body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 .alert-md-quote { margin: 0; padding-left: .7em; border-left: 3px solid rgba(128,128,128,.45) }
@@ -4728,7 +4728,7 @@ body.night #md-screen{--md-scrim:linear-gradient(rgba(8,8,8,.62),rgba(8,8,8,.9))
 --md-pill:#1c1c1e;--md-pillb:#1c1c1e;--md-pillf:#999;--md-pa:#484848;--md-paf:#fff;
 --md-pri:#3a3a3a;--md-prif:#f0f0f0;--md-prish:none;
 --md-sec:#1c1c1c;--md-secf:#b0b0b0;--md-secb:#383838;
---md-ico:#505868;--md-cur:#7da7f0;--md-bar:#fff;--md-npb:#fff;--md-npbf:#111;
+--md-ico:#505868;--md-cur:#fff;--md-bar:#fff;--md-npb:#fff;--md-npbf:#111;
 --md-field:#0a0a0c;--md-fieldsh:inset 0 2px 6px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.05);--md-fieldf:#141418;--md-fieldfsh:0 0 0 3px rgba(255,255,255,.1);
 --md-sheet:#111;--md-mini:rgba(30,30,34,.82);--md-msh:0 8px 24px rgba(0,0,0,.6);--md-wash:.5;--md-tint:rgba(255,255,255,.06);--md-ring:rgba(255,255,255,.28)}
 body.pink #md-screen{--md-scrim:linear-gradient(rgba(255,248,251,.72),rgba(255,248,251,.94));--md-bg:#fff8fb;--md-fg:#1a0a12;--md-sub:#875068;--md-sub2:#b895a8;--md-div:#f5d5e2;
@@ -4799,8 +4799,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-gh-st.is-stuck{background:var(--md-bg)}
 .md-gh small{font-size:.78rem;font-weight:500;letter-spacing:0;color:var(--md-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* grouped list: the Library's card surface, rows divided by an inset hairline */
-.md-card{overflow:hidden}
-.md-row{position:relative;display:flex;align-items:center;gap:.8rem;padding:.55rem 0;cursor:pointer;min-width:0;--md-inset:calc(52px + .8rem)}
+.md-row{position:relative;display:flex;align-items:center;gap:.8rem;padding:.55rem 0;cursor:pointer;min-width:0;--md-inset:calc(52px + .8rem);isolation:isolate;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .md-row-wide{--md-inset:calc(92px + .8rem)}
 .md-card>.md-row+.md-row::before{content:'';position:absolute;top:0;right:0;left:var(--md-inset);height:1px;background:var(--md-div)}
 .md-th{position:relative;flex-shrink:0;border-radius:6px;overflow:hidden;background:#000}
@@ -4823,6 +4822,28 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-s{font-size:.8rem;color:var(--md-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 .md-row.is-cur .md-t{color:var(--md-cur)}
 .md-more{width:40px;height:44px;border:0;background:none;color:var(--md-sub);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;margin-right:-10px}
+/* Multi-select (long-press a row, or the three-dot menu > Select): picked rows get a tinted tile; the header and a bottom bar switch to selection actions */
+.md-row::after{content:'';position:absolute;z-index:-1;inset:0 -.5rem;border-radius:12px;background:color-mix(in srgb,var(--md-cur) 16%,transparent);opacity:0;pointer-events:none;transition:opacity .15s}
+.md-row.is-sel::after{opacity:1}
+#md-screen.md-selmode .md-more{display:none}
+/* same glass as the Media header: 60% tint of the theme background + blur, transparent until the list scrolls; the real header is hidden while this one stands in for it */
+#md-selhdr{position:absolute;top:0;left:0;right:0;z-index:4;height:var(--md-hh);box-sizing:border-box;padding:env(safe-area-inset-top,0px) .75rem 0 .4rem;display:none;align-items:center;gap:.4rem;background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:var(--md-fg);border-bottom:1px solid var(--md-div);transition:background-color .2s,border-color .2s}
+#md-screen:not(.md-scrolled) #md-selhdr{background:transparent;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+#md-screen.md-selmode #md-hdr{visibility:hidden}
+#md-screen.md-selmode #md-selhdr{display:flex;animation:md-fade .15s}
+#md-seltitle{flex:1;min-width:0;font-size:1.05rem;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.md-selall{border:0;background:none;color:var(--md-cur);font-size:.9rem;font-weight:700;padding:.55rem .7rem;border-radius:10px;cursor:pointer;flex-shrink:0}
+.md-selall:active{background:var(--md-press)}
+#md-selbar{position:absolute;left:.6rem;right:.6rem;bottom:calc(.6rem + env(safe-area-inset-bottom,0px));z-index:5;display:none;gap:.2rem;padding:.35rem;border-radius:18px;background:color-mix(in srgb,var(--md-sheet) 70%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:var(--md-fg);border:1px solid var(--md-div);box-shadow:var(--md-msh)}
+#md-screen.md-selmode #md-selbar{display:flex;animation:md-up .22s cubic-bezier(.4,0,.2,1)}
+.md-selb{flex:1;min-width:0;height:52px;border:0;background:none;color:inherit;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.68rem;font-weight:700;cursor:pointer;padding:0 .2rem;white-space:nowrap}
+.md-selb span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.md-selb:active{background:var(--md-press)}
+.md-selb:disabled{opacity:.38;pointer-events:none}
+.md-selb[hidden]{display:none}
+.md-selb.dng{color:#d33}
+#md-screen.md-selmode .md-fab,#md-screen.md-selmode.has-mini #md-mini{display:none}
+#md-screen.md-selmode #md-body,#md-screen.md-selmode.has-mini.fab-tab #md-body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 6rem)}
 .md-eq{position:absolute;inset:0;display:none;align-items:center;justify-content:center;gap:2px;background:rgba(0,0,0,.5)}
 .md-eq b{display:block;width:3px;height:30%;background:#fff;border-radius:1px}
 .md-row.is-cur .md-eq{display:flex}
@@ -4867,7 +4888,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-btn{height:46px;border-radius:14px}
 .md-lt{font-size:1.85rem}
 #md-mini{border-radius:18px}
-@media (prefers-reduced-motion:reduce){#md-np-wash,#md-hdr{transition:none}}
+@media (prefers-reduced-motion:reduce){#md-np-wash,#md-hdr,#md-selhdr,.md-row::after{transition:none}#md-screen.md-selmode #md-selhdr,#md-screen.md-selmode #md-selbar{animation:none}}
 /* now playing: theme background, softly tinted by the artwork */
 #md-np{position:absolute;inset:0;z-index:6;background:var(--md-bg);color:var(--md-fg);transform:translateY(100%);visibility:hidden;transition:transform .36s cubic-bezier(.4,0,.2,1),visibility 0s .36s}
 #md-np.open{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.4,0,.2,1)}
@@ -4934,6 +4955,10 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-sh-head .md-t,.md-sh-head .md-s{line-height:1.35}
 .md-sh-title{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;position:sticky;top:var(--md-gh);z-index:2;background:var(--md-sheet);margin:0 -.9rem;padding:.1rem 1rem .6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .md-sh-title.ns{position:static}
+/* sheet-to-sheet swap: the new content fades in while a ghost copy of the old fades out and the box eases to its new height */
+#md-sheet-box.swap>:not(.md-grab):not(.md-ghost){animation:md-fade .2s ease-out}
+.md-ghost{position:absolute;left:.9rem;right:.9rem;pointer-events:none;animation:md-out .16s ease-in forwards}
+@keyframes md-out{from{opacity:1}to{opacity:0}}
 #md-sheet-box.simple{overflow-y:hidden}
 #md-sheet-box.simple .md-grab{position:static}
 .md-sh-row{display:flex;align-items:center;gap:.8rem;width:100%;padding:.85rem .3rem;background:none;border:0;border-top:1px solid var(--md-div);color:var(--md-fg);font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;box-sizing:border-box}
@@ -5151,6 +5176,8 @@ body.night .gc-tag{color:#c2c2c2}
 body.night .gc-play-icon,body.night .gc-trash,body.night .gc-edit,body.night .gc-img-more,body.night .gc-desc-time,body.night .gc-fav:not(.active){color:#a6a6a6}
 body.night #screen-settings{--st-sub:#b8bfc8}
 body.night #md-screen{--md-field:rgba(0,0,0,.3);--md-fieldsh:inset 0 2px 6px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.07);--md-fieldf:rgba(0,0,0,.45);--md-sub:#b8c0ca;--md-sub2:#9ca3ab;--md-pillf:#c8c8c8;--md-ico:#aab4c5;--md-ph:#a9afb8}
+body.night #md-screen .md-row::after{background:color-mix(in srgb,#fff 9%,transparent)}
+body.night #md-c-shuf:not(.on),body.night #md-c-rep:not(.on){color:var(--md-sub)}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 
@@ -5635,6 +5662,17 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
     <button class="md-ib" id="md-hact" data-act="newpl" aria-label="New playlist" hidden></button>
   </div>
   <div id="md-body"><div id="md-view"></div></div>
+  <div id="md-selhdr" aria-hidden="true">
+    <button class="md-ib" id="md-selx" data-act="selexit" aria-label="Cancel selection" type="button"></button>
+    <div id="md-seltitle">Select items</div>
+    <button class="md-selall" id="md-selall" data-act="selall" type="button">All</button>
+  </div>
+  <div id="md-selbar" role="toolbar" aria-label="Selection actions">
+    <button class="md-selb" id="md-selb-play" data-act="selplay" type="button"></button>
+    <button class="md-selb" id="md-selb-pl" data-act="selpl" type="button"></button>
+    <button class="md-selb" id="md-selb-q" data-act="selq" type="button" hidden></button>
+    <button class="md-selb dng" id="md-selb-rm" data-act="selrm" type="button" hidden></button>
+  </div>
   <button class="md-fab" id="md-fab" data-act="newpl" aria-label="New playlist" type="button"></button>
   <div id="md-mini" data-act="npopen" role="button" aria-label="Open player">
     <div id="md-mini-th"></div>
@@ -14246,6 +14284,63 @@ function _nbMergeIncomingTheme(remote) {
   if (editor && editor.classList.contains('active') && typeof nbRenderCanvas === 'function') nbRenderCanvas();
   return true;
 }
+// ---- Cross-device Media playlists ---------------------------------------
+// Rides in the same account backup as an extra `playlists` field ({ list, deleted }); the worker stores the
+// blob as-is. Merged per playlist by `u` (last edit, ms): the newest copy of a playlist wins as a whole.
+// A delete leaves a timestamped tombstone so a stale copy on another device can't bring the playlist back.
+// Storage is per account (the same key the Media screen reads), so one account's playlists never reach another's backup.
+const NB_PL_KEY_PREFIX = 'nb_media_pl_v1_';
+const NB_PL_DEL_PREFIX = 'nb_media_pl_del_v1_';
+function _nbPlOwner() { let a = null; try { a = nbAccount(); } catch (e) {} return (a && a.sub) ? a.sub : 'local'; }
+function _nbPlKey() { return NB_PL_KEY_PREFIX + _nbPlOwner(); }
+function _nbPlLoad() { try { const a = JSON.parse(localStorage.getItem(_nbPlKey()) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function _nbPlStamp(p) { return (p && (p.u || p.c)) || 0; } // a playlist from before `u` existed counts as last edited when created
+function _nbPlLoadTombs() { try { const m = JSON.parse(localStorage.getItem(NB_PL_DEL_PREFIX + _nbPlOwner()) || '{}'); return (m && typeof m === 'object' && !Array.isArray(m)) ? m : {}; } catch (e) { return {}; } }
+function _nbPlSaveTombs(m) { try { localStorage.setItem(NB_PL_DEL_PREFIX + _nbPlOwner(), JSON.stringify(m)); } catch (e) {} }
+function _nbPlMarkDeleted(id) { const m = _nbPlLoadTombs(); m[id] = Date.now(); _nbPlSaveTombs(m); }
+function _nbPlaylistsForSync() {
+  return { list: _nbPlLoad().map(p => Object.assign({}, p, { u: _nbPlStamp(p) })), deleted: _nbPlLoadTombs() };
+}
+function _nbPlCleanIncoming(r) {
+  if (!r || typeof r.id !== 'string' || !r.id || typeof r.name !== 'string' || !Array.isArray(r.items)) return null;
+  const items = [];
+  r.items.forEach(o => {
+    if (o && typeof o.k === 'string' && typeof o.p === 'string' && typeof o.id === 'string') {
+      items.push({ k: o.k, p: o.p, type: String(o.type || ''), id: o.id, spk: String(o.spk || ''), u: String(o.u || ''), nt: String(o.nt || ''), ns: String(o.ns || ''), na: String(o.na || '') });
+    }
+  });
+  return { id: r.id, name: r.name.slice(0, 60), items, c: Number(r.c) || 0, u: Number(r.u) || Number(r.c) || 0 };
+}
+// Returns true when the local playlists changed (the Media screen then reloads them).
+function _nbMergeIncomingPlaylists(remote) {
+  if (!remote || typeof remote !== 'object') return false;
+  const tombs = _nbPlLoadTombs();
+  let tombsChanged = false;
+  const rd = (remote.deleted && typeof remote.deleted === 'object') ? remote.deleted : {};
+  Object.keys(rd).forEach(id => { if (typeof rd[id] === 'number' && !(tombs[id] >= rd[id])) { tombs[id] = rd[id]; tombsChanged = true; } });
+  const byId = new Map(_nbPlLoad().map(p => [p.id, p]));
+  let changed = false;
+  (Array.isArray(remote.list) ? remote.list : []).forEach(raw => {
+    const r = _nbPlCleanIncoming(raw);
+    if (!r) return;
+    if (tombs[r.id] >= r.u) return; // deleted after its last edit
+    const l = byId.get(r.id);
+    if (!l || r.u > _nbPlStamp(l)) { byId.set(r.id, r); changed = true; }
+  });
+  const merged = [...byId.values()].filter(p => {
+    const d = tombs[p.id];
+    if (d === undefined) return true;
+    if (d >= _nbPlStamp(p)) { changed = true; return false; }
+    delete tombs[p.id]; tombsChanged = true; // edited here after the delete elsewhere: it lives on
+    return true;
+  });
+  if (changed) {
+    merged.sort((a, b) => (b.c || 0) - (a.c || 0)); // newest first, the order the Media screen keeps
+    try { localStorage.setItem(_nbPlKey(), JSON.stringify(merged)); } catch (e) { _nbLog('sync playlists', e); return false; }
+  }
+  if (tombsChanged) _nbPlSaveTombs(tombs);
+  return changed;
+}
 // A favorite/theme change isn't a note edit, so nothing else would trigger a
 // sync for it. Debounced so a burst of taps is one round trip.
 let _nbPushSoonTimer = null;
@@ -14476,6 +14571,7 @@ async function nbSyncPush(showFeedback) {
   const payload = JSON.stringify(Object.assign({
     app: 'Bluebook', version: imgRes.legacy ? 1 : 2, notes: notes.map(_nbStripLocalSyncFields), deletedIds,
     favorites: _nbFavoritesForSync(new Set(notes.map(n => n.id))),
+    playlists: _nbPlaylistsForSync(),
     settings: { theme: { v: themeNow, t: _nbThemeTs() } }
   }, imgRes.legacy ? { images } : {}));
   if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) return _nbSyncTooLarge(showFeedback);
@@ -14586,6 +14682,7 @@ async function nbSyncPull(showFeedback) {
     _nbSaveDeletedIds([...tombstones.values()]);
     const favChanged = _nbMergeIncomingFavorites(data && data.favorites);
     _nbMergeIncomingTheme(data && data.settings && data.settings.theme);
+    if (_nbMergeIncomingPlaylists(data && data.playlists)) { try { if (window.nbMediaPlaylistsChanged) window.nbMediaPlaylistsChanged(); } catch (e) { _nbLog('pull: playlists', e); } }
     let existing = nbLoadNotes();
     const indexById = new Map(existing.map((n, i) => [n.id, i]));
     let count = 0;
@@ -23854,6 +23951,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   IC.link = function (s) { return S('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>', s, 1.8); };
   IC.refresh = function (s) { return S('<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>', s, 2); };
   IC.doc = function (s) { return S('<path d="M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V7z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/>', s, 1.8); };
+  IC.close = function (s) { return S('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>', s, 2); };
   IC.ext = function (s) { return S('<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>', s, 1.8); };
 
   /* ---------- state ---------- */
@@ -23863,7 +23961,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     cur: null, ps: { playing: false, pos: 0, dur: 0, real: false, t0: 0 },
     frame: null, fplat: '', dead: true, endFired: false, np: false, dragging: false, dragFrac: 0,
     viewKeys: [], viewCtx: '', timer: 0, metaTimer: 0, sheetCtx: null, scanning: false,
-    refreshing: false, poll: 0, lastScroll: 0, touching: false, dsig: ''
+    refreshing: false, poll: 0, lastScroll: 0, touching: false, dsig: '',
+    sel: { on: false, keys: [] }, lpSup: 0,
+    sheetHtml: null, sheetStack: [], swapT: 0
   };
   var meta = {};
   try { meta = JSON.parse(localStorage.getItem(META_KEY) || '{}') || {}; } catch (e) { meta = {}; }
@@ -23878,9 +23978,12 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (ks.length > 1500) ks.slice(0, ks.length - 1200).forEach(function (k) { delete meta[k]; });
     try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch (e) {}
   }
-  function plKey() { var a = null; try { a = nbAccount(); } catch (e) {} return 'nb_media_pl_v1_' + ((a && a.sub) ? a.sub : 'local'); }
-  function loadPl() { try { var a = JSON.parse(localStorage.getItem(plKey()) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-  function savePl() { try { localStorage.setItem(plKey(), JSON.stringify(MD.pl)); } catch (e) { showToast('Couldn\u2019t save. Storage may be full.'); } }
+  function plKey() { return _nbPlKey(); } // storage, tombstones and merge live with the account sync code (_nbMergeIncomingPlaylists)
+  function loadPl() { return _nbPlLoad(); }
+  function savePl() {
+    try { localStorage.setItem(plKey(), JSON.stringify(MD.pl)); } catch (e) { showToast('Couldn\u2019t save. Storage may be full.'); return; }
+    try { _nbSchedulePullThenPush(); } catch (e) {} // a playlist change isn't a note edit; push it to the account backup
+  }
   function toast(m) { try { showToast(m); } catch (e) {} }
 
   /* ---------- link parsing ---------- */
@@ -24112,6 +24215,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function setSrc(v) {
     if (v === MD.src) return;
     if (v === 'likes' && !signedIn()) { toast('Sign in to see media from notes you\u2019ve liked'); return; }
+    exitSel();
     MD.src = v; view().sy = 0;
     scan(); renderView(); queueVisibleMeta();
     if (v === 'likes') loadLikes();
@@ -24642,7 +24746,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function rowHtml(it, ctx) {
     var wide = it.type === 'video';
-    return '<div class="md-row' + (wide ? ' md-row-wide' : '') + (MD.cur && MD.cur.k === it.k ? ' is-cur' : '') + '" data-k="' + esc(it.k) + '" role="button" tabindex="0">' + thumbHtml(it, wide ? 'wide' : 'sq') +
+    return '<div class="md-row' + (wide ? ' md-row-wide' : '') + (MD.cur && MD.cur.k === it.k ? ' is-cur' : '') + (MD.sel.on && MD.sel.keys.indexOf(it.k) >= 0 ? ' is-sel' : '') + '" data-k="' + esc(it.k) + '" role="button" tabindex="0"' + (MD.sel.on ? ' aria-pressed="' + (MD.sel.keys.indexOf(it.k) >= 0) + '"' : '') + '>' + thumbHtml(it, wide ? 'wide' : 'sq') +
       '<div class="md-tx"><div class="md-t">' + esc(titleOf(it)) + '</div><div class="md-s">' + esc(subOf(it)) + '</div></div>' +
       '<button class="md-more" data-act="more" data-k="' + esc(it.k) + '" aria-label="More options">' + IC.more(20) + '</button></div>';
   }
@@ -24820,6 +24924,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var curScan = box.querySelector(':scope > .md-empty.scanning'), newScan = /^<div class="md-empty scanning">.*?<b>([^<]*)<\/b>/.exec(h);
     if (!(curScan && newScan && curScan.querySelector('b') && curScan.querySelector('b').textContent === newScan[1])) box.innerHTML = h;
     markCur(box);
+    if (MD.sel.on) selUI();
     syncFab();
     var st = $('md-sticky');
     if (st) {
@@ -24857,14 +24962,64 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function queueVisibleMeta() { MD.items.forEach(function (it) { queueMeta(it); }); MD.pl.forEach(function (p) { p.items.forEach(function (o) { queueMeta(MD.items.get(o.k) || fromStored(o)); }); }); }
 
   /* ---------- sheets ---------- */
-  function openSheet(html) { $('md-sheet-box').innerHTML = '<div class="md-grab"><span></span></div>' + html; $('md-sheet-box').classList.toggle('simple', !!$('md-sheet-box').querySelector('.md-sh-title.ns')); $('md-sheet-box').scrollTop = 0; $('md-sheet').classList.add('open'); var i = $('md-sheet-box').querySelector('input'); if (i) setTimeout(function () { try { i.focus({ preventScroll: true }); i.select(); $('md-screen').scrollTop = 0; } catch (e) {} }, 320); }
-  function closeSheet() { $('md-sheet').classList.remove('open'); var bx = $('md-sheet-box'); bx.innerHTML = ''; bx.style.transform = ''; bx.style.transition = ''; MD.sheetCtx = null; }
+  // One sheet box. Opening a sheet while another is showing swaps the content in place: the old content fades out as a ghost copy,
+  // the new one fades in and the box eases to its new height. The sheet that was showing is kept, so Cancel / Back can return to it.
+  function openSheet(html, noPush) {
+    var sh = $('md-sheet'), bx = $('md-sheet-box');
+    var swap = sh.classList.contains('open') && MD.sheetHtml != null, h0 = 0, ghost = null;
+    if (swap) {
+      if (!noPush) MD.sheetStack.push(MD.sheetHtml);
+      h0 = bx.offsetHeight;
+      sheetSwapEnd();
+      var g = bx.querySelector('.md-grab');
+      ghost = document.createElement('div');
+      ghost.className = 'md-ghost'; ghost.setAttribute('aria-hidden', 'true'); ghost.setAttribute('inert', '');
+      ghost.style.top = (g ? g.offsetHeight : 0) + 'px';
+      ghost.innerHTML = MD.sheetHtml.replace(/ id="[^"]*"/g, '');
+    }
+    MD.sheetHtml = html;
+    bx.innerHTML = '<div class="md-grab"><span></span></div>' + html;
+    bx.classList.toggle('simple', !!bx.querySelector('.md-sh-title.ns'));
+    bx.scrollTop = 0;
+    var i = bx.querySelector('input');
+    sh.classList.add('open');
+    if (swap) sheetSwap(bx, h0, ghost);
+    if (i) setTimeout(function () { try { i.focus({ preventScroll: true }); i.select(); $('md-screen').scrollTop = 0; } catch (e) {} }, 320);
+  }
+  function sheetSwap(bx, h0, ghost) {
+    var still = false;
+    try { still = window.matchMedia('(prefers-reduced-motion:reduce)').matches || document.body.classList.contains('nb-reduce-motion'); } catch (e) {}
+    if (still) return;
+    var h1 = bx.offsetHeight;
+    bx.classList.add('swap');
+    bx.appendChild(ghost);
+    if (Math.abs(h1 - h0) > 1) {
+      bx.style.height = h0 + 'px'; bx.style.overflowY = 'hidden';
+      void bx.offsetHeight;
+      bx.style.transition = 'height .22s cubic-bezier(.4,0,.2,1)';
+      bx.style.height = h1 + 'px';
+    }
+    clearTimeout(MD.swapT);
+    MD.swapT = setTimeout(sheetSwapEnd, 250);
+  }
+  function sheetSwapEnd() {
+    clearTimeout(MD.swapT); MD.swapT = 0;
+    var bx = $('md-sheet-box'), gs = bx.querySelectorAll('.md-ghost');
+    Array.prototype.forEach.call(gs, function (n) { n.parentNode.removeChild(n); });
+    bx.classList.remove('swap'); bx.style.height = ''; bx.style.overflowY = ''; bx.style.transition = '';
+  }
+  // Back one sheet (Cancel on a confirm, the Android back button); closes when there is nothing behind it.
+  function sheetBack() {
+    if (MD.sheetStack.length) openSheet(MD.sheetStack.pop(), true); else closeSheet();
+  }
+  function closeSheet() { sheetSwapEnd(); $('md-sheet').classList.remove('open'); var bx = $('md-sheet-box'); bx.innerHTML = ''; bx.style.transform = ''; bx.style.transition = ''; MD.sheetCtx = null; MD.sheetHtml = null; MD.sheetStack = []; }
   function sheetRow(act, attrs, icon, label, extra, cls) { return '<button class="md-sh-row' + (cls ? ' ' + cls : '') + '" data-act="' + act + '" ' + attrs + '>' + icon + '<span>' + esc(label) + '</span>' + (extra || '') + '</button>'; }
   function itemSheet(k, inPl) {
     var it = getIt(k); if (!it) return;
     MD.sheetCtx = { k: k, pl: inPl || '' };
     var h = '<div class="md-sh-head">' + thumbHtml(it, 'sm', true, true) + '<div class="md-tx"><div class="md-t">' + esc(titleOf(it)) + '</div><div class="md-s">' + esc(subOf(it)) + '</div></div></div>';
     h += sheetRow('addpl', 'data-k="' + esc(k) + '"', IC.plus(18), 'Add to playlist');
+    h += sheetRow('selstart', 'data-k="' + esc(k) + '"', IC.check(18), 'Select');
     if (MD.queue.list.length) {
       h += sheetRow('playnext', 'data-k="' + esc(k) + '"', IC.next(18), 'Play next');
       h += sheetRow('addq', 'data-k="' + esc(k) + '"', IC.list(18), 'Add to queue');
@@ -24894,6 +25049,73 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function newPlSheet(k) {
     openSheet('<div class="md-sh-title ns">New playlist</div><input class="md-sh-in" id="md-new-name" placeholder="Playlist name" maxlength="60" autocomplete="off"><button class="md-btn" data-act="plcreate" data-k="' + esc(k || '') + '" style="width:100%">Create</button>');
   }
+  /* ---------- multi-select ---------- */
+  // Long-press a row (or the three-dot menu > Select) to start; tap rows to toggle. Items are added in the order they were picked.
+  function selHas(k) { return MD.sel.keys.indexOf(k) >= 0; }
+  function selUI() {
+    var scr = $('md-screen'), n = MD.sel.keys.length, vk = MD.viewKeys || [], all = vk.length > 0, v = view();
+    Array.prototype.forEach.call(scr.querySelectorAll('#md-view .md-row[data-k]'), function (row) {
+      var on = MD.sel.on && selHas(row.getAttribute('data-k'));
+      row.classList.toggle('is-sel', !!on);
+      if (MD.sel.on) row.setAttribute('aria-pressed', on ? 'true' : 'false'); else row.removeAttribute('aria-pressed');
+    });
+    vk.forEach(function (k) { if (!selHas(k)) all = false; });
+    $('md-seltitle').textContent = n ? n + ' selected' : 'Select items';
+    var sa = $('md-selall'); sa.textContent = all ? 'None' : 'All'; sa.disabled = !vk.length;
+    $('md-selhdr').setAttribute('aria-hidden', MD.sel.on ? 'false' : 'true');
+    ['md-selb-play', 'md-selb-pl', 'md-selb-q', 'md-selb-rm'].forEach(function (id) { $(id).disabled = !n; });
+    $('md-selb-q').hidden = !MD.queue.list.length;
+    $('md-selb-rm').hidden = v.n !== 'pl';
+  }
+  function enterSel(k) {
+    MD.sel.on = true; MD.sel.keys = k ? [k] : [];
+    $('md-screen').classList.add('md-selmode'); selUI();
+  }
+  function exitSel() {
+    if (!MD.sel.on) return;
+    MD.sel.on = false; MD.sel.keys = [];
+    $('md-screen').classList.remove('md-selmode'); selUI();
+  }
+  function toggleSel(k) {
+    var i = MD.sel.keys.indexOf(k);
+    if (i >= 0) MD.sel.keys.splice(i, 1); else MD.sel.keys.push(k);
+    selUI();
+  }
+  // All / None apply to what is on screen (the current tab, search and page); picks made elsewhere stay.
+  function selAll() {
+    var ks = MD.viewKeys || [], sel = MD.sel.keys;
+    var all = ks.length > 0 && ks.every(function (k) { return sel.indexOf(k) >= 0; });
+    if (all) MD.sel.keys = sel.filter(function (k) { return ks.indexOf(k) < 0; });
+    else ks.forEach(function (k) { if (sel.indexOf(k) < 0) sel.push(k); });
+    selUI();
+  }
+  function addPlSheetMulti() {
+    var ks = MD.sel.keys.filter(function (k) { return !!getIt(k); });
+    if (!ks.length) return;
+    var h = '<div class="md-sh-title">Add ' + ks.length + (ks.length === 1 ? ' item' : ' items') + ' to playlist</div>';
+    h += sheetRow('newpl', 'data-k="*"', IC.plus(18), 'New playlist');
+    MD.pl.forEach(function (p) {
+      var inP = {}; p.items.forEach(function (o) { inP[o.k] = 1; });
+      var all = ks.every(function (k) { return inP[k]; });
+      h += sheetRow('pladd', 'data-id="' + esc(p.id) + '" data-k="*"', IC.list(18), p.name, all ? IC.check(18) : '<em>' + p.items.length + '</em>');
+    });
+    openSheet(h);
+  }
+  // data-k="*" in the playlist sheets stands for the whole selection.
+  function addMany(pid) {
+    var p = plById(pid); if (!p) return 0;
+    var have = {}, n = 0, want = 0;
+    p.items.forEach(function (o) { have[o.k] = 1; });
+    MD.sel.keys.forEach(function (k) {
+      var it = getIt(k); if (!it) return;
+      want++;
+      if (have[k]) return;
+      have[k] = 1; p.items.push(strip(it)); n++;
+    });
+    if (n) { p.u = Date.now(); savePl(); syncLiveQueue(false); }
+    toast(!n ? (want === 1 ? 'Already in ' : 'All already in ') + p.name : 'Added ' + n + (n === 1 ? ' item' : ' items') + ' to ' + p.name + (want > n ? ' (' + (want - n) + ' already there)' : ''));
+    return n;
+  }
   function plMenuSheet(id) {
     var p = plById(id); if (!p) return;
     openSheet('<div class="md-sh-title ns">' + esc(p.name) + '</div>' + sheetRow('plrename', 'data-id="' + esc(id) + '"', IC.edit(18), 'Rename') + sheetRow('pldelask', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete playlist', '', 'dng'));
@@ -24901,7 +25123,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function createPl(name) {
     name = (name || '').trim().slice(0, 60);
     if (!name) { toast('Name your playlist'); return null; }
-    var p = { id: 'pl' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: name, items: [], c: Date.now() };
+    var p = { id: 'pl' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: name, items: [], c: Date.now(), u: Date.now() };
     MD.pl.unshift(p); savePl();
     return p;
   }
@@ -24909,7 +25131,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var p = plById(pid), it = getIt(k);
     if (!p || !it) return false;
     if (p.items.some(function (o) { return o.k === k; })) { toast('Already in ' + p.name); return false; }
-    p.items.push(strip(it)); savePl(); toast('Added to ' + p.name); syncLiveQueue(false);
+    p.items.push(strip(it)); p.u = Date.now(); savePl(); toast('Added to ' + p.name); syncLiveQueue(false);
     return true;
   }
 
@@ -24940,6 +25162,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function closeNP() { $('md-np').classList.remove('open'); $('md-np').setAttribute('aria-hidden', 'true'); MD.np = false; }
   function go(n, id) {
+    exitSel();
     var v = view(); v.sy = $('md-body').scrollTop;
     MD.stack.push({ n: n, id: id }); renderView();
   }
@@ -25072,19 +25295,46 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       case 'scan': startScan(el); break;
       case 'refresh': refreshNow(); break;
       case 'src': setSrc(el.getAttribute('data-v')); break;
-      case 'tab': MD.tab = el.getAttribute('data-v'); view().sy = 0; renderView(); break;
+      case 'tab': exitSel(); MD.tab = el.getAttribute('data-v'); view().sy = 0; renderView(); break;
       case 'more': itemSheet(k, view().n === 'pl' ? view().id : ''); break;
-      case 'playall': if (MD.viewKeys.length) playKeys(MD.viewKeys, 0, MD.viewCtx, false, curSrc()); break;
-      case 'shuffleall': if (MD.viewKeys.length) playKeys(MD.viewKeys, Math.floor(Math.random() * MD.viewKeys.length), MD.viewCtx, true, curSrc()); break;
+      case 'playall': exitSel(); if (MD.viewKeys.length) playKeys(MD.viewKeys, 0, MD.viewCtx, false, curSrc()); break;
+      case 'shuffleall': exitSel(); if (MD.viewKeys.length) playKeys(MD.viewKeys, Math.floor(Math.random() * MD.viewKeys.length), MD.viewCtx, true, curSrc()); break;
       case 'newpl': newPlSheet(k); break;
       case 'openpl': go('pl', id); break;
       case 'openal': go('al', id); break;
       case 'plmenu': plMenuSheet(view().id); break;
       case 'addpl': addPlSheet(k); break;
-      case 'pladd': if (addTo(id, k)) { closeSheet(); fillList(); } else closeSheet(); break;
+      case 'selstart': closeSheet(); enterSel(k); break;
+      case 'selexit': exitSel(); break;
+      case 'selall': selAll(); break;
+      case 'selplay':
+        var sk = MD.sel.keys.slice(); if (!sk.length) break;
+        exitSel(); playKeys(sk, 0, MD.viewCtx, false, curSrc()); break;
+      case 'selpl': addPlSheetMulti(); break;
+      case 'selq':
+        if (!MD.queue.list.length) break;
+        var sq = MD.sel.keys.filter(function (x) { return !!getIt(x); });
+        sq.forEach(function (x) { MD.queue.list.push(x); MD.queue.lm.push(true); MD.queue.base.push(x); MD.queue.bm.push(true); });
+        exitSel(); syncQueue(); toast(sq.length === 1 ? 'Added to queue' : 'Added ' + sq.length + ' to queue'); break;
+      case 'selrm':
+        if (view().n !== 'pl' || !MD.sel.keys.length) break;
+        openSheet('<div class="md-sh-title ns">Remove ' + (MD.sel.keys.length === 1 ? 'item' : MD.sel.keys.length + ' items') + '?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">' + (MD.sel.keys.length === 1 ? 'It will be' : 'They will be') + ' removed from this playlist. Your songs and videos stay in your notes.</div>' + sheetRow('selrmgo', '', IC.trash(18), 'Remove', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
+        break;
+      case 'selrmgo':
+        if (view().n !== 'pl') { closeSheet(); break; }
+        p = plById(view().id); if (!p) { closeSheet(); break; }
+        closeSheet();
+        var rm = MD.sel.keys.slice(), had = p.items.length;
+        p.items = p.items.filter(function (o) { return rm.indexOf(o.k) < 0; });
+        if (p.items.length !== had) { p.u = Date.now(); savePl(); }
+        exitSel(); fillList(); syncLiveQueue(true);
+        toast('Removed ' + (had - p.items.length) + ((had - p.items.length) === 1 ? ' item' : ' items')); break;
+      case 'pladd':
+        if (k === '*') { addMany(id); closeSheet(); exitSel(); fillList(); break; }
+        if (addTo(id, k)) { closeSheet(); fillList(); } else closeSheet(); break;
       case 'plcreate':
         p = createPl($('md-new-name') ? $('md-new-name').value : '');
-        if (p) { if (k) addTo(p.id, k); closeSheet(); renderView(true); }
+        if (p) { if (k === '*') { addMany(p.id); exitSel(); } else if (k) addTo(p.id, k); closeSheet(); renderView(true); }
         break;
       case 'plrename':
         p = plById(id); if (!p) break;
@@ -25093,19 +25343,24 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       case 'plrenamego':
         p = plById(id); var nm = ($('md-new-name').value || '').trim().slice(0, 60);
         if (!p || !nm) { toast('Name your playlist'); break; }
-        p.name = nm; savePl(); closeSheet(); renderView(true); break;
+        p.name = nm; p.u = Date.now(); savePl(); closeSheet(); renderView(true); break;
       case 'pldelask':
         p = plById(id); if (!p) break;
-        openSheet('<div class="md-sh-title ns">Delete playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">\u201c' + esc(p.name) + '\u201d will be removed. Your songs and videos stay in your notes.</div>' + sheetRow('pldel', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete', '', 'dng') + sheetRow('sheetclose', '', IC.check(18), 'Cancel'));
+        openSheet('<div class="md-sh-title ns">Delete playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">\u201c' + esc(p.name) + '\u201d will be removed. Your songs and videos stay in your notes.</div>' + sheetRow('pldel', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
         break;
       case 'pldel':
-        MD.pl = MD.pl.filter(function (x) { return x.id !== id; }); savePl(); closeSheet();
+        MD.pl = MD.pl.filter(function (x) { return x.id !== id; }); _nbPlMarkDeleted(id); savePl(); closeSheet();
         var wasPl = view().n === 'pl';
         if (wasPl) MD.stack.pop();
         renderView(!wasPl); break;
       case 'rmfrom':
         p = plById(id); if (!p) break;
-        p.items = p.items.filter(function (o) { return o.k !== k; }); savePl(); closeSheet(); fillList(); syncLiveQueue(true); break;
+        var rit = getIt(k);
+        openSheet('<div class="md-sh-title ns">Remove from playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">' + (rit ? '\u201c' + esc(titleOf(rit)) + '\u201d' : 'This item') + ' will be removed from \u201c' + esc(p.name) + '\u201d. Your song or video stays in your notes.</div>' + sheetRow('rmfromgo', 'data-k="' + esc(k) + '" data-id="' + esc(id) + '"', IC.trash(18), 'Remove', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
+        break;
+      case 'rmfromgo':
+        p = plById(id); if (!p) { closeSheet(); break; }
+        p.items = p.items.filter(function (o) { return o.k !== k; }); p.u = Date.now(); savePl(); closeSheet(); fillList(); syncLiveQueue(true); break;
       case 'playnext':
         var q = MD.queue;
         q.list.splice(q.i + 1, 0, k); q.lm.splice(q.i + 1, 0, true); q.base.push(k); q.bm.push(true); closeSheet(); syncQueue(); toast('Playing next'); break;
@@ -25122,6 +25377,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         if (ci && ci.u) copyText(ci.u);
         break;
       case 'sheetclose': closeSheet(); break;
+      case 'sheetback': sheetBack(); break;
       case 'npopen': openNP(); break;
       case 'npclose': closeNP(); break;
       case 'npmore': if (MD.cur) itemSheet(MD.cur.k, ''); break;
@@ -25181,6 +25437,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function close() {
     if (!MD.open) return;
+    exitSel();
     MD.open = false; clearInterval(MD.timer); stopPoll();
     $('md-screen').classList.remove('open'); $('md-screen').setAttribute('aria-hidden', 'true');
     try { unlockScroll(); } catch (e) {}
@@ -25191,8 +25448,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   window.nbMediaBack = function () {
     if (!MD.open) return false;
     var sv = $('story-viewer-overlay'); if (sv && sv.classList.contains('open')) { nbCloseStory(); return true; }
-    if ($('md-sheet').classList.contains('open')) { closeSheet(); return true; }
+    if ($('md-sheet').classList.contains('open')) { sheetBack(); return true; }
     if (MD.np) { closeNP(); return true; }
+    if (MD.sel.on) { exitSel(); return true; }
     if (MD.stack.length > 1) { MD.stack.pop(); renderView(); return true; }
     close(); return true;
   };
@@ -25273,6 +25531,13 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function hookEditorFrame() { EDGE_FRAMES.forEach(function (id) { hookFrame($(id)); }); }
   window.nbMediaHookFrame = hookEditorFrame;
+  // A pull merged playlists from another device: reload them (a stale MD.pl would overwrite the merge on the next save) and redraw if open.
+  window.nbMediaPlaylistsChanged = function () {
+    MD.pl = loadPl();
+    MD.pit = new Map();
+    MD.pl.forEach(function (p) { p.items.forEach(function (o) { MD.pit.set(o.k, fromStored(o)); }); });
+    if (MD.open) redrawQuiet();
+  };
 
   /* ---------- wiring ---------- */
   function init() {
@@ -25288,6 +25553,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     (function () { var f = function () { document.body.classList.toggle('nb-scrolled', (window.pageYOffset || document.documentElement.scrollTop || 0) > 2); }; window.addEventListener('scroll', f, { passive: true }); f(); })();
     $('md-fab').innerHTML = IC.plus(26);
     $('md-refresh').innerHTML = IC.refresh(16);
+    $('md-selx').innerHTML = IC.close(22);
+    $('md-selb-play').innerHTML = IC.play(18) + '<span>Play</span>';
+    $('md-selb-pl').innerHTML = IC.plus(18) + '<span>Add to playlist</span>';
+    $('md-selb-q').innerHTML = IC.list(18) + '<span>Add to queue</span>';
+    $('md-selb-rm').innerHTML = IC.trash(18) + '<span>Remove</span>';
     (function () {
       var bd = $('md-body'), on = function () { MD.touching = true; MD.lastScroll = NOW(); }, off = function () { MD.touching = false; MD.lastScroll = NOW(); };
       bd.addEventListener('touchstart', on, { passive: true });
@@ -25295,23 +25565,47 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       bd.addEventListener('touchcancel', off, { passive: true });
       document.addEventListener('visibilitychange', function () { if (!document.hidden) softRefresh(); });
     })();
+    // Long-press a song or video to start selecting (a second one while selecting toggles it). A move or a scroll cancels it.
+    (function () {
+      var vw = $('md-view'), tm = 0, sx = 0, sy = 0, pk = '';
+      function clr() { if (tm) { clearTimeout(tm); tm = 0; } pk = ''; }
+      vw.addEventListener('pointerdown', function (e) {
+        if (e.button > 0 || !e.target.closest) return;
+        var row = e.target.closest('.md-row[data-k]');
+        clr();
+        if (!row || e.target.closest('.md-more')) return;
+        sx = e.clientX; sy = e.clientY; pk = row.getAttribute('data-k');
+        tm = setTimeout(function () {
+          tm = 0; var k = pk; pk = '';
+          if (!k) return;
+          MD.lpSup = 1;
+          if (MD.sel.on) toggleSel(k); else enterSel(k);
+          try { if (navigator.vibrate) navigator.vibrate(12); } catch (x) {}
+        }, 420);
+      });
+      vw.addEventListener('pointermove', function (e) { if (tm && (Math.abs(e.clientX - sx) > 9 || Math.abs(e.clientY - sy) > 9)) clr(); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { vw.addEventListener(n, clr); });
+      vw.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.md-row')) e.preventDefault(); });
+    })();
     scr.querySelector('[data-act="next"]').innerHTML = IC.next(22);
     scr.querySelector('#md-np-ctl [data-act="prev"]').innerHTML = IC.prev(28);
     scr.querySelector('#md-np-ctl [data-act="next"]').innerHTML = IC.next(28);
     scr.querySelector('[data-act="npclose"]').innerHTML = IC.down(26);
     scr.querySelector('[data-act="npmore"]').innerHTML = IC.more(22);
     $('md-c-shuf').innerHTML = IC.shuf(22); $('md-c-rep').innerHTML = IC.rep(22); $('md-c-pp').innerHTML = IC.play(30);
+    scr.addEventListener('pointerdown', function () { MD.lpSup = 0; }, true);
     scr.addEventListener('click', function (e) {
+      if (MD.lpSup) { MD.lpSup = 0; return; } // the release of a long-press that just started selecting
       var t = e.target.closest ? e.target.closest('[data-act]') : null;
       if (t && scr.contains(t)) { act(t.getAttribute('data-act'), t); return; }
       var row = e.target.closest ? e.target.closest('#md-view .md-row[data-k]') : null;
-      if (row) playFromRow(row.getAttribute('data-k'));
+      if (row) { if (MD.sel.on) toggleSel(row.getAttribute('data-k')); else playFromRow(row.getAttribute('data-k')); }
     });
     scr.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;
       if (e.target && e.target.id === 'md-new-name') { var b = $('md-sheet-box').querySelector('[data-act="plcreate"],[data-act="plrenamego"]'); if (b) b.click(); return; }
       var row = e.target.closest ? e.target.closest('#md-view .md-row[data-k]') : null;
-      if (row && e.target === row) playFromRow(row.getAttribute('data-k'));
+      if (row && e.target === row) { if (MD.sel.on) toggleSel(row.getAttribute('data-k')); else playFromRow(row.getAttribute('data-k')); }
     });
     scr.addEventListener('input', function (e) {
       if (e.target && e.target.id === 'md-q') { MD.q = e.target.value; fillList(); }
