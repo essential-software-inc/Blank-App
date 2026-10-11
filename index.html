@@ -15965,6 +15965,8 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit';
       overlay.style.display = 'flex';
+      // Page behind a pending dialog must not scroll.
+      document.documentElement.style.overflow = 'hidden';
       // Restart the entrance animation on every open — the elements stay
       // mounted between opens, so without this reset the animation only
       // plays once and every later open just snaps straight to its end
@@ -15978,6 +15980,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
     }
     function closeDialog() {
       overlay.style.display = 'none';
+      document.documentElement.style.overflow = '';
       closeSelect();
       if (previouslyFocused && typeof previouslyFocused.focus === 'function') previouslyFocused.focus();
     }
@@ -25252,6 +25255,34 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window._mdTest = { parseLink: parseLink, MD: MD, scan: scan, open: open, close: close, AD: AD, step: step, act: act, playKeys: playKeys };
+})();
+</script>
+
+<script>
+/* Dialog scroll lock: while any dialog/sheet is pending, the page underneath must not scroll.
+   Several openers (confirm dialogs, sign out, delete, restore, unpublish...) never called lockScroll(),
+   so this watches every "-overlay" element's open state and keeps lockScroll()/unlockScroll() in sync.
+   Full-screen layers that manage their own lock (Media, Account) are respected. */
+(function () {
+  var sel = 'div[id$="-overlay"].open';
+  var own = '#md-screen.open, #account-screen.open';
+  function sync() {
+    try {
+      if (document.querySelector(sel)) lockScroll();
+      else if (!document.querySelector(own)) unlockScroll();
+    } catch (e) {}
+  }
+  var mo = new MutationObserver(function (muts) {
+    for (var i = 0; i < muts.length; i++) {
+      var t = muts[i].target;
+      if (t.id && /-overlay$/.test(t.id)) { sync(); return; }
+    }
+  });
+  function start() {
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
+    sync();
+  }
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 })();
 </script>
 
