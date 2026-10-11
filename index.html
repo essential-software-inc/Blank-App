@@ -938,12 +938,18 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 :root { --skel-a: #eceff4; --skel-b: #f8f9fc; }
 body.night { --skel-a: #1f1f22; --skel-b: #2e2e33; }
 body.pink { --skel-a: #f8e3ec; --skel-b: #fff5f9; }
-.nb-skel-card { cursor: default; pointer-events: none; }
+.nb-skel-card { cursor: default; pointer-events: none; overflow: hidden; }
 .nb-skel {
   border-radius: 6px;
-  background: linear-gradient(90deg, var(--skel-a) 30%, var(--skel-b) 50%, var(--skel-a) 70%);
-  background-size: 300% 100%;
-  animation: nb-skel-shimmer 1.4s ease-in-out infinite;
+  background: var(--skel-a);
+}
+/* The shimmer is one highlight band per card sliding across with transform: that runs on the compositor. The old per-bar
+   background-position animation repainted every bar on every frame (and everything glassed over them), which is what flickered. */
+.nb-skel-card::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 60%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--skel-b), transparent);
+  transform: translateX(-100%);
+  animation: nb-skel-sweep 1.4s ease-in-out infinite;
 }
 /* Line boxes are sized to the real card's (body line-height 1.6 on the
    .68rem author line, 1.3 on the .98rem title), with padding + content-box
@@ -968,11 +974,11 @@ body.pink { --skel-a: #f8e3ec; --skel-b: #fff5f9; }
 .nb-skel-card:nth-child(2) .nb-skel-tag:last-child { width: 34px; }
 .nb-skel-actions { display: flex; justify-content: flex-end; gap: .85rem; margin-top: .15rem; }
 .nb-skel-dot { width: 15px; height: 15px; border-radius: 50%; }
-@keyframes nb-skel-shimmer {
-  from { background-position: 100% 0; }
-  to { background-position: 0% 0; }
+@keyframes nb-skel-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(170%); }
 }
-@media (prefers-reduced-motion: reduce) { .nb-skel { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .nb-skel-card::after { animation: none; display: none; } }
 body.night #nb-stories-strip .nb-story-label { color: #b7bfca }
 body.night .nb-story-ring-inner { background: #111111; color: #999999 }
 body.night .nb-story-ring.seen { background: #333d4d }
@@ -4827,14 +4833,14 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-row.is-sel::after{opacity:1}
 #md-screen.md-selmode .md-more{display:none}
 /* same glass as the Media header: 60% tint of the theme background + blur, transparent until the list scrolls; the real header is hidden while this one stands in for it */
-#md-selhdr{position:absolute;top:0;left:0;right:0;z-index:4;height:var(--md-hh);box-sizing:border-box;padding:env(safe-area-inset-top,0px) .675rem 0 .4rem;display:none;align-items:center;gap:.4rem;background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:var(--md-fg);border-bottom:1px solid var(--md-div);transition:background-color .2s,border-color .2s}
+#md-selhdr{position:absolute;top:0;left:0;right:0;z-index:4;height:var(--md-hh);box-sizing:border-box;padding:env(safe-area-inset-top,0px) .675rem 0 .4rem;display:none;align-items:center;gap:.4rem;background:color-mix(in srgb,var(--md-bg) 78%,transparent);color:var(--md-fg);border-bottom:1px solid var(--md-div);transition:background-color .2s,border-color .2s}
 #md-screen:not(.md-scrolled) #md-selhdr{background:transparent;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
 #md-screen.md-selmode #md-hdr{visibility:hidden}
 #md-screen.md-selmode #md-selhdr{display:flex;animation:md-fade .15s}
 #md-seltitle{flex:1;min-width:0;font-size:1.05rem;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .md-selall{border:0;background:none;color:var(--md-cur);font-size:.9rem;font-weight:700;padding:.55rem .7rem;border-radius:10px;cursor:pointer;flex-shrink:0}
 .md-selall:active{background:var(--md-press)}
-#md-selbar{position:absolute;left:.6rem;right:.6rem;bottom:calc(.6rem + env(safe-area-inset-bottom,0px));z-index:5;display:none;gap:.2rem;padding:.35rem;border-radius:18px;background:color-mix(in srgb,var(--md-sheet) 70%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:var(--md-fg);border:1px solid var(--md-div);box-shadow:var(--md-msh)}
+#md-selbar{position:absolute;left:.6rem;right:.6rem;bottom:calc(.6rem + env(safe-area-inset-bottom,0px));z-index:5;display:none;gap:.2rem;padding:.35rem;border-radius:18px;background:color-mix(in srgb,var(--md-sheet) 85%,transparent);color:var(--md-fg);border:1px solid var(--md-div);box-shadow:var(--md-msh)}
 #md-screen.md-selmode #md-selbar{display:flex;animation:md-up .22s cubic-bezier(.4,0,.2,1)}
 .md-selb{flex:1;min-width:0;height:52px;border:0;background:none;color:inherit;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.68rem;font-weight:700;cursor:pointer;padding:0 .2rem;white-space:nowrap}
 .md-selb span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
@@ -4888,7 +4894,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-btn{height:46px;border-radius:14px}
 .md-lt{font-size:1.85rem}
 #md-mini{border-radius:18px}
-@media (prefers-reduced-motion:reduce){#md-np-wash,#md-hdr,#md-selhdr,.md-row::after{transition:none}#md-screen.md-selmode #md-selhdr,#md-screen.md-selmode #md-selbar{animation:none}}
+@media (prefers-reduced-motion:reduce){#md-list.md-swapin,.md-empty.md-in{animation:none}#md-np-wash,#md-hdr,#md-selhdr,.md-row::after{transition:none}#md-screen.md-selmode #md-selhdr,#md-screen.md-selmode #md-selbar{animation:none}}
 /* now playing: theme background, softly tinted by the artwork */
 #md-np{position:absolute;inset:0;z-index:6;background:var(--md-bg);color:var(--md-fg);transform:translateY(100%);visibility:hidden;transition:transform .36s cubic-bezier(.4,0,.2,1),visibility 0s .36s}
 #md-np.open{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.4,0,.2,1)}
@@ -4946,7 +4952,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 /* bottom sheet */
 #md-sheet{position:absolute;inset:0;z-index:8;display:none}
 #md-sheet.open{display:block}
-#md-sheet-scrim{position:absolute;inset:0;background:var(--md-sscrim);animation:md-fade .2s;will-change:opacity}
+#md-sheet-scrim{position:absolute;inset:0;background:var(--md-sscrim);animation:md-fade .2s}
 #md-sheet-box{--md-gpt:.9rem;--md-gpb:.8rem;--md-gh:calc(var(--md-gpt) + var(--md-gpb) + 4px);position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;box-sizing:border-box;background:var(--md-sheet);color:var(--md-fg);border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--md-ssh);padding:0 .9rem calc(env(safe-area-inset-bottom,0px) + 1rem);animation:md-up .28s cubic-bezier(.4,0,.2,1);will-change:transform;backface-visibility:hidden}
 .md-grab{display:flex;justify-content:center;flex-shrink:0;margin:0 -.9rem;padding:var(--md-gpt) 0 var(--md-gpb);cursor:grab;touch-action:none;position:sticky;top:0;z-index:2;background:var(--md-sheet)}
 .md-grab span{width:36px;height:4px;border-radius:99px;background:var(--md-grab)}
@@ -4957,6 +4963,12 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-sh-title{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;position:sticky;top:var(--md-gh);z-index:2;background:var(--md-sheet);margin:0 -.9rem;padding:.1rem 1rem .6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .md-sh-title.ns{position:static}
 /* sheet-to-sheet swap: the new content fades in while a ghost copy of the old fades out and the box eases to its new height */
+/* Media covers the whole screen, so the app underneath (its wash blur and sweep, header and nav glass, note-grid images) stops being painted while it is open: that GPU memory goes to Media instead, which is what leaves tiles unpainted when it runs short. visibility keeps layout and scroll position intact. */
+body.md-covered #nb-app,body.md-covered #bottom-nav,body.md-covered #nb-wash,body.md-covered #nb-wash-sweep,body.md-covered #nb-wash-fade{visibility:hidden}
+/* Now Playing is fully opaque and has its own wash, so once it has finished sliding up the Media wash, sweep and fade behind it are not painted. The .4s delay on the way in lets the slide finish first; on the way out the base rule applies, so they are back at once. */
+#md-screen:has(#md-np.open) #md-wash,#md-screen:has(#md-np.open) #md-wash-sweep,#md-screen:has(#md-np.open) #md-wash-fade{visibility:hidden;transition:visibility 0s .4s}
+/* The .2s colour fades on the tab chips, the Notes/Likes switch and the search field repaint the whole glass bar (and the wash under it) on every frame, which is where Media flickered; they snap instead. */
+#md-screen .md-chip,#md-screen .md-srcb,#md-screen .md-search input{transition:none!important}
 #md-sheet-box.swap>:not(.md-grab):not(.md-ghost){animation:md-fade .2s ease-out}
 .md-ghost{position:absolute;left:.9rem;right:.9rem;pointer-events:none;animation:md-out .16s ease-in forwards}
 @keyframes md-out{from{opacity:1}to{opacity:0}}
@@ -4971,6 +4983,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 #md-np-dock{padding-top:.5rem}
 #md-wash,#md-wash-sweep,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-sweep,#nb-wash-fade{display:none}
 @keyframes md-fade{from{opacity:0}to{opacity:1}}
+#md-list.md-swapin,.md-empty.md-in{animation:md-fade .14s ease-out}
 @keyframes md-up{from{transform:translateY(100%)}to{transform:none}}
 </style>
 <style id="nb-glass-core" data-nb-glass media="not all">
@@ -5023,7 +5036,7 @@ body:not(.night):not(.pink) .st-card{background:rgba(255,255,255,.68);border-col
 body:not(.night):not(.pink) .st-fund-btn{background:rgba(244,246,251,.6);border-color:rgba(213,222,242,.75)}
 
 /* premium pass: ambient backdrop (splash, or the open album's cover), glass bars, softer surfaces */
-#md-wash{position:absolute;left:-20%;right:-20%;top:-10%;height:62%;background-image:var(--md-art,var(--wash-img));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--md-wash) * 1.5);pointer-events:none}
+#md-wash{position:absolute;left:0;right:0;top:-10%;height:62%;background-image:var(--md-art,var(--wash-img));background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--md-wash) * 1.5);pointer-events:none}
 #md-wash-fade{position:absolute;left:0;right:0;top:0;height:74%;background:linear-gradient(to bottom,transparent 0%,var(--md-bg) 100%);pointer-events:none}
 #md-hdr{transition:box-shadow .2s,border-color .2s}
 #md-screen:not(.md-scrolled) #md-hdr{box-shadow:none;border-bottom-color:transparent}
@@ -5034,7 +5047,7 @@ body.pink #md-screen:not(.md-scrolled) #md-hdr{box-shadow:var(--md-hsh);border-b
 body.pink #md-hdr{background:#c8365e}
 #md-sticky{background:color-mix(in srgb,var(--md-stbg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
 }
-#md-np-wash{position:absolute;inset:-30%;background-size:cover;background-position:center;filter:blur(72px) saturate(1.8);transform:translateZ(0);opacity:calc(var(--md-wash) * 1.5);transition:opacity .5s ease;pointer-events:none}
+#md-np-wash{position:absolute;inset:-12%;background-size:cover;background-position:center;filter:blur(36px) saturate(1.8);opacity:calc(var(--md-wash) * 1.5);transition:opacity .5s ease;pointer-events:none}
 #md-wash,#md-wash-sweep,#md-wash-fade,#md-np-wash,#nb-wash,#nb-wash-sweep,#nb-wash-fade{display:block}
 @supports (color:color-mix(in srgb,red 50%,blue)){
 .md-acts{background:color-mix(in srgb,var(--md-bg) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
@@ -5066,7 +5079,7 @@ body.pink #md-hdr .md-ib:active{background:var(--md-press)}
 #md-screen .md-gh-st.is-stuck{background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
 /* page swap inside Media (Albums / Playlists / tabs): the header, search row and action bar snap to the new scroll state instead of fading through the old one */
 #md-screen.md-nav #md-hdr,#md-screen.md-nav #md-sticky,#md-screen.md-nav .md-acts{transition:none!important}
-body.nb-nav #nb-app #site-header,body.nb-nav #nb-app #feed-search-wrap{transition:none!important}
+body.nb-nav #nb-app #site-header,body.nb-nav #nb-app #feed-search-wrap,body.nb-nav #nb-app .cat-pill{transition:none!important}
 /* ===== app tabs share the Media look: wash backdrop, header/search melt into it at rest, glass once scrolled ===== */
 /* The wash follows the splash photo this launch rotated to (data-splash); an open album's cover still wins in Media. */
 html{--wash-img:var(--splash-img,var(--splash-img-0))}
@@ -5077,10 +5090,11 @@ body.pink{--nb-bg:#fff8fb;--nb-wash:.28;--nb-hdr-fg:#bd2856;--nb-hbd:rgba(200,54
 body{--nb-g1:rgba(60,115,235,.95);--nb-g2:rgba(255,212,110,.95);--nb-g3:rgba(255,140,170,.85);--nb-g4:rgba(150,165,215,.8);--nb-g5:rgba(70,200,140,.85)}
 body.night{--nb-g1:rgba(70,110,255,.9);--nb-g2:rgba(190,140,255,.8);--nb-g3:rgba(255,120,150,.75);--nb-g4:rgba(60,150,200,.7);--nb-g5:rgba(60,210,150,.75)}
 body.pink{--nb-g1:rgba(255,110,150,.95);--nb-g2:rgba(255,200,140,.9);--nb-g3:rgba(200,120,230,.8);--nb-g4:rgba(255,160,190,.8);--nb-g5:rgba(120,210,170,.7)}
-#nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none;will-change:transform}
-.wash-sweep-in{position:absolute;left:-60%;right:-60%;top:-24%;height:95%;pointer-events:none;background-image:radial-gradient(ellipse 38% 62% at 18% 42%,var(--nb-g1) 0%,transparent 72%),radial-gradient(ellipse 34% 55% at 52% 28%,var(--nb-g2) 0%,transparent 72%),radial-gradient(ellipse 36% 60% at 84% 55%,var(--nb-g3) 0%,transparent 72%),radial-gradient(ellipse 30% 50% at 36% 72%,var(--nb-g5) 0%,transparent 72%),linear-gradient(115deg,var(--nb-g4) 0%,transparent 55%);filter:blur(30px) saturate(1.5);opacity:0;transform:translate3d(-8%,0,0) scale(1.1);will-change:transform,opacity;transition:transform var(--d1,14s) ease-in-out,opacity var(--do,4s) ease-in-out}
-.wash-sweep-in::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g5) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g1) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);will-change:transform;transition:transform var(--d2,12s) ease-in-out}
-.wash-sweep-in::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at 62% 52%,var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at 20% 30%,var(--gx,transparent) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);will-change:transform,opacity;transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
+#nb-wash{position:fixed;left:0;right:0;top:-10%;height:62%;z-index:-1;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
+.wash-sweep-in{position:absolute;left:-25%;right:-25%;top:-24%;height:95%;pointer-events:none;background-image:radial-gradient(ellipse 38% 62% at 18% 42%,var(--nb-g1) 0%,transparent 72%),radial-gradient(ellipse 34% 55% at 52% 28%,var(--nb-g2) 0%,transparent 72%),radial-gradient(ellipse 36% 60% at 84% 55%,var(--nb-g3) 0%,transparent 72%),radial-gradient(ellipse 30% 50% at 36% 72%,var(--nb-g5) 0%,transparent 72%),linear-gradient(115deg,var(--nb-g4) 0%,transparent 55%);opacity:0;transform:translate3d(-8%,0,0) scale(1.1);transition:transform var(--d1,14s) ease-in-out,opacity var(--do,4s) ease-in-out}
+.wash-sweep-in::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g5) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g1) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);transition:transform var(--d2,12s) ease-in-out}
+.wash-sweep-in.wash-frozen,.wash-sweep-in.wash-frozen::before,.wash-sweep-in.wash-frozen::after{transition:none!important}
+.wash-sweep-in::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at 62% 52%,var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at 20% 30%,var(--gx,transparent) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
 /* The wrapper clips the oversized, drifting layers at 74% of the screen: exactly where the fade into the page colour ends. Anything drawn lower would sit below the fade and show as a hard-edged tint at the bottom. */
 #nb-wash-sweep{position:fixed;left:0;right:0;top:0;height:74%;overflow:hidden;z-index:-1;pointer-events:none;--sw:var(--nb-wash)}
 #md-wash-sweep{position:absolute;left:0;right:0;top:0;height:74%;overflow:hidden;pointer-events:none;--sw:var(--md-wash)}
@@ -21348,6 +21362,8 @@ function _nbRevealFade(el) {
   requestAnimationFrame(() => { el.style.opacity = ''; });
 }
 function selectCat(cat, tab) {
+  // The pills' .22s colour fades repaint the whole glass search bar on every frame; a category tap should just switch.
+  document.body.classList.add('nb-nav'); setTimeout(() => document.body.classList.remove('nb-nav'), 450);
   const same = cat === _nbActiveCat;
   if (cat === 'Subscribed') _nbSubTab = tab === 'liked' ? 'liked' : 'feed';
   if (cat === 'Published') _nbPubTab = tab === 'stories' ? 'stories' : 'published';
@@ -21606,9 +21622,28 @@ function nbCarouselSearchFocus(focused) {
   if (!wasTucked || c.style.display === 'none') return;
   nbGoToCarouselSlide(_nbCarouselIdx + 1, true); // true restarts the autoplay clock so it doesn't double-advance
 }
+// The gradient sweep pauses shortly before every auto-advance (and through the slide): arm that warning 3.8s into each 4.5s cycle
+let _nbCarouselHoldT = 0;
+function _nbCarouselArmHold() {
+  clearTimeout(_nbCarouselHoldT);
+  _nbCarouselHoldT = setTimeout(() => { if (window.nbWashHold && _nbCarouselOnScreen()) window.nbWashHold(1200); }, 3800);
+}
+// Only a carousel that is really showing counts: it can be hidden, tucked away (search focused), scrolled off the screen,
+// sitting on a screen that isn't active, or covered by Media / the sign-in screen.
+function _nbCarouselOnScreen() {
+  const c = document.getElementById('nb-onboard-carousel');
+  if (!c || document.hidden || !c.getClientRects().length) return false;
+  const cs = getComputedStyle(c);
+  if (cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) return false;
+  const r = c.getBoundingClientRect();
+  if (r.width <= 0 || r.height <= 0 || r.bottom <= 0 || r.top >= window.innerHeight || r.right <= 0 || r.left >= window.innerWidth) return false;
+  if (document.querySelector('#md-screen.open, #account-screen.open')) return false;
+  return true;
+}
 function nbStartCarouselAutoplay() {
   clearInterval(_nbCarouselTimer);
-  _nbCarouselTimer = setInterval(() => nbGoToCarouselSlide(_nbCarouselIdx + 1, false), 4500);
+  _nbCarouselArmHold();
+  _nbCarouselTimer = setInterval(() => { nbGoToCarouselSlide(_nbCarouselIdx + 1, false); _nbCarouselArmHold(); }, 4500);
 }
 function _nbFilteredEmptyMessage() {
   const lead = nbEmptyLead();
@@ -22171,6 +22206,9 @@ document.addEventListener('visibilitychange', function () { if (document.hidden)
 // Gives up when the person touches, scrolls or types, when it has held for 1.2s, or at `ms`. If the content turns out shorter, it stops at the end.
 function _nbRsSettle(sc, target, ms, wins, done) {
   let over = false, t0 = Date.now(), still = 0;
+  // gradient sweep waits while the scroll position is restored; every run has its own flag, since the page, the editor and Media can settle at the same time
+  const _washKey = 'restore' + (window._nbRsRuns = (window._nbRsRuns || 0) + 1);
+  if (window.nbWashFlag) window.nbWashFlag(_washKey, true);
   const evs = ['touchstart', 'wheel', 'mousedown', 'keydown'], stop = function () { over = true; };
   wins.forEach(w => { try { evs.forEach(e => w.addEventListener(e, stop, { passive: true, once: true })); } catch (x) {} });
   (function tick() {
@@ -22183,7 +22221,7 @@ function _nbRsSettle(sc, target, ms, wins, done) {
       } catch (x) { go = false; }
     }
     if (go) requestAnimationFrame(tick);
-    else { wins.forEach(w => { try { evs.forEach(e => w.removeEventListener(e, stop)); } catch (x) {} }); if (done) done(); }
+    else { wins.forEach(w => { try { evs.forEach(e => w.removeEventListener(e, stop)); } catch (x) {} }); if (window.nbWashFlag) window.nbWashFlag(_washKey, false); if (done) done(); }
   })();
 }
 window._nbRsSettle = _nbRsSettle;
@@ -22194,6 +22232,7 @@ const _nbRsPageSc = {
 };
 // Called from hideSplash, once the grid has been rebuilt and the splash's scroll lock released.
 function _nbRsAfterSplash() {
+  if (window.nbWashHold) window.nbWashHold(1500); // launch landing / screen restoration: sweep waits, then resumes after its usual delay
   const arm = function () { window._nbRsArmed = true; };
   const rs = window._nbRestoreBoot; let k = null;
   try { k = _nbRsKeyPage(); } catch (e) {}
@@ -22826,6 +22865,7 @@ function _nbExtractCanvasFragment(htmlSrc) {
   return inner;
 }
 function nbRestoreState(htmlSrc, uiState) {
+  if (window.nbWashHold) window.nbWashHold(1500); // gradient sweep waits while saved editor state is put back
   if (!uiState || typeof uiState.full !== 'string') return _nbRehydrateImages(htmlSrc);
   // uiState.full is now just the saved #cv-canvas innerHTML (see
   // snapshot()) — splice it into the current htmlSrc's canvas div so the
@@ -24096,6 +24136,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     sel: { on: false, keys: [] }, lpSup: 0,
     sheetHtml: null, sheetStack: [], swapT: 0
   };
+  // The gradient sweep freezes while Media scans or refreshes, even when no spinner/marker is on screen (e.g. results streaming in)
+  ['scanning', 'refreshing'].forEach(function (k) {
+    var v = !!MD[k];
+    Object.defineProperty(MD, k, { enumerable: true, configurable: true, get: function () { return v; }, set: function (x) { v = x; if (window.nbWashFlag) window.nbWashFlag(k, !!x); } });
+  });
   var meta = {};
   try { meta = JSON.parse(localStorage.getItem(META_KEY) || '{}') || {}; } catch (e) { meta = {}; }
   // Instagram/X have no title source, so nothing legitimate is ever stored for them; drop entries an earlier mix-up may have saved.
@@ -24932,6 +24977,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   // The header's glass / hairline follows the list's scroll position. A page swap resets that position without waiting for the
   // (async) scroll event, so the state is synced in the same pass and the header's own transitions are held off until it has painted.
   var NAVT = 0;
+  function fadeIn(el, c) {
+    if (!el) return;
+    el.classList.remove(c); void el.offsetWidth; el.classList.add(c);
+    setTimeout(function () { el.classList.remove(c); }, 220);
+  }
   function holdHeaderFx(scr) {
     scr.classList.add('md-nav'); clearTimeout(NAVT);
     requestAnimationFrame(function () { requestAnimationFrame(function () { scr.classList.remove('md-nav'); }); });
@@ -25069,7 +25119,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (au) msc.style.setProperty('--md-art', 'url("' + au.replace(/"/g, '%22') + '")'); else msc.style.removeProperty('--md-art');
     // Same scanning state already on screen: leave it be. Re-writing it on every streamed result restarts the CSS animation (the glitch).
     var curScan = box.querySelector(':scope > .md-empty.scanning'), newScan = /^<div class="md-empty scanning">.*?<b>([^<]*)<\/b>/.exec(h);
-    if (!(curScan && newScan && curScan.querySelector('b') && curScan.querySelector('b').textContent === newScan[1])) box.innerHTML = h;
+    if (!(curScan && newScan && curScan.querySelector('b') && curScan.querySelector('b').textContent === newScan[1])) {
+      box.innerHTML = h;
+      if (curScan) fadeIn(box.querySelector(':scope > .md-empty:not(.scanning)'), 'md-in'); // scan just finished: ease the message in instead of a hard swap
+    }
     markCur(box);
     if (MD.sel.on) selUI();
     syncFab();
@@ -25455,7 +25508,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       case 'scan': startScan(el); break;
       case 'refresh': refreshNow(); break;
       case 'src': setSrc(el.getAttribute('data-v')); break;
-      case 'tab': exitSel(); MD.tab = el.getAttribute('data-v'); view().sy = 0; renderView(); break;
+      case 'tab': exitSel(); MD.tab = el.getAttribute('data-v'); view().sy = 0; renderView(); fadeIn($('md-list'), 'md-swapin'); break;
       case 'more': itemSheet(k, view().n === 'pl' ? view().id : ''); break;
       case 'playall': exitSel(); if (MD.viewKeys.length) playKeys(MD.viewKeys, 0, MD.viewCtx, false, curSrc()); break;
       case 'shuffleall': exitSel(); if (MD.viewKeys.length) playKeys(MD.viewKeys, Math.floor(Math.random() * MD.viewKeys.length), MD.viewCtx, true, curSrc()); break;
@@ -25593,7 +25646,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   document.addEventListener('visibilitychange', function () { if (document.hidden) rsMedia(); });
   function finishOpen() {
     rsMedia();
-    try { lockScroll(); } catch (e) {}
+    clearTimeout(MD._ut); clearTimeout(MD._lt);
+    MD._lt = setTimeout(function () { if (MD.open) { document.body.classList.add('md-covered'); try { lockScroll(); } catch (e) {} } }, 340); // after the slide-in, so the Library underneath is not re-laid-out mid-slide
     clearInterval(MD.timer);
     MD.timer = setInterval(function () { if (MD.ps.playing) uiProg(); }, 250);
     startPoll();
@@ -25607,9 +25661,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function close() {
     if (!MD.open) return;
     exitSel();
-    MD.open = false; clearInterval(MD.timer); stopPoll(); rsMedia();
+    MD.open = false; document.body.classList.remove('md-covered'); clearInterval(MD.timer); stopPoll(); rsMedia();
     $('md-screen').classList.remove('open'); $('md-screen').setAttribute('aria-hidden', 'true');
-    try { unlockScroll(); } catch (e) {}
+    clearTimeout(MD._lt); clearTimeout(MD._ut);
+    MD._ut = setTimeout(function () { if (!MD.open) { try { unlockScroll(); } catch (e) {} } }, 340); // after the slide-out finishes
   }
   window.nbOpenMedia = open;
   window.nbCloseMedia = close;
@@ -25862,7 +25917,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
 </script>
 
 <script>
-/* wash sweep controller: ONE random, never-repeating state (drift / strength / fade-outs / accent colours) driving every gradient sweep layer at once, so the app tabs and Media always show the same sweep and switching screens is seamless */
+/* wash sweep controller: ONE random, never-repeating state (drift / strength / fade-outs / accent colours) driving every gradient sweep layer at once, so the app tabs and Media always show the same sweep and switching screens is seamless.
+   It freezes in place (no timers, no transitions, so nothing repaints) while a text field has focus or the page is hidden, and carries on from where it stopped. */
 (function(){
   var els=Array.prototype.slice.call(document.querySelectorAll('.wash-sweep-in'));
   if(!els.length)return;
@@ -25874,40 +25930,196 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function setVar(k,v){els.forEach(function(el){el.style.setProperty(k,v)})}
   function setStyle(k,v){els.forEach(function(el){el.style[k]=v})}
   var ACCENTS=['rgba(255,150,60,.9)','rgba(170,110,255,.85)','rgba(60,200,205,.85)','rgba(240,90,200,.8)','rgba(190,235,80,.75)','rgba(255,115,105,.85)','rgba(255,205,70,.9)','rgba(90,190,255,.85)','rgba(120,230,190,.8)','rgba(255,170,210,.85)','rgba(130,120,255,.85)'];
-  function tf(bx,by){return 'translate3d('+rr(-bx,bx).toFixed(1)+'%,'+rr(-by,by).toFixed(1)+'%,0) rotate('+rr(-11,11).toFixed(1)+'deg) scale('+rr(1,1.38).toFixed(2)+')'}
+  function tf(bx,by){return 'translate3d('+rr(-bx,bx).toFixed(1)+'%,'+rr(-by,by).toFixed(1)+'%,0) rotate('+rr(-8,8).toFixed(1)+'deg) scale('+rr(1,1.3).toFixed(2)+')'}
+  var gen=0, last='mild', on=false;
   function drift(prop,durProp,bx,by,lo,hi){
+    var my=gen;
     (function go(){
+      if(my!==gen)return;
       var d=rr(lo,hi);setVar(durProp,d.toFixed(1)+'s');
       var t=tf(bx,by);
       if(prop==='transform')setStyle('transform',t);else setVar(prop,t);
       setTimeout(go,d*1000*rr(.55,1.1));
     })();
   }
-  drift('transform','--d1',22,8,9,20);
-  drift('--t2','--d2',26,10,7,17);
-  drift('--t3','--d3',30,9,10,24);
-  var last='mild';
-  (function strength(){
-    var r=R(),kind,k;
-    if(last!=='off'&&r<.15){kind='off';k=0}
-    else if(r<.4){kind='strong';k=rr(2,2.8)}
-    else if(r<.6){kind='low';k=rr(.5,.95)}
-    else{kind='mild';k=rr(1.1,1.6)}
-    var d=rr(2.5,6.5);setVar('--do',d.toFixed(1)+'s');
-    setStyle('opacity',kind==='off'?'0':'calc(var(--sw) * '+k.toFixed(2)+')');
-    last=kind;
-    setTimeout(strength,(d+(kind==='off'?rr(1,3):rr(1.5,8)))*1000);
+  function strength(){
+    var my=gen;
+    (function go(){
+      if(my!==gen)return;
+      var r=R(),kind,k;
+      if(last!=='off'&&r<.15){kind='off';k=0}
+      else if(r<.4){kind='strong';k=rr(2,2.8)}
+      else if(r<.6){kind='low';k=rr(.5,.95)}
+      else{kind='mild';k=rr(1.1,1.6)}
+      var d=rr(2.5,6.5);setVar('--do',d.toFixed(1)+'s');
+      setStyle('opacity',kind==='off'?'0':'calc(var(--sw) * '+k.toFixed(2)+')');
+      last=kind;
+      setTimeout(go,(d+(kind==='off'?rr(1,3):rr(1.5,8)))*1000);
+    })();
+  }
+  function accent(){
+    var my=gen;
+    (function go(){
+      if(my!==gen)return;
+      if(!on){
+        setVar('--gx',pick(ACCENTS));setVar('--gd',rr(3.5,7).toFixed(1)+'s');
+        setTimeout(function(){if(my===gen)setVar('--ga',rr(.45,.95).toFixed(2))},60);
+        on=true;setTimeout(go,rr(7,16)*1000);
+      }else{
+        setVar('--ga','0');on=false;setTimeout(go,rr(4,18)*1000);
+      }
+    })();
+  }
+  function start(){
+    drift('transform','--d1',22,8,9,20);
+    drift('--t2','--d2',26,10,7,17);
+    drift('--t3','--d3',30,9,10,24);
+    strength();accent();
+  }
+  // Freeze: read where every layer is right now, stop all transitions, pin those values, and cancel every pending timer.
+  var frozen=false;
+  function freeze(){
+    if(frozen)return;frozen=true;gen++;
+    els.forEach(function(el){
+      var c=getComputedStyle(el),c2=getComputedStyle(el,'::before'),c3=getComputedStyle(el,'::after');
+      var t1=c.transform,o1=c.opacity,t2=c2.transform,t3=c3.transform,ga=c3.opacity;
+      el.classList.add('wash-frozen');
+      el.style.transform=t1;el.style.opacity=o1;
+      el.style.setProperty('--t2',t2);el.style.setProperty('--t3',t3);el.style.setProperty('--ga',ga);
+    });
+  }
+  function thaw(){
+    if(!frozen)return;frozen=false;
+    var ga=parseFloat(els[0].style.getPropertyValue('--ga'))||0;on=ga>.02;
+    els.forEach(function(el){el.classList.remove('wash-frozen')});
+    start();
+  }
+  var fieldFocused=false;
+  function isField(t){
+    if(!t||t.nodeType!==1)return false;
+    var n=t.tagName;
+    if(n==='TEXTAREA'||n==='SELECT')return true;
+    if(n==='INPUT')return !/^(button|checkbox|radio|submit|reset|range|file|image|color)$/i.test(t.type||'');
+    return !!t.isContentEditable;
+  }
+  // Freezing is immediate; resuming always waits a moment after the last thing that paused it (keyboard leaving, Media sliding,
+  // coming back to the app), and anything that pauses it again inside that wait cancels the resume.
+  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false;
+  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover}
+  // A busy marker only counts while it is really showing: displayed, visible, inside the screen, and not under Media / the sign-in screen.
+  function onScreen(el){
+    if(!el.getClientRects().length)return false;
+    if(el.checkVisibility&&!el.checkVisibility({checkOpacity:true,checkVisibilityCSS:true}))return false;
+    var r=el.getBoundingClientRect();
+    if(r.bottom<=0||r.top>=window.innerHeight||r.right<=0||r.left>=window.innerWidth)return false;
+    var md=document.getElementById('md-screen'),ac=document.getElementById('account-screen');
+    if(md&&md.classList.contains('open')&&!md.contains(el))return false;
+    if(ac&&ac.classList.contains('open')&&!ac.contains(el))return false;
+    return true;
+  }
+  // Media's own busy flags only matter while Media is open (that is the only time its work is on screen)
+  function flagsRelevant(){
+    var md=document.getElementById('md-screen'),mdOpen=!!(md&&md.classList.contains('open'));
+    for(var k in flags){ if(!flags[k])continue; if(k==='scanning'||k==='refreshing'){ if(mdOpen)return true } else return true }
+    return false;
+  }
+  // The launch splash and the sign-in / onboarding screen (#account-screen) cover the wash completely, so nothing should animate behind them
+  function coverUp(){
+    var sp=document.getElementById('splash');
+    if(sp&&sp.isConnected&&sp.getClientRects().length)return true;
+    var ac=document.getElementById('account-screen');
+    return !!(ac&&ac.classList.contains('open'));
+  }
+  function sync(wait){
+    clearTimeout(resumeT);
+    if(held()){freeze();return}
+    if(!frozen)return;
+    if(wait)resumeT=setTimeout(function(){if(!held())thaw()},KB_WAIT);
+    else thaw();
+  }
+  // Media sliding in/out (the Media screen and Now Playing are transform transitions) and the mini bar appearing/leaving
+  function isSlider(e){var t=e.target;return t&&(t.id==='md-screen'||t.id==='md-np')&&e.propertyName==='transform'}
+  function slideStart(e){
+    if(!isSlider(e))return;
+    mediaBusy=Math.max(1,mediaBusy);sync(false);
+    clearTimeout(mediaFail);mediaFail=setTimeout(function(){mediaBusy=0;sync(true)},1500);
+  }
+  function slideEnd(e){
+    if(!isSlider(e))return;
+    clearTimeout(mediaFail);mediaBusy=0;sync(true);
+  }
+  ['transitionrun','transitionstart'].forEach(function(n){document.addEventListener(n,slideStart,true)});
+  ['transitionend','transitioncancel'].forEach(function(n){document.addEventListener(n,slideEnd,true)});
+  (function(){
+    var md=document.getElementById('md-screen');
+    if(!md||!window.MutationObserver)return;
+    var had=md.classList.contains('has-mini');
+    new MutationObserver(function(){
+      var now=md.classList.contains('has-mini');
+      if(now===had)return;had=now;
+      mediaBusy=Math.max(1,mediaBusy);sync(false);
+      clearTimeout(mediaFail);mediaFail=setTimeout(function(){mediaBusy=0;sync(true)},500);
+    }).observe(md,{attributes:true,attributeFilter:['class']});
   })();
-  var on=false;
-  (function accent(){
-    if(!on){
-      setVar('--gx',pick(ACCENTS));setVar('--gd',rr(3.5,7).toFixed(1)+'s');
-      setTimeout(function(){setVar('--ga',rr(.45,.95).toFixed(2))},60);
-      on=true;setTimeout(accent,rr(7,16)*1000);
-    }else{
-      setVar('--ga','0');on=false;setTimeout(accent,rr(4,18)*1000);
+  document.addEventListener('focusin',function(e){fieldFocused=isField(e.target);sync(false)});
+  document.addEventListener('focusout',function(){setTimeout(function(){fieldFocused=isField(document.activeElement);sync(true)},0)});
+  document.addEventListener('visibilitychange',function(){sync(true)});
+  // Busy states: scanning, loading skeletons, spinning buttons (anything marked busy in the page) hold it frozen until they clear.
+  // aria-busy covers Media's scan/refresh buttons; the rest are the app's other loading markers (account sync, pull-to-refresh, ad loading)
+  var BUSY_SEL='[aria-busy="true"],.md-empty.scanning,.nb-skel,.md-spin,.com-spinner,.acct-sync-btn.syncing,#ptr-bar.ptr-spinning,#pub-ad-loading,#md-refresh.spin';
+  // only markers that are actually on screen count (some, like the ad-loading line, sit hidden in the page)
+  function anyBusy(){
+    var l=document.querySelectorAll(BUSY_SEL);
+    for(var i=0;i<l.length;i++) if(onScreen(l[i])) return true;
+    return false;
+  }
+  var domPend=false;
+  var busyCapT=0, busyCapped=false;
+  function checkBusy(){
+    domPend=false;
+    var cv=coverUp();
+    if(cv!==cover){cover=cv;sync(!cv)}
+    var fr=flagsRelevant();
+    if(fr!==flagRel){flagRel=fr;sync(!fr)}
+    var b=anyBusy();
+    if(!b){busyCapped=false;clearTimeout(busyCapT)}
+    else if(busyCapped)b=false; // something has been "busy" for 15s: treat it as stuck and let the sweep run
+    if(b===domBusy)return;
+    domBusy=b;sync(!b);
+    if(b){clearTimeout(busyCapT);busyCapT=setTimeout(function(){busyCapped=true;domBusy=false;sync(true)},15000)}
+  }
+  if(window.MutationObserver){
+    new MutationObserver(function(){ if(!domPend){domPend=true;setTimeout(checkBusy,150)} })
+      .observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-busy']});
+  }
+  // Hooks the app calls: nbWashHold(ms) = pause now for ms (the carousel, just before it advances); nbWashFlag(name, on) = a named busy state
+  window.nbWashHold=function(ms){
+    holdBusy=true;sync(false);
+    clearTimeout(holdT);holdT=setTimeout(function(){holdBusy=false;sync(true)},ms||1000);
+  };
+  window.nbWashFlag=function(k,on){
+    flags[k]=!!on;
+    var b=false;for(var fk in flags){if(flags[fk])b=true}
+    var was=flagBusy;flagBusy=b;
+    var r=flagsRelevant();
+    if(r!==flagRel){flagRel=r;sync(!r)}
+    if(b!==was){
+      clearTimeout(flagCapT);
+      if(b)flagCapT=setTimeout(function(){flags={};flagBusy=false;flagRel=false;sync(true)},60000); // a flag stuck on for a minute is ignored
     }
-  })();
+  };
+  // Category switching (Library pills, Media chips/tabs): hold while the list swaps and settles
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(!t||!t.closest||!t.closest('#feed-cats, .md-chip'))return;
+    switching=true;sync(false);
+    clearTimeout(switchT);switchT=setTimeout(function(){switching=false;sync(true)},700);
+  },true);
+  fieldFocused=isField(document.activeElement);
+  domBusy=anyBusy();
+  cover=coverUp();
+  window.nbWashHold(1500); // every fresh launch starts paused and only begins after a short wait
+  if(held()){frozen=false;freeze()}else start();
 })();
 </script>
 </body>
