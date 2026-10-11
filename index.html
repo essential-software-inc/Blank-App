@@ -4827,7 +4827,7 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 .md-row.is-sel::after{opacity:1}
 #md-screen.md-selmode .md-more{display:none}
 /* same glass as the Media header: 60% tint of the theme background + blur, transparent until the list scrolls; the real header is hidden while this one stands in for it */
-#md-selhdr{position:absolute;top:0;left:0;right:0;z-index:4;height:var(--md-hh);box-sizing:border-box;padding:env(safe-area-inset-top,0px) .75rem 0 .4rem;display:none;align-items:center;gap:.4rem;background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:var(--md-fg);border-bottom:1px solid var(--md-div);transition:background-color .2s,border-color .2s}
+#md-selhdr{position:absolute;top:0;left:0;right:0;z-index:4;height:var(--md-hh);box-sizing:border-box;padding:env(safe-area-inset-top,0px) .675rem 0 .4rem;display:none;align-items:center;gap:.4rem;background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);color:var(--md-fg);border-bottom:1px solid var(--md-div);transition:background-color .2s,border-color .2s}
 #md-screen:not(.md-scrolled) #md-selhdr{background:transparent;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
 #md-screen.md-selmode #md-hdr{visibility:hidden}
 #md-screen.md-selmode #md-selhdr{display:flex;animation:md-fade .15s}
@@ -5906,13 +5906,13 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 6 October 2026</em></p>
+      <p><em>Effective 11 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
-      <p>Your pages, drafts, images, favourites, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites and theme choice, are also backed up to our servers (see below).</p>
+      <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists and theme choice, are also backed up to our servers (see below).</p>
       <h3>Google sign-in &amp; sync</h3>
-      <p>Signing in is totally optional, and Google handles it, so we never see your Google password. We get your Google account ID and email address, and we keep them along with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a code that keeps you signed in (a session lasts up to 30 days). While you're signed in, your notes (including embedded images), your favorites and your theme choice are backed up to our servers so you can restore them on another device. Your Pro purchase (if you have one) and any ad view-credit balance (see "In-app purchases" below) are linked to your account too, so they come with you. Signing out stops syncing. Your backup stays put, so you can pick it up again when you sign back in, and deleting your account removes it, as described below. If an image in your backup isn't used by any note any more (for example, after you delete a note or swap an image), the nightly clean-up deletes it once it's more than 14 days old.</p>
-      <p>Your account is yours to keep or remove. You can delete it any time by tapping the account icon and choosing Delete account under Show more. That signs this device out and schedules your account for deletion in 30 days. The deletion happens during our nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes and images, profile name and picture, subscriptions (the ones you made and the ones to you), records of the stories you've opened, your likes and follows (including the times we noted for them), running ads and their view statistics, your invite code and any invites you made or used, your ad access record, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance. We also take down every page you published (we keep a copy of each page, along with its record, for about 30 more days, as described under "Publishing a page"). Until then, your published pages and stories stay online. Changed your mind? Sign back in with the same Google account during the 30 days and the deletion is cancelled, with full access restored. Every device where you're signed in gets signed out as part of the deletion (each one finds out the next time the app contacts our server, usually within about a minute). Deleting your account doesn't delete anything held by Google or RevenueCat. Their own policies cover that.</p>
+      <p>Signing in is totally optional, and Google handles it, so we never see your Google password. We get your Google account ID and email address, and we keep them along with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a code that keeps you signed in (a session lasts up to 30 days). While you're signed in, your notes (including embedded images), your favorites, your playlists (their names and the songs and videos you put in them) and your theme choice are backed up to our servers so you can restore them on another device. Your Pro purchase (if you have one) and any ad view-credit balance (see "In-app purchases" below) are linked to your account too, so they come with you. Signing out stops syncing. Your backup stays put, so you can pick it up again when you sign back in, and deleting your account removes it, as described below. If an image in your backup isn't used by any note any more (for example, after you delete a note or swap an image), the nightly clean-up deletes it once it's more than 14 days old.</p>
+      <p>Your account is yours to keep or remove. You can delete it any time by tapping the account icon and choosing Delete account under Show more. That signs this device out and schedules your account for deletion in 30 days. The deletion happens during our nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes, images and playlists, profile name and picture, subscriptions (the ones you made and the ones to you), records of the stories you've opened, your likes and follows (including the times we noted for them), running ads and their view statistics, your invite code and any invites you made or used, your ad access record, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance. We also take down every page you published (we keep a copy of each page, along with its record, for about 30 more days, as described under "Publishing a page"). Until then, your published pages and stories stay online. Changed your mind? Sign back in with the same Google account during the 30 days and the deletion is cancelled, with full access restored. Every device where you're signed in gets signed out as part of the deletion (each one finds out the next time the app contacts our server, usually within about a minute). Deleting your account doesn't delete anything held by Google or RevenueCat. Their own policies cover that.</p>
       <h3>In-app purchases</h3>
       <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing. RevenueCat, a third-party subscription service, handles them for us. RevenueCat gets the purchase details it needs to confirm what you bought, linked to an ID. Before you sign in, that's an anonymous ID RevenueCat makes for your install. Once you sign in, it's your Google account ID, which is what lets a purchase follow you to another device. After that, the two work differently. The app checks directly with RevenueCat (not through our servers) to see whether Pro is active. It keeps a saved copy of that answer on your device, and refreshes it from RevenueCat when the app launches and after a purchase or restore. Ad view-credits do go through our servers. They hear from RevenueCat (not from Google directly) that you bought views, and add the views to your account. We keep a list of your view credits: each purchase (for a particular ad, or added to your balance from Settings), each time views are put on an ad (with that ad's address), each refund or return, and each gift of free views for an invite, all with the time. Views returned to you stay in your balance, and you can put them on an ad without buying again. That doesn't involve Google Play or RevenueCat. If Google Play refunds a purchase, we take those views back. That list is deleted with your account. We never get your payment details, because Google handles those directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
@@ -15429,6 +15429,7 @@ async function hideSplash() {
   _nbBindAppResumeListener();
   _nbBindBackButtonListener();
   unlockScroll();
+  try { _nbRsAfterSplash(); } catch (e) { window._nbRsArmed = true; }
   // The boot IIFE's `!important` html/body background-color rule outranks
   // any inline style this function could set, so it — not the plain
   // `html { background: brown }` rule, and not the inline style the
@@ -21349,6 +21350,7 @@ function selectCat(cat, tab) {
   if (cat === 'Subscribed') _nbSubTab = tab === 'liked' ? 'liked' : 'feed';
   if (cat === 'Published') _nbPubTab = tab === 'stories' ? 'stories' : 'published';
   _nbActiveCat = cat;
+  _nbRsSave({ c: cat, t: cat === 'Subscribed' ? _nbSubTab : cat === 'Published' ? _nbPubTab : '' });
   if (!same) _nbEmptyLeadIdx = (_nbEmptyLeadIdx + 1) % NB_EMPTY_LEADS.length;
   if (!_nbIsFeedCat(cat)) nbUpdateLibraryTitle(); // instant, before any shimmer/fetch (feed lists update from their own render)
   buildCatBar();
@@ -22110,8 +22112,115 @@ function nbCanvasRedo() {
   nbSyncUndoRedoButtons();
 }
 
+/* ===================== Screen restoration =====================
+   Where you were (screen, editor note, category, Media panel, scroll position) is kept in sessionStorage, so a page refresh lands
+   back there. A copy also goes to localStorage with a timestamp: when Android recreates the app after a quick trip to the
+   background (the same 30-minute window the splash already treats as a resume) the session copy is gone, so that one is used.
+   Any other fresh launch has neither and still follows Settings > Start on. */
+function _nbRsRead() {
+  let o = null;
+  try { o = JSON.parse(sessionStorage.getItem('nb_restore_v1') || 'null'); } catch (e) {}
+  if (!o && window.__nbIsLikelyResume) {
+    try { const l = JSON.parse(localStorage.getItem('nb_restore_v1') || 'null'); if (l && l.ts && Date.now() - l.ts < 30 * 60 * 1000) o = l; } catch (e) {}
+  }
+  return o;
+}
+function _nbRsSave(patch) {
+  const o = Object.assign(_nbRsRead() || {}, patch); o.ts = Date.now();
+  let j = ''; try { j = JSON.stringify(o); } catch (e) { return; }
+  try { sessionStorage.setItem('nb_restore_v1', j); } catch (e) {}
+  try { localStorage.setItem('nb_restore_v1', j); } catch (e) {}
+}
+// Scroll positions, keyed per place (Notes per category, Settings, one per editor note). Newest 30 are kept.
+function _nbRsSetY(key, y) {
+  if (!key) return;
+  const m = (_nbRsRead() || {}).y || {};
+  delete m[key]; m[key] = Math.max(0, Math.round(y));
+  const ks = Object.keys(m); if (ks.length > 30) ks.slice(0, ks.length - 30).forEach(k => { delete m[k]; });
+  _nbRsSave({ y: m });
+}
+window._nbRsArmed = false; // saving scroll only starts once the restore has finished, so the boot's own jump to the top can't overwrite it
+setTimeout(function () { window._nbRsArmed = true; }, 15000); // safety net if the splash exit never gets there
+function _nbRsKeyPage() {
+  const on = n => { const e = document.getElementById('screen-' + n); return !!(e && e.classList.contains('active')); };
+  if (on('notes')) return 'n:' + _nbActiveCat + (_nbActiveCat === 'Subscribed' ? ':' + _nbSubTab : _nbActiveCat === 'Published' ? ':' + _nbPubTab : '');
+  if (on('settings')) return 's';
+  return null; // the editor scrolls inside its own iframe (below)
+}
+function _nbRsPageLocked() { return document.documentElement.style.overflow === 'hidden' || document.body.dataset.lockScrollY !== undefined; }
+function _nbRsSavePage() {
+  if (!window._nbRsArmed || _nbRsPageLocked()) return;
+  const k = _nbRsKeyPage(); if (k) _nbRsSetY(k, window.pageYOffset || document.documentElement.scrollTop || 0);
+}
+let _nbRsCanvasKey = null;
+function _nbRsCanvasId() { const e = _nbGetEditingId(); if (e) return 'note_' + e; try { return localStorage.getItem(_nbDraftIdKey()) || null; } catch (x) { return null; } }
+function _nbRsSaveEditor() {
+  if (!window._nbRsArmed || !_nbRsCanvasKey) return;
+  const sc = document.getElementById('screen-create'); if (!sc || !sc.classList.contains('active')) return;
+  const w = _nbCanvasWin(); if (!w) return;
+  try { _nbRsSetY(_nbRsCanvasKey, w.pageYOffset || w.document.documentElement.scrollTop || 0); } catch (e) {}
+}
+let _nbRsT = 0, _nbRsCT = 0;
+window.addEventListener('scroll', function () { if (!window._nbRsArmed) return; clearTimeout(_nbRsT); _nbRsT = setTimeout(_nbRsSavePage, 120); }, { passive: true });
+function _nbRsFlush() { _nbRsSavePage(); _nbRsSaveEditor(); }
+window.addEventListener('pagehide', _nbRsFlush);
+document.addEventListener('visibilitychange', function () { if (document.hidden) _nbRsFlush(); });
+// Walks a scroller to `target` and holds it there while the content around it settles (images, lists that fill in late).
+// Gives up when the person touches, scrolls or types, when it has held for 1.2s, or at `ms`. If the content turns out shorter, it stops at the end.
+function _nbRsSettle(sc, target, ms, wins, done) {
+  let over = false, t0 = Date.now(), still = 0;
+  const evs = ['touchstart', 'wheel', 'mousedown', 'keydown'], stop = function () { over = true; };
+  wins.forEach(w => { try { evs.forEach(e => w.addEventListener(e, stop, { passive: true, once: true })); } catch (x) {} });
+  (function tick() {
+    let go = !over;
+    if (go) {
+      try {
+        const max = sc.max(), want = Math.min(target, Math.max(0, max));
+        if (Math.abs(sc.get() - want) > 2) { sc.set(want); still = 0; } else if (max >= target && !still) still = Date.now();
+        go = !(still && Date.now() - still > 1200) && Date.now() - t0 < ms;
+      } catch (x) { go = false; }
+    }
+    if (go) requestAnimationFrame(tick);
+    else { wins.forEach(w => { try { evs.forEach(e => w.removeEventListener(e, stop)); } catch (x) {} }); if (done) done(); }
+  })();
+}
+window._nbRsSettle = _nbRsSettle;
+const _nbRsPageSc = {
+  get: () => window.pageYOffset || document.documentElement.scrollTop || 0,
+  set: y => window.scrollTo({ top: y, left: 0, behavior: 'instant' }), // the page smooth-scrolls by default
+  max: () => document.documentElement.scrollHeight - window.innerHeight
+};
+// Called from hideSplash, once the grid has been rebuilt and the splash's scroll lock released.
+function _nbRsAfterSplash() {
+  const arm = function () { window._nbRsArmed = true; };
+  const rs = window._nbRestoreBoot; let k = null;
+  try { k = _nbRsKeyPage(); } catch (e) {}
+  const y = (rs && rs.y && k && rs.y[k]) || 0;
+  if (y > 0) _nbRsSettle(_nbRsPageSc, y, _nbIsFeedCat(_nbActiveCat) ? 6000 : 2500, [window], arm); else arm();
+}
+// Editor: the canvas is its own document inside the iframe, so its scroll is saved and restored through the iframe window.
+(function () {
+  const ifr = document.getElementById('markup-iframe'); if (!ifr) return;
+  let restored = false;
+  ifr.addEventListener('load', function () {
+    let w = null; try { w = ifr.contentWindow; } catch (e) {}
+    if (!w) return;
+    _nbRsCanvasKey = (function () { const i = _nbRsCanvasId(); return i ? 'c:' + i : null; })();
+    try { w.addEventListener('scroll', function () { if (!window._nbRsArmed) return; clearTimeout(_nbRsCT); _nbRsCT = setTimeout(_nbRsSaveEditor, 120); }, { passive: true }); } catch (e) {}
+    const rs = window._nbRestoreBoot, y = (!restored && rs && rs.s === 'create' && rs.y && _nbRsCanvasKey && rs.y[_nbRsCanvasKey]) || 0;
+    if (y > 0) {
+      restored = true;
+      _nbRsSettle({
+        get: () => w.pageYOffset || w.document.documentElement.scrollTop || 0,
+        set: v => w.scrollTo({ top: v, left: 0, behavior: 'instant' }),
+        max: () => { if (ifr.contentWindow !== w) throw 0; return w.document.documentElement.scrollHeight - w.innerHeight; }
+      }, y, 4000, [window, w]);
+    }
+  });
+})();
 /* ===================== Bottom nav / screen switching ===================== */
 function nbGoScreen(name) {
+  _nbRsSave({ s: name, r: !!_nbRepostMode, e: name === 'create' ? _nbGetEditingId() : null });
   // Capture before the classList wipe below removes it — this is the one
   // place every screen transition passes through, so it's a safer hook
   // for "just left the Editor" than duplicating a check in each of the
@@ -22223,8 +22332,28 @@ if (_pendingRestoreMsg) {
 } else {
   // Always boot to Notes now, rather than the old Editor-by-default (Settings can switch to Write).
   const _so = _nbSt('startOn');
+  const _rs = _nbRsRead(); // read before the nbGoScreen below overwrites it
+  window._nbRestoreBoot = _rs;
   nbGoScreen('notes'); // the Editor section starts .active in the HTML, so leave it first or nbCreateNew() sees "already there" and does nothing
-  if (!nbAtFreeNoteLimit()) { if (_so === 'write') nbCreateNew(); else if (_so === 'share') nbRepostNav(); }
+  if (_rs) {
+    try {
+      const _c = _rs.c;
+      if (_c && _c !== 'All') {
+        const _okCat = _nbIsFeedCat(_c)
+          ? (_c === 'Subscribed' ? _nbShowSubCapsule() : _c === 'Published' ? _nbShowPublishedCat() : _nbShowAlertsCat())
+          : (NB_BASE_CATS.includes(_c) || nbVisibleNotes().some(n => (n.category || '').trim().toLowerCase() === _c.toLowerCase()));
+        if (_okCat) {
+          if (_nbIsFeedCat(_c)) selectCat(_c, _rs.t); // feed lists fetch anyway
+          else { _nbActiveCat = _c; buildCatBar(); _nbSyncStoriesStripVisibility(); nbRenderNotesScreen(); nbUpdateLibraryTitle(); } // local category: switch in place, no skeleton or forced refresh at boot
+        }
+      }
+    } catch (e) {}
+    if (_rs.s === 'settings') nbGoScreen('settings');
+    else if (_rs.s === 'create') {
+      if (_rs.e && nbLoadNotes().some(n => n.id === _rs.e)) nbOpenNoteForEdit(_rs.e);
+      else if (!nbAtFreeNoteLimit()) { if (_rs.r) nbRepostNav(); else nbCreateNew(); }
+    }
+  } else if (!nbAtFreeNoteLimit()) { if (_so === 'write') nbCreateNew(); else if (_so === 'share') nbRepostNav(); }
 }
 /* ===================== Backup sheet ===================== */
 function openBackupSheet() {
@@ -25423,7 +25552,16 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     else if (bigNotes) { MD.scanning = true; scanStream(function (stale) { if (stale) return; MD.scanning = false; if (MD.open) { queueVisibleMeta(); redrawQuiet(); } }); } // first open of a big library: render now, fill in as it reads
     $('md-body').scrollTop = st;
   }
+  function rsMedia() {
+    if (!window._nbRsSave) return;
+    var p = { m: MD.open ? 1 : 0, ms: MD.src, mt: MD.tab };
+    if (MD.open && window._nbRsArmed && MD.stack.length === 1) p.my = $('md-body').scrollTop; // top level of the tab only
+    window._nbRsSave(p);
+  }
+  window.addEventListener('pagehide', rsMedia);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) rsMedia(); });
   function finishOpen() {
+    rsMedia();
     try { lockScroll(); } catch (e) {}
     clearInterval(MD.timer);
     MD.timer = setInterval(function () { if (MD.ps.playing) uiProg(); }, 250);
@@ -25438,7 +25576,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function close() {
     if (!MD.open) return;
     exitSel();
-    MD.open = false; clearInterval(MD.timer); stopPoll();
+    MD.open = false; clearInterval(MD.timer); stopPoll(); rsMedia();
     $('md-screen').classList.remove('open'); $('md-screen').setAttribute('aria-hidden', 'true');
     try { unlockScroll(); } catch (e) {}
   }
@@ -25647,6 +25785,17 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     }
     bar.addEventListener('pointerup', function () { endDrag(true); });
     bar.addEventListener('pointercancel', function () { endDrag(false); });
+    var rs = window._nbRestoreBoot;
+    if (rs && rs.m) {
+      try {
+        if (rs.ms === 'notes' || rs.ms === 'likes') MD.src = rs.ms;
+        if (TABS.some(function (t) { return t[0] === rs.mt; })) MD.tab = rs.mt;
+        var msc = $('md-screen'); msc.style.transition = 'none'; // reopen in place, no slide-in on a refresh
+        open(); void msc.offsetWidth; msc.style.transition = '';
+        var ty = +rs.my || 0, mb = $('md-body');
+        if (ty > 0 && window._nbRsSettle) window._nbRsSettle({ get: function () { return mb.scrollTop; }, set: function (v) { mb.scrollTop = v; }, max: function () { return mb.scrollHeight - mb.clientHeight; } }, ty, 3000, [window]);
+      } catch (e) {}
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window._mdTest = { parseLink: parseLink, MD: MD, scan: scan, open: open, close: close, AD: AD, step: step, act: act, playKeys: playKeys };
