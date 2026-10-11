@@ -4795,6 +4795,8 @@ body.pink #md-hdr .md-ib:active{background:rgba(255,255,255,.22)}
 /* large section heads (Apple Music) — also used for the queue sections */
 .md-gh{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin:1.4rem .15rem .55rem}
 .md-acts+.md-card{margin-top:.3rem}
+.md-gh-st{position:sticky;top:calc(var(--md-sth,0px) + var(--md-ah,0px));z-index:1;margin:1rem -.9rem .15rem;padding:.45rem 1.05rem .5rem;background:transparent;transition:background-color .2s,box-shadow .2s}
+.md-gh-st.is-stuck{background:var(--md-bg)}
 .md-gh small{font-size:.78rem;font-weight:500;letter-spacing:0;color:var(--md-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* grouped list: the Library's card surface, rows divided by an inset hairline */
 .md-card{overflow:hidden}
@@ -5035,6 +5037,7 @@ body.pink #md-hdr .md-ib:active{background:var(--md-press)}
 #md-np-top{transition:background-color .2s}
 #md-hdr{transition:background-color .2s,box-shadow .2s,border-color .2s,color .2s}
 #md-screen:not(.md-scrolled) #md-sticky,#md-screen:not(.md-scrolled) .md-acts{background:transparent;border-bottom-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+#md-screen .md-gh-st.is-stuck{background:color-mix(in srgb,var(--md-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
 /* page swap inside Media (Albums / Playlists / tabs): the header, search row and action bar snap to the new scroll state instead of fading through the old one */
 #md-screen.md-nav #md-hdr,#md-screen.md-nav #md-sticky,#md-screen.md-nav .md-acts{transition:none!important}
 body.nb-nav #nb-app #site-header,body.nb-nav #nb-app #feed-search-wrap{transition:none!important}
@@ -24760,7 +24763,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         var pq = MD.q.trim().toLowerCase(), tiles = '';
         MD.pl.filter(function (p) { return !pq || p.name.toLowerCase().indexOf(pq) >= 0; }).forEach(function (p) {
           var first = p.items[0] ? fromStored(p.items[0]) : null;
-          tiles += '<div class="md-pt" data-act="openpl" data-id="' + esc(p.id) + '" role="button"><div class="md-pc">' + (first ? thumbHtml(first, 'fill', true) : '<div class="md-th md-th-fill"><div class="md-ph" style="background:' + bg(p.id) + '">' + IC.note(22) + '</div></div>') + '</div>' +
+          tiles += '<div class="md-pt" data-act="openpl" data-id="' + esc(p.id) + '" role="button"><div class="md-pc">' + (first ? thumbHtml(first, 'fill', true) : '<div class="md-th md-th-fill"><div class="md-ph" style="background:' + bg(p.id) + '">' + IC.list(22) + '</div></div>') + '</div>' +
             '<div class="md-t">' + esc(p.name) + '</div><div class="md-s">' + p.items.length + (p.items.length === 1 ? ' item' : ' items') + '</div></div>';
         });
         h = '<div class="md-pgrid"><div class="md-pt" data-act="newpl" role="button"><div class="md-pc"><div class="md-th md-th-fill"><div class="md-ph" style="background:var(--md-pa);color:var(--md-paf)">' + IC.plus(24) + '</div></div></div><div class="md-t">New playlist</div></div>' + tiles + '</div>';
@@ -24788,7 +24791,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         } else {
           h = actsHtml();
           groups.forEach(function (g) {
-            h += '<div class="md-gh">' + PN[g.p] + '<small>' + g.items.length + (g.items.length === 1 ? ' item' : ' items') + '</small></div><div class="md-card">' + g.items.map(function (it) { return rowHtml(it); }).join('') + '</div>';
+            h += '<div class="md-grp"><div class="md-gh md-gh-st">' + PN[g.p] + '<small>' + g.items.length + (g.items.length === 1 ? ' item' : ' items') + '</small></div><div class="md-card">' + g.items.map(function (it) { return rowHtml(it); }).join('') + '</div></div>';
           });
         }
       }
@@ -24806,7 +24809,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       var its = p2.items.map(fromStored);
       its.forEach(function (it) { if (!MD.items.has(it.k)) MD.pit.set(it.k, MD.items.get(it.k) || it); });
       MD.viewKeys = its.map(function (it) { return it.k; }); MD.viewCtx = p2.name; artIt = its[0] || null;
-      var cover = its[0] ? thumbHtml(its[0], 'lg', true) : '<div class="md-th md-th-lg"><div class="md-ph" style="background:' + bg(p2.id) + '">' + IC.note(36) + '</div></div>';
+      var cover = its[0] ? thumbHtml(its[0], 'lg', true) : '<div class="md-th md-th-lg"><div class="md-ph" style="background:' + bg(p2.id) + '">' + IC.list(36) + '</div></div>';
       h = '<div class="md-plhead">' + cover + '<div style="min-width:0"><h1 class="md-lt">' + esc(p2.name) + '</h1><div class="md-lsub">' + its.length + (its.length === 1 ? ' item' : ' items') + '</div></div></div>';
       if (!its.length) h += emptyHtml(IC.list(40), 'This playlist is empty', 'Use the \u22ef menu on a song or video in Media and choose Add to playlist.');
       else h += actsHtml() + '<div class="md-card">' + its.map(function (it) { return rowHtml(it); }).join('') + '</div>';
@@ -24823,7 +24826,28 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       var sy = function () { $('md-view').style.setProperty('--md-sth', st.offsetHeight + 'px'); };
       sy();
       if (window.ResizeObserver && !st._ro) { st._ro = new ResizeObserver(sy); st._ro.observe(st); }
+    } else {
+      // no search block on this screen (album / playlist): don't keep the home page's height, or Play/Shuffle pins that far below the header
+      $('md-view').style.removeProperty('--md-sth');
     }
+    // headings pin just under the Play/Shuffle row, so they need its height
+    var acts = box.querySelector('.md-acts');
+    var setAh = function () { $('md-view').style.setProperty('--md-ah', (acts ? acts.offsetHeight : 0) + 'px'); syncGh(); };
+    setAh();
+    // keep it right if the row's height changes later (rotation, window resize, font size)
+    if (window.ResizeObserver) {
+      if (!MD._ahRO) MD._ahRO = new ResizeObserver(function () { if (MD._ahFn) MD._ahFn(); });
+      MD._ahRO.disconnect(); MD._ahFn = setAh;
+      if (acts) MD._ahRO.observe(acts);
+    }
+  }
+  // A source heading gets its background only while it is actually pinned (not while it sits in the list)
+  function syncGh() {
+    var hs = document.querySelectorAll('#md-view .md-gh-st');
+    if (!hs.length) return;
+    var vw = $('md-view'), cs = getComputedStyle(vw);
+    var top = $('md-body').getBoundingClientRect().top + (parseFloat(cs.getPropertyValue('--md-sth')) || 0) + (parseFloat(cs.getPropertyValue('--md-ah')) || 0);
+    hs.forEach(function (h) { h.classList.toggle('is-stuck', h.getBoundingClientRect().top <= top + 1); });
   }
   function markCur(box) { var it = MD.cur; if (it) { var r = box.querySelectorAll('.md-row[data-k]'); r.forEach(function (x) { x.classList.toggle('is-cur', x.getAttribute('data-k') === it.k); }); } }
   function fromStored(o) { return { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '', ns: o.ns || '', na: o.na || '' }; }
@@ -25258,7 +25282,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     $('md-mini-pp').innerHTML = IC.play(22);
     EDGE_FRAMES.forEach(function (id) { var fr = $(id); if (fr) fr.addEventListener('load', hookEditorFrame); });
     hookEditorFrame();
-    $('md-body').addEventListener('scroll', function () { scr.classList.toggle('md-scrolled', this.scrollTop > 2); MD.lastScroll = NOW(); syncFab(); syncTitle(); }, { passive: true });
+    $('md-body').addEventListener('scroll', function () { scr.classList.toggle('md-scrolled', this.scrollTop > 2); MD.lastScroll = NOW(); syncFab(); syncTitle(); syncGh(); }, { passive: true });
     $('md-np-scroll').addEventListener('scroll', syncNpTop, { passive: true });
     window.addEventListener('resize', function () { syncFab(); syncTitle(); syncNpTop(); }, { passive: true });
     (function () { var f = function () { document.body.classList.toggle('nb-scrolled', (window.pageYOffset || document.documentElement.scrollTop || 0) > 2); }; window.addEventListener('scroll', f, { passive: true }); f(); })();
