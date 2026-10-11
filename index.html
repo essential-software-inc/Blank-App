@@ -4693,6 +4693,8 @@ body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;-
 .st-danger .st-l{color:#d6284a;font-weight:700}
 body.night .st-danger .st-l{color:#ff7a8c}
 body.pink .st-danger .st-l{color:#bd2856}
+/* Sign in takes Settings' own accent per theme (blue / light grey in dark / pink); the id keeps it above the themed red danger rules */
+#screen-settings .st-accent .st-l{color:var(--st-acc)}
 .st-chips{display:flex;flex-wrap:wrap;gap:.4rem}
 .st-chip{padding:.38rem .8rem;border-radius:999px;border:1px solid var(--st-line);background:none;color:var(--st-fg);font:inherit;font-size:.8rem;cursor:pointer}
 .st-chip.on{background:var(--st-acc);border-color:var(--st-acc);color:var(--st-on);font-weight:600}
@@ -5046,7 +5048,7 @@ body.pink{--nb-bg:#fff8fb;--nb-wash:.28;--nb-hdr-fg:#bd2856;--nb-hbd:rgba(200,54
 body{--nb-g1:rgba(60,115,235,.95);--nb-g2:rgba(255,212,110,.95);--nb-g3:rgba(255,140,170,.85);--nb-g4:rgba(150,165,215,.8);--nb-g5:rgba(70,200,140,.85)}
 body.night{--nb-g1:rgba(70,110,255,.9);--nb-g2:rgba(190,140,255,.8);--nb-g3:rgba(255,120,150,.75);--nb-g4:rgba(60,150,200,.7);--nb-g5:rgba(60,210,150,.75)}
 body.pink{--nb-g1:rgba(255,110,150,.95);--nb-g2:rgba(255,200,140,.9);--nb-g3:rgba(200,120,230,.8);--nb-g4:rgba(255,160,190,.8);--nb-g5:rgba(120,210,170,.7)}
-#nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
+#nb-wash{position:fixed;left:-20%;right:-20%;top:-10%;height:62%;z-index:-1;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none;will-change:transform}
 .wash-sweep-in{position:absolute;left:-60%;right:-60%;top:-24%;height:95%;pointer-events:none;background-image:radial-gradient(ellipse 38% 62% at 18% 42%,var(--nb-g1) 0%,transparent 72%),radial-gradient(ellipse 34% 55% at 52% 28%,var(--nb-g2) 0%,transparent 72%),radial-gradient(ellipse 36% 60% at 84% 55%,var(--nb-g3) 0%,transparent 72%),radial-gradient(ellipse 30% 50% at 36% 72%,var(--nb-g5) 0%,transparent 72%),linear-gradient(115deg,var(--nb-g4) 0%,transparent 55%);filter:blur(30px) saturate(1.5);opacity:0;transform:translate3d(-8%,0,0) scale(1.1);will-change:transform,opacity;transition:transform var(--d1,14s) ease-in-out,opacity var(--do,4s) ease-in-out}
 .wash-sweep-in::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g5) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g1) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);will-change:transform;transition:transform var(--d2,12s) ease-in-out}
 .wash-sweep-in::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at 62% 52%,var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at 20% 30%,var(--gx,transparent) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);will-change:transform,opacity;transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
@@ -5281,6 +5283,18 @@ body.nb-reduce-motion #delete-dialog,
 body.nb-reduce-motion #unpublish-dialog,
 body.nb-reduce-motion #delete-account-dialog,
 body.nb-reduce-motion #signout-dialog {animation:none}
+/* Dialog / sheet buttons slide in from the right when the dialog opens, one after another (the overlay is display:none until opened, so this replays on every open). `backwards` fill only: once it ends, the button's own transform/press rules apply as normal. */
+@keyframes dlg-btn-in{from{opacity:0;transform:translateX(34px)}}
+.rdlg-btns>button,
+#edit-dfooter-r>button,
+#pub-footer-new-r>button,#pub-footer-live-r>button,#pub-footer-ad-new-r>button,#pub-footer-ad-live-r>button{animation:dlg-btn-in .36s cubic-bezier(.2,.8,.25,1) .08s backwards}
+.rdlg-btns>button:nth-child(2),
+#edit-dfooter-r>button:nth-child(2),
+#pub-footer-new-r>button:nth-child(2),#pub-footer-live-r>button:nth-child(2),#pub-footer-ad-new-r>button:nth-child(2),#pub-footer-ad-live-r>button:nth-child(2){animation-delay:.15s}
+.rdlg-btns>button:nth-child(n+3),
+#pub-footer-new-r>button:nth-child(n+3),#pub-footer-live-r>button:nth-child(n+3),#pub-footer-ad-new-r>button:nth-child(n+3),#pub-footer-ad-live-r>button:nth-child(n+3){animation-delay:.22s}
+body.nb-reduce-motion .rdlg-btns>button,body.nb-reduce-motion #edit-dfooter-r>button,body.nb-reduce-motion [id^="pub-footer-"][id$="-r"]>button{animation:none}
+@media (prefers-reduced-motion:reduce){.rdlg-btns>button,#edit-dfooter-r>button,[id^="pub-footer-"][id$="-r"]>button{animation:none}}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 <style id="sheet-md" data-nb-glass media="not all">
@@ -13019,7 +13033,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
     ]],
     ['', [
-      { t: 'link', l: 'Sign out', danger: true, show: () => nbIsSignedIn(), go: () => openSettingsSignOutConfirm() }]],
+      { t: 'link', l: 'Sign out', danger: true, show: () => nbIsSignedIn(), go: () => openSettingsSignOutConfirm() },
+      { t: 'link', l: 'Sign in', accent: true, show: () => !nbIsSignedIn(), go: () => nbSignInWithGoogle() }]],
     ['About & Support', [
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
@@ -13037,17 +13052,23 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
     }
     if (r.t === 'info') return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
-    return '<button type="button" class="st-row st-link' + (r.danger ? ' st-danger' : '') + '"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + (r.danger ? '' : CHEV) + '</button>';
+    return '<button type="button" class="st-row st-link' + (r.danger ? ' st-danger' : '') + (r.accent ? ' st-danger st-accent' : '') + '"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + (r.danger || r.accent ? '' : CHEV) + '</button>';
   }
   window._nbStRender = function () {
     const root = document.getElementById('st-root'); if (!root) return;
     // Redrawing swaps every row at once; hold the height and the scroll position so the page doesn't drop to the top
     const _stY = window.scrollY, _stH = root.offsetHeight;
+    const _stHtml = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+    // Dialogs, sync and theme changes ask for a redraw even when nothing on this screen changed; swapping identical
+    // markup in only made the screen flash, so an unchanged page is left exactly as it is.
+    if (root.childElementCount && window._nbStLastHtml === _stHtml) return;
+    window._nbStLastHtml = _stHtml;
     if (_stH) root.style.minHeight = _stH + 'px';
-    root.innerHTML = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+    root.innerHTML = _stHtml;
     try { _nbSettingsAdsMount(); } catch (e) { _nbLog('settings ads mount', e); }
     try { _nbSettingsAcctFetch(); } catch (e) { _nbLog('settings acct fetch', e); }
     root.style.minHeight = '';
+    if (window._nbSigninRowBusy) { try { _nbStSigninBusy(true); } catch (e) {} }
     if (Math.abs(window.scrollY - _stY) > 1) window.scrollTo({ top: _stY, behavior: 'instant' });
   };
   const root = document.getElementById('st-root');
@@ -13919,11 +13940,31 @@ async function _nbProbeConnectivity() {
     return false;
   }
 }
+// The Settings "Sign in" row shows the same spinner + "Signing in…" label as the account screen's button while sign-in runs.
+// Settings can redraw mid sign-in, so the flag is re-applied after every redraw (see _nbStRender).
+function _nbStSigninBusy(busy) {
+  window._nbSigninRowBusy = !!busy;
+  const row = document.querySelector('#st-root .st-accent');
+  const l = row && row.querySelector('.st-l');
+  if (!l) return;
+  if (busy) {
+    if (row.dataset.busy) return;
+    row.dataset.busy = '1'; row.dataset.origLabel = l.textContent;
+    l.innerHTML = '<span class="com-spinner"></span>Signing in\u2026';
+    row.style.pointerEvents = 'none'; row.setAttribute('aria-disabled', 'true');
+  } else {
+    if (!row.dataset.busy) return;
+    delete row.dataset.busy;
+    l.textContent = row.dataset.origLabel || 'Sign in'; delete row.dataset.origLabel;
+    row.style.pointerEvents = ''; row.removeAttribute('aria-disabled');
+  }
+}
 async function nbSignInWithGoogle() {
   console.log('[nb] signin tapped, onLine=', navigator.onLine, 'GAuth=', !!_nbGoogleAuthPlugin());
   if (_pubOfflineGuard()) { console.log('[nb] blocked by offline guard'); return; }
   const btn = document.getElementById('account-signin-btn');
   if (btn) _pubSetBtnLoading(btn, true, 'Signing in\u2026');
+  _nbStSigninBusy(true);
   try {
     let idToken = null;
     const GAuth = _nbGoogleAuthPlugin();
@@ -13981,6 +14022,7 @@ async function nbSignInWithGoogle() {
     // the trailing sync) so the back button isn't stuck waiting on it —
     // only clear it here if that didn't happen, i.e. the flow failed.
     if (btn && btn.disabled) _pubSetBtnLoading(btn, false);
+    _nbStSigninBusy(false);
   }
 }
 async function _nbCompleteGoogleSignIn(idToken) {
