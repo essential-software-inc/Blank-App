@@ -12807,10 +12807,13 @@ function unlockScroll() {
   let isLocked = false;
   document.querySelectorAll('div[id$="-overlay"].open').forEach(ov => { isLocked = true; });
   if (!isLocked) {
+    // Where the page actually is now wins over the position saved when the dialog opened (that can be stale), and the
+    // jump is instant: the page's smooth-scroll would otherwise animate it across the screen.
+    const cur = window.scrollY;
     document.documentElement.style.overflow = '';
     const sy = parseInt(document.body.dataset.lockScrollY || '0');
     delete document.body.dataset.lockScrollY;
-    window.scrollTo(0, sy);
+    window.scrollTo({ top: cur > 0 ? cur : sy, behavior: 'instant' });
   }
 }
 
@@ -13045,9 +13048,14 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   }
   window._nbStRender = function () {
     const root = document.getElementById('st-root'); if (!root) return;
+    // Redrawing swaps every row at once; hold the height and the scroll position so the page doesn't drop to the top
+    const _stY = window.scrollY, _stH = root.offsetHeight;
+    if (_stH) root.style.minHeight = _stH + 'px';
     root.innerHTML = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
     try { _nbSettingsAdsMount(); } catch (e) { _nbLog('settings ads mount', e); }
     try { _nbSettingsAcctFetch(); } catch (e) { _nbLog('settings acct fetch', e); }
+    root.style.minHeight = '';
+    if (Math.abs(window.scrollY - _stY) > 1) window.scrollTo({ top: _stY, behavior: 'instant' });
   };
   const root = document.getElementById('st-root');
   function find(el) { const g = el.dataset.g, r = el.dataset.r; return g == null ? null : GROUPS[g][1][r]; }
