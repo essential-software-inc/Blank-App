@@ -5380,6 +5380,8 @@ body.pink #publish-close {color:var(--sh-sub) !important;opacity:1;width:36px;he
 #pub-slug-wrap:focus-within {background:var(--sh-fieldf) !important;box-shadow:var(--sh-fieldfsh) !important}
 #pub-slug-prefix {padding-left:.9rem;font-size:.95rem}
 #pub-slug-input {padding:.7rem .9rem .7rem .15rem;font-size:.95rem}
+/* Solid (non-translucent) fields: edit-details inputs, the publish slug field and the ad balance input. Same tint for every theme, derived from the page colour so each theme keeps its own look; focus goes to the plain page colour. */
+#edit-dialog .com-field,#pub-slug-wrap,#pub-ad-bal-input{--sh-field:color-mix(in srgb,var(--nb-bg) 92%,var(--sh-fg) 8%);--sh-fieldf:var(--nb-bg)}
 #publish-sheet .pub-url {border-radius:12px;padding:.7rem .9rem;background:var(--nb-fill);border-color:var(--nb-card-ring)}
 body.night #publish-sheet .pub-url {background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.07)}
 body.pink #publish-sheet .pub-url {background:rgba(255,242,247,.55);border-color:rgba(200,54,94,.18)}
