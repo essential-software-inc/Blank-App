@@ -4608,7 +4608,7 @@ body.pink .nb-carousel-dot{background:#d796b0}
   <button class="hdr-btn" id="reader-infobar-btn" aria-label="Toggle info bar" title="Toggle info bar" onclick="toggleReaderInfoBar()" style="display:none">
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <rect x="2" y="2" width="14" height="14" rx="1.5" stroke="currentColor" stroke-width="2"/>
-      <rect x="2" y="11.5" width="14" height="4.5" rx="0 0 1 1" fill="currentColor" id="reader-infobar-strip" style="display:none"/>
+      <rect x="2" y="11.5" width="14" height="4.5" fill="currentColor" id="reader-infobar-strip" style="display:none"/>
     </svg>
   </button>
   <button class="hdr-btn" id="hdr-edit-btn" onclick="openEdit()" aria-label="Edit content" title="Edit content" style="display:none">
@@ -6177,6 +6177,41 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 </div>
 
 
+<script>
+// Global error reporting for the main app (the canvas iframe has its own relay, see _errRelay).
+// Everything is logged to the console; only errors that genuinely affect the user or the app get a toast (rate-limited).
+// Transient failures that the app retries or recovers from on its own (network drops, aborted requests, interrupted playback) are logged as warnings, no toast.
+(function () {
+  var last = 0, busy = false;
+  var TRANSIENT = /abort|failed to fetch|networkerror|network request failed|load failed|network error|err_(internet|network|connection|timed)|timed? ?out|timeout|offline|interrupted by|play\(\) request|the operation was cancel|cancell?ed|resizeobserver|script error/i;
+  function transient(msg) {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+    return TRANSIENT.test(String(msg || ''));
+  }
+  function report(kind, msg) {
+    if (busy) return;
+    busy = true;
+    try {
+      if (transient(msg)) { console.warn('App ' + kind + ' (transient, no toast):', msg); return; }
+      console.error('App ' + kind + ':', msg);
+      var now = Date.now();
+      if (now - last > 4000 && typeof showToast === 'function') {
+        last = now;
+        showToast(('Error: ' + msg).slice(0, 140));
+      }
+    } catch (e) {} finally { busy = false; }
+  }
+  window.addEventListener('error', function (ev) {
+    // Resource load failures (img/script) fire here too with no message; the app retries those itself.
+    if (!ev || !ev.message) return;
+    report('error', ev.message + (ev.lineno ? ' (line ' + ev.lineno + ')' : ''));
+  });
+  window.addEventListener('unhandledrejection', function (ev) {
+    var r = ev && ev.reason;
+    report('unhandled rejection', (r && (r.name && r.message ? r.name + ': ' + r.message : r.message)) || String(r));
+  });
+})();
+</script>
 <script>
 
 // Hoisted above NB_PRISTINE_TEMPLATE (and everything else in this
@@ -9699,7 +9734,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
       // script runs inside the editor's own iframe document, so the
       // toast itself has to be reached on the parent window — there's
       // no local showToast() in here to fall back on.
-      else parent.showToast('Switch to preview to interact with this');
+      else { try { parent.showToast('Switch to preview to interact with this'); } catch (e) { console.error('Canvas: parent.showToast failed:', e); try { window.onerror('parent.showToast failed: ' + (e && e.message ? e.message : e), '', 0, 0, e); } catch (e2) {} } }
     });
   }
 
@@ -9737,7 +9772,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
       // on wrap instead of the embed — surface the same toast rather
       // than leaving the tap silent. Reached via parent.* for the same
       // reason as parent.showToast() in wireMedia above.
-      else parent.showToast('Switch to preview to interact with this');
+      else { try { parent.showToast('Switch to preview to interact with this'); } catch (e) { console.error('Canvas: parent.showToast failed:', e); try { window.onerror('parent.showToast failed: ' + (e && e.message ? e.message : e), '', 0, 0, e); } catch (e2) {} } }
     });
   }
 
@@ -22123,7 +22158,9 @@ function nbToggleUndoMode() {
 
 function _nbCanvasWin() {
   const iframe = document.getElementById('markup-iframe');
-  try { return iframe && iframe.contentWindow; } catch (e) { return null; }
+  // In a sandbox without allow-same-origin the canvas window is cross-origin: reading any property of it throws a
+  // SecurityError, so probe it and report "no canvas window" (undo/redo and view state are then simply unavailable).
+  try { const w = iframe && iframe.contentWindow; if (w) void w.document; return w; } catch (e) { return null; }
 }
 
 // Called by the canvas itself (window.parent.nbSyncUndoRedoButtons) after
@@ -22193,7 +22230,7 @@ function _nbRsSavePage() {
   const k = _nbRsKeyPage(); if (k) _nbRsSetY(k, window.pageYOffset || document.documentElement.scrollTop || 0);
 }
 let _nbRsCanvasKey = null;
-function _nbRsCanvasId() { const e = _nbGetEditingId(); if (e) return 'note_' + e; try { return localStorage.getItem(_nbDraftIdKey()) || null; } catch (x) { return null; } }
+function _nbRsCanvasId() { const e = _nbGetEditingId(); if (e) return 'note_' + e; try { return localStorage.getItem(_nbDraftIdKey()) || null; } catch (x) { return _nbMemDraftIds[_nbDraftIdKey()] || null; } }
 function _nbRsSaveEditor() {
   if (!window._nbRsArmed || !_nbRsCanvasKey) return;
   const sc = document.getElementById('screen-create'); if (!sc || !sc.classList.contains('active')) return;
@@ -22920,8 +22957,11 @@ function nbBuildSafeHtml(htmlSrc, uiState, draftId, repost) {
   // embeds through one retry path.
   const _uiStateGlobals = `<script data-noteinfra="1">window.__savedNoteUiState=${JSON.stringify(uiState || null).replace(/</g, '\\u003c')};window.__noteId=${JSON.stringify(draftId || null).replace(/</g, '\\u003c')};<\/script>`;
   const _repostGlobal = repost ? '<script data-noteinfra="1">window.__nbRepost=true;<\/script>' : '';
+  // The canvas runs in this srcdoc iframe, but lockScroll()/unlockScroll() live on the parent window only, so
+  // window.lockScroll() inside the canvas threw "is not a function". Bridge them to the parent (same-origin).
+  const _scrollBridge = '<script data-noteinfra="1">(function(){function b(n){return function(){try{var p=window.parent;if(p&&p!==window&&typeof p[n]==="function")return p[n].apply(p,arguments)}catch(e){}}}if(typeof window.lockScroll!=="function")window.lockScroll=b("lockScroll");if(typeof window.unlockScroll!=="function")window.unlockScroll=b("unlockScroll")})();<\/script>';
   const _noScrollbarCss = '<style data-noteinfra="1">html,body{scrollbar-width:none;-ms-overflow-style:none}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none}</style>';
-  const _errRelay = `<script data-noteinfra="1">window.onerror=function(msg,src,line,col,err){parent.postMessage({type:'markup-error',msg:msg+(line?(' (line '+line+')'):'')},location.origin||'*');return true};<\/script>`;
+  const _errRelay = `<script data-noteinfra="1">window.onerror=function(msg,src,line,col,err){parent.postMessage({type:'markup-error',msg:msg+(line?(' (line '+line+')'):'')},location.origin||'*');return true};window.addEventListener('unhandledrejection',function(ev){var r=ev&&ev.reason,m=(r&&(r.name&&r.message?r.name+': '+r.message:r.message))||String(r);if(navigator.onLine===false||/abort|failed to fetch|networkerror|network request failed|load failed|network error|err_(internet|network|connection|timed)|timed? ?out|timeout|offline|interrupted by|play\\(\\) request|cancell?ed/i.test(m)){console.warn('Canvas rejection (transient, no toast):',m);return}parent.postMessage({type:'markup-error',msg:'Unhandled promise rejection: '+m},location.origin||'*')});<\/script>`;
   // #5b5bd6 is the canvas's one hardcoded accent color (selection/hover/
   // focus highlights, variant swatches, FABs — both in its CSS and in a
   // few JS color-wheel/canvas defaults). Rather than have the canvas read
@@ -22951,7 +22991,7 @@ function nbBuildSafeHtml(htmlSrc, uiState, draftId, repost) {
   Object.keys(_cvAccentByTheme.fills).forEach(function (origHex) {
     htmlSrc = htmlSrc.split('#' + origHex).join('#' + _cvAccentByTheme.fills[origHex]);
   });
-  return `<!DOCTYPE html><html${repost ? ' class="nb-repost"' : ''}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="referrer" content="strict-origin-when-cross-origin"><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:#fff;color:#1a1a1a}</style>${_noScrollbarCss}</head><body>${_uiStateGlobals}${_repostGlobal}${htmlSrc}${_errRelay}${_NB_NOTE_UI_STATE_SCRIPT}</body></html>`;
+  return `<!DOCTYPE html><html${repost ? ' class="nb-repost"' : ''}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="referrer" content="strict-origin-when-cross-origin"><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:#fff;color:#1a1a1a}</style>${_noScrollbarCss}</head><body>${_uiStateGlobals}${_repostGlobal}${_scrollBridge}${htmlSrc}${_errRelay}${_NB_NOTE_UI_STATE_SCRIPT}</body></html>`;
 }
 
 /* ===================== Bluebook canvas: draft state + render =====================
@@ -22960,15 +23000,20 @@ function nbBuildSafeHtml(htmlSrc, uiState, draftId, repost) {
 function _nbDraftUiKey(id) { return 'nb_draft_uistate_' + id; }
 function _nbNewDraftId() { return 'd_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function _nbDraftIdKey() { return _nbRepostMode ? NB_REPOST_DRAFT_ID_KEY : NB_DRAFT_ID_KEY; }
+// In-memory fallback for when storage is blocked (a sandboxed page without allow-same-origin): without it every call would mint a
+// brand-new id, so anything comparing ids (e.g. the fresh-draft render after the ad fetch) never matched and the Editor never revealed.
+var _nbMemDraftIds = {};
 function _nbGetDraftId() {
-  let id;
+  let id, ok = true;
   const key = _nbDraftIdKey();
-  try { id = localStorage.getItem(key); } catch (e) {}
-  if (!id) { id = _nbNewDraftId(); try { localStorage.setItem(key, id); } catch (e) {} }
+  try { id = localStorage.getItem(key); } catch (e) { ok = false; }
+  if (!ok) return _nbMemDraftIds[key] || (_nbMemDraftIds[key] = _nbNewDraftId());
+  if (!id) { id = _nbNewDraftId(); try { localStorage.setItem(key, id); } catch (e) { _nbMemDraftIds[key] = id; } }
   return id;
 }
 function _nbSetDraftId(id) {
-  try { localStorage.setItem(_nbDraftIdKey(), id); } catch (e) {}
+  const key = _nbDraftIdKey();
+  try { localStorage.setItem(key, id); } catch (e) { _nbMemDraftIds[key] = id; }
 }
 function _nbLoadDraftUiState(id) {
   try { return JSON.parse(localStorage.getItem(_nbDraftUiKey(id)) || 'null'); } catch (e) { return null; }
@@ -23167,7 +23212,13 @@ function nbRenderCanvas(forcePreview) {
   // whatever the layout looked like a moment into that process is simply
   // never shown.
   wrap.classList.remove('show');
+  // When the app itself runs in a sandbox without allow-same-origin (opaque origin), the iframe's document is cross-origin:
+  // contentDocument is null and contentWindow.document throws a SecurityError. Fall back to srcdoc, which works either way.
+  let _bigDoc = null;
   if (safeHtml.length > 400000) {
+    try { _bigDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document); } catch (e) { _bigDoc = null; }
+  }
+  if (_bigDoc) {
     // The canvas template is well over the point where srcdoc's own size
     // limits get uncomfortable across engines, so — matching the
     // original's behavior for content this size — write directly into
@@ -23175,8 +23226,7 @@ function nbRenderCanvas(forcePreview) {
     // doc.write()/doc.close() are synchronous: by the time close()
     // returns, the document's own synchronous parse and inline scripts
     // have already run, so it's safe to reveal immediately after.
-    const doc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
-    if (!doc) return;
+    const doc = _bigDoc;
     doc.open();
     doc.write(safeHtml);
     doc.close();
@@ -26137,8 +26187,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   // Freezing is immediate; resuming always waits a moment after the last thing that paused it (keyboard leaving, Media sliding,
   // coming back to the app), and anything that pauses it again inside that wait cancels the resume.
-  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, easeHold=false, easing=false, easeLast=0, easeT=0;
-  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||easeHold}
+  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, scrolling=false, scrollT=0, editorOn=false, easeHold=false, easing=false, easeLast=0, easeT=0;
+  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||scrolling||editorOn||easeHold}
   // A busy marker only counts while it is really showing: displayed, visible, inside the screen, and not under Media / the sign-in screen.
   function onScreen(el){
     if(!el.getClientRects().length)return false;
@@ -26268,8 +26318,12 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   var domPend=false;
   var busyCapT=0, busyCapped=false;
+  // The sweep stays paused for as long as the Editor screen is showing
+  function inEditor(){var s=document.getElementById('screen-create');return !!(s&&s.classList.contains('active'))}
   function checkBusy(){
     domPend=false;
+    var ed=inEditor();
+    if(ed!==editorOn){editorOn=ed;sync(!ed)}
     var cv=coverUp();
     if(cv!==cover){cover=cv;sync(!cv)}
     var fr=flagsRelevant();
@@ -26308,7 +26362,42 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     switching=true;sync(false);
     clearTimeout(switchT);switchT=setTimeout(function(){switching=false;sync(true)},700);
   },true);
+  // Vertical scrolling (Editor canvas, Library notes list, Reader, Story viewer, Media list, Now Playing, any page): hold while it moves,
+  // then resume after it has been still for a moment (same pause pattern as category switching). Horizontal scrollers (pills, chips) don't count.
+  var lastTop=new WeakMap();
+  function vMoved(t){
+    var el=t&&t.nodeType===9?(t.scrollingElement||t.documentElement):t;
+    if(!el)return false;
+    var y;try{y=el.scrollTop}catch(e){return false}
+    var p=lastTop.get(el);lastTop.set(el,y);
+    return p!==undefined&&y!==p;
+  }
+  function onScroll(e){
+    if(!vMoved(e.target))return;
+    onInput();
+    scrolling=true;sync(false);
+    clearTimeout(scrollT);scrollT=setTimeout(function(){scrolling=false;sync(true)},300);
+  }
+  document.addEventListener('scroll',onScroll,{capture:true,passive:true});
+  // The editor canvas and Story viewer are their own (same-origin) iframe documents, rebuilt on every open, so they are hooked again after each build
+  var SCROLL_FRAMES=['markup-iframe','story-viewer-frame'];
+  function hookScrollFrames(){
+    SCROLL_FRAMES.forEach(function(id){
+      var doc,fr=document.getElementById(id);
+      try{doc=fr&&fr.contentDocument}catch(x){return}
+      if(!doc||!doc.documentElement||doc.documentElement.__nbWashScroll)return;
+      doc.documentElement.__nbWashScroll=1;
+      doc.addEventListener('scroll',onScroll,{capture:true,passive:true});
+    });
+  }
+  SCROLL_FRAMES.forEach(function(id){var fr=document.getElementById(id);if(fr)fr.addEventListener('load',hookScrollFrames)});
+  (function(){
+    var prev=window.nbMediaHookFrame;
+    window.nbMediaHookFrame=function(){try{if(prev)prev.apply(this,arguments)}finally{hookScrollFrames()}};
+  })();
+  hookScrollFrames();
   fieldFocused=isField(document.activeElement);
+  editorOn=inEditor();
   domBusy=anyBusy();
   cover=coverUp();
   window.nbWashHold(1500); // every fresh launch starts paused and only begins after a short wait
