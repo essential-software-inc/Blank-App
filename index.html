@@ -77,7 +77,17 @@ body {
   background: #fff;
   line-height: 1.6;
   overflow-x: hidden;
-  overscroll-behavior-y: none
+  overscroll-behavior-y: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none
+}
+
+/* Hold-to-select only where reading or editing text makes sense */
+input, textarea, [contenteditable], .alert-md, #privacy-body, #cterms-body, #terms-dialog-body {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default
 }
 
 a {
@@ -4457,6 +4467,17 @@ document.body.dataset.lockScrollY = window.scrollY;
 body #account-screen #account-signin-btn,body #account-screen #account-signout-btn{width:100%;height:46px;padding:0 1.2rem;border-radius:14px;font-size:.92rem;font-weight:700;transition:transform .12s}
 body #account-screen #account-signout-btn{background-color:rgba(255,255,255,.18) !important;color:#fff !important;border:1px solid rgba(255,255,255,.4) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4) !important}
 body #account-screen #account-signin-btn:active,body #account-screen #account-signout-btn:active{transform:scale(.97)}
+
+/* Glass mode sign-in / onboarding screen: a permanent, static vintage overlay (faded amber, cream, dusty rose, bleached teal, warm cast, brown vignette).
+   Plain CSS on the screen's existing scrim layer: no animation, no JS, nothing to repaint. The doubled id also wins over the pink theme, which hides this layer. */
+#account-screen#account-screen::after{display:block;background:
+  radial-gradient(ellipse 80% 62% at 50% 44%,rgba(255,224,168,.12) 0%,rgba(255,224,168,0) 100%),
+  radial-gradient(ellipse 125% 98% at 50% 50%,rgba(60,34,14,0) 52%,rgba(60,34,14,.34) 100%),
+  radial-gradient(ellipse 60% 45% at 18% 28%,rgba(212,150,84,.30) 0%,rgba(212,150,84,0) 70%),
+  radial-gradient(ellipse 55% 45% at 84% 38%,rgba(196,112,110,.26) 0%,rgba(196,112,110,0) 70%),
+  radial-gradient(ellipse 55% 40% at 28% 78%,rgba(98,144,138,.24) 0%,rgba(98,144,138,0) 70%),
+  radial-gradient(ellipse 60% 40% at 78% 84%,rgba(238,204,148,.24) 0%,rgba(238,204,148,0) 70%),
+  linear-gradient(to bottom,rgba(40,24,12,.16) 0%,rgba(40,24,12,.36) 100%)}
 
 /* ===== Onboarding carousel: soft glass overlay ===== */
 .nb-carousel-viewport{box-sizing:border-box;border-radius:18px;box-shadow:0 8px 24px rgba(20,30,50,.18),0 1px 3px rgba(20,30,50,.1);isolation:isolate}
@@ -13128,11 +13149,11 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'info', l: 'Likes', show: () => nbIsSignedIn(), s: () => _nbStAcctText('likes') },
       { t: 'info', l: 'Following', show: () => nbIsSignedIn(), s: () => _nbStAcctText('following') },
       { t: 'info', l: 'Account created', show: () => nbIsSignedIn(), s: () => _nbStAcctText('createdAt') },
-      { t: 'link', l: 'Bluebook Pro', s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
+      { t: 'link', l: 'Bluebook Pro', noChev: () => nbIsPro(), s: () => nbIsPro() ? 'Active \u00b7 unlimited notes' : 'Free \u00b7 ' + Math.min(nbVisibleNotes().length, NB_FREE_NOTE_LIMIT) + ' of ' + NB_FREE_NOTE_LIMIT + ' notes', go: () => { if (!nbIsPro()) openPaywallDialog(); } },
     ]],
     ['', [
       { t: 'link', l: 'Sign out', danger: true, show: () => nbIsSignedIn(), go: () => openSettingsSignOutConfirm() },
-      { t: 'link', l: 'Sign in', accent: true, show: () => !nbIsSignedIn(), go: () => nbSignInWithGoogle() }]],
+      { t: 'link', l: 'Sign in', accent: true, show: () => !nbIsSignedIn(), go: () => nbSignInWithGoogle('settings') }]],
     ['About & Support', [
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
@@ -13150,7 +13171,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
     }
     if (r.t === 'info') return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
-    return '<button type="button" class="st-row st-link' + (r.danger ? ' st-danger' : '') + (r.accent ? ' st-danger st-accent' : '') + '"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + (r.danger || r.accent ? '' : CHEV) + '</button>';
+    return '<button type="button" class="st-row st-link' + (r.danger ? ' st-danger' : '') + (r.accent ? ' st-danger st-accent' : '') + '"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + (r.danger || r.accent || (r.noChev && r.noChev()) ? '' : CHEV) + '</button>';
   }
   window._nbStRender = function () {
     const root = document.getElementById('st-root'); if (!root) return;
@@ -13885,7 +13906,11 @@ function _nbBindBackButtonListener() {
   _nbBackButtonListenerBound = true;
   try {
     AppPlugin.addListener('backButton', (data) => {
+      const acctScr = document.getElementById('account-screen');
+      const acctOpen = !!(acctScr && acctScr.classList.contains('open'));
+      if (acctOpen && window._nbSigninOrigin === 'settings') { closeAccountScreen(); return; }
       if (_nbBusyBtnCount > 0) return;
+      if (acctOpen) { closeAccountScreen(); return; }
       if (window.nbMediaBack && window.nbMediaBack()) return;
       if (data && data.canGoBack) window.history.back();
       else AppPlugin.exitApp();
@@ -14057,7 +14082,8 @@ function _nbStSigninBusy(busy) {
     row.style.pointerEvents = ''; row.removeAttribute('aria-disabled');
   }
 }
-async function nbSignInWithGoogle() {
+async function nbSignInWithGoogle(origin) {
+  window._nbSigninOrigin = origin === 'settings' ? 'settings' : 'screen';
   console.log('[nb] signin tapped, onLine=', navigator.onLine, 'GAuth=', !!_nbGoogleAuthPlugin());
   if (_pubOfflineGuard()) { console.log('[nb] blocked by offline guard'); return; }
   const btn = document.getElementById('account-signin-btn');
@@ -14121,6 +14147,7 @@ async function nbSignInWithGoogle() {
     // only clear it here if that didn't happen, i.e. the flow failed.
     if (btn && btn.disabled) _pubSetBtnLoading(btn, false);
     _nbStSigninBusy(false);
+    window._nbSigninOrigin = null;
   }
 }
 async function _nbCompleteGoogleSignIn(idToken) {
@@ -15243,7 +15270,8 @@ function openAccountScreen(focusInvite) {
 // nothing.
 function closeAccountScreen() {
   const signinBtn = document.getElementById('account-signin-btn');
-  if (signinBtn && signinBtn.disabled) return;
+  // A sign-in started from Settings isn't tied to this screen, so back stays available.
+  if (signinBtn && signinBtn.disabled && window._nbSigninOrigin !== 'settings') return;
   document.getElementById('account-screen').classList.remove('open');
   unlockScroll();
   _nbStopAcctSplash3D();
@@ -26235,15 +26263,14 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   // coming back to the app), and anything that pauses it again inside that wait cancels the resume.
   var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgOpen=false, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, scrolling=false, scrollT=0, editorOn=false, storyOn=false, userPaused=false, resumeQuiet=false, easeHold=false, easing=false, easeLast=0, easeT=0;
   function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||scrolling||editorOn||storyOn||dlgOpen||userPaused||easeHold}
-  // A busy marker only counts while it is really showing: displayed, visible, inside the screen, and not under Media / the sign-in screen.
+  // A busy marker only counts while it is really showing: displayed, visible, inside the screen, and not under Media.
   function onScreen(el){
     if(!el.getClientRects().length)return false;
     if(el.checkVisibility&&!el.checkVisibility({checkOpacity:true,checkVisibilityCSS:true}))return false;
     var r=el.getBoundingClientRect();
     if(r.bottom<=0||r.top>=window.innerHeight||r.right<=0||r.left>=window.innerWidth)return false;
-    var md=document.getElementById('md-screen'),ac=document.getElementById('account-screen');
+    var md=document.getElementById('md-screen');
     if(md&&md.classList.contains('open')&&!md.contains(el))return false;
-    if(ac&&ac.classList.contains('open')&&!ac.contains(el))return false;
     return true;
   }
   // Media's own busy flags only matter while Media is open (that is the only time its work is on screen)
@@ -26252,12 +26279,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     for(var k in flags){ if(!flags[k])continue; if(k==='scanning'||k==='refreshing'){ if(mdOpen)return true } else return true }
     return false;
   }
-  // The launch splash and the sign-in / onboarding screen (#account-screen) cover the wash completely, so nothing should animate behind them
+  // The launch splash covers the wash completely, so nothing should animate behind it
   function coverUp(){
     var sp=document.getElementById('splash');
-    if(sp&&sp.isConnected&&sp.getClientRects().length)return true;
-    var ac=document.getElementById('account-screen');
-    return !!(ac&&ac.classList.contains('open'));
+    return !!(sp&&sp.isConnected&&sp.getClientRects().length);
   }
   function sync(wait){
     clearTimeout(resumeT);
