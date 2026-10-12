@@ -917,6 +917,9 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 #story-viewer-like-btn:active svg { transform: scale(.85) }
 /* Room for both buttons on the right so the @slug title doesn't run under them: the Like icon's left edge (40px + .3rem + 19px) plus the same gap the Subscribe icon has to the screen edge. */
 #story-viewer-header.has-actions #story-viewer-title { margin-right: calc(40px + .3rem + 19px + 6.4px + .3rem) }
+/* Like is the only action showing (no Subscribe, e.g. a note published without an account): Like takes Subscribe's slot at the screen edge, and the title ends the same gap before it as it would normally. */
+#story-viewer-header.like-only #story-viewer-like-btn { right: 6.4px }
+#story-viewer-header.has-actions.like-only #story-viewer-title { margin-right: calc(6.4px + .3rem + 19px + 6.4px + .3rem) }
 #story-viewer-frame {
   flex: 1;
   border: none;
@@ -13065,7 +13068,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     return S[k];
   };
   // Best practice for masking: keep the first character and the domain (so the account is still recognisable),
-  // replace the rest of the name with a fixed run of asterisks so its length isn't revealed. Anything that isn't an email is left alone.
+  // replace the rest of the name with a fixed run of asterisks so its length isn't revealed. Anything that isn't an email is left alone. Anything that isn't an email is left alone.
   window._nbMaskEmail = function (e) {
     e = String(e == null ? '' : e);
     if (!window._nbSt('maskEmail')) return e;
@@ -18069,6 +18072,25 @@ function _nbAdoptStoryAuthor(slug, authorSub) {
   if (likeBtn) likeBtn.style.display = own ? 'none' : '';
   document.getElementById('story-viewer-header').classList.toggle('has-actions', !own);
 }
+// Header layout: when Like is the only action showing (Subscribe is hidden), Like moves into Subscribe's slot and the title re-fits
+// (long titles scroll with the same marquee and stop the same gap before Like). Runs on any show/hide of either button.
+function _nbSyncStoryHeaderLayout() {
+  const hdr = document.getElementById('story-viewer-header');
+  const like = document.getElementById('story-viewer-like-btn');
+  const sub = document.getElementById('story-viewer-sub-btn');
+  if (!hdr || !like || !sub) return;
+  const likeOnly = like.style.display !== 'none' && sub.style.display === 'none';
+  if (hdr.classList.contains('like-only') === likeOnly) return;
+  hdr.classList.toggle('like-only', likeOnly);
+  nbUpdateTitleMarquee(document.getElementById('story-viewer-title'), document.getElementById('story-viewer-title-text'), true);
+}
+(function () {
+  const sub = document.getElementById('story-viewer-sub-btn'), like = document.getElementById('story-viewer-like-btn');
+  if (!sub || !like || !window.MutationObserver) return;
+  const mo = new MutationObserver(_nbSyncStoryHeaderLayout);
+  mo.observe(sub, { attributes: true, attributeFilter: ['style'] });
+  mo.observe(like, { attributes: true, attributeFilter: ['style'] });
+})();
 // What /meta/:slug said about the note on screen. authorSub is null for a note published without an account.
 function _nbApplyStoryMeta(slug, data) {
   if (_nbCurrentStorySlug !== slug || !data || !data.found) return;
@@ -24338,7 +24360,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
 
   /* ---------- Likes source ---------- */
-  var LK = { sub: '', stories: [], html: new Map(), busy: false, at: 0, timer: 0 };
+  var LK = { sub: '', stories: [], html: new Map(), bad: new Map(), busy: false, toasted: false, at: 0, timer: 0 }; // bad: slug -> when it last failed to read
   function signedIn() { try { return !!nbIsSignedIn(); } catch (e) { return false; } }
   function acctSub() { try { return (nbAccount() || {}).sub || ''; } catch (e) { return ''; } }
   // A liked page is kept as just its media links (not the whole page), so a long likes list doesn't hold every page in memory.
@@ -24370,6 +24392,28 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     opts = opts || {}; if (ctl) opts.signal = ctl.signal;
     return fetch(url, opts).then(function (r) { clearTimeout(to); return r; }, function (e) { clearTimeout(to); throw e; });
   }
+  // Reads one liked page. A note the server refuses (any 4xx except 429) resolves '': nothing to read, not a failure.
+  // Timeouts, network errors, 5xx and 429 get two more tries after a short wait before the note counts as failed.
+  function readNote(slug) {
+    function go(n) {
+      return timedFetch(_pubUrlFor(slug), { referrerPolicy: 'no-referrer' }, 10000).then(function (r) {
+        if (r.ok) return r.text();
+        if (r.status >= 400 && r.status < 500 && r.status !== 429) return '';
+        throw new Error('HTTP ' + r.status);
+      }).catch(function (e) {
+        if (n >= 2) throw e;
+        return new Promise(function (ok) { setTimeout(ok, 800 * (n + 1)); }).then(function () { return go(n + 1); });
+      });
+    }
+    return go(0);
+  }
+  // A note that failed in the last 10 minutes is left alone (no retry, no toast). Refreshing by hand clears this.
+  function coolingOff(slug) {
+    var t = LK.bad.get(slug);
+    if (!t) return false;
+    if (Date.now() - t < 600000) return true;
+    LK.bad.delete(slug); return false;
+  }
   // Re-scan after more liked notes arrive. Only the counts and the list are redrawn, so a search being typed keeps focus.
   function likesChanged() {
     if (LK.timer) return;
@@ -24386,9 +24430,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function loadLikes(force, quiet) {
     if (!signedIn() || LK.busy) return;
     var sub = acctSub();
-    if (LK.sub !== sub) { LK.sub = sub; LK.stories = []; LK.html = new Map(); LK.at = 0; }
+    if (LK.sub !== sub) { LK.sub = sub; LK.stories = []; LK.html = new Map(); LK.bad = new Map(); LK.at = 0; }
     if (!force && LK.at && Date.now() - LK.at < 90000) return;
-    LK.busy = true;
+    LK.busy = true; LK.toasted = false;
     LK.quiet = !!quiet && LK.stories.length > 0; // background refresh: no loading state, no toasts, no redraw unless something changed
     if (MD.open && MD.src === 'likes' && !LK.quiet) fillList();
     var base = NB_PUBLISH_API.replace(/\/$/, ''), all = [], prev = LK.stories.slice(), todo = [], queued = {}, i = 0, run = 0, failed = 0, listDone = false, listErr = false;
@@ -24406,11 +24450,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         while (run < 4 && i < todo.length) {
           (function (st) {
             run++;
-            timedFetch(_pubUrlFor(st.slug), { referrerPolicy: 'no-referrer' }, 10000)
-              .then(function (r) { if (r.status === 404 || r.status === 410) return ''; if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }) // gone/unpublished: nothing to read, not a failure
+            readNote(st.slug)
               .then(function (h) { return parseLater(h); })
-              .then(function (c) { if (LK.sub === sub) { LK.html.set(st.slug, c); likesChanged(); } })
-              .catch(function () { failed++; })
+              .then(function (c) { if (LK.sub === sub) { LK.html.set(st.slug, c); LK.bad.delete(st.slug); likesChanged(); } })
+              .catch(function () { failed++; if (LK.sub === sub) LK.bad.set(st.slug, Date.now()); })
               .then(function () { run--; pump(); });
           })(todo[i++]);
         }
@@ -24423,7 +24466,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
             ((d && d.stories) || []).forEach(function (st) {
               if (!st || !st.slug || queued[st.slug]) return;
               queued[st.slug] = 1; all.push(st);
-              if (!LK.html.has(st.slug)) todo.push(st);
+              if (!LK.html.has(st.slug) && !coolingOff(st.slug)) todo.push(st);
             });
             publish(false); likesChanged(); pump();
             if (d && d.nextCursor && d.nextCursor !== cursor) return page(d.nextCursor); // no page cap; only stops on the last page or a repeated cursor
@@ -24436,8 +24479,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       if (LK.sub !== acctSub()) return;
       LK.at = (failed || listErr) ? 0 : Date.now();
       if (!LK.quiet && MD.open && MD.src === 'likes') {
-        if (listErr) toast('Couldn\u2019t load your liked notes');
-        else if (failed) toast('Couldn\u2019t read ' + (failed === 1 ? 'one liked note' : failed + ' liked notes'));
+        if (listErr) { LK.toasted = true; toast('Couldn\u2019t load your liked notes'); }
+        else if (failed) { LK.toasted = true; toast('Couldn\u2019t read ' + (failed === 1 ? 'one liked note' : failed + ' liked notes')); }
       }
     }).then(function () {
       LK.busy = false;
@@ -25520,10 +25563,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (b) { b.classList.add('spin'); b.setAttribute('aria-busy', 'true'); }
     function end() {
       if (ended) return; ended = true; LK.onDone = null;
+      var failToasted = likes && LK.toasted; // the load already said it couldn't read: no "up to date" on top
       setTimeout(function () {
         MD.refreshing = false;
         if (b) { b.classList.remove('spin'); b.removeAttribute('aria-busy'); }
-        if (MD.open) toast(MD.dsig !== before ? 'Media updated' : 'Already up to date');
+        if (MD.open && !failToasted) toast(MD.dsig !== before ? 'Media updated' : 'Already up to date');
       }, Math.max(350, 700 - (NOW() - t0)));
     }
     function after() {
@@ -25531,6 +25575,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       queueVisibleMeta();
       if (likes) {
         LK.onDone = end;
+        LK.bad.clear(); // by hand: try every note again
         loadLikes(true, true);
         if (!LK.busy) end();
         setTimeout(end, 25000);
@@ -26188,8 +26233,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   // Freezing is immediate; resuming always waits a moment after the last thing that paused it (keyboard leaving, Media sliding,
   // coming back to the app), and anything that pauses it again inside that wait cancels the resume.
-  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, scrolling=false, scrollT=0, editorOn=false, storyOn=false, userPaused=false, resumeQuiet=false, easeHold=false, easing=false, easeLast=0, easeT=0;
-  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||scrolling||editorOn||storyOn||userPaused||easeHold}
+  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgOpen=false, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, scrolling=false, scrollT=0, editorOn=false, storyOn=false, userPaused=false, resumeQuiet=false, easeHold=false, easing=false, easeLast=0, easeT=0;
+  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||scrolling||editorOn||storyOn||dlgOpen||userPaused||easeHold}
   // A busy marker only counts while it is really showing: displayed, visible, inside the screen, and not under Media / the sign-in screen.
   function onScreen(el){
     if(!el.getClientRects().length)return false;
@@ -26254,13 +26299,36 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if(!t||t.nodeType!==1||!t.matches||!t.matches(DLG_SEL))return false;
     return !e.propertyName||e.propertyName==='transform'||e.propertyName==='opacity'; // animations always count; transitions only the slide / fade
   }
+  // A dialog or sheet counts as open for as long as it is showing and can be touched (display, visibility and pointer-events cover every way
+  // this app hides them, not counting the image and color pickers, which sit inside the Canvas). The sweep stays frozen the whole time and continues once none is left.
+  function dlgIsOpen(el){
+    if(!el.getClientRects().length)return false;
+    var cs=getComputedStyle(el);
+    return cs.visibility!=='hidden'&&cs.pointerEvents!=='none';
+  }
+  function anyDlgOpen(){
+    if(inEditor())return false; // the Editor already holds the sweep on its own, so dialogs and sheets opened there are left out
+    var l=document.querySelectorAll(DLG_SEL);
+    for(var i=0;i<l.length;i++){
+      if(l[i].matches('.img-pick-overlay,.img-pick-box'))continue; // image and color pickers open inside the Canvas, which already holds the sweep
+      if(dlgIsOpen(l[i]))return true;
+    }
+    return false;
+  }
+  function dlgRecheck(){
+    var o=anyDlgOpen();
+    if(o===dlgOpen)return;
+    dlgOpen=o;sync(!o);
+  }
   function dlgStart(e){
     if(!isDlgMotion(e))return;
+    dlgRecheck();
     dlgN++;sync(false);
     clearTimeout(dlgFail);dlgFail=setTimeout(function(){dlgN=0;sync(true)},1500); // an end event that never arrives can't hold it
   }
   function dlgEnd(e){
     if(!isDlgMotion(e))return;
+    dlgRecheck();
     dlgN=Math.max(0,dlgN-1);
     if(!dlgN){clearTimeout(dlgFail);sync(true)}
   }
@@ -26277,19 +26345,21 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     Array.prototype.forEach.call(document.querySelectorAll(DLG_SEL),function(el){shown.set(el,vis(el))});
     function dlgNode(n){return n.nodeType===1&&(n.matches(DLG_SEL)||!!n.querySelector(DLG_SEL))}
     new MutationObserver(function(list){
-      var go=false;
+      var go=false,chk=false;
       for(var i=0;i<list.length&&!go;i++){
         var m=list[i];
         if(m.type==='attributes'){
           var t=m.target;
           if(!t.matches||!t.matches(DLG_SEL))continue;
+          chk=true;
           var now=vis(t),was=shown.get(t);shown.set(t,now);
           if(was!==undefined&&was!==now)go=true; // opened, or closed (slid down / out, or just gone)
         }else{
-          for(var a=0;a<m.addedNodes.length&&!go;a++) if(dlgNode(m.addedNodes[a]))go=true;
-          for(var r=0;r<m.removedNodes.length&&!go;r++) if(dlgNode(m.removedNodes[r]))go=true;
+          for(var a=0;a<m.addedNodes.length&&!go;a++) if(dlgNode(m.addedNodes[a]))go=chk=true;
+          for(var r=0;r<m.removedNodes.length&&!go;r++) if(dlgNode(m.removedNodes[r]))go=chk=true;
         }
       }
+      if(chk||go)dlgRecheck(); // runs before the next paint, so the sweep is already frozen when a dialog first shows
       if(go)dlgHold(450);
     }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden','open']});
   })();
@@ -26326,7 +26396,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function checkBusy(){
     domPend=false;
     var ed=inEditor();
-    if(ed!==editorOn){editorOn=ed;sync(!ed)}
+    if(ed!==editorOn){editorOn=ed;dlgRecheck();sync(!ed)}
     var sv=inStory();
     if(sv!==storyOn){storyOn=sv;sync(!sv)}
     var cv=coverUp();
@@ -26412,6 +26482,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   fieldFocused=isField(document.activeElement);
   editorOn=inEditor();
   storyOn=inStory();
+  dlgOpen=anyDlgOpen();
   try{userPaused=!!(window._nbSt&&window._nbSt('pauseSweep'))}catch(e){}
   domBusy=anyBusy();
   cover=coverUp();
