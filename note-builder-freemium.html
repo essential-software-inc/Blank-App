@@ -4340,6 +4340,330 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 </head>
 <body>
 <script>
+// ---- App lock: local PIN / password, asked for on a fresh start ------------------------------------------------
+// Stored as a salted PBKDF2-SHA256 hash in localStorage (nb_lock_v1); the passcode itself is never kept and nothing
+// here syncs to the account. "Fresh start" = every launch, including a browser refresh. Only the app's own reload after Restore
+// sets a one-shot sessionStorage flag (nb_lock_ok) that skips the lock once and is cleared at boot.
+// Recovery: a security question + answer set up with the lock (answer stored as a salted hash, compared trimmed,
+// case-insensitive, accents ignored). "Forgot" asks the question, then lets the person set a new passcode.
+// Wrong passcodes and wrong answers each have their own try counter: five in a row start a growing wait
+// (30s, 60s, 2m ... capped at 15m). Styled like the app's other dialogs: glass (when Glass mode is on) or classic
+// solid, in light / dark / pink. Sits first in <body> so the lock screen is up before the splash or anything else.
+(function () {
+  var KEY = 'nb_lock_v1', FP = 'nb_lock_fail_v1', FA = 'nb_lock_afail_v1', OKF = 'nb_lock_ok', ITER = 120000, MINLEN = 4;
+  var QS = ['What was the name of your first pet?', 'What city were you born in?', 'What was your first school called?', 'What street did you grow up on?', 'What was your childhood nickname?'];
+  var cur = null, seq = 0;
+  function cfg() { try { var c = JSON.parse(localStorage.getItem(KEY) || 'null'); return (c && c.h && c.s) ? c : null; } catch (e) { return null; } }
+  function canCrypto() { return !!(window.crypto && crypto.subtle && window.TextEncoder); }
+  function hex(u8) { var s = ''; for (var i = 0; i < u8.length; i++) s += (u8[i] < 16 ? '0' : '') + u8[i].toString(16); return s; }
+  function unhex(h) { var u = new Uint8Array(h.length / 2); for (var i = 0; i < u.length; i++) u[i] = parseInt(h.substr(i * 2, 2), 16); return u; }
+  function derive(pw, saltHex, it) {
+    return crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']).then(function (k) {
+      return crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: unhex(saltHex), iterations: it }, k, 256);
+    }).then(function (b) { return hex(new Uint8Array(b)); });
+  }
+  function same(a, b) { if (a.length !== b.length) return false; var d = 0; for (var i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
+  function norm(a) { var s = String(a || ''); try { s = s.normalize('NFKD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {} return s.trim().toLowerCase().replace(/\s+/g, ' '); }
+  function newSalt() { return hex(crypto.getRandomValues(new Uint8Array(16))); }
+  // Writes the passcode hash and/or the recovery question + answer hash, keeping whichever part isn't being replaced.
+  function store(pw, qa) {
+    var old = cfg() || {}, out = { v: 1, it: ITER, s: old.s, h: old.h, q: old.q, qs: old.qs, qh: old.qh }, jobs = [];
+    if (pw != null) { var s1 = newSalt(); out.s = s1; jobs.push(derive(pw, s1, ITER).then(function (h) { out.h = h; })); }
+    if (qa) { var s2 = newSalt(); out.q = qa.q; out.qs = s2; jobs.push(derive(norm(qa.a), s2, ITER).then(function (h) { out.qh = h; })); }
+    return Promise.all(jobs).then(function () { localStorage.setItem(KEY, JSON.stringify(out)); clearFail(FP); clearFail(FA); });
+  }
+  function fails(k) { try { return JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } }
+  function clearFail(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  function waitLeft(k) { return Math.max(0, Math.ceil(((fails(k).until || 0) - Date.now()) / 1000)); }
+  function recordFail(k) {
+    var f = fails(k); f.n = (f.n || 0) + 1;
+    if (f.n >= 5) f.until = Date.now() + Math.min(900, 30 * Math.pow(2, f.n - 5)) * 1000;
+    try { localStorage.setItem(k, JSON.stringify(f)); } catch (e) {}
+  }
+  function fmtWait(s) { return s >= 60 ? Math.ceil(s / 60) + ' min' : s + 's'; }
+  function waitMsg(k) { return 'Too many tries. Try again in ' + fmtWait(waitLeft(k)) + '.'; }
+  function verify(k, val, saltK, hashK, pre) {
+    if (waitLeft(k)) return Promise.resolve({ ok: false });
+    var c = cfg(); if (!c) return Promise.resolve({ ok: true });
+    return derive(pre ? pre(val) : val, c[saltK], c.it || ITER).then(function (h) {
+      if (same(h, c[hashK])) { clearFail(k); return { ok: true }; }
+      recordFail(k); return { ok: false };
+    });
+  }
+  function checkPw(v) { return verify(FP, v, 's', 'h'); }
+  function checkAns(v) { return verify(FA, v, 'qs', 'qh', norm); }
+  function toast(m) { try { if (window.showToast) window.showToast(m); } catch (e) {} }
+  function theme() { var t = 'light'; try { t = localStorage.getItem('nb_theme_v1') || 'light'; } catch (e) {} return (t === 'dark' || t === 'pink') ? t : 'light'; }
+  function glass() { try { return JSON.parse(localStorage.getItem('nb_settings_v1') || '{}').glassMode !== false; } catch (e) { return true; } }
+  function css() {
+    if (document.getElementById('nb-lock-css')) return;
+    var s = document.createElement('style'); s.id = 'nb-lock-css';
+    s.textContent =
+      '@keyframes nbl-fade{from{opacity:0}to{opacity:1}}' +
+      '@keyframes nbl-rise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}' +
+      '@keyframes nbl-in{from{opacity:0;transform:translateX(34px)}}' +
+      // light (base)
+      '.nbl{--bg:#f6f8fc;--card:#fff;--cardb:#c8ccd1;--gl:rgba(255,255,255,.7);--glb:rgba(213,222,242,.6);--fg:#202122;--sub:#54595d;--ac:#3366cc;--okbg:#3366cc;--okfg:#fff;--secbg:rgba(246,248,252,.6);--secf:#3366cc;--secb:rgba(20,30,50,.12);--ln:rgba(20,30,50,.12);--insh:rgba(20,30,50,.12);--foc:rgba(51,102,204,.2);--scr:rgba(10,10,12,.5);--shd:0 8px 24px rgba(20,30,50,.18);--err:#c0392b;--dng:#c0392b;' +
+      'color-scheme:light;position:fixed;inset:0;z-index:2147483001;display:flex;align-items:center;justify-content:center;padding:1.2rem;box-sizing:border-box;overflow:auto;font-family:inherit;background:var(--scr);animation:nbl-fade .2s;-webkit-tap-highlight-color:transparent}' +
+      // dark: greys and white only, same tokens as the app\'s night dialogs
+      '.nbl-dark{--bg:#111;--card:#1c1c1c;--cardb:#333;--gl:rgba(17,17,17,.72);--glb:rgba(255,255,255,.1);--fg:#e8e8e8;--sub:#8f98a3;--ac:#e8e8e8;--okbg:#c8c8c8;--okfg:#000;--secbg:rgba(28,28,28,.6);--secf:#b0b0b0;--secb:#383838;--ln:rgba(255,255,255,.07);--insh:rgba(0,0,0,.55);--foc:rgba(255,255,255,.14);--shd:0 8px 24px rgba(0,0,0,.6);--err:#e0566b;--dng:#b0253f;color-scheme:dark}' +
+      '.nbl-pink{--bg:#fff8fb;--card:#fff8fb;--cardb:#f5c5d8;--gl:rgba(255,248,251,.72);--glb:rgba(245,197,216,.6);--fg:#1a0a12;--sub:#875068;--ac:#c8365e;--okbg:#c8365e;--okfg:#fff;--secbg:rgba(255,224,236,.6);--secf:#c8365e;--secb:rgba(200,54,94,.2);--ln:rgba(200,54,94,.16);--insh:rgba(200,54,94,.14);--foc:rgba(200,54,94,.2);--scr:rgba(70,12,32,.45);--shd:0 8px 24px rgba(200,54,94,.22);--err:#b0253f;--dng:#b0253f}' +
+      '.nbl [hidden]{display:none!important}' +
+      // full-screen boot lock: solid page colour (classic) or a soft colour wash (glass); it must hide the app, so never see-through
+      '.nbl-full{z-index:2147483000;background:var(--bg)}' +
+      '.nbl-full.nbl-glass{background:radial-gradient(60% 45% at 16% 10%,rgba(51,102,204,.2),transparent 70%),radial-gradient(55% 45% at 88% 22%,rgba(190,140,255,.16),transparent 70%),radial-gradient(60% 50% at 66% 94%,rgba(255,120,150,.15),transparent 70%),var(--bg)}' +
+      '.nbl-dark.nbl-full.nbl-glass{background:radial-gradient(60% 45% at 16% 10%,rgba(255,255,255,.08),transparent 70%),radial-gradient(55% 45% at 88% 22%,rgba(255,255,255,.05),transparent 70%),radial-gradient(60% 50% at 66% 94%,rgba(255,255,255,.06),transparent 70%),var(--bg)}' +
+      '.nbl-pink.nbl-full.nbl-glass{background:radial-gradient(60% 45% at 16% 10%,rgba(200,54,94,.2),transparent 70%),radial-gradient(55% 45% at 88% 22%,rgba(255,150,180,.22),transparent 70%),radial-gradient(60% 50% at 66% 94%,rgba(255,120,150,.16),transparent 70%),var(--bg)}' +
+      '.nbl-card{width:100%;max-width:340px;box-sizing:border-box;color:var(--fg);text-align:center;animation:nbl-rise .24s}' +
+      '.nbl:not(.nbl-full) .nbl-card{text-align:left}' +
+      '.nbl-glass .nbl-card{background:var(--gl);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid var(--glb);border-radius:20px;padding:1.5rem 1.2rem 1.2rem;box-shadow:var(--shd)}' +
+      '.nbl:not(.nbl-glass):not(.nbl-full) .nbl-card{background:var(--card);border:1px solid var(--cardb);border-radius:18px;padding:1.4rem 1.2rem 1.2rem;box-shadow:var(--shd)}' +
+      '.nbl-ic{color:var(--ac);margin-bottom:.9rem}' +
+      '.nbl-t{margin:0 0 .35rem;font-size:1.2rem;font-weight:800;letter-spacing:-.02em}' +
+      '.nbl-s{margin:0 0 1rem;font-size:.9rem;line-height:1.45;color:var(--sub)}' +
+      '.nbl-qt{margin:0 0 .7rem;padding:.7rem .8rem;border-radius:12px;background:var(--secbg);border:1px solid var(--secb);font-size:.95rem;font-weight:600;line-height:1.35;text-align:left}' +
+      '.nbl-f{display:flex;flex-direction:column;gap:.55rem}' +
+      '.nbl-in,.nbl-sel{display:block;width:100%;height:48px;box-sizing:border-box;padding:0 .9rem;border-radius:12px;border:1px solid transparent;background:color-mix(in srgb,var(--bg) 92%,var(--fg) 8%);box-shadow:inset 0 1px 3px var(--insh);color:var(--fg);font:inherit;font-size:1.05rem;outline:none;transition:background .2s,box-shadow .2s}' +
+      '.nbl-dd{position:relative}' +
+      '.nbl-sel{display:flex;align-items:center;justify-content:space-between;gap:.5rem;font-size:.95rem;text-align:left;cursor:pointer;-webkit-appearance:none;appearance:none}' +
+      '.nbl-sel>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.nbl-chev{flex:none;color:var(--sub);transition:transform .18s,color .18s}' +
+      '.nbl-sel.is-open .nbl-chev{transform:rotate(180deg);color:var(--ac)}' +
+      '.nbl-list{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:3;max-height:230px;overflow-y:auto;box-sizing:border-box;background:var(--card);border:1px solid var(--cardb);border-radius:12px;box-shadow:var(--shd);text-align:left}' +
+      '.nbl-list.open{display:block}' +
+      '.nbl-opt{padding:.68rem .85rem;font-size:.95rem;line-height:1.3;cursor:pointer;color:var(--fg);outline:none}' +
+      '.nbl-opt:hover{background:color-mix(in srgb,var(--ac) 8%,var(--card))}' +
+      '.nbl-opt.is-selected{color:var(--ac);font-weight:600;background:color-mix(in srgb,var(--ac) 12%,var(--card))}' +
+      '.nbl-opt:focus{box-shadow:inset 0 0 0 2px var(--ac);background:color-mix(in srgb,var(--ac) 8%,var(--card))}' +
+      '.nbl-in:focus,.nbl-sel:focus,.nbl-sel.is-open{background:var(--bg);box-shadow:inset 0 1px 2px var(--insh),0 0 0 3px var(--foc)}' +
+      '.nbl-e{min-height:1.3rem;margin:.5rem 0 .3rem;font-size:.82rem;line-height:1.3;color:var(--err);text-align:left}' +
+      '.nbl-full .nbl-e{text-align:center}' +
+      '.nbl-b{display:flex;gap:.6rem;margin-top:.3rem}' +
+      '.nbl-b>button{flex:1 1 0;min-width:0;height:46px;box-sizing:border-box;padding:0 .8rem;border-radius:14px;background:var(--secbg);color:var(--secf);border:1px solid var(--secb);font:inherit;font-size:.9rem;font-weight:700;line-height:1.1;cursor:pointer;animation:nbl-in .36s cubic-bezier(.2,.8,.25,1) .08s backwards;transition:transform .12s}' +
+      '.nbl-b>button:nth-child(2){animation-delay:.15s}' +
+      '.nbl-b>button:active:not(:disabled){transform:scale(.97)}' +
+      '.nbl-b>button.nbl-ok{background:var(--okbg);border-color:var(--okbg);color:var(--okfg)}' +
+      '.nbl-b>button.nbl-danger{background:var(--dng);border-color:var(--dng);color:#fff}' +
+      '.nbl-b>button:disabled,.nbl-in:disabled,.nbl-sel:disabled{opacity:.55}' +
+      '.nbl-link{display:block;margin:.9rem auto 0;background:none;border:0;color:var(--sub);font:inherit;font-size:.85rem;cursor:pointer;padding:.4rem .6rem}' +
+      '@media (prefers-reduced-motion:reduce){.nbl,.nbl-card,.nbl-b>button{animation:none}}' +
+      'body.nb-reduce-motion .nbl,body.nb-reduce-motion .nbl-card,body.nb-reduce-motion .nbl-b>button{animation:none}';
+    document.head.appendChild(s);
+  }
+  var ICON = '<svg class="nbl-ic" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
+  var CUSTOM = '__custom';
+  // o: { full, cancel, link:{text,fn}, danger, onSubmit(values, h), onCancel() }
+  // h.set(title, sub, okText, kind): kind 'pw' (passcode field, default), 'qset' (question picker + answer),
+  // 'qans' (shows h.question, answer field) or 'none' (confirm only).
+  function build(o) {
+    css();
+    var el = document.createElement('div');
+    el.className = 'nbl nbl-' + theme() + (glass() ? ' nbl-glass' : '') + (o.full ? ' nbl-full' : '');
+    el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+    // The app keys its page-scroll lock and the wash sweep controller off any div whose id ends in "-overlay" while it has
+    // the class "open" (the "Dialog scroll lock" watcher calls lockScroll()/unlockScroll(); the sweep controller's dialog
+    // check uses the same id suffix), so the lock screen and its dialogs follow that convention.
+    el.id = 'nb-lock-' + (++seq) + '-overlay';
+    var opts = QS.concat([CUSTOM]).map(function (q, i) { return '<div class="nbl-opt" role="option" tabindex="-1" aria-selected="' + (i ? 'false' : 'true') + '" data-v="' + q + '">' + (q === CUSTOM ? 'Write my own question' : q) + '</div>'; }).join('');
+    el.innerHTML = '<div class="nbl-card">' + (o.full ? ICON : '') + '<h2 class="nbl-t"></h2><p class="nbl-s"></p>' +
+      '<div class="nbl-qt" hidden></div>' +
+      '<div class="nbl-f"><input class="nbl-in nbl-pw" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">' +
+      '<div class="nbl-dd" hidden><button type="button" class="nbl-sel" aria-haspopup="listbox" aria-expanded="false" aria-label="Recovery question"><span></span><svg class="nbl-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button><div class="nbl-list" role="listbox" aria-label="Recovery question">' + opts + '</div></div>' +
+      '<input class="nbl-in nbl-qc" type="text" hidden placeholder="Your question" maxlength="120" autocomplete="off" autocapitalize="sentences" spellcheck="false">' +
+      '<input class="nbl-in nbl-qa" type="text" hidden placeholder="Your answer" maxlength="80" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></div>' +
+      '<div class="nbl-e" role="alert"></div><div class="nbl-b">' + (o.cancel ? '<button type="button" class="nbl-cancel">Cancel</button>' : '') +
+      '<button type="button" class="nbl-ok' + (o.danger ? ' nbl-danger' : '') + '"></button></div>' +
+      (o.link ? '<button type="button" class="nbl-link">' + o.link.text + '</button>' : '') + '</div>';
+    var $ = function (s) { return el.querySelector(s); };
+    var pw = $('.nbl-pw'), sel = $('.nbl-dd'), qc = $('.nbl-qc'), qa = $('.nbl-qa'), qt = $('.nbl-qt'), okb = $('.nbl-ok'), errEl = $('.nbl-e');
+    var kind = 'pw', tmr = null, busy = false, closed = false;
+    function primary() { return kind === 'pw' ? pw : kind === 'qset' ? (sel.value === CUSTOM && !qc.value ? qc : qa) : kind === 'qans' ? qa : null; }
+    function focus() { var f = primary(); if (f) setTimeout(function () { try { f.focus(); } catch (e) {} }, 30); }
+    // Custom dropdown (no native <select>): sel is the wrapper, exposing value / disabled / a 'change' event like a select would.
+    var ddBtn = $('.nbl-sel'), ddList = $('.nbl-list'), ddLab = ddBtn.firstChild, ddOpts = Array.prototype.slice.call(ddList.children), ddVal = '';
+    function ddPick(o) { ddVal = o.getAttribute('data-v'); ddLab.textContent = o.textContent; ddOpts.forEach(function (x) { var on = x === o; x.classList.toggle('is-selected', on); x.setAttribute('aria-selected', on ? 'true' : 'false'); }); }
+    function ddOpen(on) { ddList.classList.toggle('open', on); ddBtn.classList.toggle('is-open', on); ddBtn.setAttribute('aria-expanded', on ? 'true' : 'false'); }
+    function ddFocus(o) { if (!o) return; ddOpts.forEach(function (x) { x.tabIndex = -1; }); o.tabIndex = 0; o.focus(); }
+    function ddCommit(o) { var ch = ddVal !== o.getAttribute('data-v'); ddPick(o); ddOpen(false); ddBtn.focus(); if (ch) sel.dispatchEvent(new Event('change')); }
+    Object.defineProperty(sel, 'value', { get: function () { return ddVal; } });
+    Object.defineProperty(sel, 'disabled', { get: function () { return ddBtn.disabled; }, set: function (v) { ddBtn.disabled = !!v; if (v) ddOpen(false); } });
+    ddPick(ddOpts[0]);
+    ddBtn.addEventListener('click', function (e) { e.stopPropagation(); ddOpen(!ddList.classList.contains('open')); });
+    ddBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); ddOpen(true); ddFocus(ddList.querySelector('.is-selected') || ddOpts[0]); }
+      else if (e.key === 'Escape' && ddList.classList.contains('open')) { e.stopPropagation(); ddOpen(false); }
+    });
+    ddOpts.forEach(function (o) { o.addEventListener('click', function (e) { e.stopPropagation(); ddCommit(o); }); });
+    ddList.addEventListener('keydown', function (e) {
+      var i = ddOpts.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); ddFocus(ddOpts[Math.min(i + 1, ddOpts.length - 1)]); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); ddFocus(ddOpts[Math.max(i - 1, 0)]); }
+      else if (e.key === 'Home') { e.preventDefault(); ddFocus(ddOpts[0]); }
+      else if (e.key === 'End') { e.preventDefault(); ddFocus(ddOpts[ddOpts.length - 1]); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (i >= 0) ddCommit(ddOpts[i]); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); ddOpen(false); ddBtn.focus(); }
+    });
+    el.addEventListener('click', function () { ddOpen(false); });
+    sel.addEventListener('change', function () { qc.hidden = sel.value !== CUSTOM; if (!qc.hidden) { try { qc.focus(); } catch (e) {} } });
+    var h = {
+      full: !!o.full, question: '',
+      set: function (t, s, ok, k) {
+        kind = k || 'pw';
+        $('.nbl-t').textContent = t; $('.nbl-s').textContent = s; okb.textContent = ok; errEl.textContent = '';
+        ddOpen(false); pw.hidden = kind !== 'pw'; sel.hidden = kind !== 'qset'; qc.hidden = !(kind === 'qset' && sel.value === CUSTOM); qa.hidden = !(kind === 'qset' || kind === 'qans');
+        qt.hidden = kind !== 'qans'; if (kind === 'qans') qt.textContent = h.question;
+        pw.value = ''; qa.value = ''; focus();
+      },
+      err: function (m) { errEl.textContent = m || ''; },
+      clear: function () { pw.value = ''; qa.value = ''; focus(); },
+      countdown: function (k) {
+        clearInterval(tmr);
+        if (!waitLeft(k)) return;
+        h.err(waitMsg(k));
+        tmr = setInterval(function () { if (!waitLeft(k)) { clearInterval(tmr); h.err(''); } else h.err(waitMsg(k)); }, 1000);
+      },
+      close: function () {
+        if (closed) return; closed = true; clearInterval(tmr);
+        if (cur === h) cur = null;
+        el.classList.remove('open'); // lets the scroll-lock watcher release the page once no other overlay is open
+        el.style.transition = 'opacity .18s'; el.style.opacity = '0';
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 190);
+      },
+      cancel: function () { var f = o.onCancel; h.close(); if (f) f(); }
+    };
+    function values() {
+      if (kind === 'pw') return pw.value;
+      if (kind === 'qans') return qa.value;
+      if (kind === 'qset') return { q: (sel.value === CUSTOM ? qc.value : sel.value).trim(), a: qa.value };
+      return null;
+    }
+    function lock(on) { okb.disabled = on; pw.disabled = qc.disabled = qa.disabled = sel.disabled = on; }
+    function submit() {
+      if (busy || closed) return;
+      var v = values(); busy = true; lock(true);
+      var p; try { p = Promise.resolve(o.onSubmit ? o.onSubmit(v, h) : null); } catch (e) { p = Promise.reject(e); }
+      p.catch(function () { h.err('Something went wrong. Try again.'); }).then(function () { busy = false; if (closed) return; lock(false); focus(); });
+    }
+    okb.addEventListener('click', submit);
+    [pw, qa, qc].forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } }); });
+    var cb = $('.nbl-cancel'); if (cb) cb.addEventListener('click', function () { h.cancel(); });
+    var lk = $('.nbl-link'); if (lk) lk.addEventListener('click', function () { if (o.link.fn) o.link.fn(); });
+    if (!o.full) el.addEventListener('click', function (e) { if (e.target === el && o.cancel) h.cancel(); });
+    (document.body || document.documentElement).appendChild(el);
+    el.classList.add('open'); // after insertion, so the scroll-lock watcher sees the class change
+    h.el = el; cur = h;
+    return h;
+  }
+  var NEWTXT = 'At least ' + MINLEN + ' characters. You\u2019ll enter it each time the app starts.';
+  var TXT = {
+    old: ['Enter your PIN or password', 'Confirm it\u2019s you first.', 'Continue'],
+    off: ['Turn off app lock', 'Enter your PIN or password to turn it off.', 'Turn off'],
+    nw: ['Set a PIN or password', NEWTXT, 'Next'],
+    nw2: ['New PIN or password', NEWTXT, 'Next'],
+    cf: ['Confirm it', 'Enter the same PIN or password again.', 'Next'],
+    q: ['Recovery question', 'If you forget your PIN or password, answering this gets you back in. Pick something only you know.', 'Save']
+  };
+  function qCheck(v, h) {
+    if (!v.q || v.q.length < 5) { h.err('Write a question of at least 5 characters.'); return false; }
+    if (norm(v.a).length < 2) { h.err('Add an answer.'); return false; }
+    return true;
+  }
+  // Enable / change / disable / recovery share one stage machine.
+  function run(mode, done) {
+    done = done || function () {};
+    if (cur) return;
+    if (mode !== 'disable' && !canCrypto()) { toast('App lock isn\u2019t available here'); done(false); return; }
+    var stages = mode === 'enable' ? ['nw', 'cf', 'q'] : mode === 'change' ? ['old', 'nw2', 'cf'] : mode === 'recovery' ? ['old', 'q'] : ['off'];
+    var i = 0, first = null, newPw = null, finished = false;
+    function show(h) { var t = TXT[stages[i]]; h.set(t[0], t[1], t[2], stages[i] === 'q' ? 'qset' : 'pw'); }
+    var h = build({
+      cancel: true,
+      onCancel: function () { if (!finished) done(false); },
+      onSubmit: function (v, h) {
+        var st = stages[i];
+        function fin(msg) { finished = true; h.close(); toast(msg); done(true); }
+        if (st === 'old' || st === 'off') {
+          return checkPw(v).then(function (r) {
+            if (!r.ok) { h.clear(); if (waitLeft(FP)) h.countdown(FP); else h.err('Wrong PIN or password.'); return; }
+            if (st === 'off') { try { localStorage.removeItem(KEY); } catch (e) {} clearFail(FP); clearFail(FA); finished = true; h.close(); toast('App lock off'); done(true); return; }
+            i++; show(h);
+          });
+        }
+        if (st === 'nw' || st === 'nw2') {
+          if (v.length < MINLEN) { h.err('Use at least ' + MINLEN + ' characters.'); return; }
+          first = v; i++; show(h); return;
+        }
+        if (st === 'cf') {
+          if (v !== first) { first = null; i = stages.indexOf(mode === 'enable' ? 'nw' : 'nw2'); show(h); h.err('Those didn\u2019t match. Start again.'); return; }
+          if (mode === 'change') return store(v).then(function () { fin('PIN or password changed'); });
+          newPw = v; i++; show(h); return;
+        }
+        // 'q'
+        if (!qCheck(v, h)) return;
+        return store(newPw, v).then(function () { fin(mode === 'enable' ? 'App lock on' : 'Recovery question saved'); });
+      }
+    });
+    show(h);
+  }
+  // Forgot: answer the recovery question, then choose a new passcode.
+  function forgot(bootH) {
+    var c = cfg();
+    if (!c || !c.q) { if (bootH) bootH.err('No recovery question was saved for this lock.'); return; }
+    var stage = 'a', first = null;
+    var h = build({
+      cancel: true,
+      onSubmit: function (v, h) {
+        if (stage === 'a') {
+          return checkAns(v).then(function (r) {
+            if (!r.ok) { h.clear(); if (waitLeft(FA)) h.countdown(FA); else h.err('That isn\u2019t the answer we have.'); return; }
+            stage = 'n'; h.set.apply(h, TXT.nw.concat(['pw']));
+          });
+        }
+        if (stage === 'n') {
+          if (v.length < MINLEN) { h.err('Use at least ' + MINLEN + ' characters.'); return; }
+          first = v; stage = 'c'; h.set.apply(h, TXT.cf.slice(0, 2).concat(['Save', 'pw'])); return;
+        }
+        if (v !== first) { first = null; stage = 'n'; h.set.apply(h, TXT.nw.concat(['pw'])); h.err('Those didn\u2019t match. Start again.'); return; }
+        return store(v).then(function () {
+          h.close(); if (bootH) bootH.close(); toast('New PIN or password saved');
+        });
+      }
+    });
+    h.question = c.q;
+    h.set('Answer your recovery question', 'Answer it to set a new PIN or password.', 'Continue', 'qans');
+    h.countdown(FA);
+  }
+  function boot() {
+    var h = build({
+      full: true, link: { text: 'Forgot PIN or password?', fn: function () { forgot(h); } },
+      onSubmit: function (v, h) {
+        return checkPw(v).then(function (r) {
+          if (r.ok) { h.close(); return; }
+          h.clear(); if (waitLeft(FP)) h.countdown(FP); else h.err('Wrong PIN or password.');
+        });
+      }
+    });
+    h.set('Bluebook is locked', 'Enter your PIN or password to continue.', 'Unlock');
+    h.countdown(FP);
+  }
+  window.nbLock = {
+    enabled: function () { return !!cfg(); },
+    enable: function (done) { run('enable', done); },
+    change: function (done) { run('change', done); },
+    recovery: function (done) { run('recovery', done); },
+    disable: function (done) { run('disable', done); }
+  };
+  // System back: on the boot lock it leaves the app; on any dialog it cancels the dialog.
+  window._nbLockBack = function (AppPlugin) {
+    if (!cur) return false;
+    if (cur.full) { try { AppPlugin.exitApp(); } catch (e) {} return true; }
+    cur.cancel(); return true;
+  };
+  var locked = false; try { locked = !!cfg() && sessionStorage.getItem(OKF) !== '1'; sessionStorage.removeItem(OKF); } catch (e) {}
+  if (locked) boot();
+})();
+</script>
+<script>
 // One-time: glass mode became default-on. Settings used to persist glassMode:false for everyone who ever changed any setting,
 // which silently overrode the new default (classic splash/sign-in). Drop that stale false once; later toggles are respected.
 try{if(!localStorage.getItem('nb_glass_def1')){var _s=JSON.parse(localStorage.getItem('nb_settings_v1')||'null');if(_s&&_s.glassMode===false){delete _s.glassMode;localStorage.setItem('nb_settings_v1',JSON.stringify(_s))}localStorage.setItem('nb_glass_def1','1')}}catch(e){}
@@ -4467,17 +4791,6 @@ document.body.dataset.lockScrollY = window.scrollY;
 body #account-screen #account-signin-btn,body #account-screen #account-signout-btn{width:100%;height:46px;padding:0 1.2rem;border-radius:14px;font-size:.92rem;font-weight:700;transition:transform .12s}
 body #account-screen #account-signout-btn{background-color:rgba(255,255,255,.18) !important;color:#fff !important;border:1px solid rgba(255,255,255,.4) !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4) !important}
 body #account-screen #account-signin-btn:active,body #account-screen #account-signout-btn:active{transform:scale(.97)}
-
-/* Glass mode sign-in / onboarding screen: a permanent, static vintage overlay (faded amber, cream, dusty rose, bleached teal, warm cast, brown vignette).
-   Plain CSS on the screen's existing scrim layer: no animation, no JS, nothing to repaint. The doubled id also wins over the pink theme, which hides this layer. */
-#account-screen#account-screen::after{display:block;background:
-  radial-gradient(ellipse 80% 62% at 50% 44%,rgba(255,224,168,.12) 0%,rgba(255,224,168,0) 100%),
-  radial-gradient(ellipse 125% 98% at 50% 50%,rgba(60,34,14,0) 52%,rgba(60,34,14,.34) 100%),
-  radial-gradient(ellipse 60% 45% at 18% 28%,rgba(212,150,84,.30) 0%,rgba(212,150,84,0) 70%),
-  radial-gradient(ellipse 55% 45% at 84% 38%,rgba(196,112,110,.26) 0%,rgba(196,112,110,0) 70%),
-  radial-gradient(ellipse 55% 40% at 28% 78%,rgba(98,144,138,.24) 0%,rgba(98,144,138,0) 70%),
-  radial-gradient(ellipse 60% 40% at 78% 84%,rgba(238,204,148,.24) 0%,rgba(238,204,148,0) 70%),
-  linear-gradient(to bottom,rgba(40,24,12,.16) 0%,rgba(40,24,12,.36) 100%)}
 
 /* ===== Onboarding carousel: soft glass overlay ===== */
 .nb-carousel-viewport{box-sizing:border-box;border-radius:18px;box-shadow:0 8px 24px rgba(20,30,50,.18),0 1px 3px rgba(20,30,50,.1);isolation:isolate}
@@ -4713,6 +5026,7 @@ body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;-
 .st-card{background:var(--st-card);border:1px solid var(--st-line);border-radius:12px;overflow:hidden}
 .st-row{display:flex;align-items:center;gap:.8rem;width:100%;padding:.8rem .9rem;background:none;border:0;border-top:1px solid var(--st-line);color:var(--st-fg);font:inherit;text-align:left;cursor:pointer}
 .st-row:first-child{border-top:0}
+.st-row.st-off{opacity:.4;pointer-events:none;cursor:default}
 .st-col{flex-direction:column;align-items:stretch;gap:.55rem;cursor:default}
 .st-txt{flex:1;min-width:0;display:flex;flex-direction:column}
 .st-l{font-size:.92rem;font-weight:600}
@@ -5358,15 +5672,17 @@ body.nb-reduce-motion #signout-dialog {animation:none}
 /* Dialog / sheet buttons slide in from the right when the dialog opens, one after another (the overlay is display:none until opened, so this replays on every open). `backwards` fill only: once it ends, the button's own transform/press rules apply as normal. */
 @keyframes dlg-btn-in{from{opacity:0;transform:translateX(34px)}}
 .rdlg-btns>button,
+#backup-body .bkp-panel>.bkp-btn,
 #edit-dfooter-r>button,
 #pub-footer-new-r>button,#pub-footer-live-r>button,#pub-footer-ad-new-r>button,#pub-footer-ad-live-r>button{animation:dlg-btn-in .36s cubic-bezier(.2,.8,.25,1) .08s backwards}
 .rdlg-btns>button:nth-child(2),
+#backup-body .bkp-panel>.bkp-btn:nth-of-type(2),
 #edit-dfooter-r>button:nth-child(2),
 #pub-footer-new-r>button:nth-child(2),#pub-footer-live-r>button:nth-child(2),#pub-footer-ad-new-r>button:nth-child(2),#pub-footer-ad-live-r>button:nth-child(2){animation-delay:.15s}
 .rdlg-btns>button:nth-child(n+3),
 #pub-footer-new-r>button:nth-child(n+3),#pub-footer-live-r>button:nth-child(n+3),#pub-footer-ad-new-r>button:nth-child(n+3),#pub-footer-ad-live-r>button:nth-child(n+3){animation-delay:.22s}
-body.nb-reduce-motion .rdlg-btns>button,body.nb-reduce-motion #edit-dfooter-r>button,body.nb-reduce-motion [id^="pub-footer-"][id$="-r"]>button{animation:none}
-@media (prefers-reduced-motion:reduce){.rdlg-btns>button,#edit-dfooter-r>button,[id^="pub-footer-"][id$="-r"]>button{animation:none}}
+body.nb-reduce-motion #backup-body .bkp-panel>.bkp-btn,body.nb-reduce-motion .rdlg-btns>button,body.nb-reduce-motion #edit-dfooter-r>button,body.nb-reduce-motion [id^="pub-footer-"][id$="-r"]>button{animation:none}
+@media (prefers-reduced-motion:reduce){#backup-body .bkp-panel>.bkp-btn,.rdlg-btns>button,#edit-dfooter-r>button,[id^="pub-footer-"][id$="-r"]>button{animation:none}}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 <style id="sheet-md" data-nb-glass media="not all">
@@ -5948,10 +6264,17 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 11 October 2026</em></p>
+      <p><em>Effective 12 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists and theme choice, are also backed up to our servers (see below).</p>
+      <h3>App lock</h3>
+      <p>App lock is optional. If you turn it on, Bluebook asks for a PIN or password whenever you open the app fresh or refresh the page, so other people can't peek at your notes.</p>
+      <p>Your PIN or password is never saved the way you typed it. The app turns it into a scrambled code (called a hash) and keeps only that code, on your device. When you type it later, the app scrambles what you typed and checks whether the two codes match. Nothing about your lock is sent to us or saved to your account, so we can't see it, reset it or recover it for you.</p>
+      <p>When you set it up, you also pick a recovery question and write an answer. The question is kept as plain text on your device so the app can show it to you if you forget your PIN. The answer is scrambled the same way as your PIN. Pick something only you know, because anyone who gets the answer right can get in.</p>
+      <p>If you type a wrong PIN or a wrong answer five times in a row, the app makes you wait before you can try again. The wait starts at 30 seconds and grows up to 15 minutes. It's there to slow down anyone who's guessing.</p>
+      <p>If you forget both your PIN and your recovery answer, we can't get you back in, and we can't reset it for you. The only way past it is to clear Bluebook's data in your phone or browser settings. Notes you backed up by signing in can be restored afterwards, but anything that only lived on this device is gone. So pick a PIN and answer you'll remember, and keep backups.</p>
+      <p>One last thing: app lock is like a door lock for the app. It doesn't scramble the notes stored on your device. For extra privacy, keep your phone's own screen lock on too.</p>
       <h3>Google sign-in &amp; sync</h3>
       <p>Signing in is totally optional, and Google handles it, so we never see your Google password. We get your Google account ID and email address, and we keep them along with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a code that keeps you signed in (a session lasts up to 30 days). While you're signed in, your notes (including embedded images), your favorites, your playlists (their names and the songs and videos you put in them) and your theme choice are backed up to our servers so you can restore them on another device. Your Pro purchase (if you have one) and any ad view-credit balance (see "In-app purchases" below) are linked to your account too, so they come with you. Signing out stops syncing. Your backup stays put, so you can pick it up again when you sign back in, and deleting your account removes it, as described below. If an image in your backup isn't used by any note any more (for example, after you delete a note or swap an image), the nightly clean-up deletes it once it's more than 14 days old.</p>
       <p>Your account is yours to keep or remove. You can delete it any time by tapping the account icon and choosing Delete account under Show more. That signs this device out and schedules your account for deletion in 30 days. The deletion happens during our nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes, images and playlists, profile name and picture, subscriptions (the ones you made and the ones to you), records of the stories you've opened, your likes and follows (including the times we noted for them), running ads and their view statistics, your invite code and any invites you made or used, your ad access record, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance. We also take down every page you published (we keep a copy of each page, along with its record, for about 30 more days, as described under "Publishing a page"). Until then, your published pages and stories stay online. Changed your mind? Sign back in with the same Google account during the 30 days and the deletion is cancelled, with full access restored. Every device where you're signed in gets signed out as part of the deletion (each one finds out the next time the app contacts our server, usually within about a minute). Deleting your account doesn't delete anything held by Google or RevenueCat. Their own policies cover that.</p>
@@ -6094,7 +6417,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
     </div>
     <div id="backup-body">
       <div class="bkp-panel">
-        <p class="bkp-help">Save every note as a single file, or bring notes back in from a file you saved earlier.</p>
+        <p class="bkp-help">Save every note and playlist as a single file, or bring them back in from a file you saved earlier.</p>
         <button id="btn-download-backup" class="bkp-btn bkp-btn-pri" onclick="nbExportNotes()">Backup Notes</button>
         <button class="bkp-btn bkp-btn-sec">
           <span id="btn-restore-label">Restore from Device</span>
@@ -13123,7 +13446,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     ['Appearance', [
       { t: 'chips', k: 'theme', l: 'Theme', o: [['light', 'Light'], ['dark', 'Dark'], ['pink', 'Pink']], get: curTheme, set: setTheme },
       { t: 'sw', k: 'glassMode', l: 'Glass mode', s: 'Frosted, see-through bars, cards and sheets over a soft colour wash. Off keeps the classic solid look.' },
-      { t: 'sw', k: 'pauseSweep', l: 'Pause moving background', s: 'Stops the moving background where it is. Turn off to continue. Try it if you see glitches, flickering, or parts of the screen missing, or if the app feels slow.', after: () => { try { if (window.nbWashUserPause) window.nbWashUserPause(!!window._nbSt('pauseSweep')); } catch (e) {} } },
+      { t: 'sw', k: 'pauseSweep', needsGlass: true, l: 'Pause moving background', s: 'Stops the moving background colours where they are. Turn off to continue. Try it if you see glitches, flickering, or parts of the screen missing, or if the app feels slow.', after: () => { try { if (window.nbWashUserPause) window.nbWashUserPause(!!window._nbSt('pauseSweep')); } catch (e) {} } },
       { t: 'sw', k: 'reduceMotion', l: 'Reduce motion', s: 'Fewer animations and transitions. Starts on if your phone has animations turned off.' },
       { t: 'sw', k: 'hideDashes', l: 'Hide Media sidebar icon', s: 'Hide the sidebar icon at the left of the Library screen\u2019s header, next to the title. Tapping the Library title still opens Media.' }]],
     ['Library', [
@@ -13137,6 +13460,10 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     ['Writing', [
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
+    ['Security', [
+      { t: 'sw', k: 'appLock', get: () => !!(window.nbLock && window.nbLock.enabled()), toggle: (done) => { const L = window.nbLock; if (!L) { done(false); return; } if (L.enabled()) L.disable(done); else L.enable(done); }, l: 'App lock', s: 'Ask for a PIN or password each time the app starts. It stays on this device. If you forget it, answering your recovery question gets you back in.' },
+      { t: 'link', l: 'Change PIN or password', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.change(() => { try { window._nbStRender(); } catch (e) {} }) },
+      { t: 'link', l: 'Change recovery question', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.recovery(() => { try { window._nbStRender(); } catch (e) {} }) }]],
     ['Sync & backup', [
       { t: 'chips', k: 'syncEvery', l: 'Auto-sync', s: 'How often Bluebook checks your account for changes. Manual only also skips the automatic backup, so tap Sync now to save your edits.', o: [[20, 'Every 20 sec'], [60, 'Every minute'], [300, 'Every 5 min'], [0, 'Manual only']] },
       { t: 'link', l: 'Sync now', s: 'Pull and push your notes', go: () => { if (!nbIsSignedIn()) { showToast('Sign in to sync your notes'); return; } nbSyncNow(); } },
@@ -13165,7 +13492,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   function sub(r) { const s = typeof r.s === 'function' ? r.s() : r.s; return s ? '<span class="st-s">' + E(s) + '</span>' : ''; }
   function row(r, g, i) {
     const d = ' data-g="' + g + '" data-r="' + i + '"';
-    if (r.t === 'sw') return '<label class="st-row"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><span class="nb-switch"><input type="checkbox" class="nb-switch-input"' + d + (window._nbSt(r.k) ? ' checked' : '') + '><span class="nb-switch-track"><span class="nb-switch-thumb"></span></span></span></label>';
+    if (r.t === 'sw') return '<label class="st-row' + (r.needsGlass && !window._nbSt('glassMode') ? ' st-off' : '') + '"' + (r.needsGlass ? ' data-needs-glass="1"' : '') + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><span class="nb-switch"><input type="checkbox" class="nb-switch-input"' + d + ((r.get ? r.get() : window._nbSt(r.k)) ? ' checked' : '') + (r.needsGlass && !window._nbSt('glassMode') ? ' disabled' : '') + '><span class="nb-switch-track"><span class="nb-switch-thumb"></span></span></span></label>';
     if (r.t === 'chips') {
       const cur = String(r.get ? r.get() : window._nbSt(r.k));
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
@@ -13211,7 +13538,9 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   root.addEventListener('change', e => {
     const i = e.target.closest('.nb-switch-input'); if (!i) return;
     const r = find(i); if (!r) return;
+    if (r.toggle) { const want = i.checked; r.toggle(ok => { if (!ok) i.checked = !want; try { window._nbStRender(); } catch (e) {} }); return; }
     put(r.k, i.checked); classes(); if (r.after) r.after();
+    if (r.k === 'glassMode') { const on = !!window._nbSt('glassMode'); root.querySelectorAll('[data-needs-glass]').forEach(l => { l.classList.toggle('st-off', !on); const x = l.querySelector('input'); if (x) x.disabled = !on; }); }
   });
   // Follow the phone's animation setting while the app is open or after it
   // resumes, until the user has made their own choice with the switch.
@@ -13906,6 +14235,7 @@ function _nbBindBackButtonListener() {
   _nbBackButtonListenerBound = true;
   try {
     AppPlugin.addListener('backButton', (data) => {
+      if (window._nbLockBack && window._nbLockBack(AppPlugin)) return;
       const acctScr = document.getElementById('account-screen');
       const acctOpen = !!(acctScr && acctScr.classList.contains('open'));
       if (acctOpen && window._nbSigninOrigin === 'settings') { closeAccountScreen(); return; }
@@ -15748,7 +16078,8 @@ function nbVisibleNotes() {
 }
 function nbExportNotes() {
   const notes = nbLoadNotes();
-  if (!notes.length) { showToast('No notes saved yet'); return; }
+  const playlists = _nbPlaylistsForSync().list;
+  if (!notes.length && !playlists.length) { showToast('No notes saved yet'); return; }
   // Note content only carries <img data-note-img-ref="id"> placeholders —
   // the actual base64 image data lives separately under nb_img_<id> in
   // localStorage. Pull every referenced id's data along so a restore on
@@ -15765,7 +16096,7 @@ function nbExportNotes() {
       try { const data = _nbGetImage(id); if (data) images[id] = data; } catch (e) {}
     }
   });
-  const backupJson = JSON.stringify({ app: 'Bluebook', version: 1, notes, images }, null, 2);
+  const backupJson = JSON.stringify({ app: 'Bluebook', version: 1, notes, images, playlists: { list: playlists } }, null, 2);
   const fileName = 'bluebook-backup.json';
   // Inside a compiled Capacitor app, use the native Filesystem + Share
   // plugins instead of any browser API. This is real native code (a
@@ -20980,6 +21311,24 @@ function _nbMaybeCountAdView() {
   _nbPendingAdViewToken = null;
 }
 
+// Restores Media playlists from a backup file into the current owner's list (see _nbPlOwner). Adds missing ones and
+// takes a newer copy of ones that exist; never deletes. A playlist deleted here after the backup was made comes back
+// (its tombstone is cleared and it's stamped as edited now so another device's tombstone can't remove it again).
+// Returns how many playlists were new.
+function _nbPlRestoreFromBackup(pl) {
+  if (!pl || !Array.isArray(pl.list)) return 0;
+  const before = new Set(_nbPlLoad().map(p => p.id));
+  const tombs = _nbPlLoadTombs(); let tc = false;
+  const list = [];
+  pl.list.forEach(raw => {
+    const r = _nbPlCleanIncoming(raw); if (!r) return;
+    if (tombs[r.id] >= r.u) { delete tombs[r.id]; tc = true; r.u = Date.now(); }
+    list.push(r);
+  });
+  if (tc) _nbPlSaveTombs(tombs);
+  _nbMergeIncomingPlaylists({ list });
+  return _nbPlLoad().filter(p => !before.has(p.id)).length;
+}
 function nbImportNotes(e) {
   const file = e.target.files[0]; if (!file) return;
   // Belt-and-suspenders: the click gate on the input itself (see
@@ -21022,6 +21371,8 @@ function nbImportNotes(e) {
       // of where its createdAt actually puts it in the newest-first list.
       if (count) existing.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       nbSaveNotesArr(existing);
+      let plCount = 0;
+      try { plCount = _nbPlRestoreFromBackup(json.playlists); } catch (err) { _nbLog('restore playlists', err); }
       // Stashed for the OTHER side of the reload — see the pending-restore
       // check near nbGoScreen('create') at boot — rather than shown here
       // before it. Expected flow is reboot -> land on Notes -> show the
@@ -21032,7 +21383,10 @@ function nbImportNotes(e) {
       // near nbGoScreen('create') at boot), by which point the reload
       // has already finished.
       const title = 'Restored';
-      const body = count === 1 ? '1 note restored.' : `${count} notes restored.`;
+      const _bp = [];
+      if (count || !plCount) _bp.push(count === 1 ? '1 note restored.' : `${count} notes restored.`);
+      if (plCount) _bp.push(plCount === 1 ? '1 playlist restored.' : `${plCount} playlists restored.`);
+      const body = _bp.join(' ');
       try { localStorage.setItem('nb_pendingRestoreMsg', JSON.stringify({ title, body })); } catch (e) {}
       // A page reload — not just re-rendering the current screen — is
       // the only way every already-open piece of state (the Notes list,
@@ -21053,6 +21407,7 @@ function nbImportNotes(e) {
       // without this the sheet could still be visibly open for a frame
       // or two right before everything reloads out from under it.
       closeBackupSheet();
+      try { sessionStorage.setItem('nb_lock_ok', '1'); } catch (e) {} // app-made reload: skip the app lock once (a browser refresh still asks)
       window.location.reload();
       return;
     } catch (_) {
