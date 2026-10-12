@@ -5092,9 +5092,12 @@ body.night{--nb-g1:rgba(70,110,255,.9);--nb-g2:rgba(190,140,255,.8);--nb-g3:rgba
 body.pink{--nb-g1:rgba(255,110,150,.95);--nb-g2:rgba(255,200,140,.9);--nb-g3:rgba(200,120,230,.8);--nb-g4:rgba(255,160,190,.8);--nb-g5:rgba(120,210,170,.7)}
 #nb-wash{position:fixed;left:0;right:0;top:-10%;height:62%;z-index:-1;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
 .wash-sweep-in{position:absolute;left:-25%;right:-25%;top:-24%;height:95%;pointer-events:none;background-image:radial-gradient(ellipse 38% 62% at 18% 42%,var(--nb-g1) 0%,transparent 72%),radial-gradient(ellipse 34% 55% at 52% 28%,var(--nb-g2) 0%,transparent 72%),radial-gradient(ellipse 36% 60% at 84% 55%,var(--nb-g3) 0%,transparent 72%),radial-gradient(ellipse 30% 50% at 36% 72%,var(--nb-g5) 0%,transparent 72%),linear-gradient(115deg,var(--nb-g4) 0%,transparent 55%);opacity:0;transform:translate3d(-8%,0,0) scale(1.1);transition:transform var(--d1,14s) ease-in-out,opacity var(--do,4s) ease-in-out}
-.wash-sweep-in::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g5) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g1) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);transition:transform var(--d2,12s) ease-in-out}
+.wash-sweep-in::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 40% 58% at 70% 35%,var(--nb-g2) 0%,transparent 70%),radial-gradient(ellipse 36% 60% at 30% 60%,var(--nb-g3) 0%,transparent 70%),radial-gradient(ellipse 32% 52% at 90% 30%,var(--nb-g1) 0%,transparent 70%),linear-gradient(-65deg,var(--nb-g5) 0%,transparent 60%);opacity:.75;transform:var(--t2,none);transition:transform var(--d2,12s) ease-in-out}
 .wash-sweep-in.wash-frozen,.wash-sweep-in.wash-frozen::before,.wash-sweep-in.wash-frozen::after{transition:none!important}
-.wash-sweep-in::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at 62% 52%,var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at 20% 30%,var(--gx,transparent) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
+/* Idle show: extra colour spots the controller adds inside every sweep layer when nobody is touching the app (search 'idle show'). Each one fades in and out on its own, in its own colour and place, so many colours can be showing at once. */
+.wash-spot{position:absolute;inset:0;pointer-events:none;opacity:0;background-image:radial-gradient(ellipse var(--sa,32%) var(--sb,50%) at var(--sx,50%) var(--sy,40%),var(--sc,transparent) 0%,transparent 70%);transition:opacity var(--so,3s) ease-in-out,transform var(--st,12s) ease-in-out}
+.wash-sweep-in.wash-frozen .wash-spot{transition:none!important}
+.wash-sweep-in::after{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 34% 56% at var(--ax1,62% 52%),var(--gx,transparent) 0%,transparent 70%),radial-gradient(ellipse 26% 46% at var(--ax2,20% 30%),var(--gx2,var(--gx,transparent)) 0%,transparent 70%);opacity:var(--ga,0);transform:var(--t3,none);transition:opacity var(--gd,5s) ease-in-out,transform var(--d3,16s) ease-in-out}
 /* The wrapper clips the oversized, drifting layers at 74% of the screen: exactly where the fade into the page colour ends. Anything drawn lower would sit below the fade and show as a hard-edged tint at the bottom. */
 #nb-wash-sweep{position:fixed;left:0;right:0;top:0;height:74%;overflow:hidden;z-index:-1;pointer-events:none;--sw:var(--nb-wash)}
 #md-wash-sweep{position:absolute;left:0;right:0;top:0;height:74%;overflow:hidden;pointer-events:none;--sw:var(--md-wash)}
@@ -25929,14 +25932,21 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function pick(a){return a[Math.floor(R()*a.length)]}
   function setVar(k,v){els.forEach(function(el){el.style.setProperty(k,v)})}
   function setStyle(k,v){els.forEach(function(el){el.style[k]=v})}
-  var ACCENTS=['rgba(255,150,60,.9)','rgba(170,110,255,.85)','rgba(60,200,205,.85)','rgba(240,90,200,.8)','rgba(190,235,80,.75)','rgba(255,115,105,.85)','rgba(255,205,70,.9)','rgba(90,190,255,.85)','rgba(120,230,190,.8)','rgba(255,170,210,.85)','rgba(130,120,255,.85)'];
+  var ACCENTS=['rgba(255,150,60,.9)','rgba(187,110,255,.85)','rgba(61,217,212,.85)','rgba(135,206,235,.9)','rgba(190,235,80,.75)','rgba(255,115,105,.85)','rgba(255,205,70,.9)','rgba(82,128,255,.85)','rgba(94,235,160,.8)','rgba(109,235,89,.8)','rgba(130,120,255,.85)'];
   function tf(bx,by){return 'translate3d('+rr(-bx,bx).toFixed(1)+'%,'+rr(-by,by).toFixed(1)+'%,0) rotate('+rr(-8,8).toFixed(1)+'deg) scale('+rr(1,1.3).toFixed(2)+')'}
-  var gen=0, last='mild', on=false;
+  var gen=0, last='mild', on=false, everRan=false, frozenAt=0, catchUntil=0;
+  // Catch-up: after a pause the sweep makes up for the lost time with a short burst, moving about 2.5x faster, pulsing strong and
+  // showing an accent colour straight away, then easing back to the normal pace. The longer the pause, the longer the burst.
+  var showing=false;
+  function catching(){return Date.now()<catchUntil}
+  // "hot" = the sweep is in a lively phase: the burst after a pause, or the idle show
+  function hot(){return showing||Date.now()<catchUntil}
   function drift(prop,durProp,bx,by,lo,hi){
     var my=gen;
     (function go(){
       if(my!==gen)return;
-      var d=rr(lo,hi);setVar(durProp,d.toFixed(1)+'s');
+      var d=rr(lo,hi);if(hot())d*=showing?.35:.4;
+      setVar(durProp,d.toFixed(1)+'s');
       var t=tf(bx,by);
       if(prop==='transform')setStyle('transform',t);else setVar(prop,t);
       setTimeout(go,d*1000*rr(.55,1.1));
@@ -25946,40 +25956,155 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var my=gen;
     (function go(){
       if(my!==gen)return;
-      var r=R(),kind,k;
-      if(last!=='off'&&r<.15){kind='off';k=0}
+      var r=R(),kind,k,cu=hot();
+      if(cu){kind=(showing||r<.7)?'strong':'mild';k=showing?rr(2.4,3.2):kind==='strong'?rr(2,2.8):rr(1.4,1.8)}
+      else if(last!=='off'&&r<.15){kind='off';k=0}
       else if(r<.4){kind='strong';k=rr(2,2.8)}
       else if(r<.6){kind='low';k=rr(.5,.95)}
       else{kind='mild';k=rr(1.1,1.6)}
-      var d=rr(2.5,6.5);setVar('--do',d.toFixed(1)+'s');
+      var d=cu?rr(1,1.8):rr(2.5,6.5);setVar('--do',d.toFixed(1)+'s');
       setStyle('opacity',kind==='off'?'0':'calc(var(--sw) * '+k.toFixed(2)+')');
       last=kind;
-      setTimeout(go,(d+(kind==='off'?rr(1,3):rr(1.5,8)))*1000);
+      setTimeout(go,(d+(cu?rr(.3,1):kind==='off'?rr(1,3):rr(1.5,8)))*1000);
     })();
+  }
+  // Accent colours come out of a shuffled bag, so every colour is used once before any repeats and the same one never shows twice
+  // in a row; two are drawn each time (one per gradient spot), so the pair differs from one appearance to the next.
+  var bag=[], lastAcc='';
+  function nextAccent(){
+    if(!bag.length){
+      bag=ACCENTS.slice();
+      for(var i=bag.length-1;i>0;i--){var j=Math.floor(R()*(i+1)),x=bag[i];bag[i]=bag[j];bag[j]=x}
+      if(bag[bag.length-1]===lastAcc){var k=Math.floor(R()*(bag.length-1)),y=bag[bag.length-1];bag[bag.length-1]=bag[k];bag[k]=y}
+    }
+    lastAcc=bag.pop();return lastAcc;
+  }
+  var lastSide=-1;
+  function newAccents(){
+    setVar('--gx',nextAccent());setVar('--gx2',nextAccent());
+    // one spot on each half of the screen, and which colour goes on which half is random (never the same side twice in a row for the first colour)
+    var s=R()<.5?0:1;if(s===lastSide)s=1-s;lastSide=s;
+    var xa=s?rr(58,88):rr(12,42),xb=s?rr(12,42):rr(58,88);
+    setVar('--ax1',xa.toFixed(0)+'% '+rr(22,72).toFixed(0)+'%');
+    setVar('--ax2',xb.toFixed(0)+'% '+rr(22,72).toFixed(0)+'%');
   }
   function accent(){
     var my=gen;
     (function go(){
       if(my!==gen)return;
+      var cu=hot();
       if(!on){
-        setVar('--gx',pick(ACCENTS));setVar('--gd',rr(3.5,7).toFixed(1)+'s');
-        setTimeout(function(){if(my===gen)setVar('--ga',rr(.45,.95).toFixed(2))},60);
-        on=true;setTimeout(go,rr(7,16)*1000);
+        newAccents();setVar('--gd',(cu?rr(1.2,2.2):rr(3.5,7)).toFixed(1)+'s');
+        setTimeout(function(){if(my===gen)setVar('--ga',(cu?rr(.8,1):rr(.45,.95)).toFixed(2))},60);
+        on=true;setTimeout(go,(cu?rr(2.5,4):rr(7,16))*1000);
+      }else if(cu){
+        // an accent is already showing: swap it for a new pair during the burst (fade out fast, change colours while invisible, fade back in)
+        setVar('--gd','.7s');setVar('--ga','0');
+        setTimeout(function(){
+          if(my!==gen)return;
+          newAccents();setVar('--gd',rr(1.2,2.2).toFixed(1)+'s');
+          setTimeout(function(){if(my===gen)setVar('--ga',rr(.8,1).toFixed(2))},60);
+        },800);
+        setTimeout(go,rr(2.5,4)*1000);
       }else{
+        setVar('--gd',rr(3.5,7).toFixed(1)+'s');
         setVar('--ga','0');on=false;setTimeout(go,rr(4,18)*1000);
       }
     })();
   }
   function start(){
+    everRan=true;
     drift('transform','--d1',22,8,9,20);
     drift('--t2','--d2',26,10,7,17);
     drift('--t3','--d3',30,9,10,24);
     strength();accent();
   }
+  /* idle show: after IDLE_MS with no touch, click, key or wheel, the sweep gets livelier: the base layers move about 3x faster and stay strong, and
+     SPOTS extra colour spots build up one after another, each in its own colour (drawn from the same shuffled bag, so none repeats) and in its own
+     cell of the screen, so the colours spread over both sides instead of sitting in two places. Any input eases it all back out over about two seconds. */
+  var IDLE_MS=5000, SPOTS=5, CELLS=[[22,28],[50,22],[78,28],[22,70],[50,74],[78,70]];
+  var lastInput=Date.now(), spotGen=0, spotEls=[], cellUsed=[];
+  for(var si=0;si<SPOTS;si++)spotEls.push([]);
+  els.forEach(function(el){
+    for(var i=0;i<SPOTS;i++){
+      var n=document.createElement('i');n.className='wash-spot';n.setAttribute('aria-hidden','true');
+      el.appendChild(n);spotEls[i].push(n);
+    }
+  });
+  function spotVar(i,k,v){spotEls[i].forEach(function(n){n.style.setProperty(k,v)})}
+  function spotOpacity(i,v){spotEls[i].forEach(function(n){n.style.opacity=v})}
+  function spotRun(i,my,delay){
+    setTimeout(function go(){
+      if(my!==spotGen)return;
+      // a spot still showing (the show is resuming after a short pause) fades out first, so its colour never jumps while visible
+      if(parseFloat(getComputedStyle(spotEls[i][0]).opacity)>.05){spotVar(i,'--so','.7s');spotOpacity(i,'0');setTimeout(go,800);return}
+      var free=[];for(var c=0;c<CELLS.length;c++)if(!cellUsed[c])free.push(c);
+      if(!free.length){setTimeout(go,800);return}
+      var cell=pick(free);cellUsed[cell]=true;
+      var xy=CELLS[cell];
+      spotVar(i,'--sc',nextAccent());
+      spotVar(i,'--sx',(xy[0]+rr(-9,9)).toFixed(0)+'%');spotVar(i,'--sy',(xy[1]+rr(-10,10)).toFixed(0)+'%');
+      spotVar(i,'--sa',rr(26,40).toFixed(0)+'%');spotVar(i,'--sb',rr(40,62).toFixed(0)+'%');
+      var inD=rr(1.8,3.2),hold=rr(3,7),outD=rr(1.8,3.2),st=inD+hold+outD;
+      spotVar(i,'--st',st.toFixed(1)+'s');
+      spotEls[i].forEach(function(n){n.style.transform='translate3d('+rr(-14,14).toFixed(1)+'%,'+rr(-12,12).toFixed(1)+'%,0) scale('+rr(.95,1.2).toFixed(2)+')'});
+      spotVar(i,'--so',inD.toFixed(1)+'s');spotOpacity(i,rr(.7,1).toFixed(2));
+      setTimeout(function(){
+        if(my!==spotGen)return;
+        spotVar(i,'--so',outD.toFixed(1)+'s');spotOpacity(i,'0');
+        setTimeout(function(){
+          if(my!==spotGen)return;
+          cellUsed[cell]=false;go();
+        },outD*1000+rr(200,1200));
+      },(inD+hold)*1000);
+    },delay);
+  }
+  function beginSpots(stagger){
+    showing=true;spotGen++;cellUsed=[];
+    var my=spotGen;
+    for(var i=0;i<SPOTS;i++)spotRun(i,my,i*rr(stagger*.5,stagger)); // staggered, so the colours build up one by one
+  }
+  // No show while the onboarding carousel is on screen (it has its own motion and holds the sweep before every slide), or when the app's reduce-motion setting is on
+  function carouselShowing(){try{return typeof _nbCarouselOnScreen==='function'&&_nbCarouselOnScreen()}catch(e){return false}}
+  function showBlocked(){return carouselShowing()||document.body.classList.contains('nb-reduce-motion')}
+  function startShow(){
+    if(showing||frozen||reduce||showBlocked())return;
+    beginSpots(2000);
+    gen++;start(); // restart the base layers right away at the lively pace
+  }
+  function endShow(){
+    if(!showing)return;
+    showing=false;spotGen++;cellUsed=[];
+    for(var i=0;i<SPOTS;i++){spotVar(i,'--so',rr(1.6,2.4).toFixed(1)+'s');spotOpacity(i,'0')}
+    // the base layers need no restart: their next pick uses the normal pace and strength, so they ease back on their own
+  }
+  // A touch during the show pauses the sweep at once, right where it is (same freeze as every other pause), and only after the touch has
+  // been quiet for a moment does it carry on in ease mode: the spots fade out slowly and the base layers go back to their normal pace, with no catch-up burst.
+  function easeCheck(){
+    var left=700-(Date.now()-easeLast);
+    if(left>20){easeT=setTimeout(easeCheck,left);return}
+    easeHold=false;sync(true);
+  }
+  function onInput(){
+    var now=Date.now();lastInput=now;
+    if(showing){easing=true;easeHold=true;easeLast=now;clearTimeout(easeT);easeT=setTimeout(easeCheck,700);sync(false)}
+    else if(easeHold)easeLast=now;
+  }
+  document.addEventListener('visibilitychange',function(){lastInput=Date.now()});
+  ['pointerdown','pointermove','touchstart','touchmove','mousedown','keydown','wheel','click','input'].forEach(function(n){
+    document.addEventListener(n,onInput,{capture:true,passive:true});
+  });
+  setInterval(function(){
+    if(frozen)return;
+    if(showing){if(showBlocked())endShow();return} // the carousel came on screen (or reduce-motion was switched on): fade the show out
+    if(Date.now()-lastInput>IDLE_MS&&!held())startShow();
+  },500);
   // Freeze: read where every layer is right now, stop all transitions, pin those values, and cancel every pending timer.
   var frozen=false;
   function freeze(){
-    if(frozen)return;frozen=true;gen++;
+    if(frozen)return;frozen=true;gen++;frozenAt=Date.now();catchUntil=0;
+    if(showing){showing=false;spotGen++;cellUsed=[]} // spots stay pinned where they are; thaw decides whether the show carries on
+    spotEls.forEach(function(arr){arr.forEach(function(n){var c=getComputedStyle(n);n.style.opacity=c.opacity;n.style.transform=c.transform})});
     els.forEach(function(el){
       var c=getComputedStyle(el),c2=getComputedStyle(el,'::before'),c3=getComputedStyle(el,'::after');
       var t1=c.transform,o1=c.opacity,t2=c2.transform,t3=c3.transform,ga=c3.opacity;
@@ -25992,6 +26117,14 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if(!frozen)return;frozen=false;
     var ga=parseFloat(els[0].style.getPropertyValue('--ga'))||0;on=ga>.02;
     els.forEach(function(el){el.classList.remove('wash-frozen')});
+    // Short pauses happen all the time (the carousel holds the sweep before every slide, dialogs, scans). If nobody has touched the app
+    // for the idle period, the show carries on after the pause; otherwise the pinned spots fade out.
+    if(Date.now()-lastInput>IDLE_MS&&!showBlocked())beginSpots(800);
+    else for(var i=0;i<SPOTS;i++){spotVar(i,'--so',easing?'2.2s':'1.2s');spotOpacity(i,'0')}
+    // the first start after launch is not a pause, so it gets no burst; every later pause does, scaled to how long it lasted
+    var paused=Date.now()-frozenAt;
+    if(everRan&&paused>400&&!easing)catchUntil=Date.now()+Math.min(9000,Math.max(2500,paused*.6));
+    easing=false;
     start();
   }
   var fieldFocused=false;
@@ -26004,8 +26137,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   // Freezing is immediate; resuming always waits a moment after the last thing that paused it (keyboard leaving, Media sliding,
   // coming back to the app), and anything that pauses it again inside that wait cancels the resume.
-  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false;
-  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover}
+  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, easeHold=false, easing=false, easeLast=0, easeT=0;
+  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||easeHold}
   // A busy marker only counts while it is really showing: displayed, visible, inside the screen, and not under Media / the sign-in screen.
   function onScreen(el){
     if(!el.getClientRects().length)return false;
@@ -26061,6 +26194,66 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       clearTimeout(mediaFail);mediaFail=setTimeout(function(){mediaBusy=0;sync(true)},500);
     }).observe(md,{attributes:true,attributeFilter:['class']});
   })();
+  // Dialogs and sheets (every *-overlay / *-dialog / *-sheet layer, the Media sheet and the picker sheets): hold while one slides or fades
+  // in, slides down or out, or is dragged down, and for a moment after. Most of them hide instantly with no animation at all, so their
+  // opening and closing is also caught from the page itself (below); the animation and transition events just cover the full length of the motion.
+  var DLG_SEL='[id$="-overlay"],[id$="-dialog"],[id$="-sheet"],#md-sheet-scrim,#md-sheet-box,.img-pick-overlay,.img-pick-box';
+  function isDlgMotion(e){
+    var t=e.target;
+    if(!t||t.nodeType!==1||!t.matches||!t.matches(DLG_SEL))return false;
+    return !e.propertyName||e.propertyName==='transform'||e.propertyName==='opacity'; // animations always count; transitions only the slide / fade
+  }
+  function dlgStart(e){
+    if(!isDlgMotion(e))return;
+    dlgN++;sync(false);
+    clearTimeout(dlgFail);dlgFail=setTimeout(function(){dlgN=0;sync(true)},1500); // an end event that never arrives can't hold it
+  }
+  function dlgEnd(e){
+    if(!isDlgMotion(e))return;
+    dlgN=Math.max(0,dlgN-1);
+    if(!dlgN){clearTimeout(dlgFail);sync(true)}
+  }
+  ['transitionrun','animationstart'].forEach(function(n){document.addEventListener(n,dlgStart,true)});
+  ['transitionend','transitioncancel','animationend','animationcancel'].forEach(function(n){document.addEventListener(n,dlgEnd,true)});
+  function dlgHold(ms){
+    dlgPulse=true;sync(false);
+    clearTimeout(dlgT);dlgT=setTimeout(function(){dlgPulse=false;sync(true)},ms);
+  }
+  (function(){
+    if(!window.MutationObserver)return;
+    var shown=new WeakMap();
+    function vis(el){return el.getClientRects().length>0}
+    Array.prototype.forEach.call(document.querySelectorAll(DLG_SEL),function(el){shown.set(el,vis(el))});
+    function dlgNode(n){return n.nodeType===1&&(n.matches(DLG_SEL)||!!n.querySelector(DLG_SEL))}
+    new MutationObserver(function(list){
+      var go=false;
+      for(var i=0;i<list.length&&!go;i++){
+        var m=list[i];
+        if(m.type==='attributes'){
+          var t=m.target;
+          if(!t.matches||!t.matches(DLG_SEL))continue;
+          var now=vis(t),was=shown.get(t);shown.set(t,now);
+          if(was!==undefined&&was!==now)go=true; // opened, or closed (slid down / out, or just gone)
+        }else{
+          for(var a=0;a<m.addedNodes.length&&!go;a++) if(dlgNode(m.addedNodes[a]))go=true;
+          for(var r=0;r<m.removedNodes.length&&!go;r++) if(dlgNode(m.removedNodes[r]))go=true;
+        }
+      }
+      if(go)dlgHold(450);
+    }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden','open']});
+  })();
+  // Dragging the Media sheet down by its handle holds for the whole drag; letting go (closing it, or snapping back) holds a little longer
+  function sheetDragEnd(){
+    if(!sheetDrag)return;
+    sheetDrag=false;clearTimeout(sheetDragT);dlgHold(450);
+  }
+  document.addEventListener('pointerdown',function(e){
+    var t=e.target;
+    if(!t||!t.closest||!t.closest('#md-sheet-box .md-grab'))return;
+    sheetDrag=true;sync(false);
+    clearTimeout(sheetDragT);sheetDragT=setTimeout(sheetDragEnd,8000);
+  },true);
+  ['pointerup','pointercancel','lostpointercapture'].forEach(function(n){document.addEventListener(n,sheetDragEnd,true)});
   document.addEventListener('focusin',function(e){fieldFocused=isField(e.target);sync(false)});
   document.addEventListener('focusout',function(){setTimeout(function(){fieldFocused=isField(document.activeElement);sync(true)},0)});
   document.addEventListener('visibilitychange',function(){sync(true)});
