@@ -13043,7 +13043,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 /* ===================== Settings ===================== */
 (function () {
   const KEY = 'nb_settings_v1';
-  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, glassMode: true, mediaSwipe: true, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
+  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, glassMode: true, pauseSweep: false, mediaSwipe: true, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
   let S = null, lastPoll = 0;
   function load() {
     try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
@@ -13099,6 +13099,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     ['Appearance', [
       { t: 'chips', k: 'theme', l: 'Theme', o: [['light', 'Light'], ['dark', 'Dark'], ['pink', 'Pink']], get: curTheme, set: setTheme },
       { t: 'sw', k: 'glassMode', l: 'Glass mode', s: 'Frosted, see-through bars, cards and sheets over a soft colour wash. Off keeps the classic solid look.' },
+      { t: 'sw', k: 'pauseSweep', l: 'Pause moving background', s: 'Stops the moving background where it is. Turn off to continue. Try it if you see glitches, flickering, or parts of the screen missing, or if the app feels slow.', after: () => { try { if (window.nbWashUserPause) window.nbWashUserPause(!!window._nbSt('pauseSweep')); } catch (e) {} } },
       { t: 'sw', k: 'reduceMotion', l: 'Reduce motion', s: 'Fewer animations and transitions. Starts on if your phone has animations turned off.' },
       { t: 'sw', k: 'hideDashes', l: 'Hide Media sidebar icon', s: 'Hide the sidebar icon at the left of the Library screen\u2019s header, next to the title. Tapping the Library title still opens Media.' }]],
     ['Library', [
@@ -26173,8 +26174,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     else for(var i=0;i<SPOTS;i++){spotVar(i,'--so',easing?'2.2s':'1.2s');spotOpacity(i,'0')}
     // the first start after launch is not a pause, so it gets no burst; every later pause does, scaled to how long it lasted
     var paused=Date.now()-frozenAt;
-    if(everRan&&paused>400&&!easing)catchUntil=Date.now()+Math.min(9000,Math.max(2500,paused*.6));
-    easing=false;
+    if(everRan&&paused>400&&!easing&&!resumeQuiet)catchUntil=Date.now()+Math.min(9000,Math.max(2500,paused*.6));
+    easing=false;resumeQuiet=false;
     start();
   }
   var fieldFocused=false;
@@ -26187,8 +26188,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   // Freezing is immediate; resuming always waits a moment after the last thing that paused it (keyboard leaving, Media sliding,
   // coming back to the app), and anything that pauses it again inside that wait cancels the resume.
-  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, scrolling=false, scrollT=0, editorOn=false, easeHold=false, easing=false, easeLast=0, easeT=0;
-  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||scrolling||editorOn||easeHold}
+  var KB_WAIT=900, resumeT=0, mediaBusy=0, mediaFail=0, domBusy=false, switching=false, switchT=0, holdBusy=false, holdT=0, flagBusy=false, flagRel=false, flagCapT=0, flags={}, cover=false, dlgN=0, dlgFail=0, dlgPulse=false, dlgT=0, sheetDrag=false, sheetDragT=0, scrolling=false, scrollT=0, editorOn=false, storyOn=false, userPaused=false, resumeQuiet=false, easeHold=false, easing=false, easeLast=0, easeT=0;
+  function held(){return fieldFocused||document.hidden||mediaBusy>0||domBusy||switching||holdBusy||flagRel||cover||dlgN>0||dlgPulse||sheetDrag||scrolling||editorOn||storyOn||userPaused||easeHold}
   // A busy marker only counts while it is really showing: displayed, visible, inside the screen, and not under Media / the sign-in screen.
   function onScreen(el){
     if(!el.getClientRects().length)return false;
@@ -26320,10 +26321,14 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   var busyCapT=0, busyCapped=false;
   // The sweep stays paused for as long as the Editor screen is showing
   function inEditor(){var s=document.getElementById('screen-create');return !!(s&&s.classList.contains('active'))}
+  // ...and for as long as the Story viewer is open (it shows stories and other people's notes)
+  function inStory(){var s=document.getElementById('story-viewer-overlay');return !!(s&&s.classList.contains('open'))}
   function checkBusy(){
     domPend=false;
     var ed=inEditor();
     if(ed!==editorOn){editorOn=ed;sync(!ed)}
+    var sv=inStory();
+    if(sv!==storyOn){storyOn=sv;sync(!sv)}
     var cv=coverUp();
     if(cv!==cover){cover=cv;sync(!cv)}
     var fr=flagsRelevant();
@@ -26344,6 +26349,13 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     holdBusy=true;sync(false);
     clearTimeout(holdT);holdT=setTimeout(function(){holdBusy=false;sync(true)},ms||1000);
   };
+  // Settings > Pause gradient sweep: pausing freezes every layer exactly where it is; resuming carries on from that same state (no catch-up burst)
+  window.nbWashUserPause=function(on){
+    on=!!on;if(on===userPaused)return;
+    userPaused=on;
+    if(!on)resumeQuiet=true;
+    sync(false);
+  };
   window.nbWashFlag=function(k,on){
     flags[k]=!!on;
     var b=false;for(var fk in flags){if(flags[fk])b=true}
@@ -26362,15 +26374,16 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     switching=true;sync(false);
     clearTimeout(switchT);switchT=setTimeout(function(){switching=false;sync(true)},700);
   },true);
-  // Vertical scrolling (Editor canvas, Library notes list, Reader, Story viewer, Media list, Now Playing, any page): hold while it moves,
-  // then resume after it has been still for a moment (same pause pattern as category switching). Horizontal scrollers (pills, chips) don't count.
+  // Scrolling in any direction (Editor canvas, Library notes list, Story viewer, Media list, Now Playing, any page, and the sideways
+  // scrollers: category pills, Media chips, stories strip): hold while it moves, then resume after it has been still for a moment
+  // (same pause pattern as category switching).
   var lastTop=new WeakMap();
   function vMoved(t){
     var el=t&&t.nodeType===9?(t.scrollingElement||t.documentElement):t;
     if(!el)return false;
-    var y;try{y=el.scrollTop}catch(e){return false}
-    var p=lastTop.get(el);lastTop.set(el,y);
-    return p!==undefined&&y!==p;
+    var y,x;try{y=el.scrollTop;x=el.scrollLeft}catch(e){return false}
+    var p=lastTop.get(el);lastTop.set(el,[x,y]);
+    return p!==undefined&&(y!==p[1]||x!==p[0]);
   }
   function onScroll(e){
     if(!vMoved(e.target))return;
@@ -26398,6 +26411,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   hookScrollFrames();
   fieldFocused=isField(document.activeElement);
   editorOn=inEditor();
+  storyOn=inStory();
+  try{userPaused=!!(window._nbSt&&window._nbSt('pauseSweep'))}catch(e){}
   domBusy=anyBusy();
   cover=coverUp();
   window.nbWashHold(1500); // every fresh launch starts paused and only begins after a short wait
