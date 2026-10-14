@@ -4339,7 +4339,7 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 </head>
 <body>
 <script>
-// ---- App lock: local PIN / password, asked for on a fresh start ------------------------------------------------
+// ---- App lock: local PIN / password, asked for on a fresh start and when returning after a while away ------------------------------------------------
 // Stored as a salted PBKDF2-SHA256 hash in localStorage (nb_lock_v1); the passcode itself is never kept and nothing
 // here syncs to the account. "Fresh start" = every launch, including a browser refresh. Only the app's own reload after Restore
 // sets a one-shot sessionStorage flag (nb_lock_ok) that skips the lock once and is cleared at boot.
@@ -4409,7 +4409,7 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
       '.nbl-pink{--bg:#fff8fb;--card:#fff8fb;--cardb:#f5c5d8;--gl:rgba(255,248,251,.72);--glb:rgba(245,197,216,.6);--fg:#1a0a12;--sub:#875068;--ac:#c8365e;--okbg:#c8365e;--okfg:#fff;--secbg:rgba(255,224,236,.6);--secf:#c8365e;--secb:rgba(200,54,94,.2);--ln:rgba(200,54,94,.16);--insh:rgba(200,54,94,.14);--foc:rgba(200,54,94,.2);--scr:rgba(70,12,32,.45);--shd:0 8px 24px rgba(200,54,94,.22);--err:#b0253f;--dng:#b0253f}' +
       '.nbl [hidden]{display:none!important}' +
       // full-screen boot lock: solid page colour (classic) or a soft colour wash (glass); it must hide the app, so never see-through
-      '.nbl-full{z-index:2147483000;background:var(--bg)}' +
+      '.nbl-full{z-index:2147483000;background:var(--bg);animation:none}' + // boot lock is opaque from its very first frame (no fade-in showing the page beneath); the card still rises in
       '.nbl-full.nbl-glass{background:radial-gradient(60% 45% at 16% 10%,rgba(51,102,204,.2),transparent 70%),radial-gradient(55% 45% at 88% 22%,rgba(190,140,255,.16),transparent 70%),radial-gradient(60% 50% at 66% 94%,rgba(255,120,150,.15),transparent 70%),var(--bg)}' +
       '.nbl-dark.nbl-full.nbl-glass{background:radial-gradient(60% 45% at 16% 10%,rgba(255,255,255,.08),transparent 70%),radial-gradient(55% 45% at 88% 22%,rgba(255,255,255,.05),transparent 70%),radial-gradient(60% 50% at 66% 94%,rgba(255,255,255,.06),transparent 70%),var(--bg)}' +
       '.nbl-pink.nbl-full.nbl-glass{background:radial-gradient(60% 45% at 16% 10%,rgba(200,54,94,.2),transparent 70%),radial-gradient(55% 45% at 88% 22%,rgba(255,150,180,.22),transparent 70%),radial-gradient(60% 50% at 66% 94%,rgba(255,120,150,.16),transparent 70%),var(--bg)}' +
@@ -4528,6 +4528,13 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
         el.style.transition = 'opacity .18s'; el.style.opacity = '0';
         setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 190);
       },
+      // Removes the dialog at once, with no fade (the shield put up on backgrounding, taken down on a quick return).
+      drop: function () {
+        if (closed) return; closed = true; clearInterval(tmr);
+        if (cur === h) cur = null;
+        el.classList.remove('open');
+        if (el.parentNode) el.parentNode.removeChild(el);
+      },
       cancel: function () { var f = o.onCancel; h.close(); if (f) f(); }
     };
     function values() {
@@ -4553,7 +4560,7 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
     h.el = el; cur = h;
     return h;
   }
-  var NEWTXT = 'At least ' + MINLEN + ' characters. You\u2019ll enter it each time the app starts.';
+  var NEWTXT = 'At least ' + MINLEN + ' characters. You\u2019ll enter it when the app starts and when you return after being away.';
   var TXT = {
     old: ['Enter your PIN or password', 'Confirm it\u2019s you first.', 'Continue'],
     off: ['Turn off app lock', 'Enter your PIN or password to turn it off.', 'Turn off'],
@@ -4645,7 +4652,26 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
     h.set('Bluebook is locked', 'Enter your PIN or password to continue.', 'Unlock');
     h.countdown(FP);
   }
+  // Coming back from the background: the lock goes up the moment the app is backgrounded (so the app is never shown
+  // unlocked on return and the recents preview isn't the notes), and a return within GRACE just takes it down again with no fade.
+  // Away longer than GRACE it stays and asks for the PIN or password. Skipped while a native flow (sign-in, purchase) is in
+  // flight, since those hand the screen to another Activity and must be able to come straight back.
+  var GRACE = 30000, bgAt = 0, shielded = false;
+  function busy() { try { return typeof _nbBusyBtnCount !== 'undefined' && _nbBusyBtnCount > 0; } catch (e) { return false; } }
+  function onBackground() {
+    if (!cfg() || (cur && cur.full) || busy()) return;
+    if (cur) cur.cancel(); // a Settings dialog (change PIN etc.) is left behind rather than kept open over the lock
+    bgAt = Date.now(); shielded = true;
+    boot();
+  }
+  function onResume() {
+    var away = bgAt ? Date.now() - bgAt : 0, was = shielded;
+    bgAt = 0; shielded = false;
+    if (was && away < GRACE && cur && cur.full) cur.drop();
+  }
   window.nbLock = {
+    onBackground: onBackground,
+    onResume: onResume,
     enabled: function () { return !!cfg(); },
     enable: function (done) { run('enable', done); },
     change: function (done) { run('change', done); },
@@ -6264,7 +6290,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists and theme choice, are also backed up to our servers (see below).</p>
       <h3>App lock</h3>
-      <p>App lock is optional. If you turn it on, Bluebook asks for a PIN or password whenever you open the app fresh or refresh the page, so other people can't peek at your notes.</p>
+      <p>App lock is optional. If you turn it on, Bluebook asks for a PIN or password whenever you open the app fresh or refresh the page, and again when you come back after being away for more than 30 seconds, so other people can't peek at your notes.</p>
       <p>Your PIN or password is never saved the way you typed it. The app turns it into a scrambled code (called a hash) and keeps only that code, on your device. When you type it later, the app scrambles what you typed and checks whether the two codes match. Nothing about your lock is sent to us or saved to your account, so we can't see it, reset it or recover it for you.</p>
       <p>When you set it up, you also pick a recovery question and write an answer. The question is kept as plain text on your device so the app can show it to you if you forget your PIN. The answer is scrambled the same way as your PIN. Pick something only you know, because anyone who gets the answer right can get in.</p>
       <p>If you type a wrong PIN or a wrong answer five times in a row, the app makes you wait before you can try again. The wait starts at 30 seconds and grows up to 15 minutes. It's there to slow down anyone who's guessing.</p>
@@ -13459,7 +13485,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
     ['Security', [
-      { t: 'sw', k: 'appLock', get: () => !!(window.nbLock && window.nbLock.enabled()), toggle: (done) => { const L = window.nbLock; if (!L) { done(false); return; } if (L.enabled()) L.disable(done); else L.enable(done); }, l: 'App lock', s: 'Ask for a PIN or password each time the app starts. It stays on this device. If you forget it, answering your recovery question gets you back in.' },
+      { t: 'sw', k: 'appLock', get: () => !!(window.nbLock && window.nbLock.enabled()), toggle: (done) => { const L = window.nbLock; if (!L) { done(false); return; } if (L.enabled()) L.disable(done); else L.enable(done); }, l: 'App lock', s: 'Ask for a PIN or password each time the app starts, and when you return after more than 30 seconds away. It stays on this device. If you forget it, answering your recovery question gets you back in.' },
       { t: 'link', l: 'Change PIN or password', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.change(() => { try { window._nbStRender(); } catch (e) {} }) },
       { t: 'link', l: 'Change recovery question', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.recovery(() => { try { window._nbStRender(); } catch (e) {} }) }]],
     ['Sync & backup', [
@@ -14192,6 +14218,7 @@ function _nbBindAppResumeListener() {
   try {
     AppPlugin.addListener('appStateChange', (state) => {
       if (state && state.isActive) {
+        try { if (window.nbLock) window.nbLock.onResume(); } catch (e) {}
         try { if (window._nbStApplyClasses) window._nbStApplyClasses(); } catch (e) {}
         _nbNudgeWebViewRepaint();
         _nbPingPresence();
@@ -14213,6 +14240,7 @@ function _nbBindAppResumeListener() {
         // there. Recorded on backgrounding rather than on some other
         // event because it's the one moment we know for certain the
         // in-memory JS state is about to become unreliable.
+        try { if (window.nbLock) window.nbLock.onBackground(); } catch (e) {}
         try { localStorage.setItem('nb_last_bg_ts_v1', String(Date.now())); } catch (e) {}
       }
     });
