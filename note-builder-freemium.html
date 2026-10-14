@@ -20521,6 +20521,7 @@ function _nbSettingsAdsMount() {
   g.id = 'st-ads-grp';
   g.innerHTML = '<div class="st-h">Ads &amp; invites</div><div class="st-card" id="st-ads-card"><div id="st-ads-bal"></div><div id="st-ads-standing"></div><div id="st-fund" class="st-sep"></div><div id="st-invite" class="st-sep"></div></div>';
   root.insertBefore(g, before);
+  _nbStFundTries = 0;
   _nbSettingsAdsPaint();
   if (Date.now() - _nbStAdsAt > 20000) _nbSettingsAdsFetch();
 }
@@ -20541,7 +20542,7 @@ async function _nbSettingsAdsFetch() {
 // Settings > Account rows: display name, subscribers, likes, following and when the account was made. The
 // numbers come from /account/subscriber-count and are cached per account, so the rows show the last known
 // values straight away (and offline); '\u2014' until the first load. A changed answer re-renders Settings.
-let _nbStAcctStats = null, _nbStAcctAt = 0, _nbStAcctSub = null, _nbStAcctSeq = 0;
+let _nbStAcctStats = null, _nbStAcctAt = 0, _nbStAcctSub = null, _nbStAcctSeq = 0, _nbStAcctTries = 0, _nbStAcctRetryT = null, _nbStAcctToasted = false;
 function _nbStAcctKey() { const a = nbAccount(); return a && a.sub ? 'nb_st_acct_stats_v1:' + a.sub : null; }
 function _nbStAcctGet() {
   const a = nbAccount(); const who = (a && a.sub) || null;
@@ -20558,8 +20559,9 @@ function _nbStAcctText(field) {
   if (field === 'createdAt') return new Date(v).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   return Number(v).toLocaleString();
 }
-async function _nbSettingsAcctFetch(force) {
+async function _nbSettingsAcctFetch(force, auto) {
   if (!nbIsSignedIn() || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+  if (!auto) _nbStAcctTries = 0; // a fresh load gets a fresh set of automatic retries
   _nbStAcctGet();
   if (!force && Date.now() - _nbStAcctAt < 20000) return;
   _nbStAcctAt = Date.now();
@@ -20577,8 +20579,19 @@ async function _nbSettingsAcctFetch(force) {
     _nbStAcctStats = next;
     const k = _nbStAcctKey();
     if (k) { try { localStorage.setItem(k, JSON.stringify(next)); } catch (e) {} }
+    _nbStAcctTries = 0; _nbStAcctToasted = false;
     if (changed && typeof window._nbStRefresh === 'function') window._nbStRefresh();
-  } catch (e) { _nbStAcctAt = 0; _nbLog('settings acct stats', e); } // 0 = last try failed, so the next render or reconnect retries
+  } catch (e) {
+    _nbStAcctAt = 0; _nbLog('settings acct stats', e); // 0 = last try failed, so the next render or reconnect retries
+    if (_nbStAcctTries < 3) { // and so does a timer: 5s, 10s, 15s while Settings is still showing
+      _nbStAcctTries++;
+      clearTimeout(_nbStAcctRetryT);
+      _nbStAcctRetryT = setTimeout(() => { const sc = document.getElementById('screen-settings'); if (sc && sc.classList.contains('active') && nbIsSignedIn()) _nbSettingsAcctFetch(true, true); }, 5000 * _nbStAcctTries);
+    } else if (!_nbStAcctToasted) {
+      _nbStAcctToasted = true; // once per failure streak, until a load works
+      showToast('Couldn\u2019t load your account details' + _nbFailureReason(e));
+    }
+  }
 }
 // Settings > Display name: open the Account sheet with the name field already unlocked.
 function nbSettingsEditDisplayName() {
@@ -20904,7 +20917,7 @@ async function _pubRefreshAdTab() {
         : 'This ad was unpublished and can\u2019t be resumed on this address. Publish a copy under a different address to run it again.';
   }
   if (_pubAdRefreshCallToken !== _pubAdRefreshToken) return;
-  if (_pubAdPkgsFailed) _pubAdLoadingShow('Couldn\u2019t load package prices.', { error: true });
+  if (_pubAdPkgsFailed) _pubAdLoadingShow(_PUB_PRICE_ERR, { error: true });
   else _pubAdLoadingHide();
 }
 
@@ -20927,29 +20940,32 @@ window.addEventListener('online', () => {
 // wipes the other's freshly-appended buttons (packages missing) or
 // appends its own on top without re-clearing (duplicated buttons, often
 // priceless if that straggler's own getOfferings() came back empty).
-let _pubAdPkgsToken = 0;
-async function _pubRenderAdPackages(eligible) {
+let _pubAdPkgsToken = 0, _pubAdPkgsTries = 0, _pubAdPkgsRetryT = null;
+const _PUB_PRICE_ERR = 'Couldn\u2019t load package prices.';
+async function _pubRenderAdPackages(eligible, auto) {
   const myToken = ++_pubAdPkgsToken;
+  clearTimeout(_pubAdPkgsRetryT);
+  if (!auto) _pubAdPkgsTries = 0; // a fresh load (tab opened, Retry tapped) gets a fresh set of automatic retries
   const wrap = document.getElementById('pub-ad-pkgs');
-  wrap.innerHTML = '';
+  if (!auto) wrap.innerHTML = ''; // an automatic retry leaves the current buttons up until the new answer arrives
   const Purchases = _nbRcPlugin();
-  let packages = null;
-  _pubAdPkgsFailed = false;
+  let packages = null, failed = false, failErr = null;
   if (Purchases) {
     try {
       const offerings = await _pubAdGetOfferings();
       const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
       packages = offering && offering.availablePackages;
-    } catch (e) { _pubAdPkgsFailed = true; _nbLog('ad offerings', e); showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
+    } catch (e) { failed = true; failErr = e; _nbLog('ad offerings', e); if (!auto) showToast('Couldn\u2019t load view packages' + _nbFailureReason(e)); }
   }
   if (myToken !== _pubAdPkgsToken) return; // a newer call has since started; let it own the DOM
+  _pubAdPkgsFailed = failed;
   wrap.innerHTML = '';
   AD_PACKAGE_IDENTIFIERS.forEach(def => {
     const pkg = packages && packages.find(p => p.identifier === def.id);
     const price = pkg && pkg.product && pkg.product.priceString;
     const btn = document.createElement('button');
     btn.className = 'pub-pkg-btn';
-    btn.innerHTML = def.views.toLocaleString() + ' views<br><span class="pub-pkg-price">' + (price || (Purchases ? (_pubAdPkgsFailed ? '\u2014' : '\u2026') : 'app only')) + '</span>';
+    btn.innerHTML = def.views.toLocaleString() + ' views<br><span class="pub-pkg-price">' + (price || (Purchases ? (failed ? '\u2014' : 'Unavailable') : 'app only')) + '</span>';
     const lock = _pubAdPkgLock(def);
     if (lock) {
       const l = document.createElement('span');
@@ -20963,6 +20979,20 @@ async function _pubRenderAdPackages(eligible) {
     btn.onclick = () => nbAdSelectPackage(def, pkg, btn);
     wrap.appendChild(btn);
   });
+  if (!failed) { _pubAdPkgsTries = 0; return; }
+  // Prices couldn't load: try again on its own a few times (5s, 10s, 15s) while the Ad tab is open, and clear the error line once it works.
+  if (_pubAdPkgsTries < 3) {
+    _pubAdPkgsTries++;
+    _pubAdPkgsRetryT = setTimeout(async () => {
+      const ov = document.getElementById('publish-overlay'), tab = document.getElementById('pub-ad-tab');
+      if (!ov || !ov.classList.contains('open') || !tab || tab.style.display === 'none' || !nbIsSignedIn()) return;
+      await _pubRenderAdPackages(eligible, true);
+      const msg = document.getElementById('pub-ad-loading-txt');
+      if (!_pubAdPkgsFailed && msg && msg.textContent === _PUB_PRICE_ERR) _pubAdLoadingHide();
+    }, 5000 * _pubAdPkgsTries);
+  } else if (auto) {
+    showToast('Still couldn\u2019t load view packages' + _nbFailureReason(failErr)); // the retries ran out: say so once (the error line and Retry button stay on the tab)
+  }
 }
 function nbAdSelectPackage(def, pkg, btn) {
   _pubAdSelectedViews = { def, pkg };
@@ -21053,43 +21083,59 @@ async function _nbBuyViews(Purchases, pkg, views, knownBalance, setStatus) {
 let _nbStFunding = false, _nbStFundSeq = 0, _nbStFundFailed = false;
 let _nbFundStatusText = '';
 function _nbFundStatus(t) { _nbFundStatusText = t || ''; const e = document.getElementById('st-fund-status'); if (e) e.textContent = _nbFundStatusText; }
+let _nbStFundTries = 0, _nbStFundRetryT = null, _nbStFundToasted = false;
 async function _nbSettingsFundRender() {
   const el = document.getElementById('st-fund');
   if (!el) return;
   const Purchases = _nbRcPlugin();
   if (!_nbStAds || !Purchases) { el.style.display = 'none'; return; } // buying needs the installed app and a known ad level
   const seq = ++_nbStFundSeq;
+  clearTimeout(_nbStFundRetryT);
   el.style.display = '';
-  let packages = null, failed = false;
+  // state: 'loading' (prices still being fetched: '…'), 'failed' ('—', retried automatically), 'ready' (price, or 'Unavailable' if the store has no such package)
+  const paint = (packages, state) => {
+    el.innerHTML = '';
+    const t = document.createElement('div'); t.className = 'ad-prog-t'; t.textContent = 'Add views to your balance'; el.appendChild(t);
+    const sub = document.createElement('div'); sub.className = 'ad-prog-s';
+    sub.textContent = 'Buy views now and put them on any of your ads later, in any amount. They aren\u2019t tied to a note until you use them.';
+    el.appendChild(sub);
+    const grid = document.createElement('div'); grid.className = 'st-fund-grid'; el.appendChild(grid);
+    AD_PACKAGE_IDENTIFIERS.forEach(def => {
+      const pkg = packages && packages.find(p => p.identifier === def.id);
+      const price = pkg && pkg.product && pkg.product.priceString;
+      const lock = _pubAdPkgLock(def);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'st-fund-btn';
+      b.appendChild(document.createTextNode(def.views.toLocaleString() + ' views'));
+      const sm = document.createElement('small');
+      sm.textContent = lock || price || (state === 'loading' ? '\u2026' : state === 'failed' ? '\u2014' : 'Unavailable');
+      b.appendChild(sm);
+      b.disabled = _nbStFunding || !pkg || !!lock;
+      b.onclick = () => nbSettingsFund(def, pkg);
+      grid.appendChild(b);
+    });
+    const st = document.createElement('div'); st.className = 'ad-prog-s'; st.id = 'st-fund-status'; st.style.marginTop = '.5rem'; st.textContent = _nbStFunding ? _nbFundStatusText : ''; el.appendChild(st);
+  };
+  if (!el.firstChild) paint(null, 'loading'); // first draw: show that prices are loading instead of an empty block (later redraws keep what's there until the answer arrives)
+  let packages = null, failed = false, failErr = null;
   try {
     const offerings = await _pubAdGetOfferings();
     const offering = offerings && offerings.all && offerings.all[AD_OFFERING_ID];
     packages = offering && offering.availablePackages;
-  } catch (e) { failed = true; _nbLog('settings offerings', e); }
+  } catch (e) { failed = true; failErr = e; _nbLog('settings offerings', e); }
   if (seq !== _nbStFundSeq || !document.getElementById('st-fund')) return; // a newer render owns the DOM
   _nbStFundFailed = failed;
-  el.innerHTML = '';
-  const t = document.createElement('div'); t.className = 'ad-prog-t'; t.textContent = 'Add views to your balance'; el.appendChild(t);
-  const sub = document.createElement('div'); sub.className = 'ad-prog-s';
-  sub.textContent = 'Buy views now and put them on any of your ads later, in any amount. They aren\u2019t tied to a note until you use them.';
-  el.appendChild(sub);
-  const grid = document.createElement('div'); grid.className = 'st-fund-grid'; el.appendChild(grid);
-  AD_PACKAGE_IDENTIFIERS.forEach(def => {
-    const pkg = packages && packages.find(p => p.identifier === def.id);
-    const price = pkg && pkg.product && pkg.product.priceString;
-    const lock = _pubAdPkgLock(def);
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'st-fund-btn';
-    b.appendChild(document.createTextNode(def.views.toLocaleString() + ' views'));
-    const sm = document.createElement('small');
-    sm.textContent = lock || price || (failed ? '\u2014' : '\u2026');
-    b.appendChild(sm);
-    b.disabled = _nbStFunding || !pkg || !!lock;
-    b.onclick = () => nbSettingsFund(def, pkg);
-    grid.appendChild(b);
-  });
-  const st = document.createElement('div'); st.className = 'ad-prog-s'; st.id = 'st-fund-status'; st.style.marginTop = '.5rem'; st.textContent = _nbStFunding ? _nbFundStatusText : ''; el.appendChild(st);
+  paint(packages, failed ? 'failed' : 'ready');
+  if (!failed) { _nbStFundTries = 0; _nbStFundToasted = false; return; }
+  // Prices couldn't load: try again on its own a few times (5s, 10s, 15s) while Settings is still showing; reopening Settings starts over.
+  if (_nbStFundTries < 3) {
+    _nbStFundTries++;
+    _nbStFundRetryT = setTimeout(() => { if (document.getElementById('st-fund') && nbIsSignedIn()) _nbSettingsFundRender(); }, 5000 * _nbStFundTries);
+  } else if (!_nbStFundToasted) {
+    _nbStFundToasted = true; // once per failure streak, until a load works
+    showToast('Couldn\u2019t load package prices' + _nbFailureReason(failErr));
+  }
 }
 async function nbSettingsFund(def, pkg) {
   if (_nbStFunding) return;
