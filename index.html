@@ -15443,9 +15443,9 @@ async function _nbOfferRestorePage(p) {
   if (_nbRelinkDeclined.has(p.slug) || _nbRelinkNever.has(p.slug)) return;
   const busy = document.getElementById('delete-overlay').classList.contains('open')
     || document.getElementById('screen-create').classList.contains('active');
-  if (busy) { _nbRelinkAt = 0; return; }
+  if (busy) { _nbRelinkAt = 0; return 'busy'; } // the caller stops the run, like the Reconnect dialogs do
   const ok = await _nbAskConfirm('Restore published page?',
-    'Your page at /@' + p.slug + ' is online but no note here is linked to it. Restore it as a note you can edit? Layout, images and details come back from the live page.',
+    (p.title ? '\u201c' + p.title + '\u201d is your page at /@' + p.slug + ', which is online' : 'Your page at /@' + p.slug + ' is online') + ' but not linked to any note here. Restore it as a note you can edit? Layout, images and details come back from the live page. If you choose Not now, we\u2019ll ask again next time you open the app.',
     'Restore', 'Not now', 'Stop asking', true);
   if (ok === 'never') { _nbRelinkNeverAdd(p.slug); return; }
   if (!ok) { _nbRelinkDeclined.add(p.slug); return; }
@@ -15526,7 +15526,7 @@ async function _nbRelinkOrphanPages() {
         const t = String(p.title || '').trim().toLowerCase();
         hit = t ? free.filter(n => String(n.title || '').trim().toLowerCase() === t) : [];
       }
-      if (!hit.length) { await _nbOfferRestorePage(p); continue; }
+      if (!hit.length) { if (await _nbOfferRestorePage(p) === 'busy') return; continue; }
       if (_nbRelinkDeclined.has(p.slug) || _nbRelinkNever.has(p.slug)) continue;
       // Never interrupt typing or another dialog: try again on the next sync instead.
       const busy = document.getElementById('delete-overlay').classList.contains('open')
