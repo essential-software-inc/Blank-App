@@ -6285,7 +6285,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 12 October 2026</em></p>
+      <p><em>Effective 14 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists and theme choice, are also backed up to our servers (see below).</p>
@@ -6302,7 +6302,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>In-app purchases</h3>
       <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing. RevenueCat, a third-party subscription service, handles them for us. RevenueCat gets the purchase details it needs to confirm what you bought, linked to an ID. Before you sign in, that's an anonymous ID RevenueCat makes for your install. Once you sign in, it's your Google account ID, which is what lets a purchase follow you to another device. After that, the two work differently. The app checks directly with RevenueCat (not through our servers) to see whether Pro is active. It keeps a saved copy of that answer on your device, and refreshes it from RevenueCat when the app launches and after a purchase or restore. Ad view-credits do go through our servers. They hear from RevenueCat (not from Google directly) that you bought views, and add the views to your account. We keep a list of your view credits: each purchase (for a particular ad, or added to your balance from Settings), each time views are put on an ad (with that ad's address), each refund or return, and each gift of free views for an invite, all with the time. Views returned to you stay in your balance, and you can put them on an ad without buying again. That doesn't involve Google Play or RevenueCat. If Google Play refunds a purchase, we take those views back. That list is deleted with your account. We never get your payment details, because Google handles those directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
-      <p>Publishing is always your choice, and it only happens when you tap Publish. We receive your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose, and we store them so the page can be shown at a public link. Anyone with that link can view the page. You can publish without signing in, and then the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on. It then shows up among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for each page. It's stored on your device, and we don't keep it in its original form. We only keep a scrambled version, just enough to check that it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes the page down, and if it was running as an ad, the ad stops too. We may keep a copy for about 30 days afterward (our clean-up runs nightly), in case of an abuse report or takedown request, and then delete it. If the page was reported as child sexual abuse material, we keep the copy for 18 months instead (see "Reporting a published page"). The page's own record is kept for the same time and then deleted. It holds the address, a scrambled form of the private token, the title, description and tags, and, if the page was linked to an account, that account's internal ID. That's why it stays even after the account itself is deleted. If we remove a page because of a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as the address stays reserved: the address, a scrambled form of the private token, the title, description and tags, and, if the page was linked to an account, that account's internal ID. This record stays even after the copy or the account is deleted, because deleting it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. That count sits in a short-lived counter that disappears on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, to stop spam, we also count how often you like, subscribe, mark stories as seen, add an invite code or back up. That count is linked to your account and disappears within a couple of minutes.</p>
+      <p>Publishing is always your choice, and it only happens when you tap Publish. We receive your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose, and we store them so the page can be shown at a public link. Anyone with that link can view the page. If you've given the note a category, we save that too. It's just your own private label, so it doesn't show on the page or on any card. We only send it back to you when you're signed in, so if you ever restore a page as a note, it goes back into the right category. You can publish without signing in, and then the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on. It then shows up among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for each page. It's stored on your device, and we don't keep it in its original form. We only keep a scrambled version, just enough to check that it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes the page down, and if it was running as an ad, the ad stops too. We may keep a copy for about 30 days afterward (our clean-up runs nightly), in case of an abuse report or takedown request, and then delete it. If the page was reported as child sexual abuse material, we keep the copy for 18 months instead (see "Reporting a published page"). The page's own record is kept for the same time and then deleted. It holds the address, a scrambled form of the private token, the title, description, tags and category, and, if the page was linked to an account, that account's internal ID. That's why it stays even after the account itself is deleted. If we remove a page because of a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as the address stays reserved: the address, a scrambled form of the private token, the title, description, tags and category, and, if the page was linked to an account, that account's internal ID. This record stays even after the copy or the account is deleted, because deleting it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. That count sits in a short-lived counter that disappears on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, to stop spam, we also count how often you like, subscribe, mark stories as seen, add an invite code or back up. That count is linked to your account and disappears within a couple of minutes.</p>
       <h3>Publishing as an ad</h3>
       <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a starting template when they start a new note in Write (or in Share, for a Share note). It isn't just for people who have the page's link, like a regular published page. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it disappears from Write and Share right away, and any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable).</p>
       <h3>Ad access &amp; invites</h3>
@@ -15381,6 +15381,126 @@ const NB_RELINK_NEVER_KEY = 'nb_relink_never'; // page slugs (this device only) 
 const _nbRelinkNever = (function () { try { return new Set(JSON.parse(localStorage.getItem(NB_RELINK_NEVER_KEY) || '[]')); } catch (e) { return new Set(); } })();
 function _nbRelinkNeverAdd(slug) { _nbRelinkNever.add(slug); try { localStorage.setItem(NB_RELINK_NEVER_KEY, JSON.stringify([..._nbRelinkNever])); } catch (e) {} }
 const _nbRelinkDeclined = new Set(); // slugs the person said no to this session; asked again next launch
+// Edit access to a live page is a per-page owner token. A note that arrives from the backup without a working one (another
+// device relinked the page and replaced the token, or the note was backed up before it had one) used to be stuck: Save,
+// stories and Unpublish all just failed. The signed-in account proves ownership, so ask the worker for a fresh token and
+// store it on the note(s) pointing at that page. Returns the token, or null when this account doesn't own the page.
+async function _nbRefreshPageToken(slug) {
+  if (!slug || !nbIsSignedIn()) return null;
+  try {
+    const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(slug) + '/relink', {
+      method: 'POST', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (!d || !d.token) return null;
+    const arr = nbLoadNotes(); let ch = false;
+    arr.forEach(n => {
+      if (n && n.publishedSlug === slug) {
+        n.publishToken = d.token;
+        if (typeof d.showInStories === 'boolean') n.showInStories = d.showInStories;
+        n.updatedAt = Date.now(); ch = true;
+      }
+    });
+    if (ch) { nbSaveNotesArr(arr); nbSyncPullThenPush(); } // the new token goes into the backup too
+    return d.token;
+  } catch (e) { _nbLog('refresh page token', e); return null; }
+}
+// Runs an owner request (send(token) -> Response). If the worker rejects the token, gets a fresh one for this
+// signed-in account and sends it once more. Any other answer is returned untouched.
+async function _nbFetchOwned(note, send) {
+  const res = await send(note.publishToken);
+  if ((res.status !== 403 && res.status !== 401) || !nbIsSignedIn()) return res;
+  let msg = ''; try { msg = await res.clone().text(); } catch (e) {}
+  if (!/invalid token|missing token/i.test(msg)) return res;
+  const t = await _nbRefreshPageToken(note.publishedSlug);
+  if (!t) return res;
+  note.publishToken = t;
+  return send(t);
+}
+// The Published feed already carries each page's card details (description, tags, note date). Pages through it for one slug;
+// null when it can't be found or the request fails (the restore then just goes ahead without them).
+async function _nbPublishedCardFor(slug) {
+  try {
+    let cursor = null;
+    for (let i = 0; i < 30; i++) {
+      const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/published-notes' + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''), {
+        headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+      });
+      if (!res.ok) return null;
+      const d = await res.json();
+      const hit = ((d && d.stories) || []).find(x => x && x.slug === slug);
+      if (hit) return hit;
+      cursor = d && d.nextCursor;
+      if (!cursor) return null;
+    }
+  } catch (e) { _nbLog('published card lookup', e); }
+  return null;
+}
+// A live page of this account with no note on this device that could be it (e.g. a new browser, or the note was never in a
+// backup): offer to rebuild an editable note from the live page and link it, so it shows in All with edit access.
+async function _nbOfferRestorePage(p) {
+  if (_nbRelinkDeclined.has(p.slug) || _nbRelinkNever.has(p.slug)) return;
+  const busy = document.getElementById('delete-overlay').classList.contains('open')
+    || document.getElementById('screen-create').classList.contains('active');
+  if (busy) { _nbRelinkAt = 0; return; }
+  const ok = await _nbAskConfirm('Restore published page?',
+    'Your page at /@' + p.slug + ' is online but no note here is linked to it. Restore it as a note you can edit? Layout, images and details come back from the live page.',
+    'Restore', 'Not now', 'Stop asking', true);
+  if (ok === 'never') { _nbRelinkNeverAdd(p.slug); return; }
+  if (!ok) { _nbRelinkDeclined.add(p.slug); return; }
+  try {
+    const pr = await fetch(_pubUrlFor(p.slug), { referrerPolicy: 'no-referrer' });
+    if (!pr.ok) throw new Error('page ' + pr.status);
+    const html = await pr.text();
+    // A published page is a static export: the blocks sit in <div class="cv-canvas"> (no #cv-canvas id, no editor controls).
+    // The editor re-wires every .blk it loads, so the inner markup is what a note stores. Background lives on the page element.
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const cv = doc.querySelector('#cv-canvas') || doc.querySelector('.cv-canvas');
+    const frag = cv ? cv.innerHTML : '';
+    if (!frag.trim() || !cv.querySelector('.blk')) { _nbRelinkDeclined.add(p.slug); showToast('That page can\u2019t be restored as a note.'); return; }
+    let pageBg, pageBgCustom;
+    const pg = doc.querySelector('.cv-page');
+    if (pg && pg.dataset.pageBg) {
+      pageBg = pg.dataset.pageBg;
+      if (pageBg === 'custom') pageBgCustom = pg.style.getPropertyValue('--blk-custom-bg') || undefined;
+    }
+    const desktopView = !!(pg && pg.classList.contains('cv-force-desktop')); // the published <body> carries it (see nbBuildStaticNoteHtml)
+    const r = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(p.slug) + '/relink', {
+      method: 'POST', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+    });
+    if (!r.ok) throw new Error('relink ' + r.status);
+    const d = await r.json();
+    if (!d || !d.token) throw new Error('no token');
+    const arr = nbLoadNotes();
+    if (arr.some(n => n && n.publishedSlug === p.slug)) return; // linked meanwhile (another sync)
+    const card = await _nbPublishedCardFor(p.slug);
+    if (nbLoadNotes().some(n => n && n.publishedSlug === p.slug)) return;
+    const acct = nbAccount();
+    const note = {
+      id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      title: (card && card.title) || p.title || d.title || 'Untitled note',
+      desc: (card && typeof card.desc === 'string') ? card.desc : '', category: (card && typeof card.category === 'string') ? card.category.trim().slice(0, 60) : '',
+      tags: (card && Array.isArray(card.tags)) ? card.tags.filter(x => typeof x === 'string') : [],
+      content: frag, pageBg, pageBgCustom, desktopView,
+      createdAt: ((card && card.noteCreatedAt) || p.noteCreatedAt || d.createdAt || p.createdAt || Date.now()),
+      updatedAt: Date.now(),
+      publishedSlug: p.slug, publishToken: d.token,
+      publishedAt: d.createdAt || p.createdAt || Date.now(), lastPublishedAt: d.updatedAt || p.updatedAt || Date.now(),
+      publishedContentHash: null, showInStories: !!d.showInStories
+    };
+    if (acct) note.acct = acct.sub;
+    arr.unshift(note);
+    if (!nbSaveNotesArr(arr)) return;
+    buildCatBar();
+    nbRenderNotesScreen();
+    showToast('Page restored as a note');
+    nbSyncPullThenPush();
+  } catch (e) {
+    _nbLog('restore page', e);
+    showToast('Couldn\u2019t restore that page' + (_nbFailureReason(e) || '. Try again.'));
+  }
+}
 async function _nbRelinkOrphanPages() {
   if (!nbIsSignedIn() || Date.now() - _nbRelinkAt < 2 * 60 * 1000) return;
   _nbRelinkAt = Date.now();
@@ -15392,6 +15512,10 @@ async function _nbRelinkOrphanPages() {
     // A note is offered to at most one page per run. Title matches are always confirmed by the
     // person, so pages that share a title are still offered.
     const claimed = new Set();
+    // Linked notes that came back without a usable edit token get one first.
+    for (const p of pages) {
+      if (p && p.slug && nbVisibleNotes().some(n => n.publishedSlug === p.slug && !n.publishToken)) await _nbRefreshPageToken(p.slug);
+    }
     for (const p of pages) {
       if (!p || !p.slug) continue;
       const notes = nbVisibleNotes();
@@ -15402,7 +15526,7 @@ async function _nbRelinkOrphanPages() {
         const t = String(p.title || '').trim().toLowerCase();
         hit = t ? free.filter(n => String(n.title || '').trim().toLowerCase() === t) : [];
       }
-      if (!hit.length) continue;
+      if (!hit.length) { await _nbOfferRestorePage(p); continue; }
       if (_nbRelinkDeclined.has(p.slug) || _nbRelinkNever.has(p.slug)) continue;
       // Never interrupt typing or another dialog: try again on the next sync instead.
       const busy = document.getElementById('delete-overlay').classList.contains('open')
@@ -17412,7 +17536,7 @@ async function nbPublishNote() {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish', {
       method: 'POST',
       headers: pubHeaders,
-      body: JSON.stringify({ slug, html, title: note.title || '', desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null })
+      body: JSON.stringify({ slug, html, title: note.title || '', desc: note.desc || '', category: note.category || '', tags: note.tags || [], createdAt: note.createdAt || null })
     });
     if (res.status === 429) {
       showToast('You\u2019re publishing too fast. Wait a moment and try again.');
@@ -17581,7 +17705,7 @@ async function nbUpdatePublishedNote() {
   try {
     const updHeaders = { 'Content-Type': 'application/json' };
     if (nbIsSignedIn()) updHeaders['Authorization'] = 'Bearer ' + nbSessionToken();
-    const updBody = { html, token: note.publishToken, desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null };
+    const updBody = { html, token: note.publishToken, desc: note.desc || '', category: note.category || '', tags: note.tags || [], createdAt: note.createdAt || null };
     // Same shape _pubOnStoriesToggle already sends when flipping the
     // switch — title plus showInStories, so the worker has what it needs
     // to re-surface the story. resurfaceStories is the flag that tells it
@@ -17592,11 +17716,11 @@ async function nbUpdatePublishedNote() {
       updBody.showInStories = true;
       updBody.resurfaceStories = true;
     }
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
+    const res = await _nbFetchOwned(note, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
       method: 'PUT',
       headers: updHeaders,
-      body: JSON.stringify(updBody)
-    });
+      body: JSON.stringify(Object.assign({}, updBody, { token: tok }))
+    }));
     if (res.status === 429) {
       showToast('You\u2019re saving too fast. Wait a moment and try again.');
       return;
@@ -17683,25 +17807,51 @@ async function _pubSendStoriesToggle(noteId, checked) {
 // rebuild, no upload) and returns the story row. A worker without that route answers 400 "invalid slug"
 // (it reads "<slug>/stories" as a slug), 404 or 405, in which case this falls back to the original
 // PUT /publish/:slug that re-sends the whole page, so the app and worker can be deployed in any order.
-async function _pubPutStoriesFlag(note, checked) {
+async function _pubPutStoriesFlag(note, checked, detailsOnly) {
   const base = NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug);
   const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() };
-  const card = { title: note.title || '', desc: note.desc || '', tags: note.tags || [], createdAt: note.createdAt || null };
-  const res = await fetch(base + '/stories', {
+  const card = { title: note.title || '', desc: note.desc || '', category: note.category || '', tags: note.tags || [], createdAt: note.createdAt || null };
+  const res = await _nbFetchOwned(note, tok => fetch(base + '/stories', {
     method: 'PUT', headers,
-    body: JSON.stringify({ token: note.publishToken, showInStories: checked, ...card })
-  });
-  if (res.ok) { try { const d = await res.json(); return (d && d.story) || null; } catch (e) { return null; } }
+    body: JSON.stringify(detailsOnly ? { token: tok, detailsOnly: true, ...card } : { token: tok, showInStories: checked, ...card })
+  }));
+  if (res.ok) {
+    try { const d = await res.json(); if (detailsOnly) return { serverShowInStories: !!(d && d.showInStories) }; return (d && d.story) || null; } catch (e) { return null; }
+  }
   let msg = ''; try { msg = await res.text(); } catch (e) {}
   const oldWorker = res.status === 404 && !/not found|page content missing/i.test(msg) || res.status === 405 || (res.status === 400 && /invalid slug/i.test(msg));
   if (!oldWorker) throw new Error('stories toggle failed: ' + res.status);
+  if (detailsOnly) return null; // old worker: its fallback re-sends the page with the stories flag, which could restart an ended story; skip
   const html = nbBuildStaticNoteHtml(note, note.publishedSlug);
-  const res2 = await fetch(base, {
+  const res2 = await _nbFetchOwned(note, tok => fetch(base, {
     method: 'PUT', headers,
-    body: JSON.stringify({ html, token: note.publishToken, ...card, showInStories: checked })
-  });
+    body: JSON.stringify({ html, token: tok, ...card, showInStories: checked })
+  }));
   if (!res2.ok) throw new Error('stories toggle failed: ' + res2.status);
   return null;
+}
+// Quick-edit of a published note's details (Notes list): the worker keeps its own copy of title, description, tags and
+// category, which otherwise only updates on the next publish/save/stories toggle. Never starts or stops a story
+// (PUT /publish/:slug/stories with detailsOnly, no page: the worker keeps its own stories state); queued behind any stories toggle so they can't land out of order.
+// Silent when offline or signed out; the local edit is already saved either way.
+function _nbPushPublishedDetails(note) {
+  if (!note || !note.publishedSlug || !note.publishToken || !nbIsSignedIn()) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  const id = note.id;
+  _pubStoriesChain = _pubStoriesChain
+    .then(async () => {
+      const n = _pubFindNote(id);
+      if (!n || !n.publishedSlug) return;
+      const r = await _pubPutStoriesFlag(n, !!n.showInStories, true);
+      // The worker's cycle had ended: bring this device's switch in line (nothing was restarted).
+      if (r && r.serverShowInStories === false && n.showInStories) {
+        _pubSaveNoteFields(id, { showInStories: false });
+        const sw = document.getElementById('pub-stories-switch');
+        if (sw && _pubNoteId === id) sw.checked = false;
+        nbRenderStoriesStrip().catch(e => _nbLog('details push: strip refresh', e));
+      }
+    })
+    .catch(e => { _nbLog('published details push', e); showToast('Saved here, but the online page details didn\u2019t update'); });
 }
 /* ===================== Stories strip + inline viewer ===================== */
 // Cache of the last-fetched strip so nbCloseStory can re-render the ring
@@ -20187,11 +20337,11 @@ function _nbRefreshProfileAvatar() {
 // the remote side already considers it gone); doesn't touch any dialog
 // or overlay state, that's each caller's own concern.
 async function _pubUnpublish(note) {
-  const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
+  const res = await _nbFetchOwned(note, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: note.publishToken })
-  });
+    body: JSON.stringify({ token: tok })
+  }));
   if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
   // Drop it from the story strip now, while the slug is still on the note; the strip otherwise only catches up on the next fetch.
   try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('unpublish: strip', e); }
@@ -21235,11 +21385,11 @@ async function nbAdPublish() {
       }
     }
     statusEl.textContent = 'Publishing\u2026';
-    const res = await fetch(api + '/ads/publish', {
+    const res = await _nbFetchOwned(note, tok => fetch(api + '/ads/publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
-      body: JSON.stringify({ slug: note.publishedSlug, token: note.publishToken, views: views, useBalance: fromBalance })
-    });
+      body: JSON.stringify({ slug: note.publishedSlug, token: tok, views: views, useBalance: fromBalance })
+    }));
     if (!res.ok) {
       const msg = await res.text().catch(() => '');
       if (res.status === 422) showToast(AD_NOT_ELIGIBLE_TOAST);
@@ -21274,11 +21424,11 @@ async function nbAdSaveChanges() {
   const btn = document.getElementById('pub-ad-save-btn');
   _pubSetBtnLoading(btn, true, 'Saving\u2026');
   try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(note.publishedSlug), {
+    const res = await _nbFetchOwned(note, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(note.publishedSlug), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html, token: note.publishToken })
-    });
+      body: JSON.stringify({ html, token: tok })
+    }));
     if (!res.ok) {
       if (res.status === 422) showToast(AD_NOT_ELIGIBLE_TOAST);
       else if (res.status === 404) showToast('This ad is no longer registered');
@@ -24251,6 +24401,7 @@ function nbConfirmSave() {
       // everywhere else, or the edit only exists locally until something
       // else happens to sync.
       nbSyncPullThenPush();
+      _nbPushPublishedDetails(notes[idx]); // published note: card details (incl. category) reach the worker too
       nbCloseSaveDialog();
       showToast('Note updated');
     } else {
@@ -25649,6 +25800,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     var v = view(), box = $('md-list'), artIt = null;
     if (!box) return;
     MD.dsig = sigOf();
+    // Every list redraw also brings the category chips (and their counts) up to date. Several callers redraw only the list and then
+    // record the new signature, which made the other tabs' counts wait until that tab was tapped.
+    if (v.n === 'home') setChips(document.querySelector('#md-view .md-cats'), catsHtml());
     var h = '';
     if (v.n === 'home') {
       if (MD.tab === 'playlists') {
@@ -26019,7 +26173,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         pickResultTab();
         queueVisibleMeta(); renderView();
         // Slow likes load: this pass ran on partial results, so pick the tab again once the load really ends.
-        if (lk && late === true && LK.busy && !LK.onDone) LK.onDone = function () { try { scan(); } catch (e) {} if (MD.open && MD.src === 'likes' && pickResultTab()) renderView(); };
+        if (lk && late === true && LK.busy && !LK.onDone) LK.onDone = function () { try { scan(); } catch (e) {} if (MD.open && MD.src === 'likes') { if (pickResultTab()) renderView(); else redrawQuiet(); } };
         if (lk && (!LK.at || (late === true && LK.busy))) return; // load failed (it already toasted) or is still running (it redraws when done)
         if (MD.src !== src0) return; // source switched mid-scan: the result isn't about what's on screen
         toast(MD.items.size ? (sigOf() !== before ? 'Media updated' : 'Already up to date') : (MD.src === 'likes' ? 'No media found in your likes' : 'No media found in your notes'));
