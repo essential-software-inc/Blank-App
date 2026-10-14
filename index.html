@@ -6189,7 +6189,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
     <div class="rdlg-body">You're using the free version of the app. Upgrade to Pro for unlimited notes. Already purchased? <a id="paywall-restore-link" onclick="nbRestorePurchases()">Restore purchases</a>.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel rdlg-getpro" onclick="nbPurchasePro()">Get Pro</button>
-      <button class="rdlg-ok rdlg-ok--blue" onclick="closePaywallDialog()">OK</button>
+      <button class="rdlg-ok rdlg-ok--blue" onclick="_nbPaywallOk()">OK</button>
     </div>
   </div>
 </div>
@@ -9927,7 +9927,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
     function sync() {
       var loaded = !!img.getAttribute('src') && img.complete && img.naturalWidth > 0;
       wrap.classList.toggle('blk-img-empty', !loaded);
-      if (phText) phText.textContent = wrap.dataset.imgError ? 'Couldn\u2019t load that image. Tap to try again' : 'Image';
+      if (phText) phText.textContent = wrap.dataset.imgError ? 'Couldn\u2019t load that image. Tap to try again.' : 'Image';
       // "Default" (no data-img-style) is meant to be a plain, uncropped
       // photo — but the base .blk-img/.blk-img img rules give every image
       // a fixed max-height:340px + object-fit:cover box, which crops
@@ -13497,7 +13497,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       const cur = String(r.get ? r.get() : window._nbSt(r.k));
       return '<div class="st-row st-col"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span><div class="st-chips">' + r.o.map(o => '<button type="button" aria-pressed="' + (String(o[0]) === cur) + '" class="st-chip' + (String(o[0]) === cur ? ' on' : '') + '"' + d + ' data-v="' + o[0] + '">' + E(o[1]) + '</button>').join('') + '</div></div>';
     }
-    if (r.t === 'info') return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
+    if (r.t === 'info' || (r.noChev && r.noChev())) return '<div class="st-row" style="cursor:default"><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span></div>';
     return '<button type="button" class="st-row st-link' + (r.danger ? ' st-danger' : '') + (r.accent ? ' st-danger st-accent' : '') + '"' + d + '><span class="st-txt"><span class="st-l">' + E(r.l) + '</span>' + sub(r) + '</span>' + (r.danger || r.accent || (r.noChev && r.noChev()) ? '' : CHEV) + '</button>';
   }
   window._nbStRender = function () {
@@ -13880,6 +13880,14 @@ function nbAtFreeNoteLimit() {
 function openPaywallDialog() {
   document.getElementById('paywall-overlay').classList.add('open');
   lockScroll();
+}
+// OK ignores taps while Get Pro / Restore is running, like the other dialogs' Cancel; the purchase code itself
+// closes the dialog through closePaywallDialog() once it succeeds.
+function _nbPaywallOk() {
+  const gp = document.querySelector('#paywall-dialog .rdlg-getpro');
+  const link = document.getElementById('paywall-restore-link');
+  if ((gp && gp.disabled) || (link && link.style.pointerEvents === 'none')) return;
+  closePaywallDialog();
 }
 function closePaywallDialog() {
   document.getElementById('paywall-overlay').classList.remove('open');
@@ -15241,7 +15249,7 @@ async function nbSyncPull(showFeedback) {
       // merge happened to leave them; existing on-device notes that
       // didn't change keep their relative order since sort is stable.
       if (count || conflictCount || copyCount) existing.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      nbSaveNotesArr(existing);
+      if (!nbSaveNotesArr(existing)) throw Object.assign(new Error('notes save failed'), { storageFull: true }); // not merged: the etag stays put so the next sync retries
       buildCatBar();
       nbRenderNotesScreen();
       // Re-run the same state-setting logic the sheet opens with —
@@ -16056,8 +16064,10 @@ function nbLoadNotes() {
   } catch (e) { return []; }
 }
 function nbSaveNotesArr(arr) {
-  try { localStorage.setItem(NB_NOTES_KEY, JSON.stringify(arr)); } catch (e) { _nbLog('notes save', e); showToast('Couldn\u2019t save. Storage may be full.'); }
+  let ok = true;
+  try { localStorage.setItem(NB_NOTES_KEY, JSON.stringify(arr)); } catch (e) { ok = false; _nbLog('notes save', e); showToast('Couldn\u2019t save. Storage may be full.'); }
   try { if (window.nbMdNotesChanged) window.nbMdNotesChanged(); } catch (e) {}
+  return ok; // callers that report success afterwards (backup restore) check it
 }
 // Notes tagged with the account they've been synced to (see the `acct`
 // field set in nbSyncPush/nbSyncPull) shouldn't appear on the notes
@@ -16838,7 +16848,7 @@ function _pubSaveNoteFields(id, fields) {
   // Explicit publish/update/unpublish by the person — clear a reseeded demo note's provisional flag so the
   // pull-then-push below can't replace this state with the older server copy (see nbSyncPull).
   if (arr[idx].seedProvisional) arr[idx].seedProvisional = false;
-  nbSaveNotesArr(arr);
+  if (!nbSaveNotesArr(arr)) return false; // storage full: nothing was written, so no sync or refresh; callers check for false (null = note not found)
   // Every caller here is a publish/update/unpublish action from outside
   // the editor, none of which land on nbGoScreen's two sync triggers —
   // sync explicitly, pull-then-push, or (a) this published/unpublished
@@ -17139,6 +17149,9 @@ function _pubApplyBtnLoading(btn, loading, loadingLabel) {
     _nbBusyBtnCount = Math.max(0, _nbBusyBtnCount - 1);
   }
 }
+// True while _pubSetBtnLoading has the button in its busy state. Anything that (re)computes a button's
+// enabled state (reopened sheet, availability check, option pick) must keep a busy button disabled.
+function _pubBtnBusy(btn) { return !!(btn && btn.dataset && btn.dataset.origLabel !== undefined); }
 // Pre-flight connectivity check for publish/unpublish/save/delete actions.
 // navigator.onLine only detects a downed network interface (not an actually
 // reachable internet, e.g. a captive portal or a dead Wi-Fi router still
@@ -17196,14 +17209,14 @@ function nbOpenPublishSheet(id, keepTab) {
     try {
       const currentHtml = nbBuildStaticNoteHtml(note, note.publishedSlug);
       const unchanged = note.publishedContentHash === _hashStr(currentHtml);
-      saveBtn.disabled = unchanged;
+      saveBtn.disabled = unchanged || _pubBtnBusy(saveBtn);
       saveStatus.textContent = unchanged ? 'No changes to save' : '';
     } catch (e) {
       // Can't tell either way if the rebuild itself failed — default to
       // letting the person try Save Changes rather than silently blocking
       // it on a check that didn't run.
       _nbLog('publish save-state check', e);
-      saveBtn.disabled = false;
+      saveBtn.disabled = _pubBtnBusy(saveBtn);
       saveStatus.textContent = '';
     }
   } else {
@@ -17283,7 +17296,7 @@ function _pubOnSlugInput(raw) {
     return;
   }
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    statusEl.textContent = 'No internet connection. Can\u2019t check availability';
+    statusEl.textContent = 'No internet connection. Can\u2019t check availability.';
     statusEl.className = 'pub-status taken';
     _pubSlugOfflinePending = true;
     return;
@@ -17299,15 +17312,15 @@ function _pubOnSlugInput(raw) {
       if (data && data.yours && data.suggest) {
         // Your own page already lives here: keep it untouched and publish this note next to it.
         _pubSlugUse = data.suggest;
-        statusEl.textContent = 'You already have this address. This will publish as ' + data.suggest;
+        statusEl.textContent = 'You already have this address. This will publish as ' + data.suggest + '.';
         statusEl.className = 'pub-status ok';
         _pubSlugAvailable = true;
-        btn.disabled = false;
+        btn.disabled = _pubBtnBusy(btn);
       } else if (data && data.available) {
         statusEl.textContent = 'Available';
         statusEl.className = 'pub-status ok';
         _pubSlugAvailable = true;
-        btn.disabled = false;
+        btn.disabled = _pubBtnBusy(btn);
       } else {
         let alt = null;
         if (!(data && data.reason === 'disabled') && nbLoadNotes().some(n => n.id !== _pubNoteId && n.publishedSlug === slug)) {
@@ -17316,10 +17329,10 @@ function _pubOnSlugInput(raw) {
         }
         if (alt) {
           _pubSlugUse = alt;
-          statusEl.textContent = 'Another of your notes uses this address. This will publish as ' + alt;
+          statusEl.textContent = 'Another of your notes uses this address. This will publish as ' + alt + '.';
           statusEl.className = 'pub-status ok';
           _pubSlugAvailable = true;
-          btn.disabled = false;
+          btn.disabled = _pubBtnBusy(btn);
         } else {
           statusEl.textContent = (data && data.reason === 'disabled') ? 'This address isn\u2019t available' : 'Already taken';
           statusEl.className = 'pub-status taken';
@@ -17333,7 +17346,7 @@ function _pubOnSlugInput(raw) {
       // 'online' listener (see _pubSlugOfflinePending above) retries this
       // once connectivity returns instead of leaving the message stuck.
       if (typeof navigator !== 'undefined' && navigator.onLine === false) _pubSlugOfflinePending = true;
-      statusEl.textContent = 'Could not check availability. Try again';
+      statusEl.textContent = 'Could not check availability. Try again.';
       statusEl.className = 'pub-status taken';
     }
   }, 400);
@@ -17421,7 +17434,7 @@ async function nbPublishNote() {
     }
     if (!res.ok) throw new Error('publish failed: ' + res.status);
     const data = await res.json();
-    _pubSaveNoteFields(note.id, {
+    const savedLocally = _pubSaveNoteFields(note.id, {
       publishedSlug: slug,
       publishToken: data.token,
       publishedAt: Date.now(),
@@ -17429,6 +17442,19 @@ async function nbPublishNote() {
       publishedContentHash: _hashStr(html),
       showInStories: false // POST /publish never sends the flag, so the server starts it off — keep the local copy in step (also heals notes left stale by an old unpublish)
     });
+    if (savedLocally === false) {
+      // Live on the server, but this device couldn't store the page's token (storage full): without it the page could never
+      // be updated or unpublished from here, so take it back down instead of leaving it stranded.
+      try {
+        await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(slug), {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: data.token })
+        });
+      } catch (e) { _nbLog('publish rollback', e); }
+      showToast('Couldn\u2019t publish. Storage may be full.');
+      _pubSetBtnLoading(btn, false);
+      btn.disabled = !_pubSlugAvailable;
+      return;
+    }
     showToast('Note published');
     _pubSetBtnLoading(btn, false);
     if (_pubNoteId === note.id) closePublishSheet();
@@ -17559,17 +17585,17 @@ async function nbUpdatePublishedNote() {
     // learn the page is actually gone and needs a fresh Publish instead.
     if (res.status === 404) {
       try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('update 404: strip', e); }
-      _pubSaveNoteFields(note.id, {
+      if (_pubSaveNoteFields(note.id, {
         publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
-      });
+      }) === false) return;
       showToast('That page is no longer live. Publish again to bring it back.');
       if (_pubNoteId === note.id) closePublishSheet();
       nbRenderNotesScreen();
       return;
     }
     if (!res.ok) throw new Error('update failed: ' + res.status);
-    _pubSaveNoteFields(note.id, { lastPublishedAt: Date.now(), publishedContentHash: _hashStr(html) });
-    showToast('Changes saved');
+    const savedLocally = _pubSaveNoteFields(note.id, { lastPublishedAt: Date.now(), publishedContentHash: _hashStr(html) });
+    showToast(savedLocally === false ? 'Page updated online, but this device couldn\u2019t save it. Storage may be full.' : 'Changes saved');
     if (_pubNoteId === note.id) closePublishSheet();
   } catch (e) {
     _nbLog('publish update', e);
@@ -18480,7 +18506,7 @@ async function nbToggleStorySubscribe() {
   if (!authorSub) {
     showToast(_nbStoryNoAuthorSlug && _nbStoryNoAuthorSlug === _nbCurrentStorySlug
       ? 'This note was published without an account, so there\u2019s no one to subscribe to'
-      : 'Couldn\u2019t subscribe. This note isn\u2019t available anymore');
+      : 'Couldn\u2019t subscribe. This note isn\u2019t available anymore.');
     return;
   }
   const acct = nbAccount();
@@ -19742,7 +19768,7 @@ async function _nbSaveProfileName(raw) {
   _nbProfileNameOfflinePending = false;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     _nbProfileNameOfflinePending = true;
-    if (statusEl) statusEl.textContent = 'No internet connection. Not saved';
+    if (statusEl) statusEl.textContent = 'No internet connection. Not saved.';
     return false;
   }
   const name = (raw || '').trim().slice(0, 30);
@@ -19931,7 +19957,7 @@ async function _nbSaveProfileImage(dataUrl) {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     _nbProfileImageOfflinePending = true;
     _nbProfileImagePendingDataUrl = dataUrl;
-    if (statusEl) statusEl.textContent = 'No internet connection. Not saved';
+    if (statusEl) statusEl.textContent = 'No internet connection. Not saved.';
     return false;
   }
   _nbProfileImageSaving++;
@@ -20143,9 +20169,9 @@ async function _pubUnpublish(note) {
   if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
   // Drop it from the story strip now, while the slug is still on the note; the strip otherwise only catches up on the next fetch.
   try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('unpublish: strip', e); }
-  _pubSaveNoteFields(note.id, {
+  if (_pubSaveNoteFields(note.id, {
     publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
-  });
+  }) === false) throw Object.assign(new Error('unpublish save failed'), { storageFull: true }); // the page is down; a retry gets a 404 (= gone) and saves again
 }
 function nbUnpublishNote() {
   const note = _pubFindNote(_pubNoteId);
@@ -20865,7 +20891,7 @@ async function _pubRefreshAdTab() {
     document.getElementById('pub-ad-status-live').textContent = '';
     document.getElementById('pub-footer-ad-new').style.display = 'none';
     document.getElementById('pub-footer-ad-live').style.display = '';
-    document.getElementById('pub-ad-save-btn').disabled = !elig.ok;
+    { const sb = document.getElementById('pub-ad-save-btn'); sb.disabled = !elig.ok || _pubBtnBusy(sb); }
   } else {
     // exhausted or unpublished — the worker has no re-publish path for a
     // slug already registered in the ads table (POST /ads/publish 409s),
@@ -20948,7 +20974,7 @@ function nbAdSelectPackage(def, pkg, btn) {
   btn.classList.add('selected');
   document.getElementById('pub-ad-bal-btn').classList.remove('selected');
   document.getElementById('pub-ad-bal-amt').style.display = 'none';
-  document.getElementById('pub-ad-publish-btn').disabled = false;
+  document.getElementById('pub-ad-publish-btn').disabled = _pubBtnBusy(document.getElementById('pub-ad-publish-btn'));
 }
 
 // ---- Spending the balance: views already on the account (refunds) go on this note without a store purchase ----
@@ -20991,7 +21017,7 @@ function _pubAdBalInput(inp) {
     : over ? 'You can use up to ' + cap.toLocaleString() + ' views on this note.'
     : (_pubAdBalance - n).toLocaleString() + ' views will stay in your balance.';
   hint.classList.toggle('taken', over);
-  document.getElementById('pub-ad-publish-btn').disabled = !(n >= 1 && !over);
+  { const pb = document.getElementById('pub-ad-publish-btn'); pb.disabled = !(n >= 1 && !over) || _pubBtnBusy(pb); }
 }
 
 // Buys one view package and waits for the purchase to land on the account balance (RevenueCat -> worker webhook is async).
@@ -21190,8 +21216,8 @@ async function nbAdSaveChanges() {
     // Same page content as the regular published page — keep the Publish
     // to Web tab's own change-tracking hash in sync too, or its Save
     // Changes button would think there's still an unsaved change.
-    _pubSaveNoteFields(note.id, { lastPublishedAt: Date.now(), publishedContentHash: _hashStr(html) });
-    showToast('Ad changes saved');
+    const savedLocally = _pubSaveNoteFields(note.id, { lastPublishedAt: Date.now(), publishedContentHash: _hashStr(html) });
+    showToast(savedLocally === false ? 'Ad updated online, but this device couldn\u2019t save it. Storage may be full.' : 'Ad changes saved');
     if (_pubNoteId === note.id) closePublishSheet();
   } catch (e) {
     _nbLog('ad save', e);
@@ -21370,7 +21396,7 @@ function nbImportNotes(e) {
       // comment) — a restored note lands wherever push() left it instead
       // of where its createdAt actually puts it in the newest-first list.
       if (count) existing.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      nbSaveNotesArr(existing);
+      if (!nbSaveNotesArr(existing)) throw Object.assign(new Error('notes save failed'), { storageFull: true }); // don't report a restore that wasn't written
       let plCount = 0;
       try { plCount = _nbPlRestoreFromBackup(json.playlists); } catch (err) { _nbLog('restore playlists', err); }
       // Stashed for the OTHER side of the reload — see the pending-restore
@@ -21410,13 +21436,13 @@ function nbImportNotes(e) {
       try { sessionStorage.setItem('nb_lock_ok', '1'); } catch (e) {} // app-made reload: skip the app lock once (a browser refresh still asks)
       window.location.reload();
       return;
-    } catch (_) {
+    } catch (restoreErr) {
       // Nothing was written on this path — there's no reboot to land
       // after, so this dialog still shows immediately, same as before.
       e.target.value = '';
       const ov = document.getElementById('restore-overlay');
       document.getElementById('restore-dialog-title').textContent = 'Restore failed';
-      document.getElementById('restore-dialog-body').textContent = 'That file could not be read.';
+      document.getElementById('restore-dialog-body').textContent = (restoreErr && restoreErr.storageFull) ? 'There isn\u2019t enough storage on this device.' : 'That file could not be read.';
       document.getElementById('restore-dialog-ok').onclick = () => { ov.classList.remove('open'); };
       ov.classList.add('open');
     }
@@ -22196,7 +22222,18 @@ function nbUpdateLibraryTitle() {
   el.textContent = text;
   nbUpdateTitleMarquee(document.getElementById('header-title'), el);
 }
+// A local category exists only while a note carries it. If the open one just emptied (last note moved, deleted or synced
+// away) its pill is gone, so go back to All instead of sitting on an unhighlighted empty list.
+function _nbEnsureActiveCat() {
+  const c = _nbActiveCat;
+  if (NB_BASE_CATS.includes(c) || _nbIsFeedCat(c)) return false;
+  const low = String(c).toLowerCase();
+  if (nbVisibleNotes().some(n => (n.category || '').trim().toLowerCase() === low)) return false;
+  _nbActiveCat = 'All';
+  return true;
+}
 function nbRenderNotesScreen() {
+  if (_nbEnsureActiveCat()) { buildCatBar(); _nbSyncStoriesStripVisibility(); }
   nbUpdateLibraryTitle();
   if (_nbIsFeedCat(_nbActiveCat)) {
     const carousel = document.getElementById('nb-onboard-carousel');
@@ -22317,7 +22354,7 @@ function _nbShowDeleteConfirmDialog(id) {
     const notes = nbLoadNotes();
     const dupIdx = notes.findIndex(n => n.id === id);
     if (dupIdx !== -1) notes.splice(dupIdx, 1);
-    nbSaveNotesArr(notes);
+    if (!nbSaveNotesArr(notes)) return; // storage full: the note is still there, so don't record or sync a delete
     _nbRecordDeletedId(id);
     // Pulling first is safe (the just-recorded tombstone already blocks
     // this note from being resurrected by nbSyncPull) and is what keeps
@@ -23162,6 +23199,7 @@ function _nbLog(ctx, err) {
 // case rather than this guessing one.
 function _nbFailureReason(err) {
   try {
+    if (err && err.storageFull) return ': storage full';
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return ': no connection';
     const msg = err && (err.message || err.name) ? String(err.message || err.name) : '';
     const m = msg.match(/(\d{3})\s*$/);
@@ -23977,8 +24015,7 @@ function _nbCommitDraftToNote() {
   // A reseeded demo note stays provisional until a pull has checked the server (a reinstall may have
   // reseeded over a note this account already published). Record the edit so the pull keeps it as a copy.
   if (notes[idx].seedProvisional) notes[idx].seedEdited = true;
-  nbSaveNotesArr(notes);
-  return true;
+  return nbSaveNotesArr(notes); // false when storage is full: no "saved automatically" toast, the draft stays as it is
 }
 
 /* ===================== Bottom-nav "Notes" ===================== */
@@ -24135,7 +24172,7 @@ function nbConfirmSave() {
       notes[idx] = Object.assign({}, notes[idx], { title, desc, category, tags, updatedAt: Date.now() });
       // Edit of a reseeded demo note: stays provisional; the pull keeps this version as a copy (see nbSyncPull).
       if (notes[idx].seedProvisional) notes[idx].seedEdited = true;
-      nbSaveNotesArr(notes);
+      if (!nbSaveNotesArr(notes)) return; // storage full: keep the dialog so the edit isn't lost
       // This quick-edit dialog never goes through the editor or leaves
       // the Notes screen, so neither of nbGoScreen's two sync triggers
       // fires for it — sync explicitly here, same pull-then-push as
@@ -24222,7 +24259,7 @@ function nbConfirmSave() {
       createdAt: Date.now()
     });
   }
-  nbSaveNotesArr(notes);
+  if (!nbSaveNotesArr(notes)) return; // storage full: keep the dialog and the draft, nothing was saved
 
   nbCloseSaveDialog();
   showToast(deletedElsewhere
@@ -24867,7 +24904,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       }
     }).then(function () {
       LK.busy = false;
-      if (MD.open && MD.src === 'likes') { likesChanged(); if (!LK.quiet) fillList(); }
+      if (MD.open && MD.src === 'likes') {
+        likesChanged();
+        if (!LK.quiet) { try { scan(); } catch (e) {} if (pickResultTab() && view().n === 'home') renderView(); else fillList(); }
+      }
       setTimeout(function () { LK.quiet = false; }, 600);
       if (LK.onDone) { var f = LK.onDone; LK.onDone = null; try { f(); } catch (e) {} }
     });
@@ -24882,7 +24922,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     if (v === 'likes' && !signedIn()) { toast('Sign in to see media from notes you\u2019ve liked'); return; }
     exitSel();
     MD.src = v; view().sy = 0;
-    scan(); renderView(); queueVisibleMeta();
+    scan(); pickResultTab(); renderView(); queueVisibleMeta();
     if (v === 'likes') loadLikes();
   }
 
@@ -25871,11 +25911,22 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       } else done(false);
     })();
   }
+  // After a scan: if the open tab has nothing, move to the first of Songs / Videos / Albums that has results (Playlists is left alone).
+  // pickPending: a scan ended (or was dropped) while Media was closed, so the next open picks the tab instead.
+  var pickPending = false;
+  function pickResultTab() {
+    var tcnt = function (t) { return t === 'albums' ? MD.al.length + itemsOfType('album').length : itemsOfType(typeOfTab(t)).length; };
+    if (MD.tab === 'playlists' || tcnt(MD.tab)) return false;
+    for (var ti = 0; ti < 3; ti++) {
+      if (tcnt(TABS[ti][0])) { MD.tab = TABS[ti][0]; var v = view(); if (v.n === 'home') v.sy = 0; return true; }
+    }
+    return false;
+  }
   // Scan library: show the scanning state first, let it paint, then do the (synchronous) scan, and hold the animation
   // for a minimum time so it reads as a scan instead of a flicker. Re-entrant taps are ignored while it runs.
   function startScan(btn) {
     if (MD.scanning || MD.refreshing) return;
-    var lk = MD.src === 'likes' && signedIn();
+    var lk = MD.src === 'likes' && signedIn(), src0 = MD.src, before = sigOf();
     MD.scanning = true;
     var box = btn && btn.closest ? btn.closest('.md-empty') : null;
     if (box) {
@@ -25892,14 +25943,14 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       if (lk) { try { scan(); } catch (e) {} }
       setTimeout(function () {
         MD.scanning = false;
-        if (!MD.open) return;
-        var tcnt = function (t) { return t === 'albums' ? MD.al.length + itemsOfType('album').length : itemsOfType(typeOfTab(t)).length; };
-        if (MD.tab !== 'playlists' && !tcnt(MD.tab)) {
-          for (var ti = 0; ti < 3; ti++) { if (tcnt(TABS[ti][0])) { MD.tab = TABS[ti][0]; view().sy = 0; break; } }
-        }
+        if (!MD.open) { pickPending = true; return; }
+        pickResultTab();
         queueVisibleMeta(); renderView();
+        // Slow likes load: this pass ran on partial results, so pick the tab again once the load really ends.
+        if (lk && late === true && LK.busy && !LK.onDone) LK.onDone = function () { try { scan(); } catch (e) {} if (MD.open && MD.src === 'likes' && pickResultTab()) renderView(); };
         if (lk && (!LK.at || (late === true && LK.busy))) return; // load failed (it already toasted) or is still running (it redraws when done)
-        toast(MD.items.size ? 'Media updated' : (MD.src === 'likes' ? 'No media found in your likes' : 'No media found in your notes'));
+        if (MD.src !== src0) return; // source switched mid-scan: the result isn't about what's on screen
+        toast(MD.items.size ? (sigOf() !== before ? 'Media updated' : 'Already up to date') : (MD.src === 'likes' ? 'No media found in your likes' : 'No media found in your notes'));
       }, Math.max(0, min - (NOW() - t0)));
     }
     if (lk) {
@@ -25942,7 +25993,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function refreshNow() {
     if (MD.refreshing || MD.scanning) return;
     MD.refreshing = true;
-    var b = $('md-refresh'), t0 = NOW(), before = MD.dsig, likes = MD.src === 'likes' && signedIn(), ended = false;
+    var b = $('md-refresh'), t0 = NOW(), before = MD.dsig, src0 = MD.src, likes = MD.src === 'likes' && signedIn(), ended = false;
     if (b) { b.classList.add('spin'); b.setAttribute('aria-busy', 'true'); }
     function end() {
       if (ended) return; ended = true; LK.onDone = null;
@@ -25950,7 +26001,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       setTimeout(function () {
         MD.refreshing = false;
         if (b) { b.classList.remove('spin'); b.removeAttribute('aria-busy'); }
-        if (MD.open && !failToasted) toast(MD.dsig !== before ? 'Media updated' : 'Already up to date');
+        if (MD.open && !failToasted && MD.src === src0) toast(MD.dsig !== before ? 'Media updated' : 'Already up to date');
       }, Math.max(350, 700 - (NOW() - t0)));
     }
     function after() {
@@ -26107,15 +26158,17 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     MD.pit = new Map();
     MD.pl.forEach(function (p) { p.items.forEach(function (o) { MD.pit.set(o.k, fromStored(o)); }); });
     if (MD.src === 'likes' && !signedIn()) MD.src = 'notes'; // signed out since last time
+    if (MD.scanning) pickPending = true; // a scan was cut off by this reopen: its results still need a tab
     SCANTOK++; MD.scanning = false; // any scan still running from before is stale
     var bigNotes = 0;
     if (MD.src === 'notes' && !MD.items.size) { try { bigNotes = nbVisibleNotes().length > 50; } catch (e) {} }
     if (!bigNotes) scan();
+    if (pickPending) { pickPending = false; if (!bigNotes) pickResultTab(); }
     MD.open = true;
     var st = $('md-body').scrollTop;
     renderView(); syncQueue(); queueVisibleMeta(); syncUI(); uiProg();
     if (MD.src === 'likes') loadLikes(true, true); // always check for new likes on open
-    else if (bigNotes) { MD.scanning = true; scanStream(function (stale) { if (stale) return; MD.scanning = false; if (MD.open) { queueVisibleMeta(); redrawQuiet(); } }); } // first open of a big library: render now, fill in as it reads
+    else if (bigNotes) { MD.scanning = true; scanStream(function (stale) { if (stale) return; MD.scanning = false; if (MD.open) { queueVisibleMeta(); if (pickResultTab() && view().n === 'home') renderView(); else redrawQuiet(); } else pickPending = true; }); } // first open of a big library: render now, fill in as it reads
     $('md-body').scrollTop = st;
   }
   function rsMedia() {
