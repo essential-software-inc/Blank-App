@@ -3486,7 +3486,6 @@ body.pink .pub-pkg-btn.selected { border-color: #c8365e; background: #ffe0ec }
 .ad-prog-t { font-weight: 700; margin-bottom: .2rem }
 .ad-prog-s { color: #5f6370; font-size: 11.5px; line-height: 1.4; margin-top: .3rem }
 .ad-prog-row { margin-top: .5rem }
-.ad-prog-sep { margin-top: .75rem; padding-top: .65rem; border-top: 1px solid #e2e5ee }
 .ad-prog-l { display: flex; justify-content: space-between; gap: .5rem; font-size: 11.5px; font-weight: 600 }
 .ad-prog-bar { height: 5px; border-radius: 3px; background: #e2e5ee; margin-top: 4px; overflow: hidden }
 .ad-prog-bar > i { display: block; height: 100%; border-radius: 3px; background: #3366cc }
@@ -3510,13 +3509,11 @@ body.pink .pub-ad-loading { color: #875068 }
 body.night .ad-prog { border-color: #333537; background: #1c1c1e; color: #e8e8e8 }
 body.night .ad-prog-s, body.night .pub-pkg-btn .pub-pkg-lock { color: #9a9a9e }
 body.night .ad-prog-bar { background: #333537 }
-body.night .ad-prog-sep { border-top-color: #333537 }
 body.night .ad-prog-bar > i { background: #aaaaaa }
 body.night .ad-prog-row.met .ad-prog-bar > i { background: #4aa36a }
 body.pink .ad-prog { border-color: #f5c5d8; background: #fff0f6; color: #1a0a12 }
 body.pink .ad-prog-s, body.pink .pub-pkg-btn .pub-pkg-lock { color: #875068 }
 body.pink .ad-prog-bar { background: #f5c5d8 }
-body.pink .ad-prog-sep { border-top-color: #f5c5d8 }
 body.pink .ad-prog-bar > i { background: #c8365e }
 body.pink .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
 #st-ads-card { padding: .8rem .9rem }
@@ -3528,16 +3525,18 @@ body.pink .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
 #st-ads-card .ad-prog-bar { background: var(--st-line) }
 #st-ads-card .ad-prog-bar > i { background: var(--st-acc) }
 #st-ads-card .ad-prog-row.met .ad-prog-bar > i { background: #2f8f4e }
+body.night #st-ads-card .ad-prog-row.met .ad-prog-bar > i { background: #4aa36a }
 #st-ads-bal { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; margin-bottom: .8rem; padding-bottom: .7rem; border-bottom: 1px solid var(--st-line); color: var(--st-fg); font-size: .85rem }
 #st-ads-bal .ad-prog-s { color: var(--st-sub) }
-#st-fund { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--st-line); color: var(--st-fg); font-size: .8rem }
+.st-sep { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--st-line) }
+#st-fund { color: var(--st-fg); font-size: .8rem }
 #st-fund .ad-prog-t { font-size: .85rem }
 #st-fund .ad-prog-s { color: var(--st-sub) }
 .st-fund-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .6rem }
 .st-fund-btn { flex: 1 1 40%; min-width: 0; padding: .6rem .5rem; border-radius: 12px; border: 1px solid var(--st-line); background: var(--st-bg); color: var(--st-fg); font: inherit; font-size: .82rem; font-weight: 700; line-height: 1.35; text-align: center; cursor: pointer }
 .st-fund-btn small { display: block; font-weight: 400; color: var(--st-sub) }
 .st-fund-btn:disabled { opacity: .6; cursor: default }
-#st-invite { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--st-line); color: var(--st-fg); font-size: .8rem }
+#st-invite { color: var(--st-fg); font-size: .8rem }
 #st-invite .ad-prog-t { font-size: .85rem }
 #st-invite .ad-prog-s { color: var(--st-sub) }
 #st-invite .inv-code { color: var(--st-fg) }
@@ -5017,9 +5016,9 @@ body.pink .nb-carousel-dot{background:#d796b0}
 </div>
 
 <style id="st-css">
-#screen-settings{--st-bg:#f4f6fb;--st-card:#fff;--st-line:#e8ecf4;--st-fg:#202122;--st-sub:#6b7280;--st-acc:#3366cc;--st-on:#fff;background:var(--st-bg);color:var(--st-fg)}
-body.night #screen-settings{--st-bg:#080808;--st-card:#111;--st-line:#282828;--st-fg:#f0f0f0;--st-sub:#888;--st-acc:#e0e0e0;--st-on:#111}
-body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:#f5c5d8;--st-fg:#1a0a12;--st-sub:#875068;--st-acc:#bd2856;--st-on:#fff}
+#screen-settings{--st-bg:#f4f6fb;--st-card:#fff;--st-line:rgba(20,30,50,.1);--st-fg:#202122;--st-sub:#6b7280;--st-acc:#3366cc;--st-on:#fff;background:var(--st-bg);color:var(--st-fg)}
+body.night #screen-settings{--st-bg:#080808;--st-card:#111;--st-line:#282828;--st-fg:#f0f0f0;--st-sub:#b8bfc8;--st-acc:#e0e0e0;--st-on:#111}
+body.pink #screen-settings{--st-bg:#fff8fb;--st-card:#fff2f7;--st-line:rgba(200,54,94,.16);--st-fg:#1a0a12;--st-sub:#875068;--st-acc:#bd2856;--st-on:#fff}
 #st-root{padding:.9rem .9rem calc(58px + env(safe-area-inset-bottom,0px) + 1.2rem)}
 .st-grp{margin-bottom:1.2rem}
 .st-h{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--st-sub);margin:0 .3rem .45rem}
@@ -5499,7 +5498,6 @@ body .nb-story-ring:not(.seen) .nb-story-ring-img,body .nb-story-ring:not(.seen)
 body:not(.night):not(.pink) .nb-story-ring:not(.seen) .nb-story-ring-inner{background:#e9edf3}
 body.pink .nb-story-ring:not(.seen) .nb-story-ring-inner{background:#fbe1ec}
 body.night .nb-story-ring:not(.seen) .nb-story-ring-inner{background:#111111}
-#screen-settings{--st-line:rgba(20,30,50,.1)}
 /* Switches / progress tracks: the pale off-track vanished on the translucent surfaces, so it gets a firmer tint + hairline edge (on = unchanged) */
 body:not(.night):not(.pink) .nb-switch-track{background:rgba(20,30,50,.28);box-shadow:inset 0 0 0 1px rgba(20,30,50,.12)}
 body:not(.night):not(.pink) .nb-switch-input:checked ~ .nb-switch-track{background:#3366cc;box-shadow:none}
@@ -5509,8 +5507,6 @@ body.night .nb-switch-track{box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
 body.night .nb-switch-input:checked ~ .nb-switch-track{box-shadow:none}
 body:not(.night):not(.pink) #st-ads-card .ad-prog-bar,body:not(.night):not(.pink) .ad-prog-bar{background:rgba(20,30,50,.16)}
 body.pink .ad-prog-bar{background:rgba(200,54,94,.2)}
-body.night #screen-settings{--st-line:#282828}
-body.pink #screen-settings{--st-line:rgba(200,54,94,.16)}
 /* Story viewer: header is the same see-through glass as the app header, over the same colour wash (the iframe below stays opaque) */
 #story-viewer-overlay{overflow:hidden}
 #story-viewer-overlay::before{content:'';position:absolute;left:-20%;right:-20%;top:-10%;height:180px;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
@@ -5530,7 +5526,6 @@ body.night .gc-author-name{color:#b4bcc6}
 body.night .gc-desc{color:#b2b2b2}
 body.night .gc-tag{color:#c2c2c2}
 body.night .gc-play-icon,body.night .gc-trash,body.night .gc-edit,body.night .gc-img-more,body.night .gc-desc-time,body.night .gc-fav:not(.active){color:#a6a6a6}
-body.night #screen-settings{--st-sub:#b8bfc8}
 body.night #md-screen{--md-field:rgba(0,0,0,.3);--md-fieldsh:inset 0 2px 6px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.07);--md-fieldf:rgba(0,0,0,.45);--md-sub:#b8c0ca;--md-sub2:#9ca3ab;--md-pillf:#c8c8c8;--md-ico:#aab4c5;--md-ph:#a9afb8}
 body.night #md-screen .md-row::after{background:color-mix(in srgb,#fff 9%,transparent)}
 body.night #md-c-shuf:not(.on),body.night #md-c-rep:not(.on){color:var(--md-sub)}
@@ -13412,13 +13407,16 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     return S[k];
   };
   // Best practice for masking: keep the first character and the domain (so the account is still recognisable),
-  // replace the rest of the name with a fixed run of asterisks so its length isn't revealed. Anything that isn't an email is left alone. Anything that isn't an email is left alone.
-  window._nbMaskEmail = function (e) {
+  // replace the rest of the name with a fixed run of asterisks so its length isn't revealed. Anything that isn't an email is left alone.
+  // _nbMaskedEmail always masks (used for the setting's own preview); _nbMaskEmail only masks while the setting is on.
+  window._nbMaskedEmail = function (e) {
     e = String(e == null ? '' : e);
-    if (!window._nbSt('maskEmail')) return e;
     const at = e.lastIndexOf('@');
     if (at < 1) return e;
     return e.charAt(0) + '*****' + e.slice(at);
+  };
+  window._nbMaskEmail = function (e) {
+    return window._nbSt('maskEmail') ? window._nbMaskedEmail(e) : String(e == null ? '' : e);
   };
   window._nbStSort = function (list) {
     const s = window._nbSt('sort'); if (s === 'default') return list;
@@ -13470,7 +13468,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Backup & restore', s: 'Save notes to a file, or restore one', go: () => openBackupSheet() }]],
     ['Account', [
       { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) ? window._nbMaskEmail(a.email) : 'Not signed in'; }, go: () => nbAccountBtnClick() },
-      { t: 'sw', k: 'maskEmail', l: 'Hide email address', s: 'Show your email as j*****@gmail.com everywhere in the app: Settings, the account sheet, sign-out prompts and sign-in messages.', after: () => { try { if (typeof window._nbStRefresh === 'function') window._nbStRefresh(); } catch (e) {} } },
+      { t: 'sw', k: 'maskEmail', l: 'Hide email address', s: () => { const a = nbAccount(); return 'Show your email as ' + ((a && a.email) ? window._nbMaskedEmail(a.email) : 'b*****@gmail.com') + ' everywhere in the app: Settings, the account sheet, sign-out prompts and sign-in messages.'; }, after: () => { try { if (typeof window._nbStRefresh === 'function') window._nbStRefresh(); } catch (e) {} } },
       { t: 'link', l: 'Display name', show: () => nbIsSignedIn(), s: () => _nbLoadCachedProfileName() || 'Not set', go: () => nbSettingsEditDisplayName() },
       { t: 'info', l: 'Subscribers', show: () => nbIsSignedIn(), s: () => _nbStAcctText('count') },
       { t: 'info', l: 'Likes', show: () => nbIsSignedIn(), s: () => _nbStAcctText('likes') },
@@ -20413,7 +20411,7 @@ function _pubRenderAdStanding(targetId, opts) {
     a.onclick = () => { closePublishSheet(); nbGoSettingsAds(); };
     card.appendChild(a);
   }
-  if (inAccount && next) add('ad-prog-s ad-prog-sep', 'Friends you invite count toward this too, once they publish a note and are active on two days. See Invite friends below.');
+  if (inAccount && next) add('ad-prog-s st-sep', 'Friends you invite count toward this too, once they publish a note and are active on two days. See Invite friends below.');
   el.appendChild(card);
 }
 // ---- Invite code at sign-in ----
@@ -20521,7 +20519,7 @@ function _nbSettingsAdsMount() {
   const g = document.createElement('div');
   g.className = 'st-grp';
   g.id = 'st-ads-grp';
-  g.innerHTML = '<div class="st-h">Ads &amp; invites</div><div class="st-card" id="st-ads-card"><div id="st-ads-bal"></div><div id="st-ads-standing"></div><div id="st-fund"></div><div id="st-invite"></div></div>';
+  g.innerHTML = '<div class="st-h">Ads &amp; invites</div><div class="st-card" id="st-ads-card"><div id="st-ads-bal"></div><div id="st-ads-standing"></div><div id="st-fund" class="st-sep"></div><div id="st-invite" class="st-sep"></div></div>';
   root.insertBefore(g, before);
   _nbSettingsAdsPaint();
   if (Date.now() - _nbStAdsAt > 20000) _nbSettingsAdsFetch();
