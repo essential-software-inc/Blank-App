@@ -933,8 +933,24 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 #story-viewer-frame {
   flex: 1;
   border: none;
-  width: 100%
+  width: 100%;
+  transition: opacity .2s ease
 }
+/* A published page lays itself out again as its images, fonts and embeds arrive, so it is held back until it has settled. */
+#story-viewer-frame.sv-loading { opacity: 0; transition: none }
+/* Same colour as the app header's icons: blue in Light, near-white in Night, rose in Pink (set here for classic mode; glass mode takes it from --nb-hdr-fg). */
+#story-viewer-loading {
+  display: none; position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; z-index: 2; pointer-events: none;
+  place-items: center; border-radius: 50%; color: var(--nb-hdr-fg, #3366cc)
+}
+#story-viewer-loading::before {
+  content: ''; box-sizing: border-box; width: 24px; height: 24px; border-radius: 50%;
+  border: 3px solid color-mix(in srgb, currentColor 25%, transparent); border-top-color: currentColor; animation: svSpin .7s linear infinite
+}
+#story-viewer-overlay.sv-loading-on #story-viewer-loading { display: grid }
+body.night #story-viewer-loading { color: #e8e8e8 }
+body.pink #story-viewer-loading { color: #bd2856 }
+@keyframes svSpin { to { transform: rotate(360deg) } }
 /* Subscribed-feed note cards get the author's profile name shown before
    the title (cosmetic display name, not the real identity). */
 .gc-author-name {
@@ -5538,6 +5554,8 @@ body.pink .ad-prog-bar{background:rgba(200,54,94,.2)}
 #story-viewer-overlay::before{content:'';position:absolute;left:-20%;right:-20%;top:-10%;height:180px;background-image:var(--wash-img);background-size:cover;background-position:center top;filter:blur(28px) saturate(1.6);opacity:calc(var(--nb-wash) * 1.5);pointer-events:none}
 #story-viewer-header{z-index:1;background:color-mix(in srgb,var(--nb-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border-bottom-color:var(--nb-hbd)}
 #story-viewer-frame{position:relative;z-index:1}
+/* the loading spinner sits on the same glass as the header */
+#story-viewer-loading{background:color-mix(in srgb,var(--nb-bg) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);box-shadow:inset 0 0 0 1px var(--nb-hbd)}
 
 /* ===== Glass + dark: legibility over the wash ===== */
 /* The wash is an image, so it is kept dim in dark themes: white titles/icons and the greys on top of it stay readable. */
@@ -6276,6 +6294,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
     <button id="story-viewer-sub-btn" onclick="nbToggleStorySubscribe()" aria-label="Subscribe"></button>
   </div>
   <iframe id="story-viewer-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
+  <div id="story-viewer-loading" aria-hidden="true"></div>
 </div>
 
 <div id="privacy-overlay" onclick="if(event.target===this)closePrivacy()">
@@ -14966,6 +14985,45 @@ function _nbStripLocalSyncFields(n) {
 // Both devices changed the note since the version they last shared. syncBaseAt
 // is that shared version's updatedAt (set on every pull merge and push).
 // Unknown (notes from before this existed, never synced) = plain last-write-wins.
+// A note rebuilt from its live page (see _nbOfferRestorePage) only stands in for a note this account already has under another
+// id on another device. When both turn up on one device, the original wins and the rebuilt copy is dropped, so the page never
+// ends up with two notes. A rebuilt copy that was edited after the restore is never dropped, and of two rebuilt copies the
+// lower id stays so every device keeps the same one.
+// True when the demo note was published or edited after the delete record. Every install seeds a note with this same id, so a
+// delete on one device must not keep the account's published copy off every other device for good.
+function _nbDemoNewerThanDelete(n, tomb) {
+  return Math.max(n.updatedAt || 0, n.lastPublishedAt || 0, n.publishedAt || 0) > ((tomb && tomb.deletedAt) || 0);
+}
+// One live page belongs to one note. If two notes (different ids) end up linked to the same page address, both could save to it,
+// unpublish it, or republish it after the other took it down. The newest link stays; each other note keeps its content but is
+// unlinked and titled "(copy)", so nothing is lost. The newest is the most recently published, then one that is not a restored
+// copy, then the older note. Works on the array in place and returns how many notes it unlinked.
+function _nbHealSharedSlugs(arr, acct) {
+  const bySlug = new Map();
+  arr.forEach(n => { if (n && n.publishedSlug) { const l = bySlug.get(n.publishedSlug) || []; l.push(n); bySlug.set(n.publishedSlug, l); } });
+  let healed = 0;
+  bySlug.forEach(list => {
+    if (list.length < 2) return;
+    list.sort((a, b) => ((b.lastPublishedAt || b.publishedAt || 0) - (a.lastPublishedAt || a.publishedAt || 0))
+      || ((a.restoredPage ? 1 : 0) - (b.restoredPage ? 1 : 0))
+      || ((a.createdAt || 0) - (b.createdAt || 0))
+      || String(a.id).localeCompare(String(b.id)));
+    list.slice(1).forEach(n => {
+      Object.assign(n, { publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, updatedAt: Date.now() });
+      if (!/\(copy\)$/.test(n.title || '')) n.title = (n.title || 'Untitled note') + ' (copy)';
+      if (acct) n.acct = acct.sub;
+      healed++;
+    });
+  });
+  return healed;
+}
+let _nbSlugHealDone = false;
+function _nbRestoreYields(a, b) {
+  if (!a || !b || !a.restoredPage || a.id === b.id) return false;
+  if ((a.updatedAt || 0) > (a.restoredAt || 0) + 2000) return false;
+  if (b.restoredPage) return (b.updatedAt || 0) <= (b.restoredAt || 0) + 2000 && String(a.id) > String(b.id);
+  return true;
+}
 function _nbIsSyncConflict(local, incoming) {
   const base = local.syncBaseAt;
   if (typeof base !== 'number') return false;
@@ -15094,6 +15152,13 @@ async function nbSyncPush(showFeedback) {
 // after that deletion, in which case the local copy wins and survives.
 async function nbSyncPull(showFeedback) {
   if (!nbIsSignedIn()) return { ok: false, reason: 'not-signed-in' };
+  if (!_nbSlugHealDone) { // once per session, before the pull: notes already on this device that share one page
+    _nbSlugHealDone = true;
+    try {
+      const stored = nbLoadNotes(), h = _nbHealSharedSlugs(stored, nbAccount());
+      if (h && nbSaveNotesArr(stored)) { buildCatBar(); nbRenderNotesScreen(); showToast(h === 1 ? 'Two notes were linked to the same page. One is unlinked and titled \u201c(copy)\u201d.' : h + ' notes were linked to a page another note already uses. They are unlinked and titled \u201c(copy)\u201d.'); }
+    } catch (e) { _nbLog('heal shared pages', e); }
+  }
   try {
     const pullHeaders = { 'Authorization': 'Bearer ' + nbSessionToken() };
     if (_nbSyncEtag && _nbSyncBaseline === 'have') pullHeaders['If-None-Match'] = _nbSyncEtag; // unchanged = 304, no download
@@ -15154,16 +15219,37 @@ async function nbSyncPull(showFeedback) {
     let editorTouchedNote = null;
     let editorLocalSavedFragment = null;
     let conflictCount = 0, baseTouched = false, copyCount = 0;
+    const droppedRestored = []; // rebuilt copies replaced by the original note, see _nbRestoreYields
     incoming.forEach(n => {
       // Deleted on another device — don't resurrect it here. Exception: a demo note that also exists
       // locally still goes through the normal merge below (newer wins, conflict copy, editor prompt), so
       // a customised copy is never silently overwritten and the two are never duplicated (same id).
-      if (tombstones.has(n.id) && !(n.id === NB_DEMO_NOTE_ID && indexById.has(n.id))) return;
+      // The demo note's id is the same on every install, so its delete record only says that one device's copy was deleted. A copy
+      // published or edited after that delete is another, newer copy, and comes in (see _nbDemoNewerThanDelete).
+      const tomb = tombstones.get(n.id);
+      if (tomb && !(n.id === NB_DEMO_NOTE_ID && (indexById.has(n.id) || _nbDemoNewerThanDelete(n, tomb)))) return;
       // Came from the account's backup, so it belongs to this account —
       // tag it the same way a push does, so nbVisibleNotes() hides it
       // again if the user later signs out. See nbSyncPush for the tag.
       if (acct) n.acct = acct.sub;
       const idx = indexById.get(n.id);
+      // Same live page as a note already here, under another id: only one of the two may stay (see _nbRestoreYields).
+      if (idx === undefined && n.publishedSlug) {
+        const di = existing.findIndex(x => x && x.id !== n.id && x.publishedSlug === n.publishedSlug);
+        if (di !== -1) {
+          const loc = existing[di];
+          if (_nbRestoreYields(n, loc)) return; // the incoming rebuilt copy is the extra one
+          if (_nbRestoreYields(loc, n) && !(editorScreenOpen && editingId === loc.id)) {
+            if (pubOverlayOpen && loc.id === _pubNoteId) closePublishSheet();
+            n.syncBaseAt = n.updatedAt || 0;
+            existing[di] = n;
+            indexById.delete(loc.id); indexById.set(n.id, di);
+            droppedRestored.push(loc.id);
+            count++;
+            return;
+          }
+        }
+      }
       const conflict = idx !== undefined && !existing[idx].seedProvisional && _nbIsSyncConflict(existing[idx], n);
       // A reinstall re-added the built-in note and it was published here before this pull ran, while the
       // account's copy of the same note is published under another address. They are two different live
@@ -15231,6 +15317,11 @@ async function nbSyncPull(showFeedback) {
         updatedCount++;
       }
     });
+    if (droppedRestored.length) {
+      // Delete records, so the dropped copy isn't pulled back in from a backup that still holds it.
+      droppedRestored.forEach(id => tombstones.set(id, Object.assign({ id, deletedAt: Date.now() }, acct ? { acct: acct.sub } : {})));
+      _nbSaveDeletedIds([...tombstones.values()]);
+    }
     // Any local note still marked seedProvisional here wasn't replaced
     // above, meaning this pull — which did reach the server — found
     // nothing for its id. That's a real confirmation there's no better
@@ -15241,6 +15332,7 @@ async function nbSyncPull(showFeedback) {
       if (n && n.seedProvisional) { n.seedProvisional = false; delete n.seedEdited; provisionalCleared = true; }
       if (n && n.seedReseeded) { delete n.seedReseeded; provisionalCleared = true; }
     });
+    const sharedHealed = (count || updatedCount) ? _nbHealSharedSlugs(existing, acct) : 0; // a pulled note can land on a page another note already has
     let removedCount = 0;
     existing = existing.filter(n => {
       const tomb = tombstones.get(n.id);
@@ -15252,6 +15344,7 @@ async function nbSyncPull(showFeedback) {
       // A copy that is still marked published is not exempt: deleting a published note always unpublishes it
       // first, so that copy's page is already gone and keeping it would leave a dead "published" state here.
       if (n.id === NB_DEMO_NOTE_ID && !n.publishedSlug) return true;
+      if (n.id === NB_DEMO_NOTE_ID && _nbDemoNewerThanDelete(n, tomb)) return true; // published after the delete: a newer copy
       const localTs = n.updatedAt || n.createdAt || 0;
       if (localTs > tomb.deletedAt) return true; // edited here after the remote delete — keep it
       // The open sheet's own note just got deleted out from under it by
@@ -15264,7 +15357,7 @@ async function nbSyncPull(showFeedback) {
     _nbSyncChangesSinceCheck.restored += count;
     _nbSyncChangesSinceCheck.updated += updatedCount;
     _nbSyncChangesSinceCheck.removed += removedCount;
-    if (count || updatedCount || removedCount || provisionalCleared || favChanged || conflictCount || copyCount || baseTouched) {
+    if (count || updatedCount || removedCount || provisionalCleared || favChanged || conflictCount || copyCount || baseTouched || sharedHealed) {
       // New notes just got push()'d onto the end above (see the merge
       // loop) regardless of when they were actually created — the list's
       // only real ordering rule is "new local notes go to index 0 and
@@ -15305,7 +15398,8 @@ async function nbSyncPull(showFeedback) {
     }
     _nbSyncFetchMissingImages().catch(e => _nbLog('fetch backup images', e)); // background; never delays or fails the pull
     _nbSyncEtag = pulledEtag; _nbSyncBaseline = 'have'; // merge finished cleanly: this is now the known server version
-    if (copyCount) showToast('Two published copies of this note existed. Kept both. The second is titled \u201c(copy)\u201d.');
+    if (sharedHealed) showToast(sharedHealed === 1 ? 'Two notes were linked to the same page. One is unlinked and titled \u201c(copy)\u201d.' : sharedHealed + ' notes were linked to a page another note already uses. They are unlinked and titled \u201c(copy)\u201d.');
+    else if (copyCount) showToast('Two published copies of this note existed. Kept both. The second is titled \u201c(copy)\u201d.');
     else if (conflictCount) showToast(conflictCount === 1 ? 'Edited on two devices. Kept both. The other is a \u201cconflict copy\u201d.' : conflictCount + ' notes were edited on two devices. Kept both. See \u201cconflict copy\u201d.');
     else if (showFeedback) {
       const parts = [];
@@ -15474,9 +15568,10 @@ async function _nbOfferRestorePage(p) {
     if (!d || !d.token) throw new Error('no token');
     const arr = nbLoadNotes();
     if (arr.some(n => n && n.publishedSlug === p.slug)) return; // linked meanwhile (another sync)
-    const card = await _nbPublishedCardFor(p.slug);
+    const card = (d && Array.isArray(d.tags)) ? d : await _nbPublishedCardFor(p.slug); // the relink answer carries the card details
     if (nbLoadNotes().some(n => n && n.publishedSlug === p.slug)) return;
     const acct = nbAccount();
+    const restoredAt = Date.now();
     const note = {
       id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       title: (card && card.title) || p.title || d.title || 'Untitled note',
@@ -15484,7 +15579,7 @@ async function _nbOfferRestorePage(p) {
       tags: (card && Array.isArray(card.tags)) ? card.tags.filter(x => typeof x === 'string') : [],
       content: frag, pageBg, pageBgCustom, desktopView,
       createdAt: ((card && card.noteCreatedAt) || p.noteCreatedAt || d.createdAt || p.createdAt || Date.now()),
-      updatedAt: Date.now(),
+      updatedAt: restoredAt, restoredPage: true, restoredAt, // marks a note rebuilt from the live page, see _nbRestoreYields
       publishedSlug: p.slug, publishToken: d.token,
       publishedAt: d.createdAt || p.createdAt || Date.now(), lastPublishedAt: d.updatedAt || p.updatedAt || Date.now(),
       publishedContentHash: null, showInStories: !!d.showInStories
@@ -17049,18 +17144,56 @@ let _nbBusyBtnCount = 0;
 // but they still looked fully tappable. Disable them for real so they look
 // (and behave) disabled too. Only ones we disabled here get re-enabled, so a
 // button that was already disabled for another reason stays that way.
+//
+// A button whose action can be cancelled (see _pubCancelable) leaves its first secondary button live instead: that button
+// is relabelled "Cancel" for as long as the action runs and its tap cancels the action. Any others are disabled as above.
 function _pubLockSiblingSecondaries(btn, lock) {
   const row = btn.parentElement;
   if (!row) return;
+  const c = lock ? btn._nbCancel : null;
   row.querySelectorAll(':scope > .rdlg-cancel, :scope > .ebtn-sec, :scope > .bkp-btn-sec').forEach(sib => {
     if (sib === btn) return;
     if (lock) {
+      if (c && !c.sib && !sib.disabled && getComputedStyle(sib).display !== 'none') {
+        c.sib = sib;
+        sib._nbOrigClick = sib.onclick;
+        sib.dataset.cancelOrigLabel = sib.textContent;
+        sib.dataset.busyCancel = '1';
+        sib.textContent = 'Cancel';
+        sib.onclick = c.trigger;
+        return;
+      }
       if (!sib.disabled) { sib.disabled = true; sib.dataset.busyLocked = '1'; }
+    } else if (sib.dataset.busyCancel) {
+      sib.textContent = sib.dataset.cancelOrigLabel;
+      sib.onclick = sib._nbOrigClick;
+      sib._nbOrigClick = null;
+      delete sib.dataset.busyCancel; delete sib.dataset.cancelOrigLabel;
+      sib.disabled = false;
     } else if (sib.dataset.busyLocked) {
       sib.disabled = false;
       delete sib.dataset.busyLocked;
     }
   });
+  if (!lock) btn._nbCancel = null;
+}
+// Makes the action behind a busy button cancellable: call before _pubSetBtnLoading(btn, true, ...). The returned object has
+// .cancelled (set once Cancel is tapped), .signal (pass it to fetch when opts.abort is set, so the request is aborted), and
+// opts.onCancel runs on the tap. opts.label swaps the busy label while the action winds down.
+function _pubCancelable(btn, opts) {
+  opts = opts || {};
+  const c = { cancelled: false, sib: null, ctl: (opts.abort && typeof AbortController !== 'undefined') ? new AbortController() : null };
+  c.signal = c.ctl ? c.ctl.signal : undefined;
+  c.trigger = () => {
+    if (c.cancelled) return;
+    c.cancelled = true;
+    if (c.sib) c.sib.disabled = true; // one tap is enough
+    if (opts.label && btn.dataset.origLabel !== undefined) btn.innerHTML = '<span class="com-spinner"></span>' + opts.label;
+    if (c.ctl) c.ctl.abort();
+    if (opts.onCancel) opts.onCancel();
+  };
+  btn._nbCancel = c;
+  return c;
 }
 // A busy label is longer than the idle one (Sign out -> "Signing out…", Unpublish -> "Unpublishing…") and the
 // buttons in a row share the width equally, so the label used to get squeezed or wrapped. Measure the busy label
@@ -17525,6 +17658,11 @@ async function nbPublishNote() {
   catch (e) { _nbLog('publish build', e); showToast('Publish failed' + _nbFailureReason(e)); return; }
   if (_nbHasUnresolvedImages(html)) { showToast('Some images aren\u2019t on this device yet. Wait for them to load, then publish.'); return; }
   const btn = document.getElementById('pub-publish-btn');
+  // Cancel (the sheet's own Cancel button, while this runs) frees the sheet at once. The upload can't be called back, so if it
+  // still lands, the page is taken straight back down below.
+  let ended = false;
+  const endBusy = () => { if (ended) return; ended = true; _pubSetBtnLoading(btn, false); };
+  const cancel = _pubCancelable(btn, { abort: false, onCancel: () => { endBusy(); btn.disabled = !_pubSlugAvailable; showToast('Publish cancelled'); } });
   _pubSetBtnLoading(btn, true, 'Publishing…');
   try {
     // Signed-in headers are best-effort ownership tagging only — the
@@ -17538,15 +17676,26 @@ async function nbPublishNote() {
       headers: pubHeaders,
       body: JSON.stringify({ slug, html, title: note.title || '', desc: note.desc || '', category: note.category || '', tags: note.tags || [], createdAt: note.createdAt || null })
     });
+    if (cancel.cancelled) {
+      if (res.ok) {
+        try {
+          const late = await res.json();
+          await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(slug), {
+            method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: late.token })
+          });
+        } catch (e) { _nbLog('publish cancel rollback', e); }
+      }
+      return;
+    }
     if (res.status === 429) {
       showToast('You\u2019re publishing too fast. Wait a moment and try again.');
-      _pubSetBtnLoading(btn, false);
+      endBusy();
       btn.disabled = !_pubSlugAvailable;
       return;
     }
     if (res.status === 413) {
       showToast('This note is too large to publish. Try trimming images or content.');
-      _pubSetBtnLoading(btn, false);
+      endBusy();
       btn.disabled = !_pubSlugAvailable;
       return;
     }
@@ -17565,7 +17714,7 @@ async function nbPublishNote() {
       }
       if (res.status === 403 && /page limit reached/.test(errMsg)) {
         showToast('You\u2019ve reached your account\u2019s page limit. Unpublish something first.');
-        _pubSetBtnLoading(btn, false);
+        endBusy();
         btn.disabled = !_pubSlugAvailable;
         return;
       }
@@ -17578,7 +17727,7 @@ async function nbPublishNote() {
         statusEl.className = 'pub-status taken';
       }
       showToast(disabled ? 'That address isn\u2019t available. Try another.' : 'That address was just taken. Try another.');
-      _pubSetBtnLoading(btn, false);
+      endBusy();
       btn.disabled = !_pubSlugAvailable;
       return;
     }
@@ -17601,18 +17750,19 @@ async function nbPublishNote() {
         });
       } catch (e) { _nbLog('publish rollback', e); }
       showToast('Couldn\u2019t publish. Storage may be full.');
-      _pubSetBtnLoading(btn, false);
+      endBusy();
       btn.disabled = !_pubSlugAvailable;
       return;
     }
     showToast('Note published');
-    _pubSetBtnLoading(btn, false);
+    endBusy();
     if (_pubNoteId === note.id) closePublishSheet();
     nbRenderNotesScreen();
   } catch (e) {
     _nbLog('publish', e);
+    if (cancel.cancelled) return;
     showToast('Publish failed' + _nbFailureReason(e));
-    _pubSetBtnLoading(btn, false);
+    endBusy();
     btn.disabled = !_pubSlugAvailable;
   }
 }
@@ -17701,6 +17851,7 @@ async function nbUpdatePublishedNote() {
   catch (e) { _nbLog('publish update build', e); showToast('Update failed' + _nbFailureReason(e)); return; }
   if (_nbHasUnresolvedImages(html)) { showToast('Some images aren\u2019t on this device yet. Wait for them to load, then save.'); return; }
   const btn = document.getElementById('pub-save-btn');
+  const cancel = _pubCancelable(btn, { abort: true }); // the Unpublish button beside it reads "Cancel" while this runs
   _pubSetBtnLoading(btn, true, 'Saving…');
   try {
     const updHeaders = { 'Content-Type': 'application/json' };
@@ -17719,7 +17870,8 @@ async function nbUpdatePublishedNote() {
     const res = await _nbFetchOwned(note, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
       method: 'PUT',
       headers: updHeaders,
-      body: JSON.stringify(Object.assign({}, updBody, { token: tok }))
+      body: JSON.stringify(Object.assign({}, updBody, { token: tok })),
+      signal: cancel.signal
     }));
     if (res.status === 429) {
       showToast('You\u2019re saving too fast. Wait a moment and try again.');
@@ -17749,7 +17901,7 @@ async function nbUpdatePublishedNote() {
     if (_pubNoteId === note.id) closePublishSheet();
   } catch (e) {
     _nbLog('publish update', e);
-    showToast('Update failed' + _nbFailureReason(e));
+    showToast(cancel.cancelled ? 'Save cancelled' : 'Update failed' + _nbFailureReason(e));
   } finally {
     _pubSetBtnLoading(btn, false);
   }
@@ -18148,6 +18300,33 @@ function _nbSetSubBtnState(subBtn, isSubscribed) {
 // guide-card) but no longer used here — the header now shows the story's
 // published @slug instead of its title, so viewers see where the story
 // actually links to rather than a title the author could change anytime.
+// The viewer's page re-lays itself out as images, fonts and embeds load (see nbBuildStaticNoteHtml), and showing every pass looks like
+// the blocks scrambling and then settling. So the frame stays hidden behind a spinner until its load event has been quiet for a
+// moment, or the page says it's ready, and never longer than the cap, so a slow embed can't hold it back for good.
+const NB_STORY_SETTLE_MS = 300, NB_STORY_HOLD_MAX_MS = 4500;
+let _nbStorySettleTimer = null, _nbStoryHoldTimer = null;
+function _nbStoryRevealFrame() {
+  clearTimeout(_nbStorySettleTimer); clearTimeout(_nbStoryHoldTimer);
+  _nbStorySettleTimer = _nbStoryHoldTimer = null;
+  const fr = document.getElementById('story-viewer-frame'), ov = document.getElementById('story-viewer-overlay');
+  if (fr) fr.classList.remove('sv-loading');
+  if (ov) ov.classList.remove('sv-loading-on');
+}
+function _nbStoryHoldFrame() {
+  const fr = document.getElementById('story-viewer-frame'), ov = document.getElementById('story-viewer-overlay');
+  if (!fr || !ov) return;
+  if (!fr._svWired) {
+    fr._svWired = true;
+    fr.addEventListener('load', () => {
+      if (!_nbCurrentStorySlug) return; // the blank page after closing
+      clearTimeout(_nbStorySettleTimer);
+      _nbStorySettleTimer = setTimeout(_nbStoryRevealFrame, NB_STORY_SETTLE_MS);
+    });
+  }
+  clearTimeout(_nbStorySettleTimer); clearTimeout(_nbStoryHoldTimer);
+  fr.classList.add('sv-loading'); ov.classList.add('sv-loading-on');
+  _nbStoryHoldTimer = setTimeout(_nbStoryRevealFrame, NB_STORY_HOLD_MAX_MS);
+}
 function nbOpenStory(slug, authorSub, title) {
   _nbCurrentStoryAuthorSub = authorSub;
   _nbCurrentStorySlug = slug;
@@ -18156,6 +18335,7 @@ function nbOpenStory(slug, authorSub, title) {
   const storyTitleInner = document.getElementById('story-viewer-title-text');
   storyTitleInner.textContent = '@' + slug;
   nbUpdateTitleMarquee(storyTitleEl, storyTitleInner, true);
+  _nbStoryHoldFrame();
   document.getElementById('story-viewer-frame').src = _pubUrlFor(slug);
   const subBtn = document.getElementById('story-viewer-sub-btn');
   const isSubscribed = _nbSubscribedAuthors().has(authorSub);
@@ -18237,6 +18417,7 @@ function nbCloseStory() {
   _ov.classList.remove('open', 'over-media');
   document.getElementById('story-viewer-frame').src = 'about:blank';
   _nbCurrentStorySlug = null;
+  _nbStoryRevealFrame();
   unlockScroll();
   if (_wasOverMedia) lockScroll(); // Media screen is still open underneath
   _nbPaintStoriesStrip(); // reflect the ring just going grey, if it did
@@ -20336,11 +20517,12 @@ function _nbRefreshProfileAvatar() {
 // apart. Throws on a real failure (anything but 404, which just means
 // the remote side already considers it gone); doesn't touch any dialog
 // or overlay state, that's each caller's own concern.
-async function _pubUnpublish(note) {
+async function _pubUnpublish(note, signal) {
   const res = await _nbFetchOwned(note, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(note.publishedSlug), {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: tok })
+    body: JSON.stringify({ token: tok }),
+    signal
   }));
   if (!res.ok && res.status !== 404) throw new Error('unpublish failed: ' + res.status);
   // Drop it from the story strip now, while the slug is still on the note; the strip otherwise only catches up on the next fetch.
@@ -20348,6 +20530,32 @@ async function _pubUnpublish(note) {
   if (_pubSaveNoteFields(note.id, {
     publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
   }) === false) throw Object.assign(new Error('unpublish save failed'), { storageFull: true }); // the page is down; a retry gets a 404 (= gone) and saves again
+}
+// Cancel aborts the unpublish request, but the server may already have taken the page down. Ask it before saying what happened;
+// if the page is gone, finish the unpublish here as well, so the note never keeps showing "published" for a page that no longer
+// exists. Returns 'down' (finished here), 'live' (cancelled in time) or 'unknown' (couldn't tell).
+async function _pubSettleCancelledUnpublish(note) {
+  await new Promise(r => setTimeout(r, 1200)); // a request that was already on its way gets the time to land
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(note.publishedSlug), { cache: 'no-store' });
+    let down = res.status === 404;
+    if (!down) {
+      if (!res.ok) return 'unknown';
+      const d = await res.json();
+      down = !d || d.found === false;
+    }
+    if (!down) return 'live';
+    try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('cancelled unpublish: strip', e); }
+    if (_pubSaveNoteFields(note.id, {
+      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
+    }) === false) return 'unknown';
+    return 'down';
+  } catch (e) { _nbLog('cancelled unpublish check', e); return 'unknown'; }
+}
+function _pubCancelledUnpublishToast(st) {
+  showToast(st === 'down' ? 'That page had already come down. Note unpublished.'
+    : st === 'live' ? 'Unpublish cancelled'
+    : 'Cancelled. Couldn\u2019t check whether the page came down.');
 }
 function nbUnpublishNote() {
   const note = _pubFindNote(_pubNoteId);
@@ -20383,15 +20591,24 @@ function nbUnpublishNote() {
   ov.onclick = (e) => { if (e.target === ov && !confirmBtn.disabled) ov.classList.remove('open'); };
   confirmBtn.onclick = async () => {
     if (_pubOfflineGuard()) return;
+    const cancel = _pubCancelable(confirmBtn, { abort: true, label: 'Cancelling\u2026' });
     _pubSetBtnLoading(confirmBtn, true, 'Unpublishing…');
     try {
-      await _pubUnpublish(note);
+      await _pubUnpublish(note, cancel.signal);
       ov.classList.remove('open');
       showToast('Note unpublished');
       _pubSetBtnLoading(confirmBtn, false);
       if (_pubNoteId === note.id) closePublishSheet();
       nbRenderNotesScreen();
     } catch (e) {
+      if (cancel.cancelled) {
+        const st = await _pubSettleCancelledUnpublish(note);
+        ov.classList.remove('open');
+        _pubSetBtnLoading(confirmBtn, false);
+        _pubCancelledUnpublishToast(st);
+        if (st === 'down') { if (_pubNoteId === note.id) closePublishSheet(); nbRenderNotesScreen(); }
+        return;
+      }
       _nbLog('unpublish', e);
       showToast('Unpublish failed' + _nbFailureReason(e));
       _pubSetBtnLoading(confirmBtn, false);
@@ -22620,10 +22837,19 @@ function _nbShowUnpublishThenDeleteDialog(id, note) {
   ov.onclick = (e) => { if (e.target === ov && !confirmBtn.disabled) ov.classList.remove('open'); };
   confirmBtn.onclick = async () => {
     if (_pubOfflineGuard()) return;
+    const cancel = _pubCancelable(confirmBtn, { abort: true, label: 'Cancelling\u2026' });
     _pubSetBtnLoading(confirmBtn, true, 'Unpublishing…');
     try {
-      await _pubUnpublish(note);
+      await _pubUnpublish(note, cancel.signal);
     } catch (e) {
+      if (cancel.cancelled) { // stop here: no delete step after a Cancel
+        const st = await _pubSettleCancelledUnpublish(note);
+        ov.classList.remove('open');
+        _pubSetBtnLoading(confirmBtn, false);
+        _pubCancelledUnpublishToast(st);
+        if (st === 'down') nbRenderNotesScreen();
+        return;
+      }
       // Note stays published, so the delete step never gets offered —
       // if it stayed as-is right into a delete confirmation, the person
       // could end up deleting the local note anyway while the live page
@@ -24067,6 +24293,10 @@ window.addEventListener('message', function (e) {
     if (e.source && storyWin && e.source === storyWin) {
       _nbOpenExternalLink(e.data.href);
     }
+  }
+  if (e.data.type === 'nb-page-ready') { // a page that reports its own layout as settled
+    const sf = document.getElementById('story-viewer-frame');
+    if (e.source && sf && e.source === sf.contentWindow) _nbStoryRevealFrame();
   }
   if (e.data.type === 'markup-error') {
     // The canvas iframe relays its own window.onerror here (see _errRelay
