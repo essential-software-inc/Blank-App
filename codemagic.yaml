@@ -484,6 +484,29 @@ workflows:
               f.write(content)
           print("Disabled pinch-zoom in", path)
           PY
+      - name: Add microphone permission (voice notes)
+        script: |
+          # android/ is regenerated every build, so the manifest edit is re-applied here.
+          # Capacitor's WebView asks Android for the permission at runtime once it's declared.
+          python3 - <<'PY'
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path) as f:
+              content = f.read()
+          needed = [
+              '<uses-permission android:name="android.permission.RECORD_AUDIO" />',
+              '<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />',
+          ]
+          add = "".join("    " + p + "\n" for p in needed if p.split('"')[1] not in content)
+          if not add:
+              print("Audio permissions already present in", path)
+              raise SystemExit(0)
+          if "</manifest>" not in content:
+              raise SystemExit("ERROR: AndroidManifest.xml has no closing </manifest> tag - the Capacitor template may have changed. Update this patch step to match.")
+          content = content.replace("</manifest>", add + "</manifest>", 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Added audio permissions to", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
@@ -641,6 +664,29 @@ workflows:
           with open(path, "w") as f:
               f.write(content)
           print("Disabled pinch-zoom in", path)
+          PY
+      - name: Add microphone permission (voice notes)
+        script: |
+          # android/ is regenerated every build, so the manifest edit is re-applied here.
+          # Capacitor's WebView asks Android for the permission at runtime once it's declared.
+          python3 - <<'PY'
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path) as f:
+              content = f.read()
+          needed = [
+              '<uses-permission android:name="android.permission.RECORD_AUDIO" />',
+              '<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />',
+          ]
+          add = "".join("    " + p + "\n" for p in needed if p.split('"')[1] not in content)
+          if not add:
+              print("Audio permissions already present in", path)
+              raise SystemExit(0)
+          if "</manifest>" not in content:
+              raise SystemExit("ERROR: AndroidManifest.xml has no closing </manifest> tag - the Capacitor template may have changed. Update this patch step to match.")
+          content = content.replace("</manifest>", add + "</manifest>", 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Added audio permissions to", path)
           PY
       - name: Generate app icon from assets/logo.png
         script: |
