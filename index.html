@@ -13430,7 +13430,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 /* ===================== Settings ===================== */
 (function () {
   const KEY = 'nb_settings_v1';
-  const DEF = { sort: 'default', images: true, stories: true, tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, glassMode: true, pauseSweep: false, mediaSwipe: true, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
+  const DEF = { sort: 'default', images: true, stories: true, myStories: 'first', tips: true, startOn: 'library', confirmDelete: true, syncEvery: 20, reduceMotion: null, glassMode: true, pauseSweep: false, mediaSwipe: true, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false };
   let S = null, lastPoll = 0;
   function load() {
     try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
@@ -13495,6 +13495,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     ['Library', [
       { t: 'chips', k: 'sort', l: 'Sort notes', o: [['default', 'Default'], ['edited', 'Recently edited'], ['newest', 'Newest'], ['oldest', 'Oldest'], ['az', 'A\u2013Z']] },
       { t: 'sw', k: 'images', l: 'Image previews', s: 'Show photos on note cards. Off gives a tighter list.' },
+      { t: 'chips', k: 'myStories', l: 'Your stories in the strip', s: 'First puts your stories in front of everyone\u2019s. After new ones puts them behind stories you haven\u2019t opened, but ahead of the grey seen ones. Last puts them after the grey seen ones.', o: [['first', 'First'], ['mid', 'After new ones'], ['last', 'Last']], set: v => { put('myStories', v); try { _nbPaintStoriesStrip(); } catch (e) { _nbLog('my stories order', e); } } },
       { t: 'sw', k: 'stories', l: 'Stories strip', s: 'Show stories above your notes in All.', after: () => _nbSyncStoriesStripVisibility() },
       { t: 'sw', k: 'tips', l: 'Welcome tips', s: 'Show the intro carousel in the Library.' },
       { t: 'sw', k: 'hideLibCount', l: 'Hide Library category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Alerts, Published, Stories, Subscribed, Liked, Uncategorized and your own categories).', after: () => buildCatBar() },
@@ -18121,6 +18122,9 @@ function _nbIsOwnAuthor(id) {
   const a = nbAccount();
   return !!(a && id && (a.authorId === id || a.sub === id));
 }
+// Slugs of this account's own published notes. A story you just posted can carry an empty author ID until the profile loads, so the
+// author check alone misses it; a story whose page is one of your own notes is always yours.
+function _nbMyPublishedSlugs() { return new Set(nbLoadNotes().filter(n => n && n.publishedSlug).map(n => n.publishedSlug)); }
 function _nbMyAuthorRef() { const a = nbAccount(); return a ? (a.authorId || a.sub || '') : ''; }
 let _nbAuthorIdFetching = false;
 async function _nbEnsureAuthorId() {
@@ -18273,7 +18277,10 @@ function _nbPaintStoriesStrip() {
   // Your own stories always lead (the worker sends them first); among everyone else's, seen ones
   // sink to the end.
   const _myAuthorId = (nbAccount() || {}).authorId || null;
-  const _rank = x => (_myAuthorId && x.authorSub === _myAuthorId) ? 0 : (x.seen ? 2 : 1);
+  const _mySlugs = _nbMyPublishedSlugs();
+  const _isMine = x => !!(_myAuthorId && x.authorSub === _myAuthorId) || _mySlugs.has(x.slug);
+  const _mp = _nbSt('myStories'), _mineRank = _mp === 'last' ? 3 : _mp === 'mid' ? 1.5 : 0; // first (default) | after the unseen ones | after the seen ones
+  const _rank = x => _isMine(x) ? _mineRank : (x.seen ? 2 : 1);
   _nbStoriesCache.sort((a, b) => _rank(a) - _rank(b));
   strip.classList.toggle('has-stories', _nbStoriesCache.length > 0);
   _nbSyncStoriesStripVisibility();
@@ -18299,8 +18306,8 @@ function _nbPaintStoriesStrip() {
           ? `<img class="nb-story-ring-img" src="${esc(s.imageUrl)}" alt="" loading="lazy" onerror="_nbStoryImgError(this,'${initialAttr}')">`
           : `<span class="nb-story-ring-inner">${esc(initial)}</span>`);
     return `
-    <button class="nb-story-item" onclick="nbOpenStory('${sid}','${asub}','${title}')">
-      <span class="nb-story-ring${s.seen ? ' seen' : ''}">${avatarInner}</span>
+    <button class="nb-story-item" onclick="nbOpenStory('${sid}','${asub}','${title}', true)">
+      <span class="nb-story-ring${s.seen && !_isMine(s) ? ' seen' : ''}">${avatarInner}</span>
       <span class="nb-story-label">${esc(s.title || 'Untitled')}</span>
     </button>`;
   }).join('');
@@ -18388,7 +18395,7 @@ function _nbStoryHoldFrame() {
   fr.classList.add('sv-loading'); ov.classList.add('sv-loading-on');
   _nbStoryHoldTimer = setTimeout(_nbStoryRevealFrame, NB_STORY_HOLD_MAX_MS);
 }
-function nbOpenStory(slug, authorSub, title) {
+function nbOpenStory(slug, authorSub, title, markSeen) { // markSeen: only a tap on a story avatar in the strip counts as viewing the story
   _nbCurrentStoryAuthorSub = authorSub;
   _nbCurrentStorySlug = slug;
   _nbStoryNoAuthorSlug = null;
@@ -18431,14 +18438,17 @@ function nbOpenStory(slug, authorSub, title) {
   // with no explanation. This runs alongside it and reports the actual
   // reason once it's known, without holding up the open.
   _nbCheckStoryReachable(slug);
-  // The server only records a seen mark for a note that is a live story, so this is safe to send for any opened note and keeps the
-  // Subscribed unread count exact (a followed author's story opened from a link still counts as read).
-  if (nbIsSignedIn()) {
+  // Only a tap on a story avatar in the strip counts as viewing the story. Opening the same note from a pasted link, search,
+  // Go to note, the Subscribed feed or the Media screen records nothing (the server also ignores notes that aren't live stories
+  // and your own stories).
+  if (markSeen && !isOwnStory && !_nbMyPublishedSlugs().has(slug) && nbIsSignedIn()) { // you never "view" your own story
     fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/stories/' + encodeURIComponent(slug) + '/seen', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
-    }).then(res => {
+    }).then(async res => {
       if (!res.ok) return; // rate-limited or refused — don't grey the ring for something the server didn't record
+      let d = null; try { d = await res.json(); } catch (e) {}
+      if (d && d.recorded === false) return; // the server skipped it (not a live story, or your own): nothing was recorded
       const entry = _nbStoriesCache.find(s => s.slug === slug);
       if (entry) entry.seen = true;
       _nbNoteOpenedSeen(slug); // the Subscribed tab's unread count follows
