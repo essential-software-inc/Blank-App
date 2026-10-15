@@ -14994,6 +14994,13 @@ function _nbStripLocalSyncFields(n) {
 function _nbDemoNewerThanDelete(n, tomb) {
   return Math.max(n.updatedAt || 0, n.lastPublishedAt || 0, n.publishedAt || 0) > ((tomb && tomb.deletedAt) || 0);
 }
+// Whether a delete record really covers this demo copy. A record made while signed out (no account tag), or under another account,
+// only says that this device's own local copy was deleted, so it never keeps this account's copy out, published or not. A record
+// from this account still means deleted, unless the copy was published or edited after it.
+function _nbDemoDeleteApplies(n, tomb, acct) {
+  if (!tomb || !acct || !tomb.acct || tomb.acct !== acct.sub) return false;
+  return !_nbDemoNewerThanDelete(n, tomb);
+}
 // One live page belongs to one note. If two notes (different ids) end up linked to the same page address, both could save to it,
 // unpublish it, or republish it after the other took it down. The newest link stays; each other note keeps its content but is
 // unlinked and titled "(copy)", so nothing is lost. The newest is the most recently published, then one that is not a restored
@@ -15059,7 +15066,9 @@ async function nbSyncPush(showFeedback) {
   // could ride along into a different account's backup and, in the
   // astronomically unlikely event of an id collision, wipe a note there
   // that was never actually deleted.
-  const deletedIds = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff && (!t.acct || t.acct === acct.sub));
+  // A delete of the built-in demo made while signed out only says this device's own copy is gone; every install has a demo with the
+  // same id, so forwarding it would delete the account's copy on its other devices.
+  const deletedIds = _nbLoadDeletedIds().filter(t => t && t.deletedAt >= cutoff && (!t.acct || t.acct === acct.sub) && !(t.id === NB_DEMO_NOTE_ID && !t.acct));
   let themeNow = 'light';
   try { themeNow = localStorage.getItem(DK) || 'light'; } catch (e) {}
   // Images go up first, each once, so the backup itself stays text-only. If the
@@ -15227,7 +15236,7 @@ async function nbSyncPull(showFeedback) {
       // The demo note's id is the same on every install, so its delete record only says that one device's copy was deleted. A copy
       // published or edited after that delete is another, newer copy, and comes in (see _nbDemoNewerThanDelete).
       const tomb = tombstones.get(n.id);
-      if (tomb && !(n.id === NB_DEMO_NOTE_ID && (indexById.has(n.id) || _nbDemoNewerThanDelete(n, tomb)))) return;
+      if (tomb && !(n.id === NB_DEMO_NOTE_ID && (indexById.has(n.id) || !_nbDemoDeleteApplies(n, tomb, acct)))) return;
       // Came from the account's backup, so it belongs to this account —
       // tag it the same way a push does, so nbVisibleNotes() hides it
       // again if the user later signs out. See nbSyncPush for the tag.
@@ -15334,9 +15343,22 @@ async function nbSyncPull(showFeedback) {
     });
     const sharedHealed = (count || updatedCount) ? _nbHealSharedSlugs(existing, acct) : 0; // a pulled note can land on a page another note already has
     let removedCount = 0;
+    // A real delete of a published note always takes its page down first. So if this device's published demo is still live on the
+    // server, the delete record against it can't be a real one (an older build uploaded a signed-out delete of the demo), and the
+    // demo stays.
+    const demoLive = new Set();
+    const demoHere = existing.find(n => n && n.id === NB_DEMO_NOTE_ID), demoTomb = tombstones.get(NB_DEMO_NOTE_ID);
+    if (demoHere && demoHere.publishedSlug && demoTomb && _nbDemoDeleteApplies(demoHere, demoTomb, acct)) {
+      try {
+        const lr = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(demoHere.publishedSlug));
+        const ld = lr.ok ? await lr.json() : null;
+        if (ld && ld.found) demoLive.add(NB_DEMO_NOTE_ID);
+      } catch (e) { _nbLog('demo live check', e); }
+    }
     existing = existing.filter(n => {
       const tomb = tombstones.get(n.id);
       if (!tomb) return true;
+      if (n.id === NB_DEMO_NOTE_ID && demoLive.has(n.id)) return true;
       // The built-in demo note has one fixed id and is re-seeded on every fresh install/browser. A delete
       // record from another device must not remove an unpublished copy (seeded or customised): that is what
       // made a new sign-in report "1 note removed". Deleting it on this device is still honoured (the note
@@ -15344,7 +15366,7 @@ async function nbSyncPull(showFeedback) {
       // A copy that is still marked published is not exempt: deleting a published note always unpublishes it
       // first, so that copy's page is already gone and keeping it would leave a dead "published" state here.
       if (n.id === NB_DEMO_NOTE_ID && !n.publishedSlug) return true;
-      if (n.id === NB_DEMO_NOTE_ID && _nbDemoNewerThanDelete(n, tomb)) return true; // published after the delete: a newer copy
+      if (n.id === NB_DEMO_NOTE_ID && !_nbDemoDeleteApplies(n, tomb, acct)) return true; // not covered by this account's delete, or newer than it
       const localTs = n.updatedAt || n.createdAt || 0;
       if (localTs > tomb.deletedAt) return true; // edited here after the remote delete — keep it
       // The open sheet's own note just got deleted out from under it by
@@ -17065,6 +17087,27 @@ const NB_PUBLISH_API = 'https://note-publish.joelisaacumoh.workers.dev';
 let _pubNoteId = null;
 let _pubSlugCheckTimer = null;
 let _pubSlugCheckSeq = 0;
+// A cancelled publish can't be called back: its upload may still land and is then taken straight down again. Until that is done
+// the address looks like one of the person's own pages to the server, so checks and republishes of that address wait for it here.
+const _pubCancelHolds = new Map();
+let _pubCancelEpoch = 0; // counts cancels, so a check that was already running when one happened can tell its answer may be stale
+const _PUB_HOLD_KEY = 'nbPubCancelUntil', _PUB_HOLD_MS = 15000;
+function _pubCancelHold(slug, p) {
+  _pubCancelEpoch++;
+  _pubCancelHolds.set(slug, p);
+  try { localStorage.setItem(_PUB_HOLD_KEY, String(Date.now() + _PUB_HOLD_MS)); } catch (e) {} // a reload mid-cancel keeps waiting out the takedown
+  p.then(() => {
+    if (_pubCancelHolds.get(slug) === p) _pubCancelHolds.delete(slug);
+    if (!_pubCancelHolds.size) { try { localStorage.removeItem(_PUB_HOLD_KEY); } catch (e) {} }
+  });
+}
+async function _pubWaitCancelHold() { // all holds, not just one address: a check of "name" can also be answered with its "name-2" suggestion
+  let until = 0;
+  try { until = Number(localStorage.getItem(_PUB_HOLD_KEY)) || 0; } catch (e) {}
+  const left = until - Date.now();
+  if (!_pubCancelHolds.size) { if (left > 0 && left <= _PUB_HOLD_MS) await new Promise(r => setTimeout(r, left)); return; } // only after a reload
+  await Promise.race([Promise.all([..._pubCancelHolds.values()]), new Promise(r => setTimeout(r, _PUB_HOLD_MS))]); // never hangs on a stuck request
+}
 let _pubSlugAvailable = false;
 // Set when a slug-availability check couldn't even start because we were
 // offline (see the navigator.onLine branch in _pubOnSlugInput). The 'online'
@@ -17589,9 +17632,16 @@ function _pubOnSlugInput(raw) {
   const seq = ++_pubSlugCheckSeq;
   _pubSlugCheckTimer = setTimeout(async () => {
     try {
-      const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/check-slug/' + encodeURIComponent(slug), nbIsSignedIn() ? { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } } : undefined);
-      if (seq !== _pubSlugCheckSeq) return; // stale response, a newer keystroke has already superseded this check
-      const data = await res.json();
+      let data;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await _pubWaitCancelHold();
+        if (seq !== _pubSlugCheckSeq) return; // superseded while waiting
+        const epoch = _pubCancelEpoch;
+        const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/check-slug/' + encodeURIComponent(slug), nbIsSignedIn() ? { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } } : undefined);
+        if (seq !== _pubSlugCheckSeq) return; // stale response, a newer keystroke has already superseded this check
+        data = await res.json();
+        if (epoch === _pubCancelEpoch) break; // no publish was cancelled while this request was out, so the answer can be trusted
+      }
       if (data && data.yours && data.suggest) {
         // Your own page already lives here: keep it untouched and publish this note next to it.
         _pubSlugUse = data.suggest;
@@ -17647,6 +17697,7 @@ async function nbPublishNote() {
   const slug = _pubSlugUse || typedSlug;
   if (!_pubValidSlugFormat(slug) || !_pubSlugAvailable) return;
   if (_pubOfflineGuard()) return;
+  await _pubWaitCancelHold(); // a cancelled publish of this address may still be taking its page down
   if (_pubSlugUse && slug !== typedSlug) {
     const ok = await _nbAskConfirm('Publish at a new address?',
       '\u201c' + typedSlug + '\u201d is already one of your pages. Publish this note as \u201c' + slug + '\u201d instead? The other page stays exactly as it is.',
@@ -17662,7 +17713,11 @@ async function nbPublishNote() {
   // still lands, the page is taken straight back down below.
   let ended = false;
   const endBusy = () => { if (ended) return; ended = true; _pubSetBtnLoading(btn, false); };
-  const cancel = _pubCancelable(btn, { abort: false, onCancel: () => { endBusy(); btn.disabled = !_pubSlugAvailable; showToast('Publish cancelled'); } });
+  let releaseCancel = () => {};
+  const cancel = _pubCancelable(btn, { abort: false, onCancel: () => {
+    _pubCancelHold(slug, new Promise(r => { releaseCancel = r; })); // released once the late upload (if any) has been taken down
+    endBusy(); btn.disabled = !_pubSlugAvailable; showToast('Publish cancelled');
+  } });
   _pubSetBtnLoading(btn, true, 'Publishing…');
   try {
     // Signed-in headers are best-effort ownership tagging only — the
@@ -17680,10 +17735,14 @@ async function nbPublishNote() {
       if (res.ok) {
         try {
           const late = await res.json();
-          await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(slug), {
+          const del = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(slug), {
             method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: late.token })
           });
-        } catch (e) { _nbLog('publish cancel rollback', e); }
+          if (!del.ok && del.status !== 404) throw new Error('rollback failed: ' + del.status);
+        } catch (e) {
+          _nbLog('publish cancel rollback', e);
+          showToast('Publishing was cancelled, but /@' + slug + ' may still be online. Check it in Published.');
+        }
       }
       return;
     }
@@ -17764,6 +17823,8 @@ async function nbPublishNote() {
     showToast('Publish failed' + _nbFailureReason(e));
     endBusy();
     btn.disabled = !_pubSlugAvailable;
+  } finally {
+    releaseCancel();
   }
 }
 // Reuses the shared confirm dialog (delete-overlay/delete-dialog) the same
@@ -18370,6 +18431,8 @@ function nbOpenStory(slug, authorSub, title) {
   // with no explanation. This runs alongside it and reports the actual
   // reason once it's known, without holding up the open.
   _nbCheckStoryReachable(slug);
+  // The server only records a seen mark for a note that is a live story, so this is safe to send for any opened note and keeps the
+  // Subscribed unread count exact (a followed author's story opened from a link still counts as read).
   if (nbIsSignedIn()) {
     fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/stories/' + encodeURIComponent(slug) + '/seen', {
       method: 'POST',
