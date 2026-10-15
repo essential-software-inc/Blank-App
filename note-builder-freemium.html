@@ -400,7 +400,8 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8a0bc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E")
 }
 
-#reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog, #delete-account-dialog, #signout-dialog, #sync-conflict-dialog {
+#reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog, #delete-account-dialog, #signout-dialog, #sync-conflict-dialog,
+#mic-dialog {
   background: #fff;
   border-radius: 18px;
   padding: 1.3rem 1.2rem 1.1rem;
@@ -2007,7 +2008,8 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 }
 
 #delete-account-overlay,
-#signout-overlay {
+#signout-overlay,
+#mic-overlay {
   display: none;
   position: fixed;
   inset: 0;
@@ -2018,7 +2020,8 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 }
 
 #delete-account-overlay.open,
-#signout-overlay.open {
+#signout-overlay.open,
+#mic-overlay.open {
   display: flex
 }
 
@@ -3042,7 +3045,8 @@ body.night .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #delete-account-dialog, body.night #signout-dialog, body.night #sync-conflict-dialog {
+body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #delete-account-dialog, body.night #signout-dialog, body.night #sync-conflict-dialog,
+body.night #mic-dialog {
   background: #111111;
   border: 1px solid #282828;
   border-radius: 18px;
@@ -3386,7 +3390,8 @@ body.pink .ebtn-pri:disabled {
   opacity: 1
 }
 
-body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #delete-account-dialog, body.pink #signout-dialog, body.pink #sync-conflict-dialog {
+body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #delete-account-dialog, body.pink #signout-dialog, body.pink #sync-conflict-dialog,
+body.pink #mic-dialog {
   background: #fff2f7;
   border: none;
   border-radius: 18px;
@@ -5025,7 +5030,7 @@ body.pink .nb-carousel-dot{background:#d796b0}
   <main id="nb-screens">
     <section class="nb-screen active" id="screen-create">
       <div id="markup-iframe-wrap">
-        <iframe id="markup-iframe" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" title="Bluebook canvas"></iframe>
+        <iframe id="markup-iframe" allow="microphone" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" title="Bluebook canvas"></iframe>
         <div id="markup-iframe-loadmask" aria-hidden="true">
           <div id="markup-iframe-loadmask-bar-wrap"><div id="markup-iframe-loadmask-bar-fill"></div><div id="markup-iframe-loadmask-bar-glow"></div></div>
         </div>
@@ -5583,14 +5588,17 @@ body.night #md-c-shuf:not(.on),body.night #md-c-rep:not(.on){color:var(--md-sub)
    button's colours are left to the existing .rdlg-ok rules (red = destructive, blue/pink = neutral). */
 @keyframes dlg-fade{from{opacity:0}to{opacity:1}}
 @keyframes dlg-rise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
-#edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay{background:rgba(10,10,12,.5);animation:dlg-fade .2s}
-body.pink #edit-reset-overlay,body.pink #sync-conflict-overlay,body.pink #delete-overlay,body.pink #unpublish-overlay,body.pink #delete-account-overlay,body.pink #signout-overlay{background:rgba(70,12,32,.45)}
+#edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay,
+#mic-overlay {background:rgba(10,10,12,.5);animation:dlg-fade .2s}
+body.pink #edit-reset-overlay,body.pink #sync-conflict-overlay,body.pink #delete-overlay,body.pink #unpublish-overlay,body.pink #delete-account-overlay,body.pink #signout-overlay,
+body.pink #mic-overlay {background:rgba(70,12,32,.45)}
 #reset-dialog,
 #sync-conflict-dialog,
 #delete-dialog,
 #unpublish-dialog,
 #delete-account-dialog,
-#signout-dialog {
+#signout-dialog,
+#mic-dialog {
   background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(213,222,242,.6);border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;
   box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)
 }
@@ -5599,7 +5607,8 @@ body.night #sync-conflict-dialog,
 body.night #delete-dialog,
 body.night #unpublish-dialog,
 body.night #delete-account-dialog,
-body.night #signout-dialog {
+body.night #signout-dialog,
+body.night #mic-dialog {
   background:rgba(17,17,17,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.1);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6)
 }
 body.pink #reset-dialog,
@@ -5607,7 +5616,8 @@ body.pink #sync-conflict-dialog,
 body.pink #delete-dialog,
 body.pink #unpublish-dialog,
 body.pink #delete-account-dialog,
-body.pink #signout-dialog {
+body.pink #signout-dialog,
+body.pink #mic-dialog {
   background:rgba(255,248,251,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(245,197,216,.6);border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22)
 }
 #reset-dialog .rdlg-title,
@@ -5615,7 +5625,8 @@ body.pink #signout-dialog {
 #delete-dialog .rdlg-title,
 #unpublish-dialog .rdlg-title,
 #delete-account-dialog .rdlg-title,
-#signout-dialog .rdlg-title {
+#signout-dialog .rdlg-title,
+#mic-dialog .rdlg-title {
   font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5rem
 }
 #reset-dialog .rdlg-body,
@@ -5623,7 +5634,8 @@ body.pink #signout-dialog {
 #delete-dialog .rdlg-body,
 #unpublish-dialog .rdlg-body,
 #delete-account-dialog .rdlg-body,
-#signout-dialog .rdlg-body {
+#signout-dialog .rdlg-body,
+#mic-dialog .rdlg-body {
   font-size:.9rem;line-height:1.45;margin-bottom:1.2rem
 }
 body.night #reset-dialog .rdlg-body,
@@ -5631,19 +5643,22 @@ body.night #sync-conflict-dialog .rdlg-body,
 body.night #delete-dialog .rdlg-body,
 body.night #unpublish-dialog .rdlg-body,
 body.night #delete-account-dialog .rdlg-body,
-body.night #signout-dialog .rdlg-body {color:#8f98a3}
+body.night #signout-dialog .rdlg-body,
+body.night #mic-dialog .rdlg-body {color:#8f98a3}
 body.pink #reset-dialog .rdlg-body,
 body.pink #sync-conflict-dialog .rdlg-body,
 body.pink #delete-dialog .rdlg-body,
 body.pink #unpublish-dialog .rdlg-body,
 body.pink #delete-account-dialog .rdlg-body,
-body.pink #signout-dialog .rdlg-body {color:#875068}
+body.pink #signout-dialog .rdlg-body,
+body.pink #mic-dialog .rdlg-body {color:#875068}
 #reset-dialog .rdlg-btns,
 #sync-conflict-dialog .rdlg-btns,
 #delete-dialog .rdlg-btns,
 #unpublish-dialog .rdlg-btns,
 #delete-account-dialog .rdlg-btns,
-#signout-dialog .rdlg-btns {
+#signout-dialog .rdlg-btns,
+#mic-dialog .rdlg-btns {
   flex-wrap:wrap;gap:.6rem
 }
 #reset-dialog .rdlg-cancel,
@@ -5657,7 +5672,9 @@ body.pink #signout-dialog .rdlg-body {color:#875068}
 #delete-dialog .rdlg-ok,
 #unpublish-dialog .rdlg-ok,
 #delete-account-dialog .rdlg-ok,
-#signout-dialog .rdlg-ok {
+#signout-dialog .rdlg-ok,
+#mic-dialog .rdlg-cancel,
+#mic-dialog .rdlg-ok {
   flex:1 1 0;min-width:0;height:46px;box-sizing:border-box;padding:0 .8rem;border-radius:14px;
   display:inline-flex;align-items:center;justify-content:center;text-align:center;
   font-size:.9rem;font-weight:700;line-height:1.1;transition:transform .12s
@@ -5673,13 +5690,16 @@ body.pink #signout-dialog .rdlg-body {color:#875068}
 #delete-dialog .rdlg-ok:active,
 #unpublish-dialog .rdlg-ok:active,
 #delete-account-dialog .rdlg-ok:active,
-#signout-dialog .rdlg-ok:active {transform:scale(.97)}
+#signout-dialog .rdlg-ok:active,
+#mic-dialog .rdlg-cancel:active,
+#mic-dialog .rdlg-ok:active {transform:scale(.97)}
 #reset-dialog .rdlg-cancel,
 #sync-conflict-dialog .rdlg-cancel,
 #delete-dialog .rdlg-cancel,
 #unpublish-dialog .rdlg-cancel,
 #delete-account-dialog .rdlg-cancel,
-#signout-dialog .rdlg-cancel {
+#signout-dialog .rdlg-cancel,
+#mic-dialog .rdlg-cancel {
   background:rgba(246,248,252,.6);color:#3366cc;border:1px solid rgba(20,30,50,.12)
 }
 body.night #reset-dialog .rdlg-cancel,
@@ -5687,7 +5707,8 @@ body.night #sync-conflict-dialog .rdlg-cancel,
 body.night #delete-dialog .rdlg-cancel,
 body.night #unpublish-dialog .rdlg-cancel,
 body.night #delete-account-dialog .rdlg-cancel,
-body.night #signout-dialog .rdlg-cancel {
+body.night #signout-dialog .rdlg-cancel,
+body.night #mic-dialog .rdlg-cancel {
   background:rgba(28,28,28,.6);color:#b0b0b0;border:1px solid #383838
 }
 body.pink #reset-dialog .rdlg-cancel,
@@ -5695,19 +5716,24 @@ body.pink #sync-conflict-dialog .rdlg-cancel,
 body.pink #delete-dialog .rdlg-cancel,
 body.pink #unpublish-dialog .rdlg-cancel,
 body.pink #delete-account-dialog .rdlg-cancel,
-body.pink #signout-dialog .rdlg-cancel {
+body.pink #signout-dialog .rdlg-cancel,
+body.pink #mic-dialog .rdlg-cancel {
   background:rgba(255,224,236,.6);color:#c8365e;border:1px solid rgba(200,54,94,.2)
 }
 @media (prefers-reduced-motion:reduce){
-#edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay,#reset-dialog,#sync-conflict-dialog,#delete-dialog,#unpublish-dialog,#delete-account-dialog,#signout-dialog{animation:none}
+#edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay,#reset-dialog,#sync-conflict-dialog,#delete-dialog,#unpublish-dialog,#delete-account-dialog,#signout-dialog,
+#mic-overlay,
+#mic-dialog {animation:none}
 }
-body.nb-reduce-motion #edit-reset-overlay,body.nb-reduce-motion #sync-conflict-overlay,body.nb-reduce-motion #delete-overlay,body.nb-reduce-motion #unpublish-overlay,body.nb-reduce-motion #delete-account-overlay,body.nb-reduce-motion #signout-overlay{animation:none}
+body.nb-reduce-motion #edit-reset-overlay,body.nb-reduce-motion #sync-conflict-overlay,body.nb-reduce-motion #delete-overlay,body.nb-reduce-motion #unpublish-overlay,body.nb-reduce-motion #delete-account-overlay,body.nb-reduce-motion #signout-overlay,
+body.nb-reduce-motion #mic-overlay {animation:none}
 body.nb-reduce-motion #reset-dialog,
 body.nb-reduce-motion #sync-conflict-dialog,
 body.nb-reduce-motion #delete-dialog,
 body.nb-reduce-motion #unpublish-dialog,
 body.nb-reduce-motion #delete-account-dialog,
-body.nb-reduce-motion #signout-dialog {animation:none}
+body.nb-reduce-motion #signout-dialog,
+body.nb-reduce-motion #mic-dialog {animation:none}
 /* Dialog / sheet buttons slide in from the right when the dialog opens, one after another (the overlay is display:none until opened, so this replays on every open). `backwards` fill only: once it ends, the button's own transform/press rules apply as normal. */
 @keyframes dlg-btn-in{from{opacity:0;transform:translateX(34px)}}
 .rdlg-btns>button,
@@ -6201,6 +6227,17 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
   </div>
 </div>
 
+<div id="mic-overlay">
+  <div id="mic-dialog" style="z-index:911" role="dialog" aria-modal="true" aria-labelledby="mic-dialog-title">
+    <div class="rdlg-title" id="mic-dialog-title">Use your microphone?</div>
+    <div class="rdlg-body">To record a voice note, the app needs your microphone. It only records after you tap record, and it stops when you tap stop. Your phone will ask you to say yes next.</div>
+    <div class="rdlg-btns">
+      <button class="rdlg-cancel" id="mic-dialog-cancel">Not now</button>
+      <button class="rdlg-ok rdlg-ok--blue" id="mic-dialog-ok">Continue</button>
+    </div>
+  </div>
+</div>
+
 
 <div id="restore-overlay">
   <div id="restore-dialog" style="z-index:501">
@@ -6304,7 +6341,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 14 October 2026</em></p>
+      <p><em>Effective 15 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists and theme choice, are also backed up to our servers (see below).</p>
@@ -6316,14 +6353,14 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>If you forget both your PIN and your recovery answer, we can't get you back in, and we can't reset it for you. The only way past it is to clear Bluebook's data in your phone or browser settings. Notes you backed up by signing in can be restored afterwards, but anything that only lived on this device is gone. So pick a PIN and answer you'll remember, and keep backups.</p>
       <p>One last thing: app lock is like a door lock for the app. It doesn't scramble the notes stored on your device. For extra privacy, keep your phone's own screen lock on too.</p>
       <h3>Google sign-in &amp; sync</h3>
-      <p>Signing in is totally optional, and Google handles it, so we never see your Google password. We get your Google account ID and email address, and we keep them along with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a code that keeps you signed in (a session lasts up to 30 days). While you're signed in, your notes (including embedded images), your favorites, your playlists (their names and the songs and videos you put in them) and your theme choice are backed up to our servers so you can restore them on another device. Your Pro purchase (if you have one) and any ad view-credit balance (see "In-app purchases" below) are linked to your account too, so they come with you. Signing out stops syncing. Your backup stays put, so you can pick it up again when you sign back in, and deleting your account removes it, as described below. If an image in your backup isn't used by any note any more (for example, after you delete a note or swap an image), the nightly clean-up deletes it once it's more than 14 days old.</p>
-      <p>Your account is yours to keep or remove. You can delete it any time by tapping the account icon and choosing Delete account under Show more. That signs this device out and schedules your account for deletion in 30 days. The deletion happens during our nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes, images and playlists, profile name and picture, subscriptions (the ones you made and the ones to you), records of the stories you've opened, your likes and follows (including the times we noted for them), running ads and their view statistics, your invite code and any invites you made or used, your ad access record, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance. We also take down every page you published (we keep a copy of each page, along with its record, for about 30 more days, as described under "Publishing a page"). Until then, your published pages and stories stay online. Changed your mind? Sign back in with the same Google account during the 30 days and the deletion is cancelled, with full access restored. Every device where you're signed in gets signed out as part of the deletion (each one finds out the next time the app contacts our server, usually within about a minute). Deleting your account doesn't delete anything held by Google or RevenueCat. Their own policies cover that.</p>
+      <p>Signing in is totally optional, and Google handles it, so we never see your Google password. We get your Google account ID and email address, and we keep them along with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a code that keeps you signed in (a session lasts up to 30 days). While you're signed in, your notes (including embedded images and voice notes), your favorites, your playlists (their names and the songs and videos you put in them) and your theme choice are backed up to our servers so you can restore them on another device. Your Pro purchase (if you have one) and any ad view-credit balance (see "In-app purchases" below) are linked to your account too, so they come with you. Signing out stops syncing. Your backup stays put, so you can pick it up again when you sign back in, and deleting your account removes it, as described below. If an image in your backup isn't used by any note any more (for example, after you delete a note or swap an image), the nightly clean-up deletes it once it's more than 14 days old.</p>
+      <p>Your account is yours to keep or remove. You can delete it any time by tapping the account icon and choosing Delete account under Show more. That signs this device out and schedules your account for deletion in 30 days. The deletion happens during our nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes, images, voice notes and playlists, profile name and picture, subscriptions (the ones you made and the ones to you), records of the stories you've opened, your likes and follows (including the times we noted for them), running ads and their view statistics, your invite code and any invites you made or used, your ad access record, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance. We also take down every page you published (we keep a copy of each page, along with its record, for about 30 more days, as described under "Publishing a page"). Until then, your published pages and stories stay online. Changed your mind? Sign back in with the same Google account during the 30 days and the deletion is cancelled, with full access restored. Every device where you're signed in gets signed out as part of the deletion (each one finds out the next time the app contacts our server, usually within about a minute). Deleting your account doesn't delete anything held by Google or RevenueCat. Their own policies cover that.</p>
       <h3>In-app purchases</h3>
       <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing. RevenueCat, a third-party subscription service, handles them for us. RevenueCat gets the purchase details it needs to confirm what you bought, linked to an ID. Before you sign in, that's an anonymous ID RevenueCat makes for your install. Once you sign in, it's your Google account ID, which is what lets a purchase follow you to another device. After that, the two work differently. The app checks directly with RevenueCat (not through our servers) to see whether Pro is active. It keeps a saved copy of that answer on your device, and refreshes it from RevenueCat when the app launches and after a purchase or restore. Ad view-credits do go through our servers. They hear from RevenueCat (not from Google directly) that you bought views, and add the views to your account. We keep a list of your view credits: each purchase (for a particular ad, or added to your balance from Settings), each time views are put on an ad (with that ad's address), each refund or return, and each gift of free views for an invite, all with the time. Views returned to you stay in your balance, and you can put them on an ad without buying again. That doesn't involve Google Play or RevenueCat. If Google Play refunds a purchase, we take those views back. That list is deleted with your account. We never get your payment details, because Google handles those directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
       <p>Publishing is always your choice, and it only happens when you tap Publish. We receive your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose, and we store them so the page can be shown at a public link. Anyone with that link can view the page. If you've given the note a category, we save that too. It's just your own private label, so it doesn't show on the page or on any card. We only send it back to you when you're signed in, so if you ever restore a page as a note, it goes back into the right category. You can publish without signing in, and then the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on. It then shows up among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for each page. It's stored on your device, and we don't keep it in its original form. We only keep a scrambled version, just enough to check that it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes the page down, and if it was running as an ad, the ad stops too. We may keep a copy for about 30 days afterward (our clean-up runs nightly), in case of an abuse report or takedown request, and then delete it. If the page was reported as child sexual abuse material, we keep the copy for 18 months instead (see "Reporting a published page"). The page's own record is kept for the same time and then deleted. It holds the address, a scrambled form of the private token, the title, description, tags and category, and, if the page was linked to an account, that account's internal ID. That's why it stays even after the account itself is deleted. If we remove a page because of a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as the address stays reserved: the address, a scrambled form of the private token, the title, description, tags and category, and, if the page was linked to an account, that account's internal ID. This record stays even after the copy or the account is deleted, because deleting it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. That count sits in a short-lived counter that disappears on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, to stop spam, we also count how often you like, subscribe, mark stories as seen, add an invite code or back up. That count is linked to your account and disappears within a couple of minutes.</p>
       <h3>Publishing as an ad</h3>
-      <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a starting template when they start a new note in Write (or in Share, for a Share note). It isn't just for people who have the page's link, like a regular published page. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it disappears from Write and Share right away, and any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable).</p>
+      <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a starting template when they start a new note in Write (or in Share, for a Share note). It isn't just for people who have the page's link, like a regular published page. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it disappears from Write and Share right away, and any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device.</p>
       <h3>Ad access &amp; invites</h3>
       <p>Some bigger ad packages have to be earned. To work out which packages you can start and how many ads you can run at once, our servers count these things, using the records described in this policy: your subscribers, published notes, stories, likes you've received and given, accounts you follow, how many of the last 30 days your account was active, your running ads, and any strikes. A strike comes from an alert we sent you about a removal, pause or suspension. We keep those alerts for up to a year, but a strike only counts for 60 days, or until we excuse it. You see these counts as your progress. We use them to enforce the limits, and other people never see them.</p>
       <p>Every signed-in account gets a random 8-character invite code, saved with the account. When someone adds a code, we save a record of who entered whose code, when it happened, and whether and why it stopped counting (the invited account was suspended or being deleted, or we removed it for abuse). A friend can add one code, in their first 14 days. You get an alert when a friend joins, but it doesn't say who. You only see totals: how many friends added your code and how many count right now, never who. An invite counts once your friend has published a note and been active on at least two days. If your friend chooses to subscribe at the same time, that's saved like any other subscription. When you share your code, it goes through your device's share sheet or clipboard, so the message is sent by the app you pick and we never see it. When an invite counts, we add 100 free views to your balance. We add it to the list of your view credits, together with the invited account's internal ID, so the same invite can't be rewarded twice. That entry stays in that list (and only there) until you delete your account, even if your friend's account is deleted first. If either account is deleted, the record of the invite itself is deleted.</p>
@@ -6333,8 +6370,10 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Write or Share screen. To find it, save the ad without adding anything new, then open the Publish sheet for that note. It fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
       <h3>Alerts</h3>
       <p>We want you to know what's happening with your account and the app. When one of your pages is reported, or we remove or pause something of yours, or change your account's status, you'll get an automatic message (an alert) that says why. We also use alerts for good news and updates, like announcements, new features, a bigger ad package unlocking, a friend adding your invite code, planned maintenance, safety tips, or a change to this policy or our terms. They can go to every account or to specific ones, and they're saved, shown and deleted the same way as the others. Alerts show up under Alerts in your library, which only appears once your account has at least one. A number on it shows how many have arrived since you last looked at the list, and the list's title shows how many you have in total. We save the text of each alert (which can name the page or item it's about), when it was sent, and when you deleted it. We also save one marker on your account for the newest alert you've been shown, so the count follows you across your devices. Deleting an alert only removes it from your list. We keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes who reported, or the details they wrote, because we don't pass those on. If you delete your account, your alerts and that marker are deleted too.</p>
+      <h3>Voice notes</h3>
+      <p>If you add a voice note to a page, the app asks your device for permission to use the microphone. It only records after you tap record, and it stops when you tap stop, after 5 minutes, or if you leave the app. The recording is saved inside the page on your device, just like a photo. If you're signed in, it's backed up to your account along with your other notes, and it's deleted if you delete your account. If you publish the page, the recording becomes part of it, so anyone with the link can listen. Voice notes can't be used in ads. We never listen to your recordings, turn them into text, or study them. When you play a voice note, it plays right on your device.</p>
       <h3>External images &amp; embeds</h3>
-      <p>Images you add to a page by URL are loaded straight from their source when the page is built. Instagram, X, Streamable, YouTube and Spotify embeds load straight from those services. We have nothing to do with these third-party hosts, with one exception: when you paste an Instagram share link or an X (t.co) short link using the editor's own tools, our server follows the link just to find out which post it points to. It doesn't read the page. It also counts requests from your IP address in a short-lived counter that disappears on its own after about a minute, and that isn't kept afterward or linked to your account. A page published as an ad can only use images linked directly from Wikipedia or Wikimedia Commons, and can't contain images uploaded from your device. We check this automatically before an ad can go live or be updated.</p>
+      <p>Images you add to a page by URL are loaded straight from their source when the page is built. Instagram, X, Streamable, YouTube and Spotify embeds load straight from those services. We have nothing to do with these third-party hosts, with one exception: when you paste an Instagram share link or an X (t.co) short link using the editor's own tools, our server follows the link just to find out which post it points to. It doesn't read the page. It also counts requests from your IP address in a short-lived counter that disappears on its own after about a minute, and that isn't kept afterward or linked to your account. A page published as an ad can only use images linked directly from Wikipedia or Wikimedia Commons, and can't contain images uploaded from your device or voice notes. We check this automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
       <p>This section is about links inside the app. In preview, tapping a link in a page shows its address in a sheet with a copy option. The app doesn't open or load the linked page. Nothing is fetched, and we can't see what links a page contains. A published page works a bit differently, depending on how you're viewing it. If someone opens its public web address directly, outside the app, they're looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Inside the app, opening a story or a note you found through search shows that same published page in the app's own built-in viewer (see "Stories, subscriptions &amp; likes" below), so you don't leave the app to see it. A link you tap inside that viewer opens in your own browser, which takes you out of the app. The app doesn't load the linked page itself, and we have nothing to do with that site, but like any site you open in a browser, it can see your IP address. If the app can't open the link, it copies the address instead.</p>
       <h3>Stories, subscriptions &amp; likes</h3>
@@ -6360,7 +6399,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 6 October 2026</em></p>
+      <p><em>Effective 15 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language, and you're welcome to reach out anytime with questions.</p>
       <h3>Responsible Use</h3>
       <p>Please use Bluebook kindly and lawfully. You agree to use it for lawful purposes only, and not to create, store, or export content that is illegal, harmful, threatening, abusive, untrue and damaging to someone's reputation, or that breaks someone else's rights. This applies with extra weight to anything you publish (see below).</p>
@@ -6373,7 +6412,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>Reports, Alerts &amp; Suspension</h3>
       <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad), or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages show up under Alerts in your library. We may also use Alerts to share announcements and updates about the app, like new features, maintenance, or changes to these terms. A profile picture that looks like it's pretending to be someone else may be removed. <strong>To keep the app safe for everyone, lots of reports about your content, or repeated rule-breaking, can lead to your account being suspended. When we remove or pause pages, stories, ads, profile pictures or display names, and when we suspend accounts, those count as strikes on your account for 60 days (unless we excuse one). Strikes affect which ad packages you can start (see Ad Access &amp; Invites below).</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, so we can run and moderate the service.</p>
       <h3>Advertising (Publish as Ad)</h3>
-      <p>You can turn a page you've already published into an ad, and buy a set number of views through Google Play Billing (handled for us by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be allowed as an ad, a page must: have no added text or captions beyond blank lines; keep the required attribution notice in place, unedited, and easy to see at its original size; have no more than two images; and use only images linked directly from Wikipedia or Wikimedia Commons (no images uploaded from your device). A page can also have video, audio, and social-post embeds added with the editor's own tools. YouTube, Spotify, Instagram, X and Streamable are the allowed sources, with one embed per platform at most. Embeds added any other way aren't allowed. Ads still follow the Responsible Use section above. They also can't contain sexual or adult content, or use images, embeds, attribution or branding to pretend to be a person, brand or organization, or to mislead viewers about who or what the ad is from. We check these rules automatically before an ad can go live or be updated. We may refuse or take down an ad that no longer follows them, or that breaks these terms. An ad and its page are the same thing, so reporting one reports the other.</p>
+      <p>You can turn a page you've already published into an ad, and buy a set number of views through Google Play Billing (handled for us by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be allowed as an ad, a page must: have no added text or captions beyond blank lines; keep the required attribution notice in place, unedited, and easy to see at its original size; have no more than two images; have no voice notes (those are recorded on your device); and use only images linked directly from Wikipedia or Wikimedia Commons (no images uploaded from your device). A page can also have video, audio, and social-post embeds added with the editor's own tools. YouTube, Spotify, Instagram, X and Streamable are the allowed sources, with one embed per platform at most. Embeds added any other way aren't allowed. Ads still follow the Responsible Use section above. They also can't contain sexual or adult content, or use images, embeds, attribution or branding to pretend to be a person, brand or organization, or to mislead viewers about who or what the ad is from. We check these rules automatically before an ad can go live or be updated. We may refuse or take down an ad that no longer follows them, or that breaks these terms. An ad and its page are the same thing, so reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app as a starting template on their Write screen (or their Share screen, for a page made in Share), not only to people who have its link. We can't promise an ad will get any particular number of views in a given time, that the ad service will always be available, or any particular result from an ad being shown.</p>
       <p>A <strong>view</strong> is counted once someone actually starts editing a note that was handed to them as your ad, not just when it's shown on their Write or Share screen. Every view counts: a repeat view from the same person or device still counts and is still taken from your view balance. Views aren't limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> number next to your ad's view count, just for your information. It's worked out from an anonymous ID made and stored on each device, which tells us whether a device has already been counted for a given ad (and, separately, is used for the activity counts in the Privacy Policy). It isn't linked to a Google account or any other identity, and it's sent whether or not you're signed in. Because it identifies a device rather than a person, someone using two devices counts as two unique viewers, and reinstalling the app or clearing its storage makes that device count as new from then on. The unique viewers number doesn't change your view balance or how views are taken from it.</p>
       <p>If Google Play refunds a view purchase, we take those views back out of your balance. If that leaves your balance below zero, your running ads stop, and you can't start a new ad until your balance covers it again.</p>
@@ -6388,7 +6427,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>You can buy a view package for a particular note when you publish it as an ad, or add views to your balance from Settings to put on any of your ads later. Views in your balance aren't assigned to a note until you use them.</p>
       <p>All buying of view packages goes through Google Play Billing (RevenueCat handles it for us). Any age or account requirements for buying are set and enforced by Google Play, not by us. By buying a view package, you confirm that Google Play's own terms allow you to make purchases on the account you're using.</p>
       <h3>Third-Party Content</h3>
-      <p>Images, video, and audio you embed by URL are loaded straight from the source you give us. You're responsible for having the right to use anything you embed. Images in an ad are limited as described above. The required attribution notice is there because third-party logos, trademarks and brand names may show up in an ad's content or images. You're still responsible for having the right to use whatever you include, and the notice doesn't give you any rights by itself.</p>
+      <p>Images, video, and audio you embed by URL are loaded straight from the source you give us. You're responsible for having the right to use anything you embed. The same goes for voice notes you record: they're your responsibility, and you need permission from anyone whose voice is in them. Images in an ad are limited as described above. The required attribution notice is there because third-party logos, trademarks and brand names may show up in an ad's content or images. You're still responsible for having the right to use whatever you include, and the notice doesn't give you any rights by itself.</p>
       <h3>Changes to These Terms</h3>
       <p>We may update these terms from time to time. If you keep using the app after changes are posted, you're accepting the revised terms.</p>
       <h3>Contact</h3>
@@ -6404,9 +6443,9 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="einfo-closebtn" onclick="closeEditorInfo()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="einfo-body">
-      <p>Make an illustrated article, a recipe with a video and an ingredient table, a trip plan with a packing checklist, or a how-to with code snippets. Mix in photos, quotes, songs, dividers, and more, and set it up exactly how you want. Then keep it to yourself, or publish it and share a link.</p>
+      <p>Make an illustrated article, a recipe with a video and an ingredient table, a trip plan with a packing checklist, or a how-to with code snippets. Mix in photos, quotes, songs, voice notes, dividers, and more, and set it up exactly how you want. Then keep it to yourself, or publish it and share a link.</p>
       <h3>Add pieces</h3>
-      <p>Scroll the bar at the top and tap what you want to add: a heading, subheading, text, to-do list, quote, code, photo, YouTube video, Spotify song, Instagram post, table, or divider. Some pieces let you choose a font, color, or layout first.</p>
+      <p>Scroll the bar at the top and tap what you want to add: a heading, subheading, text, to-do list, quote, code, photo, YouTube video, Spotify song, voice note, Instagram post, table, or divider. Some pieces let you choose a font, color, or layout first.</p>
       <h3>Move things around</h3>
       <ul>
         <li>Press and hold the six dots in a piece's top-right corner, then slide it where you want it.</li>
@@ -6745,7 +6784,7 @@ const _NB_NOTE_UI_STATE_SCRIPT = `<script data-noteinfra="1">(function(){
   new MutationObserver(function(muts){
     for (var i = 0; i < muts.length; i++) {
       var t = muts[i].target;
-      if (t && t.closest && t.closest('#cv-fab,#cv-bg-fab')) continue;
+      if (t && t.closest && t.closest('#cv-fab,#cv-bg-fab,.blk-aud-live')) continue;
       report(false);
       return;
     }
@@ -6955,6 +6994,81 @@ function nbClassicLayoutKit(canvas) {
     migrate: migrateClassicPositions, layout: layoutClassicCanvas
   };
 }
+// Voice-note player, shared by the editor, the published page and the story viewer (serialized into each via .toString(), like the
+// kits above). It only plays: recording lives in the editor. A recording is a base64 data URI held on the card's hidden
+// <img class="blk-aud-data">, so the host's image cache (sync, backup, export, publish) carries it exactly like a photo.
+// State lives in data-* attributes on purpose: the editor's change observer only watches class/aria, so playing never marks a note dirty.
+function nbAudioKit() {
+  var cur = null;
+  function fmt(s) { s = Math.max(0, Math.floor(s || 0)); var m = Math.floor(s / 60), x = s % 60; return m + ':' + (x < 10 ? '0' : '') + x; }
+  function srcOf(card) { var d = card.querySelector('.blk-aud-data'), s = d ? (d.getAttribute('src') || '') : ''; return s.indexOf('data:') === 0 ? s : ''; }
+  function keyOf(src) { var h = 0, i; for (i = 0; i < src.length; i++) { h = (h << 5) - h + src.charCodeAt(i); h |= 0; } return 'i' + (h >>> 0).toString(36) + src.length.toString(36); }
+  function hueOf(k) { var h = 0, i; for (i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0; return Math.abs(h) % 360; }
+  function durOf(card, a) { return (a && isFinite(a.duration) && a.duration > 0) ? a.duration : (Number(card.getAttribute('data-dur')) || 0); }
+  function paint(card) {
+    var b = card.querySelector('.blk-aud-bar b'), a = card._a, d = durOf(card, a);
+    if (b) b.style.width = (a && d ? Math.max(0, Math.min(1, a.currentTime / d)) * 100 : 0) + '%';
+  }
+  function label(card, t) { var pp = card.querySelector('.blk-aud-pp'); if (pp) pp.setAttribute('aria-label', t); }
+  function idle(card) {
+    card.removeAttribute('data-playing');
+    if (card.getAttribute('data-st') === 'ready') label(card, 'Play');
+    if (cur && cur.card === card) cur = null;
+  }
+  function stop(card) { if (!card) return; var a = card._a; if (a) { try { a.pause(); } catch (e) {} } idle(card); }
+  function stopAll() { if (cur) stop(cur.card); }
+  function ensure(card) {
+    var src = srcOf(card), a = card._a;
+    if (!src) return null;
+    if (a && card._aSrc === src) return a;
+    if (a) { try { a.pause(); } catch (e) {} }
+    a = card._a = new Audio(); card._aSrc = src; a.preload = 'metadata'; a.src = src;
+    a.addEventListener('timeupdate', function () { paint(card); });
+    a.addEventListener('pause', function () { if (!a.ended) idle(card); });
+    a.addEventListener('ended', function () { try { a.currentTime = 0; } catch (e) {} idle(card); paint(card); });
+    a.addEventListener('error', function () { idle(card); });
+    return a;
+  }
+  function toggle(card) {
+    if (card.getAttribute('data-playing') === '1') { stop(card); return; }
+    var a = ensure(card); if (!a) return;
+    if (cur && cur.card !== card) stop(cur.card);
+    cur = { card: card }; card.setAttribute('data-playing', '1'); label(card, 'Pause');
+    var p = a.play(); if (p && p.catch) p.catch(function () { idle(card); });
+  }
+  function reset(card) {
+    stop(card); card._a = null; card._aSrc = '';
+    var s = srcOf(card);
+    if (s) card.style.setProperty('--aud-h', String(hueOf('rec:' + keyOf(s)))); // same hue the Media panel derives from the item key
+    label(card, s ? 'Play' : 'Record'); paint(card);
+  }
+  function bind(card) {
+    if (card._audBound) return;
+    card._audBound = true;
+    card.removeAttribute('data-playing');
+    var src = srcOf(card), pp = card.querySelector('.blk-aud-pp'), bar = card.querySelector('.blk-aud-bar');
+    card.setAttribute('data-st', src ? 'ready' : 'empty');
+    if (src) card.style.setProperty('--aud-h', String(hueOf('rec:' + keyOf(src))));
+    label(card, src ? 'Play' : 'Record');
+    if (pp) pp.addEventListener('click', function (e) { e.stopPropagation(); if (card.getAttribute('data-st') === 'ready') toggle(card); });
+    if (bar) {
+      var down = false;
+      var seek = function (e) {
+        var a = ensure(card), r = bar.getBoundingClientRect(), d = a ? durOf(card, a) : 0;
+        if (!a || !d || !r.width) return;
+        try { a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * d; } catch (x) {}
+        paint(card);
+      };
+      bar.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); down = true; try { bar.setPointerCapture(e.pointerId); } catch (x) {} seek(e); });
+      bar.addEventListener('pointermove', function (e) { if (down) seek(e); });
+      var up = function () { down = false; };
+      bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+    }
+    paint(card);
+  }
+  return { bind: bind, stop: stop, stopAll: stopAll, reset: reset, fmt: fmt, srcOf: srcOf };
+}
+
 const NB_PRISTINE_TEMPLATE = `<style>
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0}
@@ -7734,6 +7848,47 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 .cv-page.cv-preview [contenteditable]:focus{background:none}
 .cv-page.cv-preview .blk-heading,.cv-page.cv-preview .blk-subheading,.cv-page.cv-preview .blk-text,.cv-page.cv-preview .blk-quote,.cv-page.cv-preview .blk-code,.cv-page.cv-preview .blk-checklist,.cv-page.cv-preview .blk-table-wrap,.cv-page.cv-preview .blk-caption figcaption{padding-right:0}
 
+
+/* Voice note: a card that mirrors the Media panel's mini player (art tile, title and subline, glass surface, thin progress bar). */
+.blk[data-type="audio"]{padding-top:1.7rem;--aud-bgs:#fff;--aud-bg:rgba(255,255,255,.88);--aud-fg:#202122;--aud-sub:#54595d;--aud-div:#e8ecf4;--aud-bar:#3366cc;--aud-sh:0 8px 24px rgba(20,30,50,.18);--aud-rec:#e5484d;--aud-h:215}
+html[data-nb-theme="pink"] .blk[data-type="audio"]{--aud-bgs:#fff2f7;--aud-bg:rgba(255,242,247,.9);--aud-fg:#1a0a12;--aud-sub:#875068;--aud-div:#f5d5e2;--aud-bar:#bd2856;--aud-sh:0 8px 24px rgba(200,54,94,.22)}
+html[data-nb-theme="night"] .blk[data-type="audio"]{--aud-bgs:#1e1e22;--aud-bg:rgba(30,30,34,.82);--aud-fg:#e8e8e8;--aud-sub:#8f98a3;--aud-div:rgba(255,255,255,.07);--aud-bar:#fff;--aud-sh:0 8px 24px rgba(0,0,0,.6);--aud-rec:#ff6a6e}
+.cv-page .blk[data-type="audio"][data-bg="black"],.cv-page[data-page-bg="black"] .blk[data-type="audio"]:not([data-bg]){--aud-bgs:#1e1e22;--aud-bg:rgba(30,30,34,.82);--aud-fg:#e8e8e8;--aud-sub:#8f98a3;--aud-div:rgba(255,255,255,.07);--aud-bar:#fff;--aud-sh:0 8px 24px rgba(0,0,0,.6);--aud-rec:#ff6a6e}
+.blk-aud{position:relative;display:flex;align-items:center;gap:.7rem;padding:.5rem .3rem .5rem .5rem;border-radius:18px;background:var(--aud-bg);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);color:var(--aud-fg);border:1px solid var(--aud-div);box-shadow:var(--aud-sh);overflow:hidden;-webkit-user-select:none;user-select:none}
+html[data-nb-glass="1"] .blk-aud{background:color-mix(in srgb,var(--aud-bgs) 62%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
+.blk-aud-art{position:relative;flex:0 0 44px;width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--aud-sub);background:var(--aud-div);overflow:hidden}
+.blk-aud-art svg{width:24px;height:24px}
+.blk-aud[data-st="ready"] .blk-aud-art{color:#fff;background:linear-gradient(135deg,hsl(var(--aud-h),52%,46%),hsl(calc(var(--aud-h) + 42),58%,28%))}
+.blk-aud[data-st="rec"] .blk-aud-art{color:#fff;background:var(--aud-rec);animation:blk-aud-pulse 1.4s ease-in-out infinite}
+@keyframes blk-aud-pulse{0%,100%{box-shadow:0 0 0 0 rgba(229,72,77,.45)}50%{box-shadow:0 0 0 7px rgba(229,72,77,0)}}
+@media (prefers-reduced-motion:reduce){.blk-aud[data-st="rec"] .blk-aud-art{animation:none}}
+.blk-aud-tx{flex:1;min-width:0}
+.blk-aud-t{font-weight:600;font-size:.95rem;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk-aud-s,.blk-aud-live{font-size:.8rem;color:var(--aud-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.blk-aud-live{display:none;font-variant-numeric:tabular-nums}
+.blk-aud-live::before{content:"Recording "}
+.blk-aud[data-st="rec"] .blk-aud-s{display:none}
+.blk-aud[data-st="rec"] .blk-aud-live{display:block;color:var(--aud-rec)}
+.blk-aud-pp,.blk-aud-redo{border:0;background:none;color:var(--aud-fg);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.blk-aud-pp{width:42px;height:44px}
+.blk-aud-redo{width:36px;height:44px;color:var(--aud-sub);display:none}
+.blk-aud[data-st="ready"] .blk-aud-redo{display:inline-flex}
+.cv-page.cv-preview .blk-aud-redo{display:none}
+.blk-aud-pp svg{width:22px;height:22px;display:none}
+.blk-aud-redo svg{width:19px;height:19px}
+.blk-aud[data-st="empty"] .blk-aud-pp .i-mic{display:block}
+.blk-aud[data-st="rec"] .blk-aud-pp .i-stop{display:block;color:var(--aud-rec)}
+.blk-aud[data-st="ready"] .blk-aud-pp .i-play{display:block}
+.blk-aud[data-st="ready"][data-playing="1"] .blk-aud-pp .i-play{display:none}
+.blk-aud[data-st="ready"][data-playing="1"] .blk-aud-pp .i-pause{display:block}
+.blk-aud-pp:active,.blk-aud-redo:active{opacity:.6}
+.blk-aud-bar{position:absolute;left:0;right:0;bottom:0;height:3px;touch-action:none;cursor:pointer}
+.blk-aud-bar::before{content:"";position:absolute;left:0;right:0;top:-12px;bottom:0}
+.blk-aud-bar b{display:block;height:100%;width:0;background:var(--aud-bar)}
+.blk-aud[data-st="ready"] .blk-aud-bar{background:var(--aud-div)}
+.blk-aud:not([data-st="ready"]) .blk-aud-bar{display:none}
+.blk-aud-data{display:none}
+.blk[data-type="audio"] .blk-caption{margin-top:.5rem}
 </style>
 
 <div class="cv-page">
@@ -7749,6 +7904,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
     <button class="cv-add" type="button" data-type="code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Code</button>
     <button class="cv-add" type="button" data-type="image" data-rp="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5.5-5.5L4 21"/></svg>Image</button>
     <button class="cv-add" type="button" data-type="media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5l5 2.5-5 2.5v-5z"/></svg>Media</button>
+    <button class="cv-add" type="button" data-type="audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Voice</button>
     <button class="cv-add" type="button" data-type="social"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 9l3 3-3 3M13 15h4"/></svg>Social post</button>
     <button class="cv-add" type="button" data-type="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Table</button>
     <button class="cv-add" type="button" data-type="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16"/></svg>Divider</button>
@@ -7851,6 +8007,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 <template id="tpl-blk-image"><div class="blk" data-type="image"><div class="blk-ctrl"><button class="blk-swap" type="button" aria-label="Change image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><figure class="blk-figure"><div class="blk-img blk-img-empty"><img alt="Image"><div class="blk-img-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5.5-5.5L4 21"/></svg><span>Image</span></div></div><div class="blk-caption"><figcaption contenteditable="true" data-placeholder="true"><br></figcaption><div class="blk-cap-ctrl"><button class="blk-cap-move" type="button" aria-label="Move caption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l4-4 4 4M8 17l4 4 4-4M12 3v18"/></svg></button><button class="blk-cap-del" type="button" aria-label="Delete caption"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div></div></figure></div></template>
 
 <template id="tpl-blk-media"><div class="blk" data-type="media"><div class="blk-ctrl"><button class="blk-swap" type="button" aria-label="Change media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><figure class="blk-figure"><div class="blk-media-frame blk-media-empty"><iframe title="Video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><div class="blk-media-ph"></div></div><div class="blk-caption"><figcaption contenteditable="true" data-placeholder="true"><br></figcaption><div class="blk-cap-ctrl"><button class="blk-cap-move" type="button" aria-label="Move caption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l4-4 4 4M8 17l4 4 4-4M12 3v18"/></svg></button><button class="blk-cap-del" type="button" aria-label="Delete caption"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div></div></figure></div></template>
+<template id="tpl-blk-audio"><div class="blk" data-type="audio"><div class="blk-ctrl"><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><figure class="blk-figure"><div class="blk-aud" data-st="empty" data-dur="0"><div class="blk-aud-art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div><div class="blk-aud-tx"><div class="blk-aud-t">Voice note</div><div class="blk-aud-s">Tap the mic to record</div><div class="blk-aud-live"></div></div><button class="blk-aud-redo" type="button" aria-label="Record again"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button><button class="blk-aud-pp" type="button" aria-label="Record"><svg class="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L8.5 4.64A1 1 0 0 0 7 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg><svg class="i-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2.4"/></svg></button><span class="blk-aud-bar"><b></b></span><img class="blk-aud-data" alt="" hidden></div><div class="blk-caption"><figcaption contenteditable="true" data-placeholder="true"><br></figcaption><div class="blk-cap-ctrl"><button class="blk-cap-move" type="button" aria-label="Move caption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l4-4 4 4M8 17l4 4 4-4M12 3v18"/></svg></button><button class="blk-cap-del" type="button" aria-label="Delete caption"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div></div></figure></div></template>
 <template id="tpl-blk-social"><div class="blk" data-type="social"><div class="blk-ctrl"><button class="blk-swap" type="button" aria-label="Change post"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><figure class="blk-figure"><div class="blk-social-frame blk-social-empty"><div class="blk-social-embed"></div><div class="blk-social-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 9l3 3-3 3M13 15h4"/></svg><span>Social post</span></div></div><div class="blk-caption"><figcaption contenteditable="true" data-placeholder="true"><br></figcaption><div class="blk-cap-ctrl"><button class="blk-cap-move" type="button" aria-label="Move caption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l4-4 4 4M8 17l4 4 4-4M12 3v18"/></svg></button><button class="blk-cap-del" type="button" aria-label="Delete caption"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div></div></figure></div></template>
 
 <template id="tpl-blk-table"><div class="blk" data-type="table"><div class="blk-ctrl"><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-table-wrap"><div class="blk-table-scroll"><table class="blk-table"><thead><tr class="blk-table-colctrl"><th class="blk-table-corner"></th><th><button class="blk-table-coldel" type="button" aria-label="Delete column"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></th><th><button class="blk-table-coldel" type="button" aria-label="Delete column"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></th></tr><tr><th class="blk-table-rowhead"></th><th contenteditable="true" data-placeholder="true">Header</th><th contenteditable="true" data-placeholder="true">Header</th></tr></thead><tbody><tr><td class="blk-table-rowhead"><button class="blk-table-rowdel" type="button" aria-label="Delete row"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></td><td contenteditable="true" data-placeholder="true">Cell</td><td contenteditable="true" data-placeholder="true">Cell</td></tr></tbody></table></div><div class="blk-table-tools"><button class="blk-table-addrow" type="button">+ Row</button><button class="blk-table-addcol" type="button">+ Column</button></div></div></div></template>
@@ -10209,7 +10366,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
     var delBtn = capWrap.querySelector('.blk-cap-del');
     if (moveBtn && figure) {
       moveBtn.addEventListener('click', function() {
-        var media = figure.querySelector('.blk-img, .blk-media-frame, .blk-social-frame');
+        var media = figure.querySelector('.blk-img, .blk-media-frame, .blk-social-frame, .blk-aud');
         if (!media) return;
         var before = hcBeginBlock(block);
         if (capWrap.previousElementSibling === media) {
@@ -10377,6 +10534,111 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
     updateColDelState();
   }
 
+  /* Voice note block (.blk-aud): editor side. Playback is the shared nbAudioKit; this adds recording and the theme/glass sync.
+     The recording is stored as a data URI on the card's hidden img.blk-aud-data, which the host's image cache already syncs,
+     backs up, exports and publishes like any photo (note content only carries the data-note-img-ref placeholder). */
+  var audKit = (${nbAudioKit.toString()})();
+  var AUD_MAX_SEC = 300, audRec = null; // 5 min at 24 kbps stays near 1.2 MB, inside the 2 MB published-page limit
+  function audToast(m) { try { parent.showToast(m); } catch (e) {} }
+  function audTheme() {
+    try {
+      var pb = parent.document.body, root = document.documentElement;
+      root.setAttribute('data-nb-theme', pb.classList.contains('night') ? 'night' : pb.classList.contains('pink') ? 'pink' : 'light');
+      var g = parent.document.querySelector('style[data-nb-glass]');
+      root.setAttribute('data-nb-glass', g && g.media === 'all' ? '1' : '0');
+    } catch (e) {}
+  }
+  audTheme();
+  document.addEventListener('visibilitychange', function() { audTheme(); if (document.hidden) audStopRec(); });
+  window.addEventListener('focus', audTheme);
+  window.addEventListener('pagehide', function() { audStopRec(); });
+  function audStopRec() { if (audRec && audRec.rec && audRec.rec.state !== 'inactive') { try { audRec.rec.stop(); } catch (e) {} } }
+  function audStamp() {
+    var d = new Date();
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ', ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+  function audAskMic() {
+    return new Promise(function(resolve) {
+      function ask() { try { if (parent.nbAskMic) { parent.nbAskMic(resolve); return; } } catch (e) {} resolve(true); }
+      try { navigator.permissions.query({ name: 'microphone' }).then(function(st) { if (st.state === 'granted') resolve(true); else ask(); }, function() { ask(); }); }
+      catch (e) { ask(); }
+    });
+  }
+  function audStartRec(card) {
+    if (audRec) return;
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)) { audToast('Recording is not supported on this device'); return; }
+    audKit.stopAll();
+    audRec = { pending: true };
+    audAskMic().then(function(ok) {
+      if (!ok) { audRec = null; return Promise.reject({ nbDeclined: true }); }
+      return navigator.mediaDevices.getUserMedia({ audio: true });
+    }).then(function(stream) {
+      var mime = '';
+      ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].some(function(m) { try { if (MediaRecorder.isTypeSupported(m)) { mime = m; return true; } } catch (e) {} return false; });
+      var rec = null;
+      try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, audioBitsPerSecond: 24000 } : { audioBitsPerSecond: 24000 }); }
+      catch (e) { try { rec = new MediaRecorder(stream); } catch (e2) { rec = null; } }
+      if (!rec) { stream.getTracks().forEach(function(t) { t.stop(); }); audRec = null; audToast('Recording is not supported on this device'); return; }
+      var chunks = [], t0 = Date.now(), live = card.querySelector('.blk-aud-live'), pp = card.querySelector('.blk-aud-pp');
+      // The live timer sits in .blk-aud-live, which the change observer ignores, so recording does not mark the note changed every tick.
+      var tick = setInterval(function() {
+        var sec = (Date.now() - t0) / 1000;
+        if (live) live.textContent = audKit.fmt(sec);
+        if (sec >= AUD_MAX_SEC || !card.isConnected) audStopRec();
+      }, 250);
+      audRec = { rec: rec };
+      rec.ondataavailable = function(e) { if (e.data && e.data.size) chunks.push(e.data); };
+      rec.onstop = function() {
+        clearInterval(tick);
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        audRec = null;
+        if (live) live.textContent = '';
+        var had = !!audKit.srcOf(card);
+        card.setAttribute('data-st', had ? 'ready' : 'empty');
+        if (pp) pp.setAttribute('aria-label', had ? 'Play' : 'Record');
+        if (!chunks.length || !card.isConnected) return;
+        var dur = Math.round((Date.now() - t0) / 100) / 10;
+        var bt = (rec.mimeType || mime || 'audio/webm').split(';')[0];
+        if (bt.indexOf('audio/') !== 0) bt = 'audio/' + (bt.split('/')[1] || 'webm');
+        var blob = new Blob(chunks, { type: bt });
+        var fr = new FileReader();
+        fr.onload = function() {
+          var d = card.querySelector('.blk-aud-data'), sub = card.querySelector('.blk-aud-s');
+          if (!d || !card.isConnected) return;
+          d.setAttribute('src', String(fr.result));
+          card.setAttribute('data-dur', String(dur));
+          card.setAttribute('data-st', 'ready');
+          audKit.reset(card);
+          if (sub) sub.textContent = audKit.fmt(dur) + ' \\u00b7 ' + audStamp();
+          card.classList.add('aud-new'); // class changes are what the change observer watches; this makes the new recording save
+          setTimeout(function() { card.classList.remove('aud-new'); }, 40);
+        };
+        fr.readAsDataURL(blob);
+      };
+      card.setAttribute('data-st', 'rec');
+      if (pp) pp.setAttribute('aria-label', 'Stop recording');
+      if (live) live.textContent = '0:00';
+      rec.start(1000);
+    }).catch(function(err) { audRec = null; if (err && err.nbDeclined) return; audToast('Microphone access was blocked'); });
+  }
+  function wireAudio(block) {
+    var card = block.querySelector('.blk-aud');
+    if (!card) return;
+    audKit.bind(card);
+    var pp = card.querySelector('.blk-aud-pp'), redo = card.querySelector('.blk-aud-redo');
+    function previewing() { var pg = document.querySelector('.cv-page'); return !!(pg && pg.classList.contains('cv-preview')); }
+    if (pp) pp.addEventListener('click', function() {
+      var st = card.getAttribute('data-st');
+      if (st === 'rec') audStopRec();
+      else if (st === 'empty' && !previewing()) audStartRec(card);
+    });
+    if (redo) redo.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (previewing()) return;
+      audKit.stop(card); audStartRec(card);
+    });
+  }
+
   function wireBlock(block) {
     wireDrag(block);
     wireResize(block);
@@ -10386,6 +10648,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
     wireImage(block);
     wireMedia(block);
     wireSocial(block);
+    wireAudio(block);
     wireCaption(block);
     wireBlockSwap(block);
     wireChecklist(block);
@@ -13499,8 +13762,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'sw', k: 'stories', l: 'Stories strip', s: 'Show stories above your notes in All.', after: () => _nbSyncStoriesStripVisibility() },
       { t: 'sw', k: 'tips', l: 'Welcome tips', s: 'Show the intro carousel in the Library.' },
       { t: 'sw', k: 'hideLibCount', l: 'Hide Library category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Alerts, Published, Stories, Subscribed, Liked, Uncategorized and your own categories).', after: () => buildCatBar() },
-      { t: 'sw', k: 'hideMdCount', l: 'Hide Media category counts', s: 'Hide the counts on the Media tabs (Songs, Videos, Albums and Playlists).' },
-      { t: 'sw', k: 'mediaSwipe', l: 'Swipe from left edge to open Media', s: 'Swipe in from the left edge of the screen, on any screen in the app, to open Media (songs, videos, albums, playlists).' }]],
+      { t: 'sw', k: 'hideMdCount', l: 'Hide Media category counts', s: 'Hide the counts on the Media tabs (Audio, Videos, Albums and Playlists).' },
+      { t: 'sw', k: 'mediaSwipe', l: 'Swipe from left edge to open Media', s: 'Swipe in from the left edge of the screen, on any screen in the app, to open Media (audio, videos, albums, playlists).' }]],
     ['Writing', [
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
@@ -14774,7 +15037,9 @@ function _nbPlCleanIncoming(r) {
   const items = [];
   r.items.forEach(o => {
     if (o && typeof o.k === 'string' && typeof o.p === 'string' && typeof o.id === 'string') {
-      items.push({ k: o.k, p: o.p, type: String(o.type || ''), id: o.id, spk: String(o.spk || ''), u: String(o.u || ''), nt: String(o.nt || ''), ns: String(o.ns || ''), na: String(o.na || '') });
+      const it = { k: o.k, p: o.p, type: String(o.type || ''), id: o.id, spk: String(o.spk || ''), u: String(o.u || ''), nt: String(o.nt || ''), ns: String(o.ns || ''), na: String(o.na || '') };
+      if (o.p === 'va') { it.dur = Number(o.dur) || 0; it.cap = String(o.cap || '').slice(0, 80); it.ix = Number(o.ix) || 0; } // a voice note carries its length, caption and (liked notes) its position in the page
+      items.push(it);
     }
   });
   return { id: r.id, name: r.name.slice(0, 60), items, c: Number(r.c) || 0, u: Number(r.u) || Number(r.c) || 0 };
@@ -14820,7 +15085,7 @@ function _nbSchedulePullThenPush() {
 // The backup is one blob with an 8 MB cap. Past it, a background push would
 // fail without a word, so say so once per session (and on every manual sync).
 let _nbSyncTooLargeNotified = false;
-const NB_SYNC_TOO_LARGE_MSG = 'Too much to sync. Auto-backup is paused. Try removing large images.';
+const NB_SYNC_TOO_LARGE_MSG = 'Too much to sync. Auto-backup is paused. Try removing large images or voice notes.';
 function _nbSyncTooLarge(showFeedback) {
   let notified = false;
   if (showFeedback || !_nbSyncTooLargeNotified) { showToast(NB_SYNC_TOO_LARGE_MSG); notified = true; }
@@ -14853,21 +15118,27 @@ let _nbImgCapNotified = false;
 let _nbImgCapHit = 0; // timestamp of the last time the account's backed-up image limit was hit (0 = not hit)
 let _nbImgCapLimit = 0; // the limit the server last reported (0 = unknown)
 const _nbImgAddWarned = new Set(); // image ids already warned about at add time
-function _nbImgCapMsg(inSync) {
-  return 'Image backup limit reached' + (_nbImgCapLimit ? ' (' + _nbImgCapLimit.toLocaleString() + ')' : '') +
-    (inSync ? '. New images stay on this device only. Delete unused notes to free space.' : '. This image stays on this device only.');
+// What a stored picture or recording is called in a message: pictures are "images", recordings are "voice notes", a mix is "items".
+function _nbMediaNoun(datas) {
+  let img = 0, aud = 0;
+  datas.forEach(d => { if (typeof d === 'string' && d.indexOf('data:audio/') === 0) aud++; else img++; });
+  return aud && img ? 'item' : aud ? 'voice note' : 'image';
 }
-function _nbImgTooLargeMsg(n) {
+function _nbImgCapMsg(inSync, noun) {
+  return 'Image and voice note backup limit reached' + (_nbImgCapLimit ? ' (' + _nbImgCapLimit.toLocaleString() + ')' : '') +
+    (inSync ? '. New images and voice notes stay on this device only. Delete unused notes to free space.' : '. This ' + noun + ' stays on this device only.');
+}
+function _nbImgTooLargeMsg(n, noun) {
   const mb = Math.round(NB_SYNC_IMG_MAX_BYTES / 1048576);
-  return (n === 1 ? 'One image is' : n + ' images are') + ' over ' + mb + ' MB and can\u2019t be backed up. The rest still sync.';
+  return (n === 1 ? 'One ' + noun + ' is' : n + ' ' + noun + 's are') + ' over ' + mb + ' MB and can\u2019t be backed up. The rest still sync.';
 }
 // Called when a note's editor hands over an image, BEFORE it's stored: tells the
 // person right away, instead of later during the background sync,
 // that this one won't be backed up. Signed-in only, once per image.
 function _nbWarnNewImage(id, data) {
   if (!nbIsSignedIn() || _nbImgAddWarned.has(id) || _nbGetImage(id) || typeof data !== 'string') return;
-  if (data.length > NB_SYNC_IMG_MAX_BYTES) { _nbImgAddWarned.add(id); showToast(_nbImgTooLargeMsg(1)); }
-  else if (_nbImgCapHit) { _nbImgAddWarned.add(id); showToast(_nbImgCapMsg(false)); }
+  if (data.length > NB_SYNC_IMG_MAX_BYTES) { _nbImgAddWarned.add(id); showToast(_nbImgTooLargeMsg(1, _nbMediaNoun([data]))); }
+  else if (_nbImgCapHit) { _nbImgAddWarned.add(id); showToast(_nbImgCapMsg(false, _nbMediaNoun([data]))); }
 }
 // Uploads whichever of `images` ({id: dataURL}) the server doesn't have yet.
 // Runs BEFORE the notes that reference them are pushed, so another device can
@@ -14887,12 +15158,12 @@ async function _nbSyncUploadImages(images, showFeedback) {
   if (_nbImgCapHit && !showFeedback && Date.now() - _nbImgCapHit < 10 * 60 * 1000) return { ok: true };
   // Images the server refused as too big stay in the set for the session; count the ones still
   // in use so the warning can repeat on a manual sync and re-arm once they're gone.
-  const stuckLarge = Object.keys(images).filter(id => _nbImgTooLarge.has(id)).length;
+  const stuckIds = Object.keys(images).filter(id => _nbImgTooLarge.has(id)), stuckLarge = stuckIds.length;
   if (!stuckLarge) _nbImgTooLargeNotified = false;
   let warned = false;
   if (!todo.length) {
     _nbImgCapHit = 0; _nbImgCapNotified = false; // nothing left waiting on the limit
-    if (stuckLarge && (showFeedback || !_nbImgTooLargeNotified)) { _nbImgTooLargeNotified = true; warned = true; showToast(_nbImgTooLargeMsg(stuckLarge)); }
+    if (stuckLarge && (showFeedback || !_nbImgTooLargeNotified)) { _nbImgTooLargeNotified = true; warned = true; showToast(_nbImgTooLargeMsg(stuckLarge, _nbMediaNoun(stuckIds.map(id => images[id])))); }
     return warned ? { ok: true, warned } : { ok: true };
   }
   const missing = [];
@@ -14931,8 +15202,8 @@ async function _nbSyncUploadImages(images, showFeedback) {
       if (_nbImgCapHit) { _nbImgCapHit = 0; _nbImgCapNotified = false; } // an upload went through: space was freed, so a future hit is announced again
     }
   } finally { _nbSaveSyncedImgs(synced); } // keep progress even if we stop partway
-  const largeNow = Object.keys(images).filter(id => _nbImgTooLarge.has(id)).length;
-  if (!warned && (tooLarge || largeNow) && (showFeedback || !_nbImgTooLargeNotified)) { _nbImgTooLargeNotified = true; warned = true; showToast(_nbImgTooLargeMsg(largeNow || 1)); }
+  const largeIds = Object.keys(images).filter(id => _nbImgTooLarge.has(id)), largeNow = largeIds.length;
+  if (!warned && (tooLarge || largeNow) && (showFeedback || !_nbImgTooLargeNotified)) { _nbImgTooLargeNotified = true; warned = true; showToast(_nbImgTooLargeMsg(largeNow || 1, _nbMediaNoun(largeIds.map(id => images[id])))); }
   return warned ? { ok: true, warned } : { ok: true };
 }
 // After a pull: any image a visible note references that isn't on this device
@@ -14973,7 +15244,7 @@ async function _nbSyncFetchMissingImages() {
   finally {
     _nbFetchingImgs = false;
     if (got) { _nbSaveSyncedImgs(synced); try { nbRenderNotesScreen(); } catch (e) {} }
-    if (gone && !_nbImgGoneNotified) { _nbImgGoneNotified = true; showToast('Some images aren\u2019t backed up, so they can\u2019t load on this device.'); }
+    if (gone && !_nbImgGoneNotified) { _nbImgGoneNotified = true; showToast('Some images or voice notes aren\u2019t backed up, so they can\u2019t load on this device.'); }
     else if (!gone && got) _nbImgGoneNotified = false;
   }
 }
@@ -15962,6 +16233,19 @@ async function confirmLogout() {
   closeLogoutConfirm();
   openAccountScreen();
 }
+// Asks before the system's own microphone prompt, so people know why. Same confirm dialog as the others (themes and glass included).
+// cb(true) = Continue, cb(false) = Not now or a tap outside. Called by the editor's voice-note recorder.
+function nbAskMic(cb) {
+  const ov = document.getElementById('mic-overlay');
+  const okBtn = document.getElementById('mic-dialog-ok');
+  const noBtn = document.getElementById('mic-dialog-cancel');
+  if (!ov || !okBtn || !noBtn) { cb(true); return; }
+  const done = (v) => { ov.classList.remove('open'); ov.onclick = null; okBtn.onclick = null; noBtn.onclick = null; cb(v); };
+  noBtn.onclick = () => done(false);
+  ov.onclick = (e) => { if (e.target === ov) done(false); };
+  okBtn.onclick = () => done(true);
+  ov.classList.add('open');
+}
 // Settings' Sign out tile: the same confirmation dialog as the account sheet's Sign out, but opened from Settings, so
 // Cancel (or a tap outside) just closes it and a successful sign-out stays on Settings (which redraws signed-out)
 // instead of jumping to the account screen.
@@ -16536,6 +16820,9 @@ function _nbCleanContentForExport(html) {
   // editable/draggable/mid-drag, since none of that machinery ships here.
   container.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
   container.querySelectorAll('[draggable]').forEach(el => el.removeAttribute('draggable'));
+  // Voice notes: no re-record button on a published page, and a block whose recording is missing has nothing to play.
+  container.querySelectorAll('.blk-aud-redo').forEach(el => el.remove());
+  container.querySelectorAll('.blk[data-type="audio"]').forEach(b => { const d = b.querySelector('.blk-aud-data'); if (!d || (d.getAttribute('src') || '').indexOf('data:') !== 0) b.remove(); });
   container.querySelectorAll('.blk.dragging').forEach(el => el.classList.remove('dragging'));
   // Checklist checkboxes keep their checked/unchecked look but can't
   // actually do anything without wireChecklist(), so disable rather than
@@ -16994,6 +17281,13 @@ ${_nbGetPristineCanvasStyle()}
       imgs.forEach(function(i) { if (kit.isPending(i)) kit.reloadImage(i); });
       frames.forEach(function(f) { if (kit.isPending(f)) kit.reloadFrame(f); });
     });
+  })();
+  <\/script>
+  <script>
+  // Voice notes: the same player the editor uses (nbAudioKit, serialized in).
+  (function() {
+    var kit = (${nbAudioKit.toString()})();
+    Array.prototype.forEach.call(document.querySelectorAll('.blk-aud'), kit.bind);
   })();
   <\/script>
   <script>
@@ -17691,6 +17985,12 @@ function _nbHasUnresolvedImages(html) {
   const tags = String(html || '').match(/<img\b[^>]*data-note-img-ref="[^"]+"[^>]*>/g) || [];
   return tags.some(t => !/\bsrc="data:/.test(t));
 }
+// What the not-yet-here items are called in the message: a recording's hidden <img> carries class blk-aud-data.
+function _nbUnresolvedWhat(html) {
+  const tags = (String(html || '').match(/<img\b[^>]*data-note-img-ref="[^"]+"[^>]*>/g) || []).filter(t => !/\bsrc="data:/.test(t));
+  const aud = tags.filter(t => /\bblk-aud-data\b/.test(t)).length;
+  return aud && aud < tags.length ? 'images and voice notes' : aud ? 'voice notes' : 'images';
+}
 async function nbPublishNote() {
   const note = _pubFindNote(_pubNoteId);
   if (!note) { showToast('Note not found'); return; }
@@ -17708,7 +18008,7 @@ async function nbPublishNote() {
   let html;
   try { html = nbBuildStaticNoteHtml(note, slug); }
   catch (e) { _nbLog('publish build', e); showToast('Publish failed' + _nbFailureReason(e)); return; }
-  if (_nbHasUnresolvedImages(html)) { showToast('Some images aren\u2019t on this device yet. Wait for them to load, then publish.'); return; }
+  if (_nbHasUnresolvedImages(html)) { showToast('Some ' + _nbUnresolvedWhat(html) + ' aren\u2019t on this device yet. Wait for them to load, then publish.'); return; }
   const btn = document.getElementById('pub-publish-btn');
   // Cancel (the sheet's own Cancel button, while this runs) frees the sheet at once. The upload can't be called back, so if it
   // still lands, the page is taken straight back down below.
@@ -17754,7 +18054,7 @@ async function nbPublishNote() {
       return;
     }
     if (res.status === 413) {
-      showToast('This note is too large to publish. Try trimming images or content.');
+      showToast('This note is too large to publish. Try trimming images, voice notes or content.');
       endBusy();
       btn.disabled = !_pubSlugAvailable;
       return;
@@ -17911,7 +18211,7 @@ async function nbUpdatePublishedNote() {
   let html;
   try { html = nbBuildStaticNoteHtml(note, note.publishedSlug); }
   catch (e) { _nbLog('publish update build', e); showToast('Update failed' + _nbFailureReason(e)); return; }
-  if (_nbHasUnresolvedImages(html)) { showToast('Some images aren\u2019t on this device yet. Wait for them to load, then save.'); return; }
+  if (_nbHasUnresolvedImages(html)) { showToast('Some ' + _nbUnresolvedWhat(html) + ' aren\u2019t on this device yet. Wait for them to load, then save.'); return; }
   const btn = document.getElementById('pub-save-btn');
   const cancel = _pubCancelable(btn, { abort: true }); // the Unpublish button beside it reads "Cancel" while this runs
   _pubSetBtnLoading(btn, true, 'Saving…');
@@ -17940,7 +18240,7 @@ async function nbUpdatePublishedNote() {
       return;
     }
     if (res.status === 413) {
-      showToast('This note is too large to save. Try trimming images or content.');
+      showToast('This note is too large to save. Try trimming images, voice notes or content.');
       return;
     }
     // A 404 means the remote side no longer has this page at all (admin
@@ -19018,8 +19318,8 @@ let _nbSubFeedTotal = null; // size of the whole list, as the worker reports it 
 const NB_EMPTY_LEADS = [
   'Mix text, photos, checklists, and more into scrapbook-style notes. ',
   'Paste posts, videos, and songs into one note on the Share screen. ',
-  'Play the songs and videos from your notes in the Media panel. ',
-  'Scan your notes in Media to build a library of songs, videos, albums, and playlists. ',
+  'Play the audio and videos from your notes in the Media panel. ',
+  'Scan your notes in Media to build a library of audio, videos, albums, and playlists. ',
   'Swipe in from the left edge of any screen to open Media. ',
   'Sign in to sync your notes between devices and keep an automatic backup. ',
   'Save your notes to a file, or restore them, from Backup & restore in Settings. ',
@@ -20755,6 +21055,7 @@ function nbAdCheckEligibility(html) {
     if (hiddenPattern.test(attrBlockMatch[0])) return { ok: false, reason: 'attribution-hidden-or-shrunk' };
   }
   const imageSrcs = Array.from(doc.querySelectorAll('.blk-img img')).map(img => img.getAttribute('src') || '');
+  if (doc.querySelector('.blk[data-type="audio"]')) return { ok: false, reason: 'device-voice-note' };
   if (imageSrcs.length > AD_MAX_IMAGES) return { ok: false, reason: 'too-many-images' };
   for (const src of imageSrcs) {
     if (!src) continue;
@@ -20790,6 +21091,7 @@ const AD_ELIGIBILITY_MESSAGES = {
   'attribution-hidden-or-shrunk': 'The attribution block can\u2019t be hidden or shrunk.',
   'too-many-images': `Only up to ${AD_MAX_IMAGES} images are allowed.`,
   'device-image': 'Remove any device-uploaded photo. Only linked Wikipedia/Wikimedia images are allowed.',
+  'device-voice-note': 'Remove any voice notes. Ads can\u2019t include recordings made on your device.',
   'non-wikimedia-image': 'Images must be linked from Wikipedia or Wikimedia Commons.',
   'invalid-image-src': 'One of the images has an invalid source.',
   'invalid-embed-src': 'One of the media/post embeds has an invalid source.',
@@ -23031,7 +23333,7 @@ function extractImagesFromHtml(html) {
   const urls = [];
   const re = /<img[^>]+src=["']([^"']+)["']/gi;
   let match;
-  while ((match = re.exec(html || '')) !== null) urls.push(match[1]);
+  while ((match = re.exec(html || '')) !== null) { if (match[1].indexOf('data:audio/') !== 0) urls.push(match[1]); } // voice-note data is not a thumbnail
   return urls;
 }
 // totalCount (optional): the note's full image count when imgUrls is only
@@ -23787,17 +24089,19 @@ async function _nbInitImageCache() {
     loadFailures++;
   } finally {
     _nbImgCacheReady = true;
-    if (loadFailures) showToast('Some images may not have loaded');
+    if (loadFailures) showToast('Some images or voice notes may not have loaded');
   }
 }
 function _nbGetImage(id) { return _nbImgCache.get(id) || null; }
+const _nbImgSaveFailed = new Set(); // ids whose last storage write failed: retried on the next update, toasted once
 async function _nbSetImage(id, data) {
   _nbImgCache.set(id, data); // update the sync-readable cache immediately
-  try { await _idbSet(_nbNoteImgKey(id), data); }
-  catch (e) { _nbLog('image save: ' + id, e); showToast('Image didn\u2019t save'); }
+  try { await _idbSet(_nbNoteImgKey(id), data); _nbImgSaveFailed.delete(id); }
+  catch (e) { _nbLog('image save: ' + id, e); if (_nbImgSaveFailed.has(id)) return; _nbImgSaveFailed.add(id); showToast(_nbMediaNoun([data]) === 'voice note' ? 'Voice note didn\u2019t save' : 'Image didn\u2019t save'); }
 }
 async function _nbDeleteImage(id) {
-  _nbImgCache.delete(id);
+  const was = _nbGetImage(id); // read before it is dropped, so a failure can name what it was
+  _nbImgCache.delete(id); _nbImgSaveFailed.delete(id);
   try {
     const db = await _idbOpen();
     await new Promise((res, rej) => {
@@ -23806,7 +24110,7 @@ async function _nbDeleteImage(id) {
       tx.oncomplete = res;
       tx.onerror = () => rej(tx.error);
     });
-  } catch (e) { _nbLog('image delete: ' + id, e); showToast('Couldn\u2019t delete image'); }
+  } catch (e) { _nbLog('image delete: ' + id, e); showToast('Couldn\u2019t delete ' + _nbMediaNoun([was])); }
 }
 
 function _nbRehydrateImages(html) {
@@ -24395,7 +24699,7 @@ window.addEventListener('message', function (e) {
     const draftId = e.data.noteId;
     if (!draftId) return;
     const images = e.data.images || {};
-    Object.keys(images).forEach(id => { try { _nbWarnNewImage(id, images[id]); _nbSetImage(id, images[id]); } catch (err) {} });
+    Object.keys(images).forEach(id => { try { _nbWarnNewImage(id, images[id]); if (_nbGetImage(id) !== images[id] || _nbImgSaveFailed.has(id)) _nbSetImage(id, images[id]); } catch (err) {} });
     const prev = _nbLoadDraftUiState(draftId) || {};
     const next = Object.assign({}, prev, e.data.state || {});
     _nbSaveDraftUiState(draftId, next);
@@ -25113,10 +25417,10 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   var NOW = function () { return (window.performance && performance.now) ? performance.now() : Date.now(); };
   var RK = nbEmbedRetryKit(); // shared with the editor's embed retry (host script, above NB_PRISTINE_TEMPLATE)
   var META_KEY = 'nb_media_meta_v1';
-  var PN = { yt: 'YouTube', sp: 'Spotify', st: 'Streamable', ig: 'Instagram', x: 'X' };
-  var PORD = ['sp', 'yt', 'st', 'ig', 'x'];
+  var PN = { yt: 'YouTube', sp: 'Spotify', st: 'Streamable', ig: 'Instagram', x: 'X', va: 'Voice notes' };
+  var PORD = ['va', 'sp', 'yt', 'st', 'ig', 'x'];
   var SPK = { track: 'Song', episode: 'Episode', album: 'Album', playlist: 'Playlist', show: 'Podcast', artist: 'Artist' };
-  var TABS = [['songs', 'Songs', 'song'], ['videos', 'Videos', 'video'], ['albums', 'Albums', 'album'], ['playlists', 'Playlists', '']];
+  var TABS = [['audio', 'Audio', 'audio'], ['videos', 'Videos', 'video'], ['albums', 'Albums', 'album'], ['playlists', 'Playlists', '']];
 
   /* ---------- icons ---------- */
   function S(inner, sz, sw) { return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>'; }
@@ -25147,9 +25451,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   IC.close = function (s) { return S('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>', s, 2); };
   IC.ext = function (s) { return S('<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>', s, 1.8); };
 
+  IC.mic = function (s) { return S('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', s, 1.8); };
+
   /* ---------- state ---------- */
   var MD = {
-    open: false, tab: 'songs', src: 'notes', q: '', stack: [{ n: 'home' }], items: new Map(), pit: new Map(), pl: [], al: [],
+    open: false, tab: 'audio', src: 'notes', q: '', stack: [{ n: 'home' }], items: new Map(), pit: new Map(), pl: [], al: [],
     queue: { list: [], base: [], lm: [], bm: [], gone: {}, i: -1, shuffle: false, repeat: 'off', ctx: '', src: null },
     cur: null, ps: { playing: false, pos: 0, dur: 0, real: false, t0: 0 },
     frame: null, fplat: '', dead: true, endFired: false, np: false, dragging: false, dragFrac: 0,
@@ -25190,6 +25496,22 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function mk(p, type, id, spk, u) { return { k: p + ':' + (spk ? spk + ':' : '') + id, p: p, type: type, id: id, spk: spk || '', u: u }; }
   function parseLink(raw) {
     var u;
+    // A voice note found in a note (see extractLinks): 'nbva:<image id>|<seconds>|<caption>' plays from the on-device image cache.
+    // One from a liked page adds '|<position>|<slug>': its audio is inline in that published page and is read from there when played.
+    if (typeof raw === 'string' && raw.indexOf('nbva:') === 0) {
+      var vp = raw.slice(5).split('|'), vid = '', vcap = '', vsl = '', vix = -1, vit;
+      try { vid = decodeURIComponent(vp[0] || ''); vcap = decodeURIComponent(vp[2] || ''); vsl = decodeURIComponent(vp[4] || ''); } catch (e) { return null; }
+      if (vsl) {
+        vix = Number(vp[3]);
+        if (!(vix >= 0) || vix !== Math.floor(vix)) return null;
+        vit = mk('va', 'audio', vid || 'n' + vix, vsl, ''); vit.ix = vix;
+      } else {
+        if (!vid) return null;
+        vit = mk('va', 'audio', vid, '', '');
+      }
+      vit.dur = Number(vp[1]) || 0; vit.cap = vcap;
+      return vit;
+    }
     try { u = new URL(String(raw || '').trim().replace(/^\/\//, 'https://')); } catch (e) { return null; }
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
     var host = u.hostname.toLowerCase().replace(/^(www\.|m\.|mobile\.)/, '');
@@ -25199,14 +25521,14 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       else if (P[0] === 'watch') id = u.searchParams.get('v') || '';
       else if (['shorts', 'embed', 'live', 'v'].indexOf(P[0]) >= 0) id = P[1] || '';
       if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return null;
-      return mk('yt', host === 'music.youtube.com' ? 'song' : 'video', id, '', 'https://www.youtube.com/watch?v=' + id);
+      return mk('yt', host === 'music.youtube.com' ? 'audio' : 'video', id, '', 'https://www.youtube.com/watch?v=' + id);
     }
     if (host === 'open.spotify.com') {
       P = P.filter(function (s) { return s !== 'embed' && !/^intl-/.test(s); });
       if (P[0] === 'user' && P[2] === 'playlist') P = P.slice(2); // /user/<name>/playlist/<id>
       var kind = P[0] || '';
       if (!SPK[kind] || !/^[A-Za-z0-9]{10,32}$/.test(P[1] || '')) return null;
-      return mk('sp', (kind === 'album' || kind === 'playlist') ? 'album' : 'song', P[1], kind, 'https://open.spotify.com/' + kind + '/' + P[1]);
+      return mk('sp', (kind === 'album' || kind === 'playlist') ? 'album' : 'audio', P[1], kind, 'https://open.spotify.com/' + kind + '/' + P[1]);
     }
     if (host === 'streamable.com') {
       id = (['e', 'o', 's'].indexOf(P[0]) >= 0) ? (P[1] || '') : (P[0] || '');
@@ -25239,9 +25561,9 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       var html = n && n.content;
       if (!html) return;
       var found, hit = (n.id != null) ? SCACHE.get(n.id) : null;
-      if (!(hit && hit.c === html) && !QUICK.test(html)) return;
+      if (!(hit && hit.c === html) && !QUICK.test(html) && html.indexOf('blk-aud') < 0 && html.indexOf('nbva:') < 0) return;
       if (hit && hit.c === html) found = hit.f; else {
-      found = extractLinks(html);
+      found = extractLinks(html, n.slug);
       if (!found) return;
       if (n.id != null) SCACHE.set(n.id, { c: html, f: found });
       }
@@ -25263,15 +25585,31 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     });
     return { items: out, al: al };
   }
-  function extractLinks(html) {
-      var doc, found = [];
-      html = html.replace(/\b(src|href|poster)=("|')data:[^"']*\2/gi, ''); // inline base64 images can be megabytes; don't parse them on the main thread
+  // slug is set for a liked note's page, whose recordings are inline: its voice notes come back as links that name the slug and the recording's position.
+  function extractLinks(html, slug) {
+      var doc, found = [], vn = 0, sl = slug ? encodeURIComponent(slug) : '';
+      // inline base64 images can be megabytes; don't parse them on the main thread. An audio src keeps a short marker so the recording is still known to be there.
+      html = html.replace(/\b(src|href|poster)=("|')data:(audio)?[^"']*\2/gi, function (m, a, q, au) { return (au && a.toLowerCase() === 'src') ? 'src=' + q + 'data:audio' + q : ''; });
       try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return null; }
       // The note's own infra scripts/templates mention hosts as plain strings; drop them before reading anything.
       doc.querySelectorAll('script,style,template').forEach(function (el) { el.remove(); });
       doc.querySelectorAll('iframe[src]').forEach(function (f) { found.push(f.getAttribute('src')); });
       doc.querySelectorAll('[data-social-url]').forEach(function (f) { found.push(f.getAttribute('data-social-url')); });
-      doc.querySelectorAll('a[href]').forEach(function (a) { found.push(a.getAttribute('href')); });
+      // Voice notes: in your own notes the recording lives in the image cache, so the note only carries its id (plus length and caption).
+      // A published page carries the recording inline instead; there it is told apart by its position among the page's recordings (and its id, when the page kept one).
+      doc.querySelectorAll('.blk-aud').forEach(function (c) {
+        var im = c.querySelector('.blk-aud-data'), ref = im ? (im.getAttribute('data-note-img-ref') || '') : '', blk = c.closest('.blk'), fc = blk ? blk.querySelector('figcaption') : null;
+        var has = !!im && String(im.getAttribute('src') || '').indexOf('data:audio') === 0, ix = has ? vn++ : -1, dur = Number(c.getAttribute('data-dur'));
+        if (!(dur > 0)) return; // nothing recorded yet
+        var cap = encodeURIComponent(fc ? (fc.textContent || '').trim().slice(0, 80) : '');
+        if (slug) { if (has) found.push('nbva:' + encodeURIComponent(ref) + '|' + dur + '|' + cap + '|' + ix + '|' + sl); }
+        else if (ref) found.push('nbva:' + encodeURIComponent(ref) + '|' + dur + '|' + cap);
+      });
+      doc.querySelectorAll('a[href]').forEach(function (a) {
+        var h = a.getAttribute('href') || '';
+        if (h.indexOf('nbva:') === 0 && !(sl && h.split('|')[4] === sl)) return; // a page's own text can't pose as a recording
+        found.push(h);
+      });
       // textContent runs blocks together ("...abc</p><p>next" reads "abcnext"), which corrupts the id. Pad them with a space first.
       doc.querySelectorAll('br,p,div,li,h1,h2,h3,h4,h5,h6,blockquote,figcaption,td,th,pre').forEach(function (el) {
         if (el.parentNode) el.parentNode.insertBefore(doc.createTextNode(' '), el.nextSibling);
@@ -25310,20 +25648,21 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function signedIn() { try { return !!nbIsSignedIn(); } catch (e) { return false; } }
   function acctSub() { try { return (nbAccount() || {}).sub || ''; } catch (e) { return ''; } }
   // A liked page is kept as just its media links (not the whole page), so a long likes list doesn't hold every page in memory.
-  function compactLinks(h) {
-    if (!QUICK.test(h)) return '';
-    return (extractLinks(h) || []).filter(function (u) { return !!parseLink(u); }).map(function (u) { return '<a href="' + esc(u) + '"></a>'; }).join('');
+  // Its voice notes stay as links naming the slug and position; the recording itself is read from the page when it is played.
+  function compactLinks(h, slug) {
+    if (!QUICK.test(h) && h.indexOf('blk-aud') < 0) return '';
+    return (extractLinks(h, slug) || []).filter(function (u) { return !!parseLink(u); }).map(function (u) { return '<a href="' + esc(u) + '"></a>'; }).join('');
   }
   // Liked pages are parsed one at a time in ~8ms slices (at least one page per slice), so several responses landing together can't stall a frame.
   var PQ = [], pqBusy = false;
-  function parseLater(h) {
-    return new Promise(function (res) { PQ.push({ h: h, res: res }); if (!pqBusy) { pqBusy = true; setTimeout(drainPQ, 0); } });
+  function parseLater(h, slug) {
+    return new Promise(function (res) { PQ.push({ h: h, slug: slug, res: res }); if (!pqBusy) { pqBusy = true; setTimeout(drainPQ, 0); } });
   }
   function drainPQ() {
     var t0 = NOW();
     do {
       var j = PQ.shift(), out = '';
-      try { out = compactLinks(j.h); } catch (e) {}
+      try { out = compactLinks(j.h, j.slug); } catch (e) {}
       j.res(out);
     } while (PQ.length && NOW() - t0 < 8);
     if (PQ.length) setTimeout(drainPQ, 0); else pqBusy = false;
@@ -25397,7 +25736,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
           (function (st) {
             run++;
             readNote(st.slug)
-              .then(function (h) { return parseLater(h); })
+              .then(function (h) { return parseLater(h, st.slug); })
               .then(function (c) { if (LK.sub === sub) { LK.html.set(st.slug, c); LK.bad.delete(st.slug); likesChanged(); } })
               .catch(function () { failed++; if (LK.sub === sub) LK.bad.set(st.slug, Date.now()); })
               .then(function () { run--; pump(); });
@@ -25454,12 +25793,13 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
 
   /* ---------- metadata ---------- */
   function getIt(k) { return MD.items.get(k) || MD.pit.get(k) || null; }
-  function metaOf(it) { return (it.p === 'ig' || it.p === 'x') ? {} : (meta[it.k] || {}); }
+  function metaOf(it) { return (it.p === 'ig' || it.p === 'x' || it.p === 'va') ? {} : (meta[it.k] || {}); }
   function kindLabel(it) { return it.p === 'sp' ? (SPK[it.spk] || 'Spotify') : (it.p === 'ig' || it.p === 'x') ? 'Post' : 'Video'; }
   // The note's title only stands in for a missing video/post title when the note holds just that one item; with several, each would show the same name.
-  function titleOf(it) { var m = metaOf(it); return m.t || (it.nc > 1 ? '' : it.noteTitle) || (PN[it.p] + ' ' + kindLabel(it).toLowerCase()); }
+  function titleOf(it) { if (it.p === 'va') return it.cap || ((it.nc > 1 ? '' : it.noteTitle) || 'Voice note'); var m = metaOf(it); return m.t || (it.nc > 1 ? '' : it.noteTitle) || (PN[it.p] + ' ' + kindLabel(it).toLowerCase()); }
   function subOf(it) {
-    var m = metaOf(it), a = m.a || PN[it.p];
+    var m = metaOf(it), a = m.a || (it.p === 'va' ? 'Voice note' : PN[it.p]);
+    if (it.p === 'va' && it.dur > 0) a += ' \u00b7 ' + fmt(it.dur);
     if (it.noteTitle && it.noteTitle !== titleOf(it)) a += ' \u00b7 ' + it.noteTitle;
     return a;
   }
@@ -25471,6 +25811,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   var fq = [], fbusy = 0, ftried = {}, fcool = {}, fstreak = {}, fwake = 0;
   var FRETRY = [4000, 15000, 60000]; // wait before retry 1, 2, 3; then give up until the next session
   function queueMeta(it) {
+    if (it.p === 'va') return; // a recording has no page to look a title up on
     var m = meta[it.k], s = ftried[it.k];
     if (m && m.t) return;
     if (!s) s = ftried[it.k] = { n: 0, at: 0, q: 0, done: 0 };
@@ -25546,7 +25887,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   /* ---------- small helpers ---------- */
   function hue(k) { var h = 0; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0; return Math.abs(h) % 360; }
   function bg(k) { var h = hue(k); return 'linear-gradient(135deg,hsl(' + h + ',52%,46%),hsl(' + ((h + 42) % 360) + ',58%,28%))'; }
-  function typeIcon(it, s) { return it.type === 'song' ? IC.note(s) : it.type === 'album' ? IC.disc(s) : IC.vid(s); }
+  function typeIcon(it, s) { if (it.p === 'va') return IC.mic(s); return it.type === 'audio' ? IC.note(s) : it.type === 'album' ? IC.disc(s) : IC.vid(s); }
   function thumbHtml(it, kind, noEq, eager) {
     var th = thumbOf(it);
     return '<div class="md-th md-th-' + (kind || 'sq') + '"><div class="md-ph" style="background:' + bg(it.k) + '">' + typeIcon(it, 24) + '</div>' +
@@ -25560,7 +25901,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   function shuf(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function emptyHtml(icon, title, body, cta) {
-    if (cta && MD.scanning) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Scanning your notes\u2026</b><span>Looking for YouTube, Spotify, Streamable, Instagram and X links.</span><button class="md-btn busy" data-act="scan" aria-busy="true"><i class="md-spin" aria-hidden="true"></i>Scanning\u2026</button></div>';
+    if (cta && MD.scanning) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Scanning your notes\u2026</b><span>Looking for voice notes and YouTube, Spotify, Streamable, Instagram and X links.</span><button class="md-btn busy" data-act="scan" aria-busy="true"><i class="md-spin" aria-hidden="true"></i>Scanning\u2026</button></div>';
     return '<div class="md-empty"><div class="md-ei">' + icon + '</div><b>' + esc(title) + '</b><span>' + esc(body) + '</span>' + (cta ? '<button class="md-btn" data-act="scan">' + esc(cta) + '</button>' : '') + '</div>';
   }
 
@@ -25682,6 +26023,12 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         else if (ev === 'ended') { onEnded(); }
       }
     },
+    va: {
+      cap: true,
+      play: function () { if (VA.a) { var p = VA.a.play(); if (p && p.catch) p.catch(function () {}); } },
+      pause: function () { if (VA.a) { try { VA.a.pause(); } catch (e) {} } },
+      seek: function (s) { if (VA.a) { try { VA.a.currentTime = Math.max(0, s); } catch (e) {} } }
+    },
     ig: {
       cap: false,
       src: function (it) { return 'https://www.instagram.com/p/' + it.id + '/embed/captioned/'; }
@@ -25691,6 +26038,58 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       src: function (it) { return 'https://platform.twitter.com/embed/Tweet.html?dnt=true&theme=' + (document.body.classList.contains('night') ? 'dark' : 'light') + '&id=' + it.id; }
     }
   };
+  /* Voice notes play through one native audio element, kept for the whole session so auto-advance may start the next recording. */
+  var VA = { a: null, t: 0 };
+  function vaDur(a, it) { return (a && isFinite(a.duration) && a.duration > 0) ? a.duration : ((it && it.dur) || 0); }
+  function vaStop() { VA.t++; if (VA.a) { try { VA.a.pause(); } catch (e) {} } }
+  // A liked note's recordings are inline in its published page (the same data: URI the page's own player uses). The page is read again when one is
+  // played and the item's recording is picked out of it: by the id the page kept, else by its position. Only the last few are held; each can be megabytes.
+  var VAC = new Map();
+  function vaRemote(it) {
+    var hit = VAC.get(it.k);
+    if (hit) return Promise.resolve(hit);
+    return readNote(it.spk).then(function (h) {
+      var tags = String(h || '').match(/<img\b[^>]*\bblk-aud-data\b[^>]*>/gi) || [], list = [], i, s, r, pick = null;
+      for (i = 0; i < tags.length; i++) {
+        s = /\bsrc=("|')(data:audio\/[^"']+)\1/i.exec(tags[i]);
+        if (!s) continue;
+        r = /\bdata-note-img-ref=("|')([^"']*)\1/i.exec(tags[i]);
+        list.push({ ref: r ? r[2] : '', src: s[2].replace(/&amp;/g, '&') });
+      }
+      for (i = 0; i < list.length && !pick; i++) if (list[i].ref && list[i].ref === it.id) pick = list[i];
+      if (!pick) pick = list[it.ix] || null;
+      if (!pick) return '';
+      if (VAC.size >= 3) VAC.delete(VAC.keys().next().value);
+      VAC.set(it.k, pick.src);
+      return pick.src;
+    });
+  }
+  function vaMount(it) {
+    var a = VA.a, tok, got;
+    VA.t++; tok = VA.t;
+    if (a) { try { a.pause(); } catch (e) {} }
+    var live = function () { return tok === VA.t && MD.cur === it; };
+    if (it.spk) got = vaRemote(it);
+    else { var loc = ''; try { loc = _nbGetImage(it.id) || ''; } catch (e) {} got = Promise.resolve(loc); }
+    got.then(function (src) {
+      if (!live()) return;
+      a = VA.a;
+      if (src.indexOf('data:audio/') !== 0) {
+        if (a) { try { a.removeAttribute('src'); a.load(); } catch (e) {} }
+        setPs({ playing: false }); toast(it.spk ? 'This recording is no longer in the note' : 'This recording isn\u2019t on this device yet'); return;
+      }
+      if (!a) a = VA.a = new Audio();
+      a.onloadedmetadata = function () { if (live()) setPs({ real: true, dur: vaDur(a, it) }); };
+      a.ontimeupdate = function () { if (live()) setPs({ real: true, pos: a.currentTime, dur: vaDur(a, it) }); };
+      a.onplay = function () { if (live()) { MD.endFired = false; setPs({ real: true, playing: true }); } };
+      a.onpause = function () { if (live() && !a.ended) setPs({ playing: false }); };
+      a.onended = function () { if (live()) onEnded(); };
+      a.onerror = function () { if (live()) { setPs({ playing: false }); toast('Couldn\u2019t play this recording'); } };
+      a.src = src;
+      setPs({ real: true, pos: 0, dur: it.dur || 0 });
+      var p = a.play(); if (p && p.catch) p.catch(function () { if (live()) setPs({ playing: false }); });
+    }, function () { if (live()) { setPs({ playing: false }); toast('Couldn\u2019t load this recording'); } });
+  }
   function stateYt(s) {
     if (s === 1 || s === 3) { MD.endFired = false; setPs({ playing: true, real: true }); }
     else if (s === 2 || s === 5 || s === -1) setPs({ playing: false });
@@ -25708,7 +26107,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   function layoutStage(it) {
     var np = $('md-np');
     np.classList.remove('np-audio', 'np-video', 'np-social', 'np-empty');
-    np.classList.add(it.p === 'sp' ? 'np-audio' : (it.p === 'ig' || it.p === 'x') ? 'np-social' : 'np-video');
+    np.classList.add((it.p === 'sp' || it.p === 'va') ? 'np-audio' : (it.p === 'ig' || it.p === 'x') ? 'np-social' : 'np-video');
     np.classList.toggle('np-nocap', !AD[it.p].cap);
     $('md-stage').style.height = it.p === 'sp' ? ((it.spk === 'track' || it.spk === 'episode') ? '80px' : '152px') : '';
   }
@@ -25767,6 +26166,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     MD.cur = it; MD.endFired = false; MD.wantPlay = (it.p === 'sp');
     MD.ps = { playing: false, pos: 0, dur: keepDur, real: false, t0: NOW() };
     layoutStage(it);
+    if (it.p === 'va') { // native audio: no embed frame. Park any frame, then play the recording.
+      if (f && !MD.dead) { try { f.src = 'about:blank'; } catch (e) {} }
+      MD.dead = false; WD.loaded = true; WD.mt = NOW(); MD.fplat = 'va'; vaMount(it); return;
+    }
+    vaStop();
     // Reuse only a frame that has finished loading this same platform's player. A frame still navigating (e.g. from an Instagram post) would drop loadVideoById and keep showing the old page.
     if (!retry && f && !MD.dead && ad.reuse && MD.fplat === it.p && f._plat === it.p && WD.loaded && f.src && f.src.indexOf('about:blank') !== 0) {
       WD.pend = { id: it.id, t: NOW() };
@@ -25793,6 +26197,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     f.src = ad.src(it);
   }
   function killFrame() {
+    vaStop();
     if (MD.frame) { try { MD.frame.src = 'about:blank'; } catch (e) {} }
     MD.dead = true;
     MD.ps = { playing: false, pos: MD.ps.pos, dur: MD.ps.dur, real: false, t0: NOW() };
@@ -25979,7 +26384,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   }
   // Likes empty states match Notes: same Scan library button and the same scanning state (also shown while the list first loads).
   function likesEmpty(icon, title, body) {
-    if ((LK.busy && !LK.quiet) || MD.scanning) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Scanning your likes\u2026</b><span>Looking for YouTube, Spotify, Streamable, Instagram and X links.</span><button class="md-btn busy" data-act="scan" aria-busy="true"><i class="md-spin" aria-hidden="true"></i>Scanning\u2026</button></div>';
+    if ((LK.busy && !LK.quiet) || MD.scanning) return '<div class="md-empty scanning"><div class="md-ei">' + icon + '</div><b>Scanning your likes\u2026</b><span>Looking for voice notes and YouTube, Spotify, Streamable, Instagram and X links.</span><button class="md-btn busy" data-act="scan" aria-busy="true"><i class="md-spin" aria-hidden="true"></i>Scanning\u2026</button></div>';
     return emptyHtml(icon, title, body, 'Scan library');
   }
   function rowHtml(it, ctx) {
@@ -26005,11 +26410,11 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       if (a && b && a.textContent !== b.textContent) a.textContent = b.textContent;
     }
   }
-  // Search box hint follows the page: Songs and Videos each name themselves (they used to fall through to a generic "media").
+  // Search box hint follows the page: Audio and Videos each name themselves (they used to fall through to a generic "media").
   function searchPh() {
     if (MD.tab === 'playlists') return 'Search playlists';
     if (MD.tab === 'albums') return 'Search albums';
-    var what = MD.tab === 'videos' ? 'videos' : MD.tab === 'songs' ? 'songs' : 'media';
+    var what = MD.tab === 'videos' ? 'videos' : MD.tab === 'audio' ? 'audio' : 'media';
     return MD.src === 'likes' ? 'Search liked ' + what : 'Search your ' + what;
   }
   function catsHtml() {
@@ -26135,7 +26540,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         MD.viewKeys = []; groups.forEach(function (g) { g.items.forEach(function (it) { MD.viewKeys.push(it.k); }); });
         MD.viewCtx = TABS.filter(function (t) { return t[0] === MD.tab; })[0][1];
         if (!all.length) {
-          h = MD.src === 'likes' ? likesEmpty(MD.tab === 'songs' ? IC.note(40) : IC.vid(40), MD.tab === 'songs' ? 'No songs in your likes' : 'No videos in your likes', 'YouTube, Spotify, Streamable, Instagram and X links in notes you\u2019ve liked show up here.') : emptyHtml(MD.tab === 'songs' ? IC.note(40) : MD.tab === 'albums' ? IC.disc(40) : IC.vid(40), (MD.tab === 'songs' ? 'No songs yet' : 'No videos yet'), 'Add YouTube, Spotify, Streamable, Instagram or X links to a note and they show up here.', 'Scan library');
+          h = MD.src === 'likes' ? likesEmpty(MD.tab === 'audio' ? IC.note(40) : IC.vid(40), MD.tab === 'audio' ? 'No audio in your likes' : 'No videos in your likes', 'Voice notes and YouTube, Spotify, Streamable, Instagram and X links in notes you\u2019ve liked show up here.') : emptyHtml(MD.tab === 'audio' ? IC.note(40) : MD.tab === 'albums' ? IC.disc(40) : IC.vid(40), (MD.tab === 'audio' ? 'No audio yet' : 'No videos yet'), (MD.tab === 'audio' ? 'Record a voice note, or add YouTube, Spotify, Streamable, Instagram or X links to a note, and they show up here.' : 'Add YouTube, Spotify, Streamable, Instagram or X links to a note and they show up here.'), 'Scan library');
         } else if (!list.length) {
           h = emptyHtml(IC.note(40), 'No matches', 'Try a different search.');
         } else {
@@ -26161,7 +26566,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       MD.viewKeys = its.map(function (it) { return it.k; }); MD.viewCtx = p2.name; artIt = its[0] || null;
       var cover = its[0] ? thumbHtml(its[0], 'lg', true) : '<div class="md-th md-th-lg"><div class="md-ph" style="background:' + bg(p2.id) + '">' + IC.list(36) + '</div></div>';
       h = '<div class="md-plhead">' + cover + '<div style="min-width:0"><h1 class="md-lt">' + esc(p2.name) + '</h1><div class="md-lsub">' + its.length + (its.length === 1 ? ' item' : ' items') + '</div></div></div>';
-      if (!its.length) h += emptyHtml(IC.list(40), 'This playlist is empty', 'Use the \u22ef menu on a song or video in Media and choose Add to playlist.');
+      if (!its.length) h += emptyHtml(IC.list(40), 'This playlist is empty', 'Use the \u22ef menu on an audio or video item in Media and choose Add to playlist.');
       else h += actsHtml() + '<div class="md-card">' + its.map(function (it) { return rowHtml(it); }).join('') + '</div>';
     }
     var au = artIt ? thumbOf(artIt) : '', msc = $('md-screen');
@@ -26204,8 +26609,16 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     hs.forEach(function (h) { h.classList.toggle('is-stuck', h.getBoundingClientRect().top <= top + 1); });
   }
   function markCur(box) { var it = MD.cur; if (it) { var r = box.querySelectorAll('.md-row[data-k]'); r.forEach(function (x) { x.classList.toggle('is-cur', x.getAttribute('data-k') === it.k); }); } }
-  function fromStored(o) { return { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '', nc: o.nc || 0, ns: o.ns || '', na: o.na || '' }; }
-  function strip(it) { return { k: it.k, p: it.p, type: it.type, id: it.id, spk: it.spk || '', u: it.u, nt: it.noteTitle || '', nc: it.nc || 0, ns: it.ns || '', na: it.na || '' }; }
+  function fromStored(o) {
+    var it = { k: o.k, p: o.p, type: o.type, id: o.id, spk: o.spk || '', u: o.u, noteTitle: o.nt || '', nc: o.nc || 0, ns: o.ns || '', na: o.na || '' };
+    if (o.p === 'va') { it.dur = Number(o.dur) || 0; it.cap = o.cap || ''; it.ix = Number(o.ix) || 0; }
+    return it;
+  }
+  function strip(it) {
+    var o = { k: it.k, p: it.p, type: it.type, id: it.id, spk: it.spk || '', u: it.u, nt: it.noteTitle || '', nc: it.nc || 0, ns: it.ns || '', na: it.na || '' };
+    if (it.p === 'va') { o.dur = it.dur || 0; o.cap = it.cap || ''; o.ix = it.ix || 0; }
+    return o;
+  }
   function alById(id) { for (var i = 0; i < MD.al.length; i++) if (MD.al[i].id === id) return MD.al[i]; return null; }
   function plById(id) { for (var i = 0; i < MD.pl.length; i++) if (MD.pl[i].id === id) return MD.pl[i]; return null; }
   function queueVisibleMeta() { MD.items.forEach(function (it) { queueMeta(it); }); MD.pl.forEach(function (p) { p.items.forEach(function (o) { queueMeta(MD.items.get(o.k) || fromStored(o)); }); }); }
@@ -26274,8 +26687,8 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       h += sheetRow('addq', 'data-k="' + esc(k) + '"', IC.list(18), 'Add to queue');
     }
     if (it.ns) h += sheetRow('opennote', 'data-k="' + esc(k) + '"', IC.doc(18), 'Go to note');
-    h += sheetRow('openorig', 'data-k="' + esc(k) + '"', IC.ext(18), 'Open on ' + PN[it.p]);
-    h += sheetRow('copylink', 'data-k="' + esc(k) + '"', IC.link(18), 'Copy link');
+    if (it.p !== 'va') h += sheetRow('openorig', 'data-k="' + esc(k) + '"', IC.ext(18), 'Open on ' + PN[it.p]);
+    if (it.p !== 'va') h += sheetRow('copylink', 'data-k="' + esc(k) + '"', IC.link(18), 'Copy link');
     if (inPl) h += sheetRow('rmfrom', 'data-k="' + esc(k) + '" data-id="' + esc(inPl) + '"', IC.trash(18), 'Remove from this playlist', '', 'dng');
     openSheet(h);
   }
@@ -26440,7 +26853,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       } else done(false);
     })();
   }
-  // After a scan: if the open tab has nothing, move to the first of Songs / Videos / Albums that has results (Playlists is left alone).
+  // After a scan: if the open tab has nothing, move to the first of Audio / Videos / Albums that has results (Playlists is left alone).
   // pickPending: a scan ended (or was dropped) while Media was closed, so the next open picks the tab instead.
   var pickPending = false;
   function pickResultTab() {
@@ -26462,7 +26875,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       box.classList.add('scanning');
       var tt = box.querySelector('b'), ss = box.querySelector('span');
       if (tt) tt.textContent = lk ? 'Scanning your likes\u2026' : 'Scanning your notes\u2026';
-      if (ss) ss.textContent = 'Looking for YouTube, Spotify, Streamable, Instagram and X links.';
+      if (ss) ss.textContent = 'Looking for voice notes and YouTube, Spotify, Streamable, Instagram and X links.';
     }
     if (btn) { btn.classList.add('busy'); btn.setAttribute('aria-busy', 'true'); btn.innerHTML = '<i class="md-spin" aria-hidden="true"></i>Scanning\u2026'; }
     var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -26593,7 +27006,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         exitSel(); syncQueue(); toast(sq.length === 1 ? 'Added to queue' : 'Added ' + sq.length + ' to queue'); break;
       case 'selrm':
         if (view().n !== 'pl' || !MD.sel.keys.length) break;
-        openSheet('<div class="md-sh-title ns">Remove ' + (MD.sel.keys.length === 1 ? 'item' : MD.sel.keys.length + ' items') + '?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">' + (MD.sel.keys.length === 1 ? 'It will be' : 'They will be') + ' removed from this playlist. Your songs and videos stay in your notes.</div>' + sheetRow('selrmgo', '', IC.trash(18), 'Remove', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
+        openSheet('<div class="md-sh-title ns">Remove ' + (MD.sel.keys.length === 1 ? 'item' : MD.sel.keys.length + ' items') + '?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">' + (MD.sel.keys.length === 1 ? 'It will be' : 'They will be') + ' removed from this playlist. Your audio and videos stay in your notes.</div>' + sheetRow('selrmgo', '', IC.trash(18), 'Remove', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
         break;
       case 'selrmgo':
         if (view().n !== 'pl') { closeSheet(); break; }
@@ -26621,7 +27034,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
         p.name = nm; p.u = Date.now(); savePl(); closeSheet(); renderView(true); break;
       case 'pldelask':
         p = plById(id); if (!p) break;
-        openSheet('<div class="md-sh-title ns">Delete playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">\u201c' + esc(p.name) + '\u201d will be removed. Your songs and videos stay in your notes.</div>' + sheetRow('pldel', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
+        openSheet('<div class="md-sh-title ns">Delete playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">\u201c' + esc(p.name) + '\u201d will be removed. Your audio and videos stay in your notes.</div>' + sheetRow('pldel', 'data-id="' + esc(id) + '"', IC.trash(18), 'Delete', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
         break;
       case 'pldel':
         MD.pl = MD.pl.filter(function (x) { return x.id !== id; }); _nbPlMarkDeleted(id); savePl(); closeSheet();
@@ -26631,7 +27044,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       case 'rmfrom':
         p = plById(id); if (!p) break;
         var rit = getIt(k);
-        openSheet('<div class="md-sh-title ns">Remove from playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">' + (rit ? '\u201c' + esc(titleOf(rit)) + '\u201d' : 'This item') + ' will be removed from \u201c' + esc(p.name) + '\u201d. Your song or video stays in your notes.</div>' + sheetRow('rmfromgo', 'data-k="' + esc(k) + '" data-id="' + esc(id) + '"', IC.trash(18), 'Remove', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
+        openSheet('<div class="md-sh-title ns">Remove from playlist?</div><div class="md-s" style="margin:0 .1rem .8rem;white-space:normal">' + (rit ? '\u201c' + esc(titleOf(rit)) + '\u201d' : 'This item') + ' will be removed from \u201c' + esc(p.name) + '\u201d. Your audio or video stays in your notes.</div>' + sheetRow('rmfromgo', 'data-k="' + esc(k) + '" data-id="' + esc(id) + '"', IC.trash(18), 'Remove', '', 'dng') + sheetRow('sheetback', '', IC.check(18), 'Cancel'));
         break;
       case 'rmfromgo':
         p = plById(id); if (!p) { closeSheet(); break; }
@@ -26853,7 +27266,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
       bd.addEventListener('touchcancel', off, { passive: true });
       document.addEventListener('visibilitychange', function () { if (!document.hidden) softRefresh(); });
     })();
-    // Long-press a song or video to start selecting (a second one while selecting toggles it). A move or a scroll cancels it.
+    // Long-press an audio or video item to start selecting (a second one while selecting toggles it). A move or a scroll cancels it.
     (function () {
       var vw = $('md-view'), tm = 0, sx = 0, sy = 0, pk = '';
       function clr() { if (tm) { clearTimeout(tm); tm = 0; } pk = ''; }
