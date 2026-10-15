@@ -10320,6 +10320,31 @@ html[data-nb-glass="1"] .blk-aud{background:color-mix(in srgb,var(--aud-bgs) 62%
     });
   }
 
+  // Leaving the Editor screen only hides this iframe, so a playing video or song in an embed would keep going. While hidden, every
+  // embed is parked on about:blank by navigating its window, which leaves the src attribute alone, so a save taken meanwhile is
+  // unchanged. Coming back re-arms the retry flag and reloads it. The retry sweep below stays off while parked.
+  var _embedsParked = false, _parkedFrames = [];
+  window.nbParkEmbeds = function(park) {
+    if (park) {
+      if (_embedsParked) return;
+      _embedsParked = true; _parkedFrames = [];
+      canvas.querySelectorAll('.blk-media-frame iframe, .blk-social-embed iframe').forEach(function(f) {
+        if (!f.getAttribute('src')) return;
+        try { f.contentWindow.location.replace('about:blank'); _parkedFrames.push(f); } catch (e) {}
+      });
+    } else {
+      if (!_embedsParked) return;
+      _embedsParked = false;
+      var fr = _parkedFrames; _parkedFrames = [];
+      fr.forEach(function(f) {
+        var src = f.getAttribute('src');
+        if (!f.isConnected || !src) return;
+        _markEmbedRetryPending(f.closest('.blk-social-embed') || f);
+        f.src = src;
+      });
+    }
+  };
+
   // A YouTube/Instagram embed that failed to load (or loaded silently
   // broken) while offline just sits inert afterward — there's no
   // browser-level retry the way a normal navigation gets, so
@@ -10329,6 +10354,7 @@ html[data-nb-glass="1"] .blk-aud{background:color-mix(in srgb,var(--aud-bgs) 62%
   // actively playing, is left alone, so a brief reconnect blip doesn't
   // restart video mid-playback for no reason.
   function _retryPendingEmbeds() {
+    if (_embedsParked) return;
     // Images: unlike the iframe cases below, a plain <img> reliably
     // fires 'error'/'load' on its own, so wireImage's listeners are
     // enough to keep embedRetryPending accurate — this just needs to
@@ -10538,6 +10564,7 @@ html[data-nb-glass="1"] .blk-aud{background:color-mix(in srgb,var(--aud-bgs) 62%
      The recording is stored as a data URI on the card's hidden img.blk-aud-data, which the host's image cache already syncs,
      backs up, exports and publishes like any photo (note content only carries the data-note-img-ref placeholder). */
   var audKit = (${nbAudioKit.toString()})();
+  window.nbStopVoice = audKit.stopAll; // the host calls this when you leave the Editor screen
   var AUD_MAX_SEC = 300, audRec = null; // 5 min at 24 kbps stays near 1.2 MB, inside the 2 MB published-page limit
   function audToast(m) { try { parent.showToast(m); } catch (e) {} }
   function audTheme() {
@@ -17288,6 +17315,7 @@ ${_nbGetPristineCanvasStyle()}
   (function() {
     var kit = (${nbAudioKit.toString()})();
     Array.prototype.forEach.call(document.querySelectorAll('.blk-aud'), kit.bind);
+    window.addEventListener('pagehide', kit.stopAll); // the story viewer closes by navigating its frame away
   })();
   <\/script>
   <script>
@@ -23574,12 +23602,14 @@ function nbGoScreen(name) {
   // call sites that can leave it (nbNotesNavClick's auto-save-and-leave,
   // the Save dialog's confirm handler, etc.) — including any added later.
   const leavingEditor = document.getElementById('screen-create').classList.contains('active') && name !== 'create';
+  if (leavingEditor) { try { const _w = document.getElementById('markup-iframe').contentWindow; if (_w) { if (_w.nbStopVoice) _w.nbStopVoice(); if (_w.nbParkEmbeds) _w.nbParkEmbeds(true); } } catch (e) {} } // the Editor iframe stays alive when hidden, so a playing voice note or embed would keep going
   document.querySelectorAll('.nb-screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
   const screen = document.getElementById('screen-' + name);
   const btn = document.getElementById('bn-' + name);
   if (screen) screen.classList.add('active');
   if (btn) btn.classList.add('active');
+  if (name === 'create') { try { const _w2 = document.getElementById('markup-iframe').contentWindow; if (_w2 && _w2.nbParkEmbeds) _w2.nbParkEmbeds(false); } catch (e) {} } // reload embeds parked while the Editor was hidden
   // Repost shares the Editor's screen; its own nav button is the active one there.
   if (name === 'create' && _nbRepostMode) {
     document.getElementById('bn-create').classList.remove('active');
