@@ -78,13 +78,23 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   overscroll-behavior-y: none;
-  -webkit-user-select: none;
-  user-select: none;
   -webkit-touch-callout: none
 }
 
-/* Hold-to-select only where reading or editing text makes sense */
-input, textarea, [contenteditable], .alert-md, #privacy-body, #cterms-body, #terms-dialog-body {
+/* Text selection is off for app chrome, but never for anything you type into
+   (every input, textarea, select, contenteditable and what's inside it, in the
+   editor, comments, dialogs and sheets) or for text meant to be read and copied.
+   :where() keeps this at zero specificity, so a specific class can still opt out. */
+body :where(*:not(input, textarea, select, [contenteditable], [contenteditable] *,
+    .alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body, #cterms-body *,
+    #terms-dialog-body, #terms-dialog-body *)) {
+  -webkit-user-select: none;
+  user-select: none
+}
+
+input, textarea, select, [contenteditable], [contenteditable] *,
+.alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body, #cterms-body *,
+#terms-dialog-body, #terms-dialog-body * {
   -webkit-user-select: text;
   user-select: text;
   -webkit-touch-callout: default
@@ -873,7 +883,7 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 }
 #story-viewer-back {
   position: absolute;
-  left: 6.2px;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
@@ -881,7 +891,12 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
   border: none;
   cursor: pointer;
   color: #202122;
-  padding: .3rem;
+  /* 36 x 44px tap area, flush with the screen edge and ending where the title text starts. The chevron sits where it
+     always did (6.2px + .3rem from the edge). */
+  width: 36px;
+  height: 44px;
+  padding: 0 0 0 calc(6.2px + .3rem);
+  align-items: center;
   display: flex
 }
 #story-viewer-title {
@@ -1207,6 +1222,68 @@ body:not(.night):not(.pink) #story-viewer-like-btn.is-liked {
   top: .125em
 }
 
+.gc-comments {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .22rem;
+  margin-right: .55rem
+}
+.gc-comments[hidden] { display: none }
+.gc-comments svg { flex-shrink: 0; position: relative; top: .125em }
+.pub-opts { display: flex; flex-direction: column }
+.pub-opts .nb-switch-wrap { justify-content: space-between; padding: .5rem 0 }
+.pub-opts .nb-switch-wrap:first-child { padding-top: 0 }
+.alert-card.alert-tap { cursor: pointer }
+/* Alerts: unread highlight, hold-to-select and the select / delete FABs. The accent follows the theme: blue in Light, near-white in Night (no blue), rose in Pink. */
+body { --al-acc: #3366cc; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17; --al-fsh: 0 4px 14px rgba(20, 30, 50, .18), 0 1px 3px rgba(20, 30, 50, .10) }
+body.night { --al-acc: #e8e8e8; --al-on: #1c1c1e; --al-tint: .08; --al-tint-sel: .15; --al-fsh: 0 4px 14px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .4) }
+body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17; --al-fsh: 0 4px 14px rgba(200, 54, 94, .22), 0 1px 3px rgba(200, 54, 94, .12) }
+.alert-card { -webkit-touch-callout: none }
+.alert-card::before, .alert-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .15s }
+.alert-card::before { z-index: -1; background: var(--al-acc) }
+.alert-card::after { box-shadow: inset 0 0 0 1.5px var(--al-acc) }
+.alert-card.alert-unread::before { opacity: var(--al-tint) }
+.alert-card.alert-unread::after { opacity: .5 }
+.alert-card.is-sel::before { opacity: var(--al-tint-sel) }
+.alert-card.is-sel::after { opacity: 1; box-shadow: inset 0 0 0 2px var(--al-acc) }
+.alert-card .al-chk { display: none; width: 18px; height: 18px; box-sizing: border-box; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--al-acc); color: var(--al-on); opacity: .55; align-items: center; justify-content: center }
+.alert-card .al-chk svg { display: none }
+.alert-card.is-sel .al-chk { background: var(--al-acc); opacity: 1 }
+.alert-card.is-sel .al-chk svg { display: block }
+#nb-notes-grid.al-selmode { padding-bottom: 8.5rem }
+#nb-notes-grid.al-selmode .alert-card { -webkit-user-select: none; user-select: none }
+#nb-notes-grid.al-selmode .alert-card .gc-trash { display: none }
+#nb-notes-grid.al-selmode .alert-card .al-chk { display: flex }
+
+/* Notes: hold-to-select, same look as Alerts. Published notes are locked (a toast explains). */
+.guide-card.nb-nsel { -webkit-touch-callout: none }
+.guide-card.nb-nsel::before, .guide-card.nb-nsel::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .15s }
+.guide-card.nb-nsel::before { z-index: -1; background: var(--al-acc) }
+.guide-card.nb-nsel::after { box-shadow: inset 0 0 0 1.5px var(--al-acc) }
+.guide-card.nb-nsel.is-sel::before { opacity: var(--al-tint-sel) }
+.guide-card.nb-nsel.is-sel::after { opacity: 1; box-shadow: inset 0 0 0 2px var(--al-acc) }
+.guide-card.nb-nsel .al-chk { display: none; width: 18px; height: 18px; box-sizing: border-box; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--al-acc); color: var(--al-on); opacity: .55; align-items: center; justify-content: center }
+.guide-card.nb-nsel .al-chk svg { display: none }
+.guide-card.nb-nsel.is-sel .al-chk { background: var(--al-acc); opacity: 1 }
+.guide-card.nb-nsel.is-sel .al-chk svg { display: block }
+#nb-notes-grid.nb-nselmode { padding-bottom: 8.5rem }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel { -webkit-user-select: none; user-select: none }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-fav, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-edit, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-trash { display: none }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel:not(.nb-nlocked) .al-chk { display: flex }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel.nb-nlocked { opacity: .45 }
+#nb-alert-fabs { position: fixed; right: .9rem; bottom: calc(58px + env(safe-area-inset-bottom, 0px) + .9rem); z-index: 95; display: flex; align-items: center; gap: .6rem; opacity: 0; transform: translateY(10px) scale(.96); visibility: hidden; pointer-events: none; transition: opacity .18s, transform .18s, visibility 0s .18s }
+#nb-alert-fabs.on { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition: opacity .18s, transform .18s }
+.al-fab { height: 48px; min-width: 48px; box-sizing: border-box; padding: 0 1rem; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: .4rem; font: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; border: 1px solid #dde6ff; background: #fff; color: var(--al-acc); box-shadow: var(--al-fsh); transition: transform .12s }
+.al-fab:active { transform: scale(.95) }
+.al-fab svg { display: block; flex-shrink: 0 }
+#al-fab-del { width: 48px; padding: 0; border-color: transparent; background: #d33; color: #fff }
+body.night .al-fab { background: #1c1c1e; border-color: #2e2e30; color: #e8e8e8 }
+body.pink .al-fab { background: #fff2f7; border-color: #f5c5d8; color: #bd2856 }
+body.night #al-fab-del, body.pink #al-fab-del { background: #d33; border-color: transparent; color: #fff }
+#nb-alert-fabs .al-fab { height: 48px; min-height: 48px; max-height: 48px; padding-top: 0; padding-bottom: 0; line-height: 1; align-self: center; box-sizing: border-box }
+#nb-alert-fabs .al-fab span { line-height: 1; display: block }
+@media (prefers-reduced-motion: reduce) { #nb-alert-fabs, #nb-alert-fabs.on, .al-fab, .alert-card::before, .alert-card::after { transition: none } }
+.guide-card.nb-flash { box-shadow: 0 0 0 2px rgba(80,130,220,.7); transition: box-shadow .4s }
 .gc-tags-row {
   display: flex;
   gap: .35rem;
@@ -1781,7 +1858,7 @@ body.pink .bn-item.active {
   box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
   overflow: hidden
 }
-#publish-sheet.is-live { height: min(290px, 80vh) }
+#publish-sheet.is-live { height: min(264px, 80vh) }
 #publish-hdr {
   display: flex;
   align-items: center;
@@ -2752,6 +2829,8 @@ html[data-splash="2"] { --splash-img: var(--splash-img-2) }
   cursor: pointer;
   padding: 0;
 }
+/* Invisible margin that makes the 36px circle a 48px target. */
+#account-screen-back-btn::before { content: ''; position: absolute; inset: -6px }
 
 #account-screen-inner {
   display: flex;
@@ -5578,6 +5657,9 @@ body.night .gc-play-icon,body.night .gc-trash,body.night .gc-edit,body.night .gc
 body.night #md-screen{--md-field:rgba(0,0,0,.3);--md-fieldsh:inset 0 2px 6px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.07);--md-fieldf:rgba(0,0,0,.45);--md-sub:#b8c0ca;--md-sub2:#9ca3ab;--md-pillf:#c8c8c8;--md-ico:#aab4c5;--md-ph:#a9afb8}
 body.night #md-screen .md-row::after{background:color-mix(in srgb,#fff 9%,transparent)}
 body.night #md-c-shuf:not(.on),body.night #md-c-rep:not(.on){color:var(--md-sub)}
+/* Alerts select / delete FABs: same glass recipe as the bars (tinted page colour + blur, hairline ring); the highlight on the cards is an overlay, so it already works over the glass cards */
+body:not(.reader-mode) #nb-alert-fabs .al-fab{background:color-mix(in srgb,var(--nb-bg) 62%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:none;color:var(--al-acc);box-shadow:0 0 0 1px var(--nb-card-ring),var(--al-fsh)}
+body:not(.reader-mode) #nb-alert-fabs #al-fab-del{background:color-mix(in srgb,#d33 82%,transparent);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2),var(--al-fsh)}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
 
@@ -5807,7 +5889,7 @@ body.pink #edit-dialog,
 body.pink #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
 #edit-dialog {max-height:85vh}
 #publish-sheet {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
-#publish-sheet.is-live {height:min(calc(330px + env(safe-area-inset-bottom,0px)),85vh)}
+#publish-sheet.is-live {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
 #edit-dhdr,
 #publish-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
 #edit-dhdr-title,
@@ -6341,7 +6423,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 15 October 2026</em></p>
+      <p><em>Effective 16 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists and theme choice, are also backed up to our servers (see below).</p>
@@ -6362,7 +6444,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>Publishing as an ad</h3>
       <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a starting template when they start a new note in Write (or in Share, for a Share note). It isn't just for people who have the page's link, like a regular published page. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it disappears from Write and Share right away, and any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device.</p>
       <h3>Ad access &amp; invites</h3>
-      <p>Some bigger ad packages have to be earned. To work out which packages you can start and how many ads you can run at once, our servers count these things, using the records described in this policy: your subscribers, published notes, stories, likes you've received and given, accounts you follow, how many of the last 30 days your account was active, your running ads, and any strikes. A strike comes from an alert we sent you about a removal, pause or suspension. We keep those alerts for up to a year, but a strike only counts for 60 days, or until we excuse it. You see these counts as your progress. We use them to enforce the limits, and other people never see them.</p>
+      <p>Some bigger ad packages have to be earned. To work out which packages you can start and how many ads you can run at once, our servers count these things, using the records described in this policy: your subscribers, published notes, stories, likes and comments you've received and given, accounts you follow, how many of the last 30 days your account was active, your running ads, and any strikes. A strike comes from an alert we sent you about a removal, pause or suspension. We keep those alerts for up to a year, but a strike only counts for 60 days, or until we excuse it. You see these counts as your progress. We use them to enforce the limits, and other people never see them.</p>
       <p>Every signed-in account gets a random 8-character invite code, saved with the account. When someone adds a code, we save a record of who entered whose code, when it happened, and whether and why it stopped counting (the invited account was suspended or being deleted, or we removed it for abuse). A friend can add one code, in their first 14 days. You get an alert when a friend joins, but it doesn't say who. You only see totals: how many friends added your code and how many count right now, never who. An invite counts once your friend has published a note and been active on at least two days. If your friend chooses to subscribe at the same time, that's saved like any other subscription. When you share your code, it goes through your device's share sheet or clipboard, so the message is sent by the app you pick and we never see it. When an invite counts, we add 100 free views to your balance. We add it to the list of your view credits, together with the invited account's internal ID, so the same invite can't be rewarded twice. That entry stays in that list (and only there) until you delete your account, even if your friend's account is deleted first. If either account is deleted, the record of the invite itself is deleted.</p>
       <h3>Reporting a published page</h3>
       <p>Reports help keep Bluebook a good place for everyone. Anyone can report a published page from its public link. To stop spam, we count how many reports come from an IP address. That count lives in a short-lived counter that disappears on its own about a minute after the last report from that address. It's never saved as part of the report. We only keep the reason and details that were sent, which page it's about, and when. A report doesn't record who sent it. A report stays on file until someone reviews it, even if the page is unpublished or its author's account is deleted in the meantime. After it's handled, it's deleted. The exception is reports of child sexual abuse material. We keep those for 18 months, along with a copy of the reported page. The report's 18 months start when it's closed. The page copy's 18 months start when it was reported, or when it was most recently reported if it's reported again. The same period covers any other copy we hold of that page. We may also send a notification with the page's address, the reason and the details to our private alerts channel. We handle reports of child sexual abuse material the way the law requires, including passing them to the proper authority. We keep a short record of each one we pass on (the page's address, the date, the authority's reference for it, and a brief note) for 18 months from the latest. When we take an action (like a takedown, a dismissed report, or a restored page), we write down the action, the page's address, the time, and a short note such as the reason given. We keep that for about 13 months, as a record of what was done.</p>
@@ -6399,7 +6481,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 15 October 2026</em></p>
+      <p><em>Effective 16 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language, and you're welcome to reach out anytime with questions.</p>
       <h3>Responsible Use</h3>
       <p>Please use Bluebook kindly and lawfully. You agree to use it for lawful purposes only, and not to create, store, or export content that is illegal, harmful, threatening, abusive, untrue and damaging to someone's reputation, or that breaks someone else's rights. This applies with extra weight to anything you publish (see below).</p>
@@ -6417,6 +6499,8 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>A <strong>view</strong> is counted once someone actually starts editing a note that was handed to them as your ad, not just when it's shown on their Write or Share screen. Every view counts: a repeat view from the same person or device still counts and is still taken from your view balance. Views aren't limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> number next to your ad's view count, just for your information. It's worked out from an anonymous ID made and stored on each device, which tells us whether a device has already been counted for a given ad (and, separately, is used for the activity counts in the Privacy Policy). It isn't linked to a Google account or any other identity, and it's sent whether or not you're signed in. Because it identifies a device rather than a person, someone using two devices counts as two unique viewers, and reinstalling the app or clearing its storage makes that device count as new from then on. The unique viewers number doesn't change your view balance or how views are taken from it.</p>
       <p>If Google Play refunds a view purchase, we take those views back out of your balance. If that leaves your balance below zero, your running ads stop, and you can't start a new ad until your balance covers it again.</p>
       <p>Purchased views are a one-time purchase through Google Play that gets used up. For anything about the purchase itself, see Google Play's own refund policy. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad by mistake after approving it, <a href="mailto:essentialsoftware.support@gmail.com">contact us</a> and we'll decide whether to credit or refund the affected views. That's separate from, and doesn't replace, Google Play's own refund process for the purchase itself. If you unpublish an ad, it stops being shown and any views it had left go unused (so check your balance first). Those views aren't returned to your account or moved to another ad, and any unspent view-credit balance also goes unused if your account is deleted. Taking down the ad doesn't affect the published page, which stays live until you unpublish it separately. Views we return to your account (for example, a refund of an ad's unused views) stay in your balance, and you can put any amount of them on one of your ads from the Publish as Ad tab without buying again.</p>
+      <h3>Comments</h3>
+      <p>If you turn on "Show comments" in a note's Publish sheet, signed-in people can comment on it and reply to each other. A comment is saved with its text, the time, and the commenter's profile picture and display name (or shown as Anonymous if they have no name), and appears on the live page for anyone who opens it. Comments count toward ad access like likes do. The commenter or the note's author can delete a comment, which also removes its replies. Turning comments off hides them; unpublishing the note or deleting an account removes them.</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
       <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags and preview images. It also lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description and tags, just like anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. Your display name and profile picture are optional. If you add them, they're shown on your stories and to your subscribers. They don't have to be your real name or photo, but they can't pretend to be another person, account or brand, or mislead viewers about who's posting.</p>
       <p>A signed-in account can also like a published note. Likes are a simple way to say thanks. As its author, you can see each note's own like count on its card in your Published and Stories tabs, and anyone who sees the note in their Subscribed feed or Liked tab can see it too. Nobody sees who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. Please don't misuse likes, like using multiple accounts or automated tools to push a note's count up or down. We may remove likes, or suspend your ability to like, for the same reasons we can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what's recorded about likes.</p>
@@ -6526,12 +6610,18 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
           <div id="pub-slug-status" class="pub-status"></div>
         </div>
         <div id="pub-state-live" class="bkp-panel" style="display:none">
-          <div class="pub-live-top">
-            <p class="bkp-help">This note is live.</p>
+          <div class="pub-opts">
             <label class="nb-switch-wrap" for="pub-stories-switch">
               <span class="nb-switch-label">Show in stories</span>
               <span class="nb-switch">
                 <input type="checkbox" id="pub-stories-switch" class="nb-switch-input" onchange="_pubOnStoriesToggle(this.checked)">
+                <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
+              </span>
+            </label>
+            <label class="nb-switch-wrap" for="pub-comments-switch">
+              <span class="nb-switch-label">Show comments</span>
+              <span class="nb-switch">
+                <input type="checkbox" id="pub-comments-switch" class="nb-switch-input" onchange="_pubOnCommentsToggle(this.checked)">
                 <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
               </span>
             </label>
@@ -14556,21 +14646,62 @@ function _nbBindAppResumeListener() {
     });
   } catch (e) {}
 }
-// System/gesture back button (Android). Registering a 'backButton'
-// listener at all takes over from Capacitor's native default (WebView
-// history back, else exit the app) — nothing else in this file did that
-// before, so without the canGoBack fallback below, adding this listener
-// would silently break back-to-exit everywhere it wasn't already broken.
-// The one behavior change: while any _pubSetBtnLoading-tracked action is
-// in flight (Google sign-in, sign-out, delete account, purchase, restore
-// purchases, publish/update/unpublish), swallow it instead of exiting
-// mid-flow — every one of those has a native call, a stacked native
-// Activity (billing sheet, account picker), or a network request that'd
-// be orphaned under an app that's already gone, the same failure mode
-// as sign-in. _nbBusyBtnCount is the
-// single shared counter (see _pubSetBtnLoading) so this doesn't need its
-// own per-action list — anything that already shows a spinner is already
-// covered.
+// System/gesture back button (Android). Registering a 'backButton' listener takes over from Capacitor's native
+// default, which is WebView history back. This app never navigates by history, but its iframes (the story viewer,
+// the editor canvas) do add entries, so the default kept "going back" inside an iframe and nothing visibly changed.
+// So back works like the on-screen controls instead: close the layer that's on top, else leave the Editor/Settings
+// for Notes, else exit. While any _pubSetBtnLoading-tracked action is in flight (Google sign-in, sign-out, delete
+// account, purchase, restore purchases, publish/update/unpublish) it's swallowed instead of exiting mid-flow: every
+// one of those has a native call, a stacked native Activity (billing sheet, account picker), or a network request
+// that'd be orphaned under an app that's already gone. _nbBusyBtnCount is the single shared counter (see
+// _pubSetBtnLoading), so anything that already shows a spinner is already covered.
+function _nbClickEl(id) { const b = document.getElementById(id); if (b) b.click(); }
+// Everything that can sit on screen over the rest, each closed by the same call its own on-screen control makes
+// (a dialog's Cancel, a sheet's close button, a viewer's back arrow) so back never skips a cleanup the tap does.
+// The layer visually on top (highest z-index; on a tie, the earlier entry here) goes first, so a dialog over a
+// sheet closes before the sheet. Terms is the first-run gate: back from it leaves the app.
+const NB_BACK_LAYERS = [
+  { id: 'mic-overlay', close: () => _nbClickEl('mic-dialog-cancel') },
+  { id: 'signout-overlay', close: () => _nbClickEl('signout-dialog-cancel') },
+  { id: 'delete-account-overlay', close: () => _nbClickEl('delete-account-dialog-cancel') },
+  { id: 'unpublish-overlay', close: () => _nbClickEl('unpublish-dialog-cancel') },
+  { id: 'delete-overlay', close: () => _nbClickEl('delete-dialog-cancel') },
+  { id: 'restore-overlay', close: () => _nbClickEl('restore-dialog-ok') },
+  { id: 'edit-reset-overlay', close: () => _nbClickEl('edit-reset-cancel') },
+  { id: 'sync-conflict-overlay', close: () => _nbClickEl('sync-conflict-keep') },
+  { id: 'paywall-overlay', close: () => _nbPaywallOk() },
+  { id: 'privacy-overlay', close: () => closePrivacy() },
+  { id: 'cterms-overlay', close: () => closeConsumerTerms() },
+  { id: 'einfo-overlay', close: () => closeEditorInfo() },
+  { id: 'terms-overlay', close: (AppPlugin) => { try { AppPlugin.exitApp(); } catch (e) {} } },
+  { id: 'account-overlay', close: () => closeLogoutConfirm() },
+  { id: 'publish-overlay', close: () => _pubUserClose() },
+  { id: 'backup-overlay', close: () => closeBackupSheet() },
+  { id: 'edit-overlay', close: () => nbCloseSaveDialog() },
+  { id: 'story-viewer-overlay', close: () => nbCloseStory() },
+  { id: 'account-screen', close: () => closeAccountScreen() },
+  { id: 'md-screen', close: () => { if (window.nbMediaBack) window.nbMediaBack(); } } // closes its own sheet, player, selection or view first
+];
+function _nbCloseTopBackLayer(AppPlugin) {
+  let top = null, topZ = -Infinity;
+  for (const layer of NB_BACK_LAYERS) {
+    const el = document.getElementById(layer.id);
+    if (!el || !el.classList.contains('open')) continue;
+    const z = parseInt(getComputedStyle(el).zIndex, 10) || 0;
+    if (z > topZ) { top = layer; topZ = z; }
+  }
+  if (!top) return false;
+  top.close(AppPlugin);
+  return true;
+}
+// Editor and Settings are reached from Notes, so back goes there, the same as tapping Notes in the bottom nav
+// (which also saves an open draft).
+function _nbBackToNotes() {
+  const on = (id) => { const e = document.getElementById(id); return !!(e && e.classList.contains('active')); };
+  if (!on('screen-create') && !on('screen-settings')) return false;
+  nbNotesNavClick();
+  return true;
+}
 let _nbBackButtonListenerBound = false;
 function _nbBindBackButtonListener() {
   if (_nbBackButtonListenerBound) return;
@@ -14578,16 +14709,15 @@ function _nbBindBackButtonListener() {
   if (!AppPlugin) return;
   _nbBackButtonListenerBound = true;
   try {
-    AppPlugin.addListener('backButton', (data) => {
+    AppPlugin.addListener('backButton', () => {
       if (window._nbLockBack && window._nbLockBack(AppPlugin)) return;
       const acctScr = document.getElementById('account-screen');
       const acctOpen = !!(acctScr && acctScr.classList.contains('open'));
       if (acctOpen && window._nbSigninOrigin === 'settings') { closeAccountScreen(); return; }
       if (_nbBusyBtnCount > 0) return;
-      if (acctOpen) { closeAccountScreen(); return; }
-      if (window.nbMediaBack && window.nbMediaBack()) return;
-      if (data && data.canGoBack) window.history.back();
-      else AppPlugin.exitApp();
+      if (_nbCloseTopBackLayer(AppPlugin)) return;
+      if (_nbBackToNotes()) return;
+      AppPlugin.exitApp();
     });
   } catch (e) {}
 }
@@ -15315,7 +15445,7 @@ function _nbHealSharedSlugs(arr, acct) {
       || ((a.createdAt || 0) - (b.createdAt || 0))
       || String(a.id).localeCompare(String(b.id)));
     list.slice(1).forEach(n => {
-      Object.assign(n, { publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, updatedAt: Date.now() });
+      Object.assign(n, { publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, updatedAt: Date.now() });
       if (!/\(copy\)$/.test(n.title || '')) n.title = (n.title || 'Untitled note') + ' (copy)';
       if (acct) n.acct = acct.sub;
       healed++;
@@ -15344,7 +15474,7 @@ function _nbMakeConflictCopy(src, acct) {
     id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     title: (src.title || 'Untitled') + ' (conflict copy)',
     createdAt: Date.now(), updatedAt: Date.now(),
-    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
   });
   delete c.syncBaseAt; delete c.seedProvisional; delete c.seedEdited; delete c.seedReseeded;
   if (acct) c.acct = acct.sub;
@@ -16937,8 +17067,8 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
   <div id="nb-report-overlay" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(20,20,24,.5);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:1rem;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
     <div id="nb-report-box" role="dialog" aria-modal="true" aria-labelledby="nb-report-title" tabindex="-1" style="width:100%;max-width:380px;background:#fff;border-radius:18px;padding:1.4rem;box-shadow:0 20px 50px rgba(20,20,40,.28)">
       <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:1.1rem">
-        <div style="flex:none;width:34px;height:34px;border-radius:10px;background:#fdeeee;display:flex;align-items:center;justify-content:center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c23b3b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="2"></line></svg>
+        <div style="flex:none;width:34px;height:34px;border-radius:10px;background:#fde8ef;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e0245e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="2"></line></svg>
         </div>
         <div>
           <div id="nb-report-title" style="font-weight:700;font-size:15.5px;color:#202122;letter-spacing:-.01em">Report an issue</div>
@@ -16966,7 +17096,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
         <textarea id="nb-report-details" rows="3" placeholder="Anything that helps us understand the issue" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e5ee;border-radius:11px;padding:.7rem .85rem;font:inherit;font-size:14px;color:#202122;background:#f8f9fc;outline:none;resize:vertical;overflow:auto;line-height:1.4;margin-bottom:.25rem;transition:border-color .15s,background .15s"></textarea>
         <div style="font-size:.72rem;color:#8f8f89;line-height:1.4">Drag the bottom-right corner to resize this box.</div>
       </div>
-      <div id="nb-report-msg" role="status" aria-live="polite" aria-atomic="true" style="min-height:1.2em;margin:.4rem 0;font-size:12.5px;color:#a83232"></div>
+      <div id="nb-report-msg" role="status" aria-live="polite" aria-atomic="true" style="min-height:1.2em;margin:.4rem 0;font-size:12.5px;color:#e0245e"></div>
       <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.5rem">
         <button type="button" id="nb-report-cancel" style="padding:.55rem 1rem;border-radius:10px;border:1.5px solid #e2e5ee;background:#fff;color:#4a4a46;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s">Cancel</button>
         <button type="button" id="nb-report-submit" style="padding:.55rem 1.1rem;border-radius:10px;border:none;background:#3366cc;color:#fff;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(51,102,204,.35);transition:background .15s,transform .1s">Submit</button>
@@ -17138,7 +17268,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
     function openDialog() {
       previouslyFocused = document.activeElement;
       msgEl.textContent = '';
-      msgEl.style.color = '#a83232';
+      msgEl.style.color = '#e0245e';
       selectedReason = 'spam';
       selectLabel.textContent = 'Spam';
       selectOpts.forEach(function(o){
@@ -17186,7 +17316,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
       submitBtn.dataset.origLabel = submitBtn.textContent;
       submitBtn.innerHTML = '<span class="nb-report-spinner"></span>Submitting…';
       submitBtn.disabled = true;
-      msgEl.style.color = '#a83232';
+      msgEl.style.color = '#e0245e';
       msgEl.textContent = '';
       fetch('/report/${esc(publishSlug)}', {
         method: 'POST',
@@ -17202,7 +17332,7 @@ function nbBuildStaticNoteHtml(note, publishSlug) {
         msgEl.textContent = 'Thanks, this page has been reported.';
         submitBtn.textContent = 'Submitted';
       }).catch(function(){
-        msgEl.style.color = '#a83232';
+        msgEl.style.color = '#e0245e';
         msgEl.textContent = 'Could not send report. Please try again.';
         submitBtn.disabled = false;
         submitBtn.textContent = submitBtn.dataset.origLabel || 'Submit';
@@ -17856,6 +17986,8 @@ function nbOpenPublishSheet(id, keepTab) {
     liveFooter.style.display = '';
     document.getElementById('pub-live-url').textContent = _pubUrlFor(note.publishedSlug);
     document.getElementById('pub-stories-switch').checked = !!note.showInStories;
+    document.getElementById('pub-comments-switch').checked = !!note.showComments;
+    _pubSyncCommentsFlag(note.id);
     // Decide the Save button's state by comparing current content against
     // what's live: without a comparison the button would just sit at
     // whatever its last state happened to be (enabled, by default markup).
@@ -18289,7 +18421,7 @@ async function nbUpdatePublishedNote() {
     if (res.status === 404) {
       try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('update 404: strip', e); }
       if (_pubSaveNoteFields(note.id, {
-        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
+        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
       }) === false) return;
       showToast('That page is no longer live. Publish again to bring it back.');
       if (_pubNoteId === note.id) closePublishSheet();
@@ -18319,6 +18451,55 @@ async function nbUpdatePublishedNote() {
 // same session run one after another (_pubStoriesChain) so a quick on/off can't reach the server
 // out of order.
 let _pubStoriesChain = Promise.resolve();
+// ---- Comments switch (Publish sheet) ----
+// Optimistic like the stories switch: the flag is saved on the note at once and PUT /publish/:slug/comments
+// follows; a failure puts it back. The server owns the truth, so opening the sheet re-reads it.
+let _pubCommentsChain = Promise.resolve(), _pubCommentsPending = 0;
+function _pubOnCommentsToggle(checked) {
+  const note = _pubFindNote(_pubNoteId);
+  const sw = document.getElementById('pub-comments-switch');
+  if (!note || !note.publishedSlug) return;
+  if (_pubOfflineGuard()) { if (sw) sw.checked = !!note.showComments; return; }
+  if (!nbIsSignedIn()) { showToast('Sign in to turn on comments'); if (sw) sw.checked = !!note.showComments; return; }
+  const id = note.id, was = !!note.showComments;
+  _pubSaveNoteFields(id, { showComments: checked });
+  showToast(checked ? 'Comments on' : 'Comments off');
+  _pubCommentsPending++;
+  _pubCommentsChain = _pubCommentsChain.then(async () => {
+    const n = _pubFindNote(id);
+    if (!n || !n.publishedSlug) return;
+    try {
+      const res = await _nbFetchOwned(n, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(n.publishedSlug) + '/comments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+        body: JSON.stringify({ token: tok, showComments: checked })
+      }));
+      if (!res.ok) throw new Error('comments toggle failed: ' + res.status);
+      setTimeout(() => { try { _nbPollLikeCounts(); } catch (e) {} }, 400);
+    } catch (e) {
+      _nbLog('comments toggle', e);
+      _pubSaveNoteFields(id, { showComments: was });
+      const sw2 = document.getElementById('pub-comments-switch');
+      if (sw2 && _pubNoteId === id) sw2.checked = was;
+      showToast('Couldn\u2019t turn comments ' + (checked ? 'on' : 'off') + _nbFailureReason(e) + '. Change undone.');
+    } finally { _pubCommentsPending--; }
+  }).catch(e => _nbLog('comments chain', e));
+}
+async function _pubSyncCommentsFlag(id) {
+  const note = _pubFindNote(id);
+  if (!note || !note.publishedSlug || _pubCommentsPending || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/comments/' + encodeURIComponent(note.publishedSlug), { cache: 'no-store' });
+    if (!res.ok) return;
+    const d = await res.json();
+    if (!d || typeof d.enabled !== 'boolean' || _pubCommentsPending) return;
+    const cur = _pubFindNote(id);
+    if (!cur || d.enabled === !!cur.showComments) return;
+    _pubSaveNoteFields(id, { showComments: d.enabled });
+    const sw = document.getElementById('pub-comments-switch');
+    if (sw && _pubNoteId === id) sw.checked = d.enabled;
+  } catch (e) { _nbLog('comments flag sync', e); }
+}
 function _pubOnStoriesToggle(checked) {
   const note = _pubFindNote(_pubNoteId);
   const sw = document.getElementById('pub-stories-switch');
@@ -18829,6 +19010,7 @@ function nbCloseStory() {
   _ov.classList.remove('open', 'over-media');
   document.getElementById('story-viewer-frame').src = 'about:blank';
   _nbCurrentStorySlug = null;
+  _nbStoryOpenComment = null;
   _nbStoryRevealFrame();
   unlockScroll();
   if (_wasOverMedia) lockScroll(); // Media screen is still open underneath
@@ -18888,13 +19070,25 @@ async function _nbPollLikeCounts() {
     if (!res.ok) return;
     const data = await res.json();
     const counts = (data && data.counts) || {};
+    const cmap = (data && data.comments) || {};
     if (key !== _nbSubFeedPaintKey) return; // moved to another list meanwhile
     _nbSubFeedStories.forEach(row => {
-      const n = counts[row.slug];
-      if (typeof n === 'number' && row.likes !== n) { row.likes = n; _nbSubCardHtml(row); } // keep data + html cache current
+      const n = counts[row.slug], cn = typeof row.comments === 'number' || cmap[row.slug] ? (cmap[row.slug] || 0) : null;
+      let dirty = false;
+      if (typeof n === 'number' && row.likes !== n) { row.likes = n; dirty = true; }
+      if (cn !== null && row.comments !== cn) { row.comments = cn; dirty = true; }
+      if (dirty) _nbSubCardHtml(row); // keep data + html cache current
     });
     grid.querySelectorAll('.guide-card[data-slug]').forEach(el => {
-      const n = counts[el.getAttribute('data-slug')];
+      const slugKey = el.getAttribute('data-slug');
+      const cspan = el.querySelector('.gc-comments');
+      if (cspan) {
+        const c = cmap[slugKey] || 0, ctxt = _nbCompactCount(c);
+        if (cspan.lastChild && cspan.lastChild.nodeType === 3 && cspan.lastChild.nodeValue !== ctxt) cspan.lastChild.nodeValue = ctxt;
+        cspan.hidden = !c;
+        cspan.setAttribute('aria-label', c + (c === 1 ? ' comment' : ' comments'));
+      }
+      const n = counts[slugKey];
       const span = el.querySelector('.gc-likes');
       if (typeof n !== 'number' || !span) return;
       const txt = _nbCompactCount(n);
@@ -20032,59 +20226,398 @@ function _nbAlertMessageHtml(text) { return _nbMdRender(text); }
 // An alert: a short automatic statement, how long ago it was sent, and a delete icon. No open action.
 function _nbAlertCardHtml(s) {
   const ts = _nbSubEpoch(s.createdAt);
+  const tap = s.ref && /^(c:[^:]+:[^:]+|l:[^:]+)$/.test(String(s.ref));
   return `
-      <div class="guide-card alert-card" data-slug="${esc(s.slug)}">
+      <div class="guide-card alert-card${tap ? ' alert-tap' : ''}${_nbAlertUnreadIds && _nbAlertUnreadIds.has(s.slug) ? ' alert-unread' : ''}${_nbAlertSel && _nbAlertSel.has(s.slug) ? ' is-sel' : ''}" data-slug="${esc(s.slug)}"${_nbAlertSel && _nbAlertSel.size ? ` aria-pressed="${_nbAlertSel.has(s.slug)}"` : ''}${tap ? ` onclick="nbAlertOpen('${escJs(String(s.id || ''))}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbAlertOpen('${escJs(String(s.id || ''))}')"` : ''}>
         <div class="gc-desc"><div class="gc-desc-text alert-md">${_nbAlertMessageHtml(s.message || '')}</div></div>
         <div class="gc-steps-row">
           <span class="gc-desc-time">${ts ? _nbShortTimeAgo(ts) : ''}</span>
-          <button class="gc-trash" onclick="nbDeleteAlert('${escJs(String(s.id || ''))}')" aria-label="Delete alert">
+          <button class="gc-trash" onclick="event.stopPropagation(); nbDeleteAlert('${escJs(String(s.id || ''))}')" aria-label="Delete alert">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
           </button>
+          <span class="al-chk" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7.5"/></svg></span>
         </div>
       </div>`;
 }
+// Tapping a comment/reply/comment-like alert opens that note's viewer with the comments sheet scrolled to the comment;
+// a like alert goes to the note's card (All if it's on this device, else Published).
+let _nbStoryOpenComment = null;
+function nbAlertOpen(id) {
+  const row = _nbSubFeedStories.find(x => x.slug === 'alert:' + id);
+  const ref = row && String(row.ref || '');
+  let m;
+  if (ref && (m = /^c:([^:]+):([^:]+)$/.exec(ref))) {
+    _nbStoryOpenComment = { slug: m[1], id: m[2] };
+    _nbOpenStoryBySlug(m[1], { notFound: 'That note isn\u2019t available anymore' }).then(ok => { if (!ok) _nbStoryOpenComment = null; });
+  } else if (ref && (m = /^l:([^:]+)$/.exec(ref))) {
+    const slug = m[1];
+    const own = nbLoadNotes().find(n => n && n.publishedSlug === slug);
+    if (own) selectCat('All'); else selectCat('Published', 'published');
+    let tries = 0;
+    const find = () => {
+      const g = document.getElementById('nb-notes-grid');
+      const el = g && (own ? g.querySelector('.guide-card[data-note-id="' + CSS.escape(own.id) + '"]') : g.querySelector('.guide-card[data-slug="' + CSS.escape(slug) + '"]'));
+      if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('nb-flash'); setTimeout(() => el.classList.remove('nb-flash'), 1800); return; }
+      if (++tries < 12) setTimeout(find, 300);
+      else showToast('That note isn\u2019t in the list right now');
+    };
+    setTimeout(find, 350);
+  }
+}
+// The comments inside a page shown in the story viewer talk to the app (the page can't carry the account's session itself).
+async function _nbCommentsBridge(e) {
+  const fr = document.getElementById('story-viewer-frame'), m = e.data;
+  if (!fr || e.source !== fr.contentWindow || !_nbCurrentStorySlug || m.slug !== _nbCurrentStorySlug) return;
+  const reply = (ok, data, error) => { try { e.source.postMessage({ type: 'nb-cm-res', rid: m.rid, ok, data, error }, '*'); } catch (err) {} };
+  const base = NB_PUBLISH_API.replace(/\/$/, '');
+  const signed = nbIsSignedIn();
+  const auth = signed ? { 'Authorization': 'Bearer ' + nbSessionToken() } : {};
+  const send = async (url, opts) => {
+    const res = await _nbApiFetch(base + url, opts);
+    let d = null; try { d = await res.json(); } catch (err) {}
+    if (!res.ok) throw new Error((d && d.error) || 'Something went wrong');
+    return d;
+  };
+  try {
+    if (m.op === 'hello') {
+      reply(true, { signedIn: signed });
+      const want = _nbStoryOpenComment;
+      if (want && want.slug === m.slug) {
+        _nbStoryOpenComment = null;
+        setTimeout(() => { try { e.source.postMessage({ type: 'nb-cm-open', commentId: want.id }, '*'); } catch (err) {} }, 450);
+      }
+      return;
+    }
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('No internet connection');
+    const slug = encodeURIComponent(m.slug), cid = encodeURIComponent(String(m.id || ''));
+    if (m.op === 'list') {
+      // Pages of comments: cursor = next older page, thread = one thread's replies, focus = one comment with its thread, mine = the viewer's own.
+      const q = [], IDV = /^[A-Za-z0-9]{1,40}$/;
+      if (typeof m.cursor === 'string' && /^[0-9]{1,15}:[A-Za-z0-9]{1,40}$/.test(m.cursor)) q.push('cursor=' + encodeURIComponent(m.cursor));
+      if (typeof m.thread === 'string' && IDV.test(m.thread)) q.push('thread=' + encodeURIComponent(m.thread));
+      if (typeof m.focus === 'string' && IDV.test(m.focus)) q.push('focus=' + encodeURIComponent(m.focus));
+      if (m.mine) q.push('mine=1');
+      return reply(true, await send('/comments/' + slug + (q.length ? '?' + q.join('&') : ''), { headers: auth, cache: 'no-store' }));
+    }
+    if (m.op === 'sync') {
+      // The comments loaded beyond the first page, checked for current likes, reply counts and deletions.
+      const ids = Array.isArray(m.ids) ? m.ids.filter(x => typeof x === 'string' && /^[A-Za-z0-9]{1,40}$/.test(x)).slice(0, 450) : [];
+      return reply(true, await send('/comments/' + slug + '/sync', { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth }, body: JSON.stringify({ ids }) }));
+    }
+    if (!signed) throw new Error('Sign in to do that.');
+    const J = { 'Content-Type': 'application/json', ...auth };
+    let out;
+    if (m.op === 'post') out = await send('/comments/' + slug, { method: 'POST', headers: J, body: JSON.stringify({ body: m.body, parentId: m.parentId || null }) });
+    else if (m.op === 'del') out = await send('/comment/' + cid, { method: 'DELETE', headers: auth });
+    else if (m.op === 'like') out = await send('/comment-likes/' + cid, { method: 'POST', headers: auth });
+    else if (m.op === 'unlike') out = await send('/comment-likes/' + cid, { method: 'DELETE', headers: auth });
+    else throw new Error('Unknown action');
+    reply(true, out);
+    if (m.op === 'post' || m.op === 'del') setTimeout(() => { try { _nbPollLikeCounts(); } catch (err) {} }, 400);
+  } catch (err) { reply(false, null, (err && err.message) || 'Something went wrong'); }
+}
 function nbAlertsEmptySub() { return nbEmptyLead() + 'Announcements from us and messages about your account will show up here.'; }
-// Same confirmation dialog as deleting a note (#delete-dialog), reworded for an alert.
-function nbDeleteAlert(id) {
+// ---- Alerts: unread highlight, hold-to-select, select all / none and delete FABs ----
+// Unread = the alerts that arrived since Alerts was last opened (the newest _nbAlertUnread of them when the list loads).
+// They stay highlighted until tapped and are forgotten once another category is opened. Selection works like the Media
+// screen: hold a card to start, tap others to toggle; the FABs show while at least one alert is selected.
+var _nbAlertSel = new Set(), _nbAlertUnreadIds = new Set(), _nbAlertLpSup = 0;
+function _nbAlertCaptureUnread(rows) {
+  let pick = rows.filter(a => a && (a.seen === false || a.unread === true || a.read === false)); // if the server flags them, trust it
+  if (!pick.length && _nbAlertUnread > 0) pick = rows.slice().sort((a, b) => _nbSubEpoch(b.createdAt) - _nbSubEpoch(a.createdAt)).slice(0, _nbAlertUnread);
+  pick.forEach(a => _nbAlertUnreadIds.add(a.slug));
+}
+function _nbAlertPaint(slug) {
+  const grid = document.getElementById('nb-notes-grid');
+  const el = grid && grid.querySelector('.alert-card[data-slug="' + CSS.escape(slug) + '"]');
+  if (el) { el.classList.toggle('is-sel', _nbAlertSel.has(slug)); el.classList.toggle('alert-unread', _nbAlertUnreadIds.has(slug)); }
+  const row = _nbSubFeedStories.find(x => x.slug === slug);
+  if (row && _nbActiveCat === 'Alerts') _nbSubCardHtml(row); // keeps the card cache in step so a refresh doesn't swap the node
+}
+function _nbAlertShownSlugs() {
+  const grid = document.getElementById('nb-notes-grid');
+  return grid ? [...grid.querySelectorAll('.alert-card[data-slug]:not(.nb-skel-card)')].map(el => el.getAttribute('data-slug')) : [];
+}
+function _nbAlertFabs() {
+  let f = document.getElementById('nb-alert-fabs');
+  if (f) return f;
+  f = document.createElement('div');
+  f.id = 'nb-alert-fabs'; f.setAttribute('role', 'toolbar'); f.setAttribute('aria-label', 'Selected alerts');
+  f.innerHTML = '<button type="button" class="al-fab" id="al-fab-sel"></button>'
+    + '<button type="button" class="al-fab" id="al-fab-del" aria-label="Delete selected alerts"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>';
+  (document.getElementById('nb-app') || document.body).appendChild(f);
+  f.querySelector('#al-fab-sel').onclick = nbAlertSelAll;
+  f.querySelector('#al-fab-del').onclick = nbDeleteSelectedAlerts;
+  return f;
+}
+function _nbAlertSelUi() {
+  const grid = document.getElementById('nb-notes-grid');
+  for (const k of [..._nbAlertSel]) if (!_nbSubFeedStories.some(x => x.slug === k)) _nbAlertSel.delete(k); // gone after a refresh
+  const n = _nbAlertSel.size, on = n > 0 && _nbActiveCat === 'Alerts';
+  if (grid) {
+    grid.classList.toggle('al-selmode', n > 0);
+    grid.querySelectorAll('.alert-card[data-slug]').forEach(el => { if (n) el.setAttribute('aria-pressed', el.classList.contains('is-sel') ? 'true' : 'false'); else el.removeAttribute('aria-pressed'); });
+  }
+  const f = _nbAlertFabs();
+  f.classList.toggle('on', on);
+  if (!on) return;
+  const shown = _nbAlertShownSlugs(), all = shown.length > 0 && shown.every(k => _nbAlertSel.has(k));
+  const sel = f.querySelector('#al-fab-sel');
+  sel.innerHTML = (all
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 5 9 9 5"/><polyline points="3 17 5 19 9 15"/><line x1="13" y1="7" x2="21" y2="7"/><line x1="13" y1="17" x2="21" y2="17"/></svg>')
+    + '<span>' + (all ? 'Select none' : 'Select all') + '</span>';
+  f.querySelector('#al-fab-del').setAttribute('aria-label', 'Delete ' + n + (n === 1 ? ' alert' : ' alerts'));
+}
+function _nbAlertToggle(k) {
+  if (_nbAlertSel.has(k)) _nbAlertSel.delete(k); else _nbAlertSel.add(k);
+  _nbAlertUnreadIds.delete(k);
+  _nbAlertPaint(k);
+  _nbAlertSelUi();
+}
+function nbAlertSelAll() {
+  if (_nbActiveCat !== 'Alerts') return nbNoteSelAll();
+  const shown = _nbAlertShownSlugs();
+  const all = shown.length > 0 && shown.every(k => _nbAlertSel.has(k));
+  if (all) _nbAlertSel.clear(); else shown.forEach(k => { _nbAlertSel.add(k); _nbAlertUnreadIds.delete(k); });
+  shown.forEach(_nbAlertPaint);
+  _nbAlertSelUi();
+}
+// Leaving Alerts forgets the selection and the unread highlights (buildCatBar calls this whenever another category is open).
+function _nbAlertUiReset() {
+  if (!_nbAlertSel || (!_nbAlertSel.size && !_nbAlertUnreadIds.size)) return;
+  _nbAlertSel.clear(); _nbAlertUnreadIds.clear();
+  _nbAlertSelUi();
+}
+(function () {
+  let tm = 0, sx = 0, sy = 0, pk = '';
+  const clr = () => { if (tm) { clearTimeout(tm); tm = 0; } pk = ''; };
+  document.addEventListener('pointerdown', e => {
+    _nbAlertLpSup = 0; clr();
+    if (_nbActiveCat !== 'Alerts' || e.button > 0 || !e.target.closest) return;
+    const card = e.target.closest('#nb-notes-grid .alert-card[data-slug]');
+    if (!card || e.target.closest('a, .gc-trash, .nb-carousel-viewport, .alert-md-tablewrap')) return;
+    sx = e.clientX; sy = e.clientY; pk = card.getAttribute('data-slug');
+    tm = setTimeout(() => {
+      tm = 0; const k = pk; pk = '';
+      if (!k) return;
+      _nbAlertLpSup = 1; // the release of this press must not also count as a tap
+      _nbAlertToggle(k);
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (x) {}
+      try { const g = window.getSelection && window.getSelection(); if (g) g.removeAllRanges(); } catch (x) {}
+    }, 420);
+  }, true);
+  document.addEventListener('pointermove', e => { if (tm && (Math.abs(e.clientX - sx) > 9 || Math.abs(e.clientY - sy) > 9)) clr(); }, true);
+  ['pointerup', 'pointercancel'].forEach(n => document.addEventListener(n, clr, true));
+  document.addEventListener('contextmenu', e => { if (_nbActiveCat === 'Alerts' && e.target.closest && e.target.closest('#nb-notes-grid .alert-card')) e.preventDefault(); });
+  // Capture phase, so while selecting a tap toggles the card instead of opening it or following a link; a tap on an unread alert clears its highlight.
+  document.addEventListener('click', e => {
+    if (_nbActiveCat !== 'Alerts' || !e.target.closest) return;
+    const card = e.target.closest('#nb-notes-grid .alert-card[data-slug]');
+    if (!card) return;
+    if (_nbAlertLpSup) { _nbAlertLpSup = 0; e.preventDefault(); e.stopPropagation(); return; }
+    const k = card.getAttribute('data-slug');
+    if (_nbAlertSel.size) { e.preventDefault(); e.stopPropagation(); _nbAlertToggle(k); return; }
+    if (_nbAlertUnreadIds.has(k)) { _nbAlertUnreadIds.delete(k); _nbAlertPaint(k); }
+  }, true);
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || _nbActiveCat !== 'Alerts' || !_nbAlertSel.size || !e.target.closest) return;
+    const card = e.target.closest('#nb-notes-grid .alert-card[data-slug]');
+    if (card && e.target === card) { e.preventDefault(); e.stopPropagation(); _nbAlertToggle(card.getAttribute('data-slug')); }
+  }, true);
+})();
+// ---- Notes: hold-to-select, select all / none and delete FABs (same gestures and FABs as Alerts) ----
+// Works in every notes category that shows cards with a trash icon. A published note is locked: it can't be selected
+// (unpublish it first), and trying shows a toast. In Published every card is locked.
+var _nbNoteSel = new Set(), _nbNoteSelCat = '', _nbNoteLpSup = 0;
+const _NB_SEL_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 5 9 9 5"/><polyline points="3 17 5 19 9 15"/><line x1="13" y1="7" x2="21" y2="7"/><line x1="13" y1="17" x2="21" y2="17"/></svg>';
+const _NB_NONE_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+function _nbNoteCardOf(t) {
+  if (!t || !t.closest || _nbActiveCat === 'Alerts') return null;
+  const c = t.closest('#nb-notes-grid .guide-card');
+  if (!c || c.classList.contains('nb-skel-card')) return null;
+  if (c.hasAttribute('data-note-id') || c.querySelector('.gc-trash')) return c;
+  return null;
+}
+function _nbNoteCardLocked(c) {
+  const id = c.getAttribute('data-note-id');
+  if (!id) return true; // a Published-feed card: always a published note
+  const n = _pubFindNote(id);
+  return !n || !!n.publishedSlug;
+}
+function _nbNoteLockedToast() { showToast('Published notes can\u2019t be selected. Unpublish first.'); }
+function _nbNoteShownIds() {
+  const grid = document.getElementById('nb-notes-grid');
+  return grid ? [...grid.querySelectorAll('.guide-card.nb-nsel[data-note-id]:not(.nb-nlocked)')].map(el => el.getAttribute('data-note-id')) : [];
+}
+function _nbNotePaint(id) {
+  const grid = document.getElementById('nb-notes-grid');
+  const el = grid && grid.querySelector('.guide-card[data-note-id="' + CSS.escape(id) + '"]');
+  if (el) el.classList.toggle('is-sel', _nbNoteSel.has(id));
+}
+function _nbNoteSelUi() {
+  const grid = document.getElementById('nb-notes-grid');
+  for (const k of [..._nbNoteSel]) { const n = _pubFindNote(k); if (!n || n.publishedSlug) _nbNoteSel.delete(k); } // deleted, or published meanwhile
+  const n = _nbNoteSel.size, on = n > 0 && _nbActiveCat !== 'Alerts' && !_nbIsFeedCat(_nbActiveCat);
+  if (grid) {
+    grid.classList.toggle('nb-nselmode', n > 0);
+    grid.querySelectorAll('.guide-card.nb-nsel[data-note-id]').forEach(el => {
+      el.classList.toggle('is-sel', _nbNoteSel.has(el.getAttribute('data-note-id')));
+      if (n) el.setAttribute('aria-pressed', el.classList.contains('is-sel') ? 'true' : 'false'); else el.removeAttribute('aria-pressed');
+    });
+  }
+  if (!n && !document.getElementById('nb-alert-fabs')) return;
+  const f = _nbAlertFabs();
+  f.classList.toggle('on', on);
+  if (!on) return;
+  const shown = _nbNoteShownIds(), all = shown.length > 0 && shown.every(k => _nbNoteSel.has(k));
+  f.querySelector('#al-fab-sel').innerHTML = (all ? _NB_NONE_ICON : _NB_SEL_ICON) + '<span>' + (all ? 'Select none' : 'Select all') + '</span>';
+  f.querySelector('#al-fab-del').setAttribute('aria-label', 'Delete ' + n + (n === 1 ? ' note' : ' notes'));
+}
+function _nbNoteToggle(id) {
+  if (_nbNoteSel.has(id)) _nbNoteSel.delete(id); else { _nbNoteSel.add(id); _nbNoteSelCat = _nbActiveCat; }
+  _nbNotePaint(id);
+  _nbNoteSelUi();
+}
+function nbNoteSelAll() {
+  const shown = _nbNoteShownIds();
+  const all = shown.length > 0 && shown.every(k => _nbNoteSel.has(k));
+  if (all) _nbNoteSel.clear(); else shown.forEach(k => _nbNoteSel.add(k));
+  shown.forEach(_nbNotePaint);
+  _nbNoteSelUi();
+}
+function _nbNoteUiReset() {
+  if (!_nbNoteSel || !_nbNoteSel.size) return;
+  _nbNoteSel.clear();
+  _nbNoteSelUi();
+}
+(function () {
+  let tm = 0, sx = 0, sy = 0, pc = null;
+  const clr = () => { if (tm) { clearTimeout(tm); tm = 0; } pc = null; };
+  const hit = c => c.getAttribute('data-note-id') || '';
+  document.addEventListener('pointerdown', e => {
+    _nbNoteLpSup = 0; clr();
+    if (e.button > 0) return;
+    const card = _nbNoteCardOf(e.target);
+    if (!card || e.target.closest('button, a, input, .nb-carousel-viewport')) return;
+    sx = e.clientX; sy = e.clientY; pc = card;
+    tm = setTimeout(() => {
+      tm = 0; const c = pc; pc = null;
+      if (!c || !c.isConnected) return;
+      _nbNoteLpSup = 1; // the release of this press must not also count as a tap
+      if (_nbNoteCardLocked(c)) _nbNoteLockedToast();
+      else _nbNoteToggle(hit(c));
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (x) {}
+      try { const g = window.getSelection && window.getSelection(); if (g) g.removeAllRanges(); } catch (x) {}
+    }, 420);
+  }, true);
+  document.addEventListener('pointermove', e => { if (tm && (Math.abs(e.clientX - sx) > 9 || Math.abs(e.clientY - sy) > 9)) clr(); }, true);
+  ['pointerup', 'pointercancel'].forEach(n => document.addEventListener(n, clr, true));
+  document.addEventListener('contextmenu', e => { if (_nbNoteCardOf(e.target)) e.preventDefault(); });
+  // Capture phase: while selecting, a tap toggles the card instead of opening it; a locked card shows the toast.
+  document.addEventListener('click', e => {
+    const card = _nbNoteCardOf(e.target);
+    if (!card) return;
+    if (_nbNoteLpSup) { _nbNoteLpSup = 0; e.preventDefault(); e.stopPropagation(); return; }
+    if (!_nbNoteSel.size) return;
+    e.preventDefault(); e.stopPropagation();
+    if (_nbNoteCardLocked(card)) { _nbNoteLockedToast(); return; }
+    _nbNoteToggle(hit(card));
+  }, true);
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || !_nbNoteSel.size) return;
+    const card = _nbNoteCardOf(e.target);
+    if (!card || e.target !== card) return;
+    e.preventDefault(); e.stopPropagation();
+    if (_nbNoteCardLocked(card)) _nbNoteLockedToast(); else _nbNoteToggle(hit(card));
+  }, true);
+})();
+function nbDeleteSelectedNotes() {
+  const ids = [..._nbNoteSel].filter(id => { const n = _pubFindNote(id); return n && !n.publishedSlug; });
+  if (!ids.length) { _nbNoteUiReset(); return; }
+  const cnt = ids.length, one = cnt === 1;
   const ov = document.getElementById('delete-overlay');
   const cancelBtn = document.getElementById('delete-dialog-cancel');
   const confirmBtn = document.getElementById('delete-dialog-confirm');
-  document.querySelector('#delete-dialog .rdlg-title').textContent = 'Delete alert?';
-  document.querySelector('#delete-dialog .rdlg-body').textContent = 'This alert will be removed from your list. This can\u2019t be undone.';
+  document.querySelector('#delete-dialog .rdlg-title').textContent = one ? 'Delete note?' : 'Delete ' + cnt + ' notes?';
+  document.querySelector('#delete-dialog .rdlg-body').textContent = (one ? 'This note will be permanently removed.' : 'These notes will be permanently removed.') + ' This can\u2019t be undone.';
   confirmBtn.textContent = 'Delete';
   confirmBtn.disabled = false;
   cancelBtn.onclick = () => ov.classList.remove('open');
   ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
-  confirmBtn.onclick = () => { ov.classList.remove('open'); _nbDeleteAlertNow(id); };
+  confirmBtn.onclick = () => {
+    ov.classList.remove('open');
+    const notes = nbLoadNotes();
+    const gone = [];
+    ids.forEach(id => {
+      const i = notes.findIndex(n => n.id === id && !n.publishedSlug); // never a note that got published since
+      if (i !== -1) { notes.splice(i, 1); gone.push(id); }
+    });
+    if (!gone.length) return;
+    if (!nbSaveNotesArr(notes)) return; // storage full: the notes are still there, so don't record or sync a delete
+    gone.forEach(_nbRecordDeletedId);
+    _nbNoteSel.clear();
+    nbSyncPullThenPush();
+    buildCatBar();
+    nbRenderNotesScreen();
+    showToast(gone.length === 1 ? 'Note deleted' : gone.length + ' notes deleted');
+  };
   ov.classList.add('open');
 }
-// The delete itself: the card leaves the list at once; if the server call fails the list reloads.
-async function _nbDeleteAlertNow(id) {
-  const key = 'alert:' + id;
-  const i = _nbSubFeedStories.findIndex(x => x.slug === key);
-  if (i >= 0) _nbSubFeedStories.splice(i, 1);
-  _nbSubCardCache.delete(key);
+// Same confirmation dialog as deleting a note (#delete-dialog), reworded for an alert (or for the selected ones).
+function nbDeleteAlert(id) { _nbAlertConfirmDelete([String(id)]); }
+function nbDeleteSelectedAlerts() {
+  if (_nbActiveCat !== 'Alerts') return nbDeleteSelectedNotes();
+  const ids = [..._nbAlertSel].map(k => k.slice('alert:'.length));
+  if (ids.length) _nbAlertConfirmDelete(ids);
+}
+function _nbAlertConfirmDelete(ids) {
+  const one = ids.length === 1;
+  const ov = document.getElementById('delete-overlay');
+  const cancelBtn = document.getElementById('delete-dialog-cancel');
+  const confirmBtn = document.getElementById('delete-dialog-confirm');
+  document.querySelector('#delete-dialog .rdlg-title').textContent = one ? 'Delete alert?' : 'Delete ' + ids.length + ' alerts?';
+  document.querySelector('#delete-dialog .rdlg-body').textContent = (one ? 'This alert will be removed from your list.' : 'These alerts will be removed from your list.') + ' This can\u2019t be undone.';
+  confirmBtn.textContent = 'Delete';
+  confirmBtn.disabled = false;
+  cancelBtn.onclick = () => ov.classList.remove('open');
+  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  confirmBtn.onclick = () => { ov.classList.remove('open'); _nbDeleteAlertsNow(ids); };
+  ov.classList.add('open');
+}
+// The delete itself: the cards leave the list at once; if a server call fails the list reloads.
+async function _nbDeleteAlertsNow(ids) {
+  ids = ids.map(String);
+  const keys = new Set(ids.map(id => 'alert:' + id));
   const grid = document.getElementById('nb-notes-grid');
-  grid.querySelectorAll('.guide-card[data-slug]').forEach(el => { if (el.getAttribute('data-slug') === key) el.remove(); });
+  keys.forEach(key => {
+    const i = _nbSubFeedStories.findIndex(x => x.slug === key);
+    if (i >= 0) _nbSubFeedStories.splice(i, 1);
+    _nbSubCardCache.delete(key);
+    _nbAlertSel.delete(key); _nbAlertUnreadIds.delete(key);
+  });
+  grid.querySelectorAll('.guide-card[data-slug]').forEach(el => { if (keys.has(el.getAttribute('data-slug'))) el.remove(); });
+  const n = ids.length;
   const _hadSubTotal = _nbSubFeedTotal !== null;
-  if (_hadSubTotal) _nbSubFeedTotal = Math.max(0, _nbSubFeedTotal - 1);
-  if (_nbAlertTotal !== null) _nbAlertTotal = Math.max(0, _nbAlertTotal - 1);
+  if (_hadSubTotal) _nbSubFeedTotal = Math.max(0, _nbSubFeedTotal - n);
+  if (_nbAlertTotal !== null) _nbAlertTotal = Math.max(0, _nbAlertTotal - n);
+  _nbAlertSelUi();
   nbUpdateLibraryTitle();
   _nbSubCarouselByCount();
-  try {
-    const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/alerts/' + encodeURIComponent(id), {
-      method: 'DELETE', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
-    });
-    if (!res.ok) throw new Error('delete alert failed: ' + res.status);
-    showToast('Alert deleted');
-  } catch (e) {
-    _nbLog('delete alert', e);
-    if (_hadSubTotal && _nbSubFeedTotal !== null) _nbSubFeedTotal++; // the delete didn't happen: put both counts back
-    if (_nbAlertTotal !== null) { _nbAlertTotal++; try { nbUpdateCatCounts(); } catch (err) {} }
-    showToast('Couldn\u2019t delete alert' + _nbFailureReason(e));
+  const base = NB_PUBLISH_API.replace(/\/$/, '');
+  const results = await Promise.allSettled(ids.map(id => _nbApiFetch(base + '/alerts/' + encodeURIComponent(id), {
+    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + nbSessionToken() }
+  }).then(res => { if (!res.ok) throw new Error('delete alert failed: ' + res.status); })));
+  const failed = results.filter(r => r.status === 'rejected');
+  if (failed.length) {
+    _nbLog('delete alert', failed[0].reason);
+    if (_hadSubTotal && _nbSubFeedTotal !== null) _nbSubFeedTotal += failed.length; // those deletes didn't happen: put their counts back
+    if (_nbAlertTotal !== null) { _nbAlertTotal += failed.length; try { nbUpdateCatCounts(); } catch (err) {} }
+    showToast('Couldn\u2019t delete ' + (failed.length === 1 ? 'alert' : failed.length + ' alerts') + _nbFailureReason(failed[0].reason));
     if (_nbActiveCat === 'Alerts') { _nbSubFeedPaintKey = null; nbRenderNotesScreen(); }
     return;
   }
+  showToast(n === 1 ? 'Alert deleted' : n + ' alerts deleted');
   if (_nbActiveCat !== 'Alerts' || grid.querySelector('.guide-card:not(.nb-skel-card)')) return;
   if (!_nbSubFeedStories.length && _nbSubFeedDone) {
     grid.style.display = 'none'; grid.innerHTML = '';
@@ -20110,6 +20643,8 @@ function _nbSubCardHtmlRaw(s) {
   const tags = own ? (own.tags || []).filter(Boolean).slice(0, 10) : _nbSubStoryTags(s);
   const imgsHtml = own ? _buildImgsHtml(extractImagesFromHtml(_nbRehydrateImages(own.content || ''))) : _buildImgsHtml(s.images || [], s.imageCount);
   const likes = (typeof s.likes === 'number' && isFinite(s.likes)) ? Math.max(0, Math.floor(s.likes)) : null; // absent from an older worker: show nothing rather than a false 0
+  const cmts = (typeof s.comments === 'number' && isFinite(s.comments)) ? Math.max(0, Math.floor(s.comments)) : null;
+  const commentsHtml = cmts === null ? '' : `<span class="gc-comments"${cmts ? '' : ' hidden'} aria-label="${cmts} ${cmts === 1 ? 'comment' : 'comments'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>${_nbCompactCount(cmts)}</span>`;
   const likesHtml = likes === null ? '' : `<span class="gc-likes" aria-label="${likes} ${likes === 1 ? 'like' : 'likes'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.3 2.6 4.5 6.3 4.5c2 0 3.6 1 5.7 3.2 2.1-2.2 3.7-3.2 5.7-3.2 3.7 0 5.5 3.8 3.9 7.3C19.5 16.4 12 21 12 21z"/></svg>${_nbCompactCount(likes)}</span>`;
   // Published/Stories only: how long the note has been published / showing in stories, before the like count.
   const inStoriesTab = _nbActiveCat === 'Published' && _nbFeedKind() === 'stories';
@@ -20124,7 +20659,7 @@ function _nbSubCardHtmlRaw(s) {
       <div class="guide-card" data-slug="${esc(s.slug)}" onclick="${open}" role="button" tabindex="0" onkeydown="if (event.key==='Enter') { ${open} }">
         ${showAuthor ? `<span class="gc-author-name">${esc(s.authorProfileName)}</span>` : ''}
         <div class="gc-title">${esc(shownTitle || 'Untitled note')}</div>
-        ${(desc || ts || likesHtml || uptimeHtml) ? `<div class="gc-desc">${desc ? `<span class="gc-desc-text">${esc(desc)}</span>` : ''}${(ts || likesHtml || uptimeHtml) ? `<span class="gc-desc-time">${uptimeHtml}${likesHtml}${ts ? _nbShortTimeAgo(ts) : ''}</span>` : ''}</div>` : ''}
+        ${(desc || ts || likesHtml || commentsHtml || uptimeHtml) ? `<div class="gc-desc">${desc ? `<span class="gc-desc-text">${esc(desc)}</span>` : ''}${(ts || likesHtml || commentsHtml || uptimeHtml) ? `<span class="gc-desc-time">${uptimeHtml}${likesHtml}${commentsHtml}${ts ? _nbShortTimeAgo(ts) : ''}</span>` : ''}</div>` : ''}
         ${imgsHtml}
         ${tags.length ? `<div class="gc-tags-row">${tags.map(tg => `<span class="gc-tag">${esc(tg)}</span>`).join('')}</div>` : ''}
         ${own ? _nbCardActionsHtml(own) : ''}
@@ -20245,6 +20780,7 @@ function _nbSubReconcile(rows) {
   existing.forEach((el, slug) => { if (!keep.has(slug)) el.remove(); });
   nbUpdateLibraryTitle();
   if (_nbIsFeedCat(_nbActiveCat) && grid.querySelector('.guide-card[data-slug]')) _nbSubCarouselByCount();
+  if (_nbActiveCat === 'Alerts') _nbAlertSelUi();
 }
 // Re-render for Published/Stories while its cards are already on screen: repaint from the rows we
 // have (so local edits show at once), then silently re-fetch the pages already loaded and patch the
@@ -20325,7 +20861,7 @@ async function _nbLoadSubFeedPage() {
     if (tab !== _nbFeedKind()) { setTimeout(() => { if (_nbIsFeedCat(_nbActiveCat)) _nbLoadSubFeedPage(); }, 0); return; } // list switched: load the current one once this call has released the lock
     // Everything on this first page is now on screen, so it counts as seen, up to the newest one shown (the pill's
     // badge counts what arrived after that; the title count is the list's total).
-    if (isFirstPage && tab === 'alerts' && stories.length) _nbMarkAlertsSeen(Math.max(...stories.map(a => _nbSubEpoch(a.createdAt))));
+    if (isFirstPage && tab === 'alerts' && stories.length) { _nbAlertCaptureUnread(stories); _nbMarkAlertsSeen(Math.max(...stories.map(a => _nbSubEpoch(a.createdAt)))); } // highlight what's new before the server counts it as seen
     if (isFirstPage && !stories.length) {
       _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       if (tab === 'stories') {
@@ -20368,6 +20904,7 @@ async function _nbLoadSubFeedPage() {
     _nbSubAttachSentinel();
     _nbSubAfterPage();
     nbUpdateLibraryTitle();
+    if (tab === 'alerts') _nbAlertSelUi();
   } catch (e) {
     _nbLog('subscriptions feed', e);
     if (!_nbIsFeedCat(_nbActiveCat)) return;
@@ -20958,7 +21495,7 @@ async function _pubUnpublish(note, signal) {
   // Drop it from the story strip now, while the slug is still on the note; the strip otherwise only catches up on the next fetch.
   try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('unpublish: strip', e); }
   if (_pubSaveNoteFields(note.id, {
-    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
   }) === false) throw Object.assign(new Error('unpublish save failed'), { storageFull: true }); // the page is down; a retry gets a 404 (= gone) and saves again
 }
 // Cancel aborts the unpublish request, but the server may already have taken the page down. Ask it before saying what happened;
@@ -20977,7 +21514,7 @@ async function _pubSettleCancelledUnpublish(note) {
     if (!down) return 'live';
     try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('cancelled unpublish: strip', e); }
     if (_pubSaveNoteFields(note.id, {
-      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false
+      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
     }) === false) return 'unknown';
     return 'down';
   } catch (e) { _nbLog('cancelled unpublish check', e); return 'unknown'; }
@@ -21203,7 +21740,7 @@ function _pubRenderAdStanding(targetId, opts) {
   if (!next) {
     add('ad-prog-s', 'Every package is unlocked. Thank you for building something worth reading.');
   } else if (inAccount) {
-    add('ad-prog-s', 'Next: ' + next.views.toLocaleString() + ' views. Publishing notes, earning likes and subscribers, liking and following others, sharing to stories and inviting friends all count. We\u2019ll send you an alert the moment it unlocks.');
+    add('ad-prog-s', 'Next: ' + next.views.toLocaleString() + ' views. Publishing notes, earning likes, comments and subscribers, liking and commenting on others\u2019 notes, following others, sharing to stories and inviting friends all count. We\u2019ll send you an alert the moment it unlocks.');
     next.reqs.forEach(r => {
       const row = document.createElement('div');
       row.className = 'ad-prog-row' + (r.met ? ' met' : '');
@@ -22554,6 +23091,8 @@ function nbUpdateCatCounts() {
 function buildCatBar() {
   const bar = document.getElementById('feed-cats');
   if (!bar) return;
+  if (_nbActiveCat !== 'Alerts') _nbAlertUiReset(); // another category is open: no selection, no unread highlights
+  if (typeof _nbNoteSel !== 'undefined' && _nbNoteSel && _nbNoteSel.size && _nbNoteSelCat !== _nbActiveCat) _nbNoteUiReset(); // selection belongs to the category it started in
   const notes = nbVisibleNotes();
   const customCats = new Map();
   notes.forEach(n => {
@@ -23028,6 +23567,7 @@ function _nbCardActionsHtml(n) {
           <button class="gc-trash" onclick="event.stopPropagation();nbDeleteNote('${nid}')" aria-label="Delete">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
           </button>
+          <span class="al-chk" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7.5"/></svg></span>
         </div>
       </div>
 `;
@@ -23104,6 +23644,7 @@ function _nbEnsureActiveCat() {
   return true;
 }
 function nbRenderNotesScreen() {
+  Promise.resolve().then(() => { try { _nbNoteSelUi(); } catch (e) {} }); // after the list is painted: prune / show the selection UI
   if (_nbEnsureActiveCat()) { buildCatBar(); _nbSyncStoriesStripVisibility(); }
   nbUpdateLibraryTitle();
   if (_nbIsFeedCat(_nbActiveCat)) {
@@ -23175,7 +23716,7 @@ function nbRenderNotesScreen() {
     const imgsHtml = _nbSt('images') ? _buildImgsHtml(imgUrls) : '';
     const nid = escJs(n.id);
     return `
-    <div class="guide-card" data-note-id="${esc(n.id)}" onclick="nbOpenNoteForEdit('${nid}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenNoteForEdit('${nid}')">
+    <div class="guide-card nb-nsel${_nbNoteSel && _nbNoteSel.has(n.id) ? ' is-sel' : ''}${n.publishedSlug ? ' nb-nlocked' : ''}" data-note-id="${esc(n.id)}"${_nbNoteSel && _nbNoteSel.size ? ` aria-pressed="${_nbNoteSel.has(n.id)}"` : ''} onclick="nbOpenNoteForEdit('${nid}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenNoteForEdit('${nid}')">
       <div class="gc-title">${esc(n.title || 'Untitled note')}</div>
       ${(n.desc || n.createdAt) ? `<div class="gc-desc">${n.desc ? `<span class="gc-desc-text">${esc(n.desc)}</span>` : ''}${n.createdAt ? `<span class="gc-desc-time">${_nbShortTimeAgo(n.createdAt)}</span>` : ''}</div>` : ''}
       ${imgsHtml}
@@ -24738,6 +25279,7 @@ function nbOpenNoteForEdit(id) {
 let _nbLastCanvasErrorToast = 0;
 window.addEventListener('message', function (e) {
   if (!e.data) return;
+  if (e.data.type === 'nb-cm') { _nbCommentsBridge(e); return; }
   if (e.data.type === 'nb-link-tap') {
     // Relayed from inside the story/search note viewer's iframe (see the
     // click relay nbBuildStaticNoteHtml bakes into every published page)
