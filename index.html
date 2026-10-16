@@ -78,13 +78,23 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   overscroll-behavior-y: none;
-  -webkit-user-select: none;
-  user-select: none;
   -webkit-touch-callout: none
 }
 
-/* Hold-to-select only where reading or editing text makes sense */
-input, textarea, [contenteditable], .alert-md, #privacy-body, #cterms-body, #terms-dialog-body {
+/* Text selection is off for app chrome, but never for anything you type into
+   (every input, textarea, select, contenteditable and what's inside it, in the
+   editor, comments, dialogs and sheets) or for text meant to be read and copied.
+   :where() keeps this at zero specificity, so a specific class can still opt out. */
+body :where(*:not(input, textarea, select, [contenteditable], [contenteditable] *,
+    .alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body, #cterms-body *,
+    #terms-dialog-body, #terms-dialog-body *)) {
+  -webkit-user-select: none;
+  user-select: none
+}
+
+input, textarea, select, [contenteditable], [contenteditable] *,
+.alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body, #cterms-body *,
+#terms-dialog-body, #terms-dialog-body * {
   -webkit-user-select: text;
   user-select: text;
   -webkit-touch-callout: default
