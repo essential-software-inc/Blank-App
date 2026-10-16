@@ -20290,7 +20290,20 @@ async function _nbCommentsBridge(e) {
     }
     if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('No internet connection');
     const slug = encodeURIComponent(m.slug), cid = encodeURIComponent(String(m.id || ''));
-    if (m.op === 'list') return reply(true, await send('/comments/' + slug, { headers: auth, cache: 'no-store' }));
+    if (m.op === 'list') {
+      // Pages of comments: cursor = next older page, thread = one thread's replies, focus = one comment with its thread, mine = the viewer's own.
+      const q = [], IDV = /^[A-Za-z0-9]{1,40}$/;
+      if (typeof m.cursor === 'string' && /^[0-9]{1,15}:[A-Za-z0-9]{1,40}$/.test(m.cursor)) q.push('cursor=' + encodeURIComponent(m.cursor));
+      if (typeof m.thread === 'string' && IDV.test(m.thread)) q.push('thread=' + encodeURIComponent(m.thread));
+      if (typeof m.focus === 'string' && IDV.test(m.focus)) q.push('focus=' + encodeURIComponent(m.focus));
+      if (m.mine) q.push('mine=1');
+      return reply(true, await send('/comments/' + slug + (q.length ? '?' + q.join('&') : ''), { headers: auth, cache: 'no-store' }));
+    }
+    if (m.op === 'sync') {
+      // The comments loaded beyond the first page, checked for current likes, reply counts and deletions.
+      const ids = Array.isArray(m.ids) ? m.ids.filter(x => typeof x === 'string' && /^[A-Za-z0-9]{1,40}$/.test(x)).slice(0, 450) : [];
+      return reply(true, await send('/comments/' + slug + '/sync', { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth }, body: JSON.stringify({ ids }) }));
+    }
     if (!signed) throw new Error('Sign in to do that.');
     const J = { 'Content-Type': 'application/json', ...auth };
     let out;
