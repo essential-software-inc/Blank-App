@@ -5041,7 +5041,7 @@ body.pink .nb-carousel-dot{background:#d796b0}
       <div class="nb-empty" id="notes-empty-state">
         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <div class="nb-empty-title" id="notes-empty-title">Welcome to Bluebook</div>
-        <div class="nb-empty-sub" id="notes-empty-sub">Mix text, photos, checklists, and more into scrapbook-style notes. Tap the + button to create your first one. It'll show up here, sorted by category.</div>
+        <div class="nb-empty-sub" id="notes-empty-sub">Mix text, photos, voice notes, checklists, and more into scrapbook-style notes. Tap the + button to create your first note. It'll show up here, sorted by category.</div>
       </div>
       <div class="nb-carousel" id="nb-onboard-carousel">
           <div class="nb-carousel-viewport">
@@ -6230,7 +6230,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 <div id="mic-overlay">
   <div id="mic-dialog" style="z-index:911" role="dialog" aria-modal="true" aria-labelledby="mic-dialog-title">
     <div class="rdlg-title" id="mic-dialog-title">Use your microphone?</div>
-    <div class="rdlg-body">To record a voice note, the app needs your microphone. It only records after you tap record, and it stops when you tap stop. Your phone will ask you to say yes next.</div>
+    <div class="rdlg-body">To record a voice note, the app needs your microphone. It only records after you tap record, and it stops when you tap stop. Your phone may ask for permission next.</div>
     <div class="rdlg-btns">
       <button class="rdlg-cancel" id="mic-dialog-cancel">Not now</button>
       <button class="rdlg-ok rdlg-ok--blue" id="mic-dialog-ok">Continue</button>
@@ -6371,7 +6371,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>Alerts</h3>
       <p>We want you to know what's happening with your account and the app. When one of your pages is reported, or we remove or pause something of yours, or change your account's status, you'll get an automatic message (an alert) that says why. We also use alerts for good news and updates, like announcements, new features, a bigger ad package unlocking, a friend adding your invite code, planned maintenance, safety tips, or a change to this policy or our terms. They can go to every account or to specific ones, and they're saved, shown and deleted the same way as the others. Alerts show up under Alerts in your library, which only appears once your account has at least one. A number on it shows how many have arrived since you last looked at the list, and the list's title shows how many you have in total. We save the text of each alert (which can name the page or item it's about), when it was sent, and when you deleted it. We also save one marker on your account for the newest alert you've been shown, so the count follows you across your devices. Deleting an alert only removes it from your list. We keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes who reported, or the details they wrote, because we don't pass those on. If you delete your account, your alerts and that marker are deleted too.</p>
       <h3>Voice notes</h3>
-      <p>If you add a voice note to a page, the app asks your device for permission to use the microphone. It only records after you tap record, and it stops when you tap stop, after 5 minutes, or if you leave the app. The recording is saved inside the page on your device, just like a photo. If you're signed in, it's backed up to your account along with your other notes, and it's deleted if you delete your account. If you publish the page, the recording becomes part of it, so anyone with the link can listen. Voice notes can't be used in ads. We never listen to your recordings, turn them into text, or study them. When you play a voice note, it plays right on your device.</p>
+      <p>When you record a voice note, the app asks your device for permission to use the microphone. It only records after you tap record, and it stops when you tap stop, after 5 minutes, or if you leave the app. The recording is saved inside the note on your device, just like a photo. If you're signed in, it's backed up to your account along with your other notes, and it's deleted if you delete your account. If you publish the note, the recording becomes part of the published page, so anyone with the link can listen. Voice notes can't be used in ads. We never listen to your recordings, turn them into text, or study them. When you play a voice note, it plays right on your device.</p>
       <h3>External images &amp; embeds</h3>
       <p>Images you add to a page by URL are loaded straight from their source when the page is built. Instagram, X, Streamable, YouTube and Spotify embeds load straight from those services. We have nothing to do with these third-party hosts, with one exception: when you paste an Instagram share link or an X (t.co) short link using the editor's own tools, our server follows the link just to find out which post it points to. It doesn't read the page. It also counts requests from your IP address in a short-lived counter that disappears on its own after about a minute, and that isn't kept afterward or linked to your account. A page published as an ad can only use images linked directly from Wikipedia or Wikimedia Commons, and can't contain images uploaded from your device or voice notes. We check this automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
@@ -10646,7 +10646,7 @@ html[data-nb-glass="1"] .blk-aud{background:color-mix(in srgb,var(--aud-bgs) 62%
       if (pp) pp.setAttribute('aria-label', 'Stop recording');
       if (live) live.textContent = '0:00';
       rec.start(1000);
-    }).catch(function(err) { audRec = null; if (err && err.nbDeclined) return; audToast('Microphone access was blocked'); });
+    }).catch(function(err) { audRec = null; if (err && err.nbDeclined) return; audToast('Could not use the microphone'); });
   }
   function wireAudio(block) {
     var card = block.querySelector('.blk-aud');
@@ -19343,16 +19343,20 @@ let _nbSubFeedTotal = null; // size of the whole list, as the worker reports it 
 // so their own note count plays no part here.
 // Same lead sentence the other categories' empty-state subtext opens with
 // (see _nbFilteredEmptyMessage); the title stays specific to each state.
+// Each tip can carry a `need` so it only shows where it reads right: 'notes' = needs notes to exist (skipped on the
+// first-run screen), 'out' = for signed-out people (skipped once signed in, and on the sign-in screen, which already
+// says it), 'swipe' = only while the Media swipe setting is on.
 const NB_EMPTY_LEADS = [
-  'Mix text, photos, checklists, and more into scrapbook-style notes. ',
-  'Paste posts, videos, and songs into one note on the Share screen. ',
-  'Play the audio and videos from your notes in the Media panel. ',
-  'Scan your notes in Media to build a library of audio, videos, albums, and playlists. ',
-  'Swipe in from the left edge of any screen to open Media. ',
-  'Sign in to sync your notes between devices and keep an automatic backup. ',
-  'Save your notes to a file, or restore them, from Backup & restore in Settings. ',
-  'Switch between Light, Dark, and Pink themes, or turn on Glass mode, in Settings. ',
-  'Sort your notes by recently edited, newest, or A\u2013Z from Settings. '
+  { t: 'Mix text, photos, voice notes, checklists, and more into scrapbook-style notes. ' },
+  { t: 'On the Write screen, tap Voice to add a voice note, then tap the mic to record. ' },
+  { t: 'Paste posts, videos, and songs into one note on the Share screen. ' },
+  { t: 'Play the voice notes, songs, and videos from your notes in Media. ', need: 'notes' },
+  { t: 'Scan your notes in Media to build a library of voice notes, songs, videos, albums, and playlists. ', need: 'notes' },
+  { t: 'Swipe in from the left edge of any screen to open Media. ', need: 'swipe' },
+  { t: 'Sign in to sync your notes between devices and keep an automatic backup. ', need: 'out' },
+  { t: 'Save your notes to a file, or restore them from one, with Backup & restore in Settings. ' },
+  { t: 'Pick a Light, Dark, or Pink theme, or switch Glass mode on or off, in Settings. ' },
+  { t: 'Sort your notes by recently edited, newest, oldest, or A\u2013Z in Settings. ', need: 'notes' }
 ];
 // Rotates so the empty states cover the whole app, not just Write: starts on the next one each launch
 // and moves on whenever a category is picked, so it stays put across re-renders of the same list.
@@ -19361,7 +19365,21 @@ try {
   _nbEmptyLeadIdx = ((parseInt(localStorage.getItem('nb_empty_lead_v1'), 10) || 0) + 1) % NB_EMPTY_LEADS.length;
   localStorage.setItem('nb_empty_lead_v1', String(_nbEmptyLeadIdx));
 } catch (e) {}
-function nbEmptyLead() { return NB_EMPTY_LEADS[_nbEmptyLeadIdx % NB_EMPTY_LEADS.length]; }
+// Picks the current tip, moving on to the next one that suits the screen (opts.noNotes: first run, no notes yet;
+// opts.signInScreen: the signed-out gate). Returns '' if none fit.
+function nbEmptyLead(opts) {
+  opts = opts || {};
+  const n = NB_EMPTY_LEADS.length;
+  let swipeOn = false; try { swipeOn = !!window._nbSt('mediaSwipe'); } catch (e) {}
+  for (let i = 0; i < n; i++) {
+    const l = NB_EMPTY_LEADS[(_nbEmptyLeadIdx + i) % n];
+    if (l.need === 'notes' && opts.noNotes) continue;
+    if (l.need === 'out' && (opts.signInScreen || nbIsSignedIn())) continue;
+    if (l.need === 'swipe' && !swipeOn) continue;
+    return l.t;
+  }
+  return '';
+}
 // Three placeholder cards mirroring a loaded Subscribed card (author line,
 // title, thumbnail row) — swapped out wholesale when the first page lands.
 function _nbAlertSkeletonHtml() {
@@ -19414,7 +19432,7 @@ async function nbRenderSubscribedFeed() {
   if (!nbIsSignedIn()) {
     _nbRevealFade(empty); grid.style.display = 'none';
     emptyTitle.textContent = 'Sign in to see this';
-    emptySub.textContent = nbEmptyLead() + (_nbActiveCat === 'Published'
+    emptySub.textContent = nbEmptyLead({ signInScreen: true }) + (_nbActiveCat === 'Published'
       ? 'Stories and published notes are tied to your account, so this needs you to be signed in.'
       : _nbActiveCat === 'Alerts'
         ? 'Alerts bring you announcements and messages about your account, so this needs you to be signed in.'
@@ -20304,7 +20322,7 @@ async function _nbLoadSubFeedPage() {
         emptySub.textContent = nbEmptyLead() + 'Turn on \u201cShow in stories\u201d from a published note\u2019s Publish sheet and it\u2019ll show up here.';
       } else if (tab === 'published') {
         emptyTitle.textContent = 'No published notes yet';
-        emptySub.textContent = nbEmptyLead() + 'Notes you publish from the web icon on a note will show up here, with how many likes each has received.';
+        emptySub.textContent = nbEmptyLead() + 'Tap the upload icon on a note to publish it. It\u2019ll show up here with how many likes it has received.';
       } else if (tab === 'alerts') {
         emptyTitle.textContent = 'No alerts';
         emptySub.textContent = nbAlertsEmptySub();
@@ -20346,7 +20364,7 @@ async function _nbLoadSubFeedPage() {
       _nbSubFeedPaintKey = null;
       _nbRevealFade(empty); grid.style.display = 'none'; grid.innerHTML = '';
       emptyTitle.textContent = 'Could not load';
-      emptySub.textContent = nbEmptyLead() + 'Something went wrong loading ' + (tab === 'stories' ? 'your stories' : tab === 'published' ? 'your published notes' : tab === 'alerts' ? 'your alerts' : (tab === 'liked' ? 'your liked notes' : 'the Subscribed feed')) + '. Try again.';
+      emptySub.textContent = 'Something went wrong loading ' + (tab === 'stories' ? 'your stories' : tab === 'published' ? 'your published notes' : tab === 'alerts' ? 'your alerts' : (tab === 'liked' ? 'your liked notes' : 'the Subscribed feed')) + '. Try again.';
       _nbSubCarousel(true);
     } else {
       showToast('Couldn\u2019t load more' + _nbFailureReason(e));
@@ -22961,16 +22979,16 @@ function _nbFilteredEmptyMessage() {
   const lead = nbEmptyLead();
   const q = (document.getElementById('feed-search-input') || {}).value || '';
   if (q && _nbLooksLikeNoteLink(q)) {
-    return { title: 'No matches', sub: lead + 'Tap GO to open this note link.' };
+    return { title: 'No matches', sub: 'Tap GO to open this note link.' };
   }
   if (q && _nbActiveCat === 'Alerts') {
-    return { title: 'No matches', sub: lead + 'No alerts match \u201c' + q + '\u201d. Try a different search term instead.' };
+    return { title: 'No matches', sub: 'No alerts match \u201c' + q + '\u201d. Try a different search term.' };
   }
   if (q) {
-    return { title: 'No matches', sub: lead + 'No notes match \u201c' + q + '\u201d. Try a different search term instead.' };
+    return { title: 'No matches', sub: 'No notes match \u201c' + q + '\u201d. Try a different search term.' };
   }
   if (_nbActiveCat === 'Favorites') {
-    return { title: 'No favorites yet', sub: lead + 'Tap the heart on any note to add it here. It\u2019ll show up in this category.' };
+    return { title: 'No favorites yet', sub: lead + 'Tap the heart on any note to keep it here.' };
   }
   if (_nbActiveCat === 'Uncategorized') {
     return { title: 'Nothing uncategorized', sub: lead + 'Every note you\u2019ve made so far has already been sorted into a category.' };
@@ -23095,7 +23113,7 @@ function nbRenderNotesScreen() {
   if (!all.length) {
     // True first-run: no notes anywhere yet, regardless of filter/search.
     emptyTitle.textContent = 'Welcome to Bluebook';
-    emptySub.textContent = nbEmptyLead() + 'Tap the + button to create your first one. It\u2019ll show up here, sorted by category.';
+    emptySub.textContent = nbEmptyLead({ noNotes: true }) + 'Tap the + button to create your first note. It\u2019ll show up here, sorted by category.';
     _nbRevealFade(empty);
     _nbRevealFade(carousel);
     grid.style.display = 'none';
