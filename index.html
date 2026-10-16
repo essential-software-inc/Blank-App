@@ -1230,8 +1230,9 @@ body:not(.night):not(.pink) #story-viewer-like-btn.is-liked {
 }
 .gc-comments[hidden] { display: none }
 .gc-comments svg { flex-shrink: 0; position: relative; top: .125em }
-.pub-opts { display: flex; flex-direction: column; margin-top: .4rem; padding-top: .2rem }
+.pub-opts { display: flex; flex-direction: column }
 .pub-opts .nb-switch-wrap { justify-content: space-between; padding: .5rem 0 }
+.pub-opts .nb-switch-wrap:first-child { padding-top: 0 }
 .alert-card.alert-tap { cursor: pointer }
 /* Alerts: unread highlight, hold-to-select and the select / delete FABs. The accent follows the theme: blue in Light, near-white in Night (no blue), rose in Pink. */
 body { --al-acc: #3366cc; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17; --al-fsh: 0 4px 14px rgba(20, 30, 50, .18), 0 1px 3px rgba(20, 30, 50, .10) }
