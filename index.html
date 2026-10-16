@@ -1253,6 +1253,23 @@ body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17
 #nb-notes-grid.al-selmode .alert-card { -webkit-user-select: none; user-select: none }
 #nb-notes-grid.al-selmode .alert-card .gc-trash { display: none }
 #nb-notes-grid.al-selmode .alert-card .al-chk { display: flex }
+
+/* Notes: hold-to-select, same look as Alerts. Published notes are locked (a toast explains). */
+.guide-card.nb-nsel { -webkit-touch-callout: none }
+.guide-card.nb-nsel::before, .guide-card.nb-nsel::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .15s }
+.guide-card.nb-nsel::before { z-index: -1; background: var(--al-acc) }
+.guide-card.nb-nsel::after { box-shadow: inset 0 0 0 1.5px var(--al-acc) }
+.guide-card.nb-nsel.is-sel::before { opacity: var(--al-tint-sel) }
+.guide-card.nb-nsel.is-sel::after { opacity: 1; box-shadow: inset 0 0 0 2px var(--al-acc) }
+.guide-card.nb-nsel .al-chk { display: none; width: 18px; height: 18px; box-sizing: border-box; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--al-acc); color: var(--al-on); opacity: .55; align-items: center; justify-content: center }
+.guide-card.nb-nsel .al-chk svg { display: none }
+.guide-card.nb-nsel.is-sel .al-chk { background: var(--al-acc); opacity: 1 }
+.guide-card.nb-nsel.is-sel .al-chk svg { display: block }
+#nb-notes-grid.nb-nselmode { padding-bottom: 8.5rem }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel { -webkit-user-select: none; user-select: none }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-fav, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-edit, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-trash { display: none }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel:not(.nb-nlocked) .al-chk { display: flex }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel.nb-nlocked { opacity: .45 }
 #nb-alert-fabs { position: fixed; right: .9rem; bottom: calc(58px + env(safe-area-inset-bottom, 0px) + .9rem); z-index: 95; display: flex; align-items: center; gap: .6rem; opacity: 0; transform: translateY(10px) scale(.96); visibility: hidden; pointer-events: none; transition: opacity .18s, transform .18s, visibility 0s .18s }
 #nb-alert-fabs.on { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition: opacity .18s, transform .18s }
 .al-fab { height: 48px; min-width: 48px; box-sizing: border-box; padding: 0 1rem; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: .4rem; font: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; border: 1px solid #dde6ff; background: #fff; color: var(--al-acc); box-shadow: var(--al-fsh); transition: transform .12s }
@@ -1262,6 +1279,8 @@ body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17
 body.night .al-fab { background: #1c1c1e; border-color: #2e2e30; color: #e8e8e8 }
 body.pink .al-fab { background: #fff2f7; border-color: #f5c5d8; color: #bd2856 }
 body.night #al-fab-del, body.pink #al-fab-del { background: #d33; border-color: transparent; color: #fff }
+#nb-alert-fabs .al-fab { height: 48px; min-height: 48px; max-height: 48px; padding-top: 0; padding-bottom: 0; line-height: 1; align-self: center; box-sizing: border-box }
+#nb-alert-fabs .al-fab span { line-height: 1; display: block }
 @media (prefers-reduced-motion: reduce) { #nb-alert-fabs, #nb-alert-fabs.on, .al-fab, .alert-card::before, .alert-card::after { transition: none } }
 .guide-card.nb-flash { box-shadow: 0 0 0 2px rgba(80,130,220,.7); transition: box-shadow .4s }
 .gc-tags-row {
@@ -1838,7 +1857,7 @@ body.pink .bn-item.active {
   box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
   overflow: hidden
 }
-#publish-sheet.is-live { height: min(290px, 80vh) }
+#publish-sheet.is-live { height: min(264px, 80vh) }
 #publish-hdr {
   display: flex;
   align-items: center;
@@ -6590,9 +6609,6 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
           <div id="pub-slug-status" class="pub-status"></div>
         </div>
         <div id="pub-state-live" class="bkp-panel" style="display:none">
-          <div class="pub-live-top">
-            <p class="bkp-help">This note is live.</p>
-          </div>
           <div class="pub-opts">
             <label class="nb-switch-wrap" for="pub-stories-switch">
               <span class="nb-switch-label">Show in stories</span>
@@ -20346,6 +20362,7 @@ function _nbAlertToggle(k) {
   _nbAlertSelUi();
 }
 function nbAlertSelAll() {
+  if (_nbActiveCat !== 'Alerts') return nbNoteSelAll();
   const shown = _nbAlertShownSlugs();
   const all = shown.length > 0 && shown.every(k => _nbAlertSel.has(k));
   if (all) _nbAlertSel.clear(); else shown.forEach(k => { _nbAlertSel.add(k); _nbAlertUnreadIds.delete(k); });
@@ -20395,9 +20412,148 @@ function _nbAlertUiReset() {
     if (card && e.target === card) { e.preventDefault(); e.stopPropagation(); _nbAlertToggle(card.getAttribute('data-slug')); }
   }, true);
 })();
+// ---- Notes: hold-to-select, select all / none and delete FABs (same gestures and FABs as Alerts) ----
+// Works in every notes category that shows cards with a trash icon. A published note is locked: it can't be selected
+// (unpublish it first), and trying shows a toast. In Published every card is locked.
+var _nbNoteSel = new Set(), _nbNoteSelCat = '', _nbNoteLpSup = 0;
+const _NB_SEL_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 5 9 9 5"/><polyline points="3 17 5 19 9 15"/><line x1="13" y1="7" x2="21" y2="7"/><line x1="13" y1="17" x2="21" y2="17"/></svg>';
+const _NB_NONE_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+function _nbNoteCardOf(t) {
+  if (!t || !t.closest || _nbActiveCat === 'Alerts') return null;
+  const c = t.closest('#nb-notes-grid .guide-card');
+  if (!c || c.classList.contains('nb-skel-card')) return null;
+  if (c.hasAttribute('data-note-id') || c.querySelector('.gc-trash')) return c;
+  return null;
+}
+function _nbNoteCardLocked(c) {
+  const id = c.getAttribute('data-note-id');
+  if (!id) return true; // a Published-feed card: always a published note
+  const n = _pubFindNote(id);
+  return !n || !!n.publishedSlug;
+}
+function _nbNoteLockedToast() { showToast('Published notes can\u2019t be selected. Unpublish first.'); }
+function _nbNoteShownIds() {
+  const grid = document.getElementById('nb-notes-grid');
+  return grid ? [...grid.querySelectorAll('.guide-card.nb-nsel[data-note-id]:not(.nb-nlocked)')].map(el => el.getAttribute('data-note-id')) : [];
+}
+function _nbNotePaint(id) {
+  const grid = document.getElementById('nb-notes-grid');
+  const el = grid && grid.querySelector('.guide-card[data-note-id="' + CSS.escape(id) + '"]');
+  if (el) el.classList.toggle('is-sel', _nbNoteSel.has(id));
+}
+function _nbNoteSelUi() {
+  const grid = document.getElementById('nb-notes-grid');
+  for (const k of [..._nbNoteSel]) { const n = _pubFindNote(k); if (!n || n.publishedSlug) _nbNoteSel.delete(k); } // deleted, or published meanwhile
+  const n = _nbNoteSel.size, on = n > 0 && _nbActiveCat !== 'Alerts' && !_nbIsFeedCat(_nbActiveCat);
+  if (grid) {
+    grid.classList.toggle('nb-nselmode', n > 0);
+    grid.querySelectorAll('.guide-card.nb-nsel[data-note-id]').forEach(el => {
+      el.classList.toggle('is-sel', _nbNoteSel.has(el.getAttribute('data-note-id')));
+      if (n) el.setAttribute('aria-pressed', el.classList.contains('is-sel') ? 'true' : 'false'); else el.removeAttribute('aria-pressed');
+    });
+  }
+  if (!n && !document.getElementById('nb-alert-fabs')) return;
+  const f = _nbAlertFabs();
+  f.classList.toggle('on', on);
+  if (!on) return;
+  const shown = _nbNoteShownIds(), all = shown.length > 0 && shown.every(k => _nbNoteSel.has(k));
+  f.querySelector('#al-fab-sel').innerHTML = (all ? _NB_NONE_ICON : _NB_SEL_ICON) + '<span>' + (all ? 'Select none' : 'Select all') + '</span>';
+  f.querySelector('#al-fab-del').setAttribute('aria-label', 'Delete ' + n + (n === 1 ? ' note' : ' notes'));
+}
+function _nbNoteToggle(id) {
+  if (_nbNoteSel.has(id)) _nbNoteSel.delete(id); else { _nbNoteSel.add(id); _nbNoteSelCat = _nbActiveCat; }
+  _nbNotePaint(id);
+  _nbNoteSelUi();
+}
+function nbNoteSelAll() {
+  const shown = _nbNoteShownIds();
+  const all = shown.length > 0 && shown.every(k => _nbNoteSel.has(k));
+  if (all) _nbNoteSel.clear(); else shown.forEach(k => _nbNoteSel.add(k));
+  shown.forEach(_nbNotePaint);
+  _nbNoteSelUi();
+}
+function _nbNoteUiReset() {
+  if (!_nbNoteSel || !_nbNoteSel.size) return;
+  _nbNoteSel.clear();
+  _nbNoteSelUi();
+}
+(function () {
+  let tm = 0, sx = 0, sy = 0, pc = null;
+  const clr = () => { if (tm) { clearTimeout(tm); tm = 0; } pc = null; };
+  const hit = c => c.getAttribute('data-note-id') || '';
+  document.addEventListener('pointerdown', e => {
+    _nbNoteLpSup = 0; clr();
+    if (e.button > 0) return;
+    const card = _nbNoteCardOf(e.target);
+    if (!card || e.target.closest('button, a, input, .nb-carousel-viewport')) return;
+    sx = e.clientX; sy = e.clientY; pc = card;
+    tm = setTimeout(() => {
+      tm = 0; const c = pc; pc = null;
+      if (!c || !c.isConnected) return;
+      _nbNoteLpSup = 1; // the release of this press must not also count as a tap
+      if (_nbNoteCardLocked(c)) _nbNoteLockedToast();
+      else _nbNoteToggle(hit(c));
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (x) {}
+      try { const g = window.getSelection && window.getSelection(); if (g) g.removeAllRanges(); } catch (x) {}
+    }, 420);
+  }, true);
+  document.addEventListener('pointermove', e => { if (tm && (Math.abs(e.clientX - sx) > 9 || Math.abs(e.clientY - sy) > 9)) clr(); }, true);
+  ['pointerup', 'pointercancel'].forEach(n => document.addEventListener(n, clr, true));
+  document.addEventListener('contextmenu', e => { if (_nbNoteCardOf(e.target)) e.preventDefault(); });
+  // Capture phase: while selecting, a tap toggles the card instead of opening it; a locked card shows the toast.
+  document.addEventListener('click', e => {
+    const card = _nbNoteCardOf(e.target);
+    if (!card) return;
+    if (_nbNoteLpSup) { _nbNoteLpSup = 0; e.preventDefault(); e.stopPropagation(); return; }
+    if (!_nbNoteSel.size) return;
+    e.preventDefault(); e.stopPropagation();
+    if (_nbNoteCardLocked(card)) { _nbNoteLockedToast(); return; }
+    _nbNoteToggle(hit(card));
+  }, true);
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || !_nbNoteSel.size) return;
+    const card = _nbNoteCardOf(e.target);
+    if (!card || e.target !== card) return;
+    e.preventDefault(); e.stopPropagation();
+    if (_nbNoteCardLocked(card)) _nbNoteLockedToast(); else _nbNoteToggle(hit(card));
+  }, true);
+})();
+function nbDeleteSelectedNotes() {
+  const ids = [..._nbNoteSel].filter(id => { const n = _pubFindNote(id); return n && !n.publishedSlug; });
+  if (!ids.length) { _nbNoteUiReset(); return; }
+  const cnt = ids.length, one = cnt === 1;
+  const ov = document.getElementById('delete-overlay');
+  const cancelBtn = document.getElementById('delete-dialog-cancel');
+  const confirmBtn = document.getElementById('delete-dialog-confirm');
+  document.querySelector('#delete-dialog .rdlg-title').textContent = one ? 'Delete note?' : 'Delete ' + cnt + ' notes?';
+  document.querySelector('#delete-dialog .rdlg-body').textContent = (one ? 'This note will be permanently removed.' : 'These notes will be permanently removed.') + ' This can\u2019t be undone.';
+  confirmBtn.textContent = 'Delete';
+  confirmBtn.disabled = false;
+  cancelBtn.onclick = () => ov.classList.remove('open');
+  ov.onclick = (e) => { if (e.target === ov) ov.classList.remove('open'); };
+  confirmBtn.onclick = () => {
+    ov.classList.remove('open');
+    const notes = nbLoadNotes();
+    const gone = [];
+    ids.forEach(id => {
+      const i = notes.findIndex(n => n.id === id && !n.publishedSlug); // never a note that got published since
+      if (i !== -1) { notes.splice(i, 1); gone.push(id); }
+    });
+    if (!gone.length) return;
+    if (!nbSaveNotesArr(notes)) return; // storage full: the notes are still there, so don't record or sync a delete
+    gone.forEach(_nbRecordDeletedId);
+    _nbNoteSel.clear();
+    nbSyncPullThenPush();
+    buildCatBar();
+    nbRenderNotesScreen();
+    showToast(gone.length === 1 ? 'Note deleted' : gone.length + ' notes deleted');
+  };
+  ov.classList.add('open');
+}
 // Same confirmation dialog as deleting a note (#delete-dialog), reworded for an alert (or for the selected ones).
 function nbDeleteAlert(id) { _nbAlertConfirmDelete([String(id)]); }
 function nbDeleteSelectedAlerts() {
+  if (_nbActiveCat !== 'Alerts') return nbDeleteSelectedNotes();
   const ids = [..._nbAlertSel].map(k => k.slice('alert:'.length));
   if (ids.length) _nbAlertConfirmDelete(ids);
 }
@@ -22922,6 +23078,7 @@ function buildCatBar() {
   const bar = document.getElementById('feed-cats');
   if (!bar) return;
   if (_nbActiveCat !== 'Alerts') _nbAlertUiReset(); // another category is open: no selection, no unread highlights
+  if (typeof _nbNoteSel !== 'undefined' && _nbNoteSel && _nbNoteSel.size && _nbNoteSelCat !== _nbActiveCat) _nbNoteUiReset(); // selection belongs to the category it started in
   const notes = nbVisibleNotes();
   const customCats = new Map();
   notes.forEach(n => {
@@ -23396,6 +23553,7 @@ function _nbCardActionsHtml(n) {
           <button class="gc-trash" onclick="event.stopPropagation();nbDeleteNote('${nid}')" aria-label="Delete">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
           </button>
+          <span class="al-chk" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17.5 19 7.5"/></svg></span>
         </div>
       </div>
 `;
@@ -23472,6 +23630,7 @@ function _nbEnsureActiveCat() {
   return true;
 }
 function nbRenderNotesScreen() {
+  Promise.resolve().then(() => { try { _nbNoteSelUi(); } catch (e) {} }); // after the list is painted: prune / show the selection UI
   if (_nbEnsureActiveCat()) { buildCatBar(); _nbSyncStoriesStripVisibility(); }
   nbUpdateLibraryTitle();
   if (_nbIsFeedCat(_nbActiveCat)) {
@@ -23543,7 +23702,7 @@ function nbRenderNotesScreen() {
     const imgsHtml = _nbSt('images') ? _buildImgsHtml(imgUrls) : '';
     const nid = escJs(n.id);
     return `
-    <div class="guide-card" data-note-id="${esc(n.id)}" onclick="nbOpenNoteForEdit('${nid}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenNoteForEdit('${nid}')">
+    <div class="guide-card nb-nsel${_nbNoteSel && _nbNoteSel.has(n.id) ? ' is-sel' : ''}${n.publishedSlug ? ' nb-nlocked' : ''}" data-note-id="${esc(n.id)}"${_nbNoteSel && _nbNoteSel.size ? ` aria-pressed="${_nbNoteSel.has(n.id)}"` : ''} onclick="nbOpenNoteForEdit('${nid}')" role="button" tabindex="0" onkeydown="if (event.key==='Enter') nbOpenNoteForEdit('${nid}')">
       <div class="gc-title">${esc(n.title || 'Untitled note')}</div>
       ${(n.desc || n.createdAt) ? `<div class="gc-desc">${n.desc ? `<span class="gc-desc-text">${esc(n.desc)}</span>` : ''}${n.createdAt ? `<span class="gc-desc-time">${_nbShortTimeAgo(n.createdAt)}</span>` : ''}</div>` : ''}
       ${imgsHtml}
