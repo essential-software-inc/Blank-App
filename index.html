@@ -4087,6 +4087,22 @@ body.pink .com-field:focus {
   box-shadow: 0 0 0 3px rgba(200, 54, 94, 0.15) !important
 }
 
+/* #pub-slug-wrap is a div (class com-field) that holds the real <input>, so the .com-field:focus rules above never match it: focus sits
+   on the input inside. Glass mode already handles this with #pub-slug-wrap:focus-within; classic mode did not, so the address box
+   never got the focus ring the other fields get. Same values as the .com-field:focus rules for each theme. */
+body:not(.night):not(.pink) #pub-slug-wrap:focus-within {
+  background: #ffffff !important;
+  box-shadow: inset 0 1px 2px rgba(51, 102, 204, 0.05), 0 0 0 3px rgba(51, 102, 204, 0.2) !important
+}
+body.night #pub-slug-wrap:focus-within {
+  background: #141418 !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important
+}
+body.pink #pub-slug-wrap:focus-within {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(200, 54, 94, 0.15) !important
+}
+
 body.theme-switching #splash-bar-fill {
   transition-property: none !important;
 }
