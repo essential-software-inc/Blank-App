@@ -16471,7 +16471,18 @@ async function hideSplash() {
   // more time so preview images that came up empty on the splash-exit
   // render don't stay stuck missing until something unrelated (opening
   // a note, searching, switching category) happens to re-render it.
-  _nbImgCacheInitPromise.then(() => { try { nbRenderNotesScreen(); } catch (e) {} });
+  _nbImgCacheInitPromise.then(() => {
+    try { nbRenderNotesScreen(); } catch (e) {}
+    // The Editor canvas may have been built (top-level nbRenderCanvas(), or an
+    // app-resume landing straight on the Editor) before the image cache
+    // finished loading: _nbRehydrateImages found nothing, so every image block
+    // came up as an empty placeholder until the Editor was left and re-entered.
+    // Rebuild it once now that the images are available, same mode as before.
+    try {
+      const pend = window._nbCanvasBuiltBeforeImgs;
+      if (pend) { window._nbCanvasBuiltBeforeImgs = null; nbRenderCanvas(pend.forcePreview); }
+    } catch (e) {}
+  });
   // Skip the full multi-second splash treatment — its 3200ms floor and
   // the name/tagline/copyright it's there to let someone read — when
   // this boot is probably Android recreating the Activity after the
@@ -24361,6 +24372,20 @@ function _nbSaveDraftUiState(id, state) {
     showToast('Couldn\u2019t save your edit' + _nbFailureReason(e));
   }
 }
+function _nbImgRefInSavedNotes(refId, exceptDraftId) {
+  try {
+    const needle = 'data-note-img-ref="' + refId + '"';
+    if (nbLoadNotes().some(n => (n.content || '').indexOf(needle) !== -1)) return true;
+    // Other in-progress drafts (new-note, repost, other notes' edits) can hold the same image too.
+    const skip = exceptDraftId ? _nbDraftUiKey(exceptDraftId) : null;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || k.indexOf('nb_draft_uistate_') !== 0 || k === skip) continue;
+      if ((localStorage.getItem(k) || '').indexOf(needle) !== -1) return true;
+    }
+    return false;
+  } catch (e) { return true; } // can't tell: keep the image
+}
 function _nbClearDraftUiState(id, keepFragment) {
   const st = _nbLoadDraftUiState(id);
   if (st && Array.isArray(st.imgRefs)) {
@@ -24376,6 +24401,9 @@ function _nbClearDraftUiState(id, keepFragment) {
       // this cleanup, meant to GC images from an abandoned draft,
       // deletes image data a still-live note depends on.
       if (keepFragment && keepFragment.indexOf('data-note-img-ref="' + refId + '"') !== -1) return;
+      // Image ids are content hashes, so another saved note (or the same stock
+      // template image) can share this id: never delete data a saved note still uses.
+      if (_nbImgRefInSavedNotes(refId, id)) return;
       try { _nbDeleteImage(refId); } catch (e) {}
     });
   }
@@ -24479,6 +24507,8 @@ function _nbForcePreviewClass(html) {
   });
 }
 function nbRenderCanvas(forcePreview) {
+  // Image data comes from _nbImgCache; built before it loads, image blocks render empty (see the replay in the boot IIFE).
+  window._nbCanvasBuiltBeforeImgs = _nbImgCacheReady ? null : { forcePreview: !!forcePreview };
   const wrap = document.getElementById('markup-iframe-wrap');
   const iframe = document.getElementById('markup-iframe');
   const mask = document.getElementById('markup-iframe-loadmask');
