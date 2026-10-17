@@ -1233,6 +1233,8 @@ body:not(.night):not(.pink) #story-viewer-like-btn.is-liked {
 .pub-opts { display: flex; flex-direction: column }
 .pub-opts .nb-switch-wrap { justify-content: space-between; padding: .5rem 0 }
 .pub-opts .nb-switch-wrap:first-child { padding-top: 0 }
+/* "Allow new comments" does nothing while the comments button is hidden, so its row is dimmed and its switch locked until the button is shown. */
+.pub-opts .nb-switch-wrap.pub-opt-off { opacity: .45 }
 .alert-card.alert-tap { cursor: pointer }
 /* Alerts: unread highlight, hold-to-select and the select / delete FABs. The accent follows the theme: blue in Light, near-white in Night (no blue), rose in Pink. */
 body { --al-acc: #3366cc; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17; --al-fsh: 0 4px 14px rgba(20, 30, 50, .18), 0 1px 3px rgba(20, 30, 50, .10) }
@@ -1271,6 +1273,9 @@ body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-fav, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-edit, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-trash { display: none }
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel:not(.nb-nlocked) .al-chk { display: flex }
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel.nb-nlocked { opacity: .45 }
+/* The selection tick (.al-chk) is only styled, and hidden until select mode, on alert cards and on .nb-nsel note cards. Published/Stories
+   cards reuse _nbCardActionsHtml but have neither class and no select mode, so the bare tick showed at the end of the action row. */
+.guide-card:not(.alert-card):not(.nb-nsel) .al-chk { display: none }
 #nb-alert-fabs { position: fixed; right: .9rem; bottom: calc(58px + env(safe-area-inset-bottom, 0px) + .9rem); z-index: 95; display: flex; align-items: center; gap: .6rem; opacity: 0; transform: translateY(10px) scale(.96); visibility: hidden; pointer-events: none; transition: opacity .18s, transform .18s, visibility 0s .18s }
 #nb-alert-fabs.on { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition: opacity .18s, transform .18s }
 .al-fab { height: 48px; min-width: 48px; box-sizing: border-box; padding: 0 1rem; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: .4rem; font: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; border: 1px solid #dde6ff; background: #fff; color: var(--al-acc); box-shadow: var(--al-fsh); transition: transform .12s }
@@ -1858,7 +1863,7 @@ body.pink .bn-item.active {
   box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
   overflow: hidden
 }
-#publish-sheet.is-live { height: min(264px, 80vh) }
+#publish-sheet.is-live { height: min(302px, 80vh) } /* 264 + one more switch row (Allow new comments) */
 #publish-hdr {
   display: flex;
   align-items: center;
@@ -6635,9 +6640,16 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
               </span>
             </label>
             <label class="nb-switch-wrap" for="pub-comments-switch">
-              <span class="nb-switch-label">Show comments</span>
+              <span class="nb-switch-label">Show comments button</span>
               <span class="nb-switch">
                 <input type="checkbox" id="pub-comments-switch" class="nb-switch-input" onchange="_pubOnCommentsToggle(this.checked)">
+                <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
+              </span>
+            </label>
+            <label class="nb-switch-wrap" id="pub-allow-row" for="pub-allow-switch">
+              <span class="nb-switch-label">Allow new comments</span>
+              <span class="nb-switch">
+                <input type="checkbox" id="pub-allow-switch" class="nb-switch-input" onchange="_pubOnAllowCommentsToggle(this.checked)">
                 <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
               </span>
             </label>
@@ -13881,6 +13893,13 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     setTimeout(() => document.body.classList.remove('theme-switching'), 200);
     try { _nbSchedulePullThenPush(); } catch (e) {}
   }
+  // One "All my notes" switch. Turning it on applies it to every published page first (_nbAllNotesApply) and only then keeps it on;
+  // `clears` is the opposite rule, which turns off when this one turns on. The rules belong to the signed-in account and sync with it.
+  const allRule = (k, l, s, clears) => ({ t: 'sw', k, l, s, get: () => _nbAllNotesGet(k), toggle: done => {
+    const want = !_nbAllNotesGet(k);
+    if (!want) { _nbAllNotesSet({ [k]: false }); done(true); return; }
+    _nbAllNotesApply(k).then(ok => { if (ok) _nbAllNotesSet(clears ? { [k]: true, [clears]: false } : { [k]: true }); done(ok); });
+  } });
   const GROUPS = [
     ['Appearance', [
       { t: 'chips', k: 'theme', l: 'Theme', o: [['light', 'Light'], ['dark', 'Dark'], ['pink', 'Pink']], get: curTheme, set: setTheme },
@@ -13897,6 +13916,11 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'sw', k: 'hideLibCount', l: 'Hide Library category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Alerts, Published, Stories, Subscribed, Liked, Uncategorized and your own categories).', after: () => buildCatBar() },
       { t: 'sw', k: 'hideMdCount', l: 'Hide Media category counts', s: 'Hide the counts on the Media tabs (Audio, Videos, Albums and Playlists).' },
       { t: 'sw', k: 'mediaSwipe', l: 'Swipe from left edge to open Media', s: 'Swipe in from the left edge of the screen, on any screen in the app, to open Media (audio, videos, albums, playlists).' }]],
+    ['All my notes', [
+      allRule('allStories', 'Always show in stories', 'Show all your published pages in stories now, and every page you publish from here on. Turning it off leaves your pages as they are.'),
+      allRule('allShowComments', 'Always show comments', 'Show the comments button on all your published pages now, and on every page you publish from here on. Turns off \u201cHide comments on all pages\u201d.', 'allHideComments'),
+      allRule('allHideComments', 'Hide comments on all pages', 'Hide the comments button and comments on all your published pages now, and on every page you publish from here on. Turns off \u201cAlways show comments\u201d.', 'allShowComments'),
+      allRule('allDisableComments', 'Disable comments on all pages', 'Visitors can\u2019t add new comments or replies on any of your pages; they see a note that you turned them off. Existing comments stay.')]],
     ['Writing', [
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
@@ -15461,7 +15485,7 @@ function _nbHealSharedSlugs(arr, acct) {
       || ((a.createdAt || 0) - (b.createdAt || 0))
       || String(a.id).localeCompare(String(b.id)));
     list.slice(1).forEach(n => {
-      Object.assign(n, { publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, updatedAt: Date.now() });
+      Object.assign(n, { publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true, updatedAt: Date.now() });
       if (!/\(copy\)$/.test(n.title || '')) n.title = (n.title || 'Untitled note') + ' (copy)';
       if (acct) n.acct = acct.sub;
       healed++;
@@ -15490,7 +15514,7 @@ function _nbMakeConflictCopy(src, acct) {
     id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     title: (src.title || 'Untitled') + ' (conflict copy)',
     createdAt: Date.now(), updatedAt: Date.now(),
-    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
   });
   delete c.syncBaseAt; delete c.seedProvisional; delete c.seedEdited; delete c.seedReseeded;
   if (acct) c.acct = acct.sub;
@@ -15532,7 +15556,7 @@ async function nbSyncPush(showFeedback) {
     app: 'Bluebook', version: imgRes.legacy ? 1 : 2, notes: notes.map(_nbStripLocalSyncFields), deletedIds,
     favorites: _nbFavoritesForSync(new Set(notes.map(n => n.id))),
     playlists: _nbPlaylistsForSync(),
-    settings: { theme: { v: themeNow, t: _nbThemeTs() } }
+    settings: Object.assign({ theme: { v: themeNow, t: _nbThemeTs() } }, _nbAllNotesForSync() ? { allNotes: _nbAllNotesForSync() } : {})
   }, imgRes.legacy ? { images } : {}));
   if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) return _nbSyncTooLarge(showFeedback);
   if (_nbSyncEtag && payload === _nbLastPushedPayload && _nbSyncEtag === _nbLastPushedEtag) return { ok: true, skipped: true };
@@ -15649,6 +15673,7 @@ async function nbSyncPull(showFeedback) {
     _nbSaveDeletedIds([...tombstones.values()]);
     const favChanged = _nbMergeIncomingFavorites(data && data.favorites);
     _nbMergeIncomingTheme(data && data.settings && data.settings.theme);
+    try { _nbMergeIncomingAllNotes(data && data.settings && data.settings.allNotes); } catch (e) { _nbLog('pull: all-notes rules', e); }
     if (_nbMergeIncomingPlaylists(data && data.playlists)) { try { if (window.nbMediaPlaylistsChanged) window.nbMediaPlaylistsChanged(); } catch (e) { _nbLog('pull: playlists', e); } }
     let existing = nbLoadNotes();
     const indexById = new Map(existing.map((n, i) => [n.id, i]));
@@ -18002,7 +18027,7 @@ function nbOpenPublishSheet(id, keepTab) {
     liveFooter.style.display = '';
     document.getElementById('pub-live-url').textContent = _pubUrlFor(note.publishedSlug);
     document.getElementById('pub-stories-switch').checked = !!note.showInStories;
-    document.getElementById('pub-comments-switch').checked = !!note.showComments;
+    _pubPaintCommentSwitches(note);
     _pubSyncCommentsFlag(note.id);
     // Decide the Save button's state by comparing current content against
     // what's live: without a comparison the button would just sit at
@@ -18302,6 +18327,7 @@ async function nbPublishNote() {
       return;
     }
     showToast('Note published');
+    try { _nbApplyPublishRules(note.id); } catch (e) { _nbLog('publish rules', e); }
     endBusy();
     if (_pubNoteId === note.id) closePublishSheet();
     nbRenderNotesScreen();
@@ -18437,7 +18463,7 @@ async function nbUpdatePublishedNote() {
     if (res.status === 404) {
       try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('update 404: strip', e); }
       if (_pubSaveNoteFields(note.id, {
-        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
       }) === false) return;
       showToast('That page is no longer live. Publish again to bring it back.');
       if (_pubNoteId === note.id) closePublishSheet();
@@ -18467,19 +18493,21 @@ async function nbUpdatePublishedNote() {
 // same session run one after another (_pubStoriesChain) so a quick on/off can't reach the server
 // out of order.
 let _pubStoriesChain = Promise.resolve();
-// ---- Comments switch (Publish sheet) ----
-// Optimistic like the stories switch: the flag is saved on the note at once and PUT /publish/:slug/comments
-// follows; a failure puts it back. The server owns the truth, so opening the sheet re-reads it.
+// ---- Comments switches (Publish sheet) ----
+// "Show comments button" (note.showComments) puts the comments button and the comments themselves on the published page.
+// "Allow new comments" (note.allowComments, true unless set) lets visitors write comments and replies; off, the page shows
+// the comments it has with a note that the author disabled new ones. Optimistic like the stories switch: the flag is saved
+// on the note at once and PUT /publish/:slug/comments follows; a failure puts it back. The server owns the truth, so opening
+// the sheet re-reads it.
 let _pubCommentsChain = Promise.resolve(), _pubCommentsPending = 0;
-function _pubOnCommentsToggle(checked) {
-  const note = _pubFindNote(_pubNoteId);
-  const sw = document.getElementById('pub-comments-switch');
-  if (!note || !note.publishedSlug) return;
-  if (_pubOfflineGuard()) { if (sw) sw.checked = !!note.showComments; return; }
-  if (!nbIsSignedIn()) { showToast('Sign in to turn on comments'); if (sw) sw.checked = !!note.showComments; return; }
-  const id = note.id, was = !!note.showComments;
-  _pubSaveNoteFields(id, { showComments: checked });
-  showToast(checked ? 'Comments on' : 'Comments off');
+function _pubPaintCommentSwitches(note) {
+  const show = document.getElementById('pub-comments-switch'), allow = document.getElementById('pub-allow-switch'), row = document.getElementById('pub-allow-row');
+  if (show) show.checked = !!note.showComments;
+  if (allow) { allow.checked = note.allowComments !== false; allow.disabled = !note.showComments; }
+  if (row) row.classList.toggle('pub-opt-off', !note.showComments);
+}
+// Queues one PUT for a page's comment switches (fields: { showComments?, allowComments? }); `was` holds the values to put back if it fails.
+function _pubQueueCommentFlags(id, fields, was, failText) {
   _pubCommentsPending++;
   _pubCommentsChain = _pubCommentsChain.then(async () => {
     const n = _pubFindNote(id);
@@ -18488,18 +18516,42 @@ function _pubOnCommentsToggle(checked) {
       const res = await _nbFetchOwned(n, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(n.publishedSlug) + '/comments', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
-        body: JSON.stringify({ token: tok, showComments: checked })
+        body: JSON.stringify({ token: tok, ...fields })
       }));
       if (!res.ok) throw new Error('comments toggle failed: ' + res.status);
       setTimeout(() => { try { _nbPollLikeCounts(); } catch (e) {} }, 400);
     } catch (e) {
       _nbLog('comments toggle', e);
-      _pubSaveNoteFields(id, { showComments: was });
-      const sw2 = document.getElementById('pub-comments-switch');
-      if (sw2 && _pubNoteId === id) sw2.checked = was;
-      showToast('Couldn\u2019t turn comments ' + (checked ? 'on' : 'off') + _nbFailureReason(e) + '. Change undone.');
+      _pubSaveNoteFields(id, was);
+      const back = _pubFindNote(id);
+      if (back && _pubNoteId === id) _pubPaintCommentSwitches(back);
+      showToast(failText + _nbFailureReason(e) + '. Change undone.');
     } finally { _pubCommentsPending--; }
   }).catch(e => _nbLog('comments chain', e));
+}
+function _pubOnCommentsToggle(checked) {
+  const note = _pubFindNote(_pubNoteId);
+  const sw = document.getElementById('pub-comments-switch');
+  if (!note || !note.publishedSlug) return;
+  if (_pubOfflineGuard()) { if (sw) sw.checked = !!note.showComments; return; }
+  if (!nbIsSignedIn()) { showToast('Sign in to turn on comments'); if (sw) sw.checked = !!note.showComments; return; }
+  const id = note.id, was = { showComments: !!note.showComments };
+  _pubSaveNoteFields(id, { showComments: checked });
+  _pubPaintCommentSwitches(_pubFindNote(id) || note);
+  showToast(checked ? 'Comments button shown' : 'Comments hidden');
+  _pubQueueCommentFlags(id, { showComments: checked }, was, 'Couldn’t ' + (checked ? 'show' : 'hide') + ' comments');
+}
+function _pubOnAllowCommentsToggle(checked) {
+  const note = _pubFindNote(_pubNoteId);
+  const sw = document.getElementById('pub-allow-switch');
+  if (!note || !note.publishedSlug) return;
+  const wasAllow = note.allowComments !== false;
+  if (_pubOfflineGuard()) { if (sw) sw.checked = wasAllow; return; }
+  if (!nbIsSignedIn()) { showToast('Sign in to change comment settings'); if (sw) sw.checked = wasAllow; return; }
+  const id = note.id;
+  _pubSaveNoteFields(id, { allowComments: checked });
+  showToast(checked ? 'New comments allowed' : 'New comments disabled');
+  _pubQueueCommentFlags(id, { allowComments: checked }, { allowComments: wasAllow }, 'Couldn’t ' + (checked ? 'allow' : 'disable') + ' new comments');
 }
 async function _pubSyncCommentsFlag(id) {
   const note = _pubFindNote(id);
@@ -18510,11 +18562,132 @@ async function _pubSyncCommentsFlag(id) {
     const d = await res.json();
     if (!d || typeof d.enabled !== 'boolean' || _pubCommentsPending) return;
     const cur = _pubFindNote(id);
-    if (!cur || d.enabled === !!cur.showComments) return;
-    _pubSaveNoteFields(id, { showComments: d.enabled });
-    const sw = document.getElementById('pub-comments-switch');
-    if (sw && _pubNoteId === id) sw.checked = d.enabled;
+    if (!cur) return;
+    const fields = {};
+    if (d.enabled !== !!cur.showComments) fields.showComments = d.enabled;
+    if (typeof d.allow === 'boolean' && d.allow !== (cur.allowComments !== false)) fields.allowComments = d.allow; // an older worker sends no allow: leave it
+    if (!Object.keys(fields).length) return;
+    _pubSaveNoteFields(id, fields);
+    const now = _pubFindNote(id);
+    if (now && _pubNoteId === id) _pubPaintCommentSwitches(now);
   } catch (e) { _nbLog('comments flag sync', e); }
+}
+// ---- Settings > All my notes ----
+// Four rules that apply to every published page at once and to each page published afterwards (this device). Turning a rule on
+// applies it right away; turning it off only stops applying it, pages keep whatever they are set to. Per-page switches still win
+// afterwards. Comments go through one account-wide call (every page the account owns, even ones not on this device); stories
+// go page by page through the same path as the Publish-sheet switch, since each page has its own story.
+// The rules are kept per account (so one account's rules never apply to another's pages on a shared device) and travel in the
+// account backup next to the theme: settings.allNotes = { v: { allStories, ... }, t }, newest write wins. Nothing is stored while signed out.
+const NB_ALLNOTES_KEY = 'nb_allnotes_v1';
+function _nbAllNotesStore() {
+  const a = nbAccount();
+  if (!a) return null;
+  try {
+    const o = JSON.parse(localStorage.getItem(NB_ALLNOTES_KEY + ':' + a.sub) || 'null');
+    return (o && o.v && typeof o.v === 'object' && typeof o.t === 'number') ? o : { v: {}, t: 0 };
+  } catch (e) { return { v: {}, t: 0 }; }
+}
+function _nbAllNotesGet(k) { const s = _nbAllNotesStore(); return !!(s && s.v[k]); }
+function _nbAllNotesWrite(v, t) {
+  const a = nbAccount();
+  if (!a) return false;
+  const clean = {};
+  ['allStories', 'allShowComments', 'allHideComments', 'allDisableComments'].forEach(k => { clean[k] = !!(v && v[k]); });
+  try { localStorage.setItem(NB_ALLNOTES_KEY + ':' + a.sub, JSON.stringify({ v: clean, t })); return true; } catch (e) { return false; }
+}
+function _nbAllNotesSet(vals) { // a change made here: stamp it now and push it to the account
+  const s = _nbAllNotesStore();
+  if (!s) return;
+  if (_nbAllNotesWrite(Object.assign({}, s.v, vals), Date.now())) { try { _nbSchedulePullThenPush(); } catch (e) {} }
+}
+function _nbAllNotesForSync() { const s = _nbAllNotesStore(); return s && s.t ? { v: s.v, t: s.t } : null; }
+// A newer copy from the account (another device changed the rules). The comment rules were already applied to every page by the
+// device that set them, so only "always show in stories" has something left to do here: this device's own pages join stories.
+function _nbMergeIncomingAllNotes(remote) {
+  const s = _nbAllNotesStore();
+  if (!s || !remote || typeof remote.t !== 'number' || !remote.v || typeof remote.v !== 'object' || remote.t <= s.t) return false;
+  const wasStories = !!s.v.allStories;
+  if (!_nbAllNotesWrite(remote.v, remote.t)) return false;
+  if (!wasStories && remote.v.allStories) { try { _nbBulkStories(true).catch(e => _nbLog('synced rule: stories', e)); } catch (e) { _nbLog('synced rule: stories', e); } }
+  try { if (window._nbStRefresh) window._nbStRefresh(); } catch (e) {}
+  return true;
+}
+async function _nbBulkComments(fields) {
+  const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/comments', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+    body: JSON.stringify(fields)
+  });
+  let d = null; try { d = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error((d && d.error) || ('apply to all failed: ' + res.status));
+  nbVisibleNotes().filter(n => n.publishedSlug).forEach(n => _pubSaveNoteFields(n.id, fields));
+  setTimeout(() => { try { _nbPollLikeCounts(); } catch (e) {} }, 400);
+  return (d && d.updated) || 0;
+}
+async function _nbBulkStories(on) {
+  const notes = nbVisibleNotes().filter(n => n.publishedSlug && !!n.showInStories !== on);
+  let failed = 0;
+  notes.forEach(n => {
+    const wasShowing = _nbStoryOverrides.has(n.publishedSlug) ? !!_nbStoryOverrides.get(n.publishedSlug).show : !!n.showInStories;
+    _nbStoryOptimistic(n, on);
+    if (wasShowing !== on) _nbBumpPubCount('stories', on ? 1 : -1);
+    _pubStoriesChain = _pubStoriesChain
+      .then(() => _pubSendStoriesToggle(n.id, on, true))
+      .then(ok => { if (!ok) failed++; })
+      .catch(e => { failed++; _nbLog('bulk stories', e); });
+  });
+  await _pubStoriesChain;
+  return { total: notes.length, failed };
+}
+// k = the rule's settings key. Resolves true when it can be turned on (applied everywhere), false to put the switch back.
+async function _nbAllNotesApply(k) {
+  if (!nbIsSignedIn()) { showToast('Sign in to apply this to your pages'); return false; }
+  if (_pubOfflineGuard()) return false;
+  try {
+    if (k === 'allStories') {
+      const r = await _nbBulkStories(true);
+      if (r.failed) showToast('Added ' + (r.total - r.failed) + ' of ' + r.total + ' pages to stories. The rest couldn’t be added' + (r.total - r.failed ? '' : ' right now') + '.');
+      else showToast(r.total ? 'Showing ' + r.total + (r.total === 1 ? ' page' : ' pages') + ' in stories' : 'Pages you publish will show in stories');
+      return r.failed < r.total || !r.total;
+    }
+    const fields = k === 'allShowComments' ? { showComments: true } : k === 'allHideComments' ? { showComments: false } : { allowComments: false };
+    const n = await _nbBulkComments(fields);
+    const what = k === 'allShowComments' ? 'Comments button shown on ' : k === 'allHideComments' ? 'Comments hidden on ' : 'New comments disabled on ';
+    showToast(n ? what + n + (n === 1 ? ' page' : ' pages') : 'Will apply to pages you publish');
+    return true;
+  } catch (e) {
+    _nbLog('apply to all notes', e);
+    showToast('Couldn’t apply to all pages' + _nbFailureReason(e));
+    return false;
+  }
+}
+// A page that was just published picks up the rules that are on.
+function _nbApplyPublishRules(noteId) {
+  if (!nbIsSignedIn()) return;
+  const on = k => _nbAllNotesGet(k);
+  const n = _pubFindNote(noteId);
+  if (!n || !n.publishedSlug) return;
+  if (on('allStories') && !n.showInStories) {
+    _nbStoryOptimistic(n, true);
+    _nbBumpPubCount('stories', 1);
+    // Saved on the note at once, like the comment switches below, so the Publish sheet shows Show in stories on straight away
+    // instead of after the server answers; put back if it can't be done.
+    _pubSaveNoteFields(noteId, { showInStories: true });
+    _pubStoriesChain = _pubStoriesChain
+      .then(() => _pubSendStoriesToggle(noteId, true, false))
+      .then(ok => { if (!ok) { _pubSaveNoteFields(noteId, { showInStories: false }); const sw = document.getElementById('pub-stories-switch'); if (sw && _pubNoteId === noteId) sw.checked = false; } })
+      .catch(e => _nbLog('publish rule: stories', e));
+  }
+  const f = {};
+  if (on('allShowComments') && !n.showComments) f.showComments = true;
+  else if (on('allHideComments') && n.showComments) f.showComments = false;
+  if (on('allDisableComments') && n.allowComments !== false) f.allowComments = false;
+  if (Object.keys(f).length) {
+    const was = { showComments: !!n.showComments, allowComments: n.allowComments !== false };
+    _pubSaveNoteFields(noteId, f);
+    _pubQueueCommentFlags(noteId, f, was, 'Couldn’t apply your comment settings');
+  }
 }
 function _pubOnStoriesToggle(checked) {
   const note = _pubFindNote(_pubNoteId);
@@ -18535,14 +18708,15 @@ function _pubOnStoriesToggle(checked) {
     .then(() => _pubSendStoriesToggle(noteId, checked))
     .catch(e => _nbLog('stories toggle chain', e));
 }
-async function _pubSendStoriesToggle(noteId, checked) {
+async function _pubSendStoriesToggle(noteId, checked, quiet) { // quiet: the caller (Settings > All my notes) reports one summary instead of a toast per page; resolves true on success
   const note = _pubFindNote(noteId);
-  if (!note || !note.publishedSlug) return;
+  if (!note || !note.publishedSlug) return true;
   const slug = note.publishedSlug;
   try {
     const story = await _pubPutStoriesFlag(note, checked);
     _pubSaveNoteFields(noteId, { showInStories: checked });
     if (checked && story) _nbStoryServerRow(slug, story); // the server's own row replaces the provisional one
+    return true;
   } catch (e) {
     _nbLog('stories toggle', e);
     _nbStoryOverrides.delete(slug);
@@ -18550,7 +18724,8 @@ async function _pubSendStoriesToggle(noteId, checked) {
     const sw = document.getElementById('pub-stories-switch');
     if (sw && _pubNoteId === noteId) sw.checked = !!note.showInStories; // put the switch back to what's actually saved
     nbRenderStoriesStrip().catch(err => _nbLog('stories toggle: strip refresh', err));
-    showToast('Couldn\u2019t ' + (checked ? 'add to stories' : 'remove from stories') + _nbFailureReason(e) + '. Change undone.');
+    if (!quiet) showToast('Couldn\u2019t ' + (checked ? 'add to stories' : 'remove from stories') + _nbFailureReason(e) + '. Change undone.');
+    return false;
   }
 }
 // Sends the flag. Preferred route: PUT /publish/:slug/stories, which carries only the flag (no page
@@ -21511,7 +21686,7 @@ async function _pubUnpublish(note, signal) {
   // Drop it from the story strip now, while the slug is still on the note; the strip otherwise only catches up on the next fetch.
   try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('unpublish: strip', e); }
   if (_pubSaveNoteFields(note.id, {
-    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
   }) === false) throw Object.assign(new Error('unpublish save failed'), { storageFull: true }); // the page is down; a retry gets a 404 (= gone) and saves again
 }
 // Cancel aborts the unpublish request, but the server may already have taken the page down. Ask it before saying what happened;
@@ -21530,7 +21705,7 @@ async function _pubSettleCancelledUnpublish(note) {
     if (!down) return 'live';
     try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('cancelled unpublish: strip', e); }
     if (_pubSaveNoteFields(note.id, {
-      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
     }) === false) return 'unknown';
     return 'down';
   } catch (e) { _nbLog('cancelled unpublish check', e); return 'unknown'; }
