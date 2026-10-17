@@ -19444,7 +19444,7 @@ let _nbStoryCommentsOpen = false;
 function nbStoryBack() {
   if (_nbStoryCommentsOpen) {
     const fr = document.getElementById('story-viewer-frame');
-    try { fr.contentWindow.postMessage({ type: 'nb-cm-close' }, '*'); return; } catch (e) { _nbStoryCommentsOpen = false; }
+    try { fr.contentWindow.postMessage({ type: 'nb-cm-close' }, '*'); _nbStoryCommentsOpen = false; return; } catch (e) { _nbStoryCommentsOpen = false; } // the page confirms with its own sheet message; clearing here means a stale flag costs one press, never a trap
   }
   nbCloseStory();
 }
@@ -20728,7 +20728,7 @@ async function _nbCommentsBridge(e) {
     if (m.op === 'sheet') { _nbStoryCommentsOpen = !!m.open; return; }
     if (m.op === 'toast') { const t = String(m.text == null ? '' : m.text).slice(0, 200); if (t) showToast(t); return; } // the comments page's messages, in the app's own toast
     if (m.op === 'hello') {
-      _nbStoryCommentsOpen = false;
+      // No reset here: the page re-sends hello every few seconds (auth sync) while its comments sheet is open, which wrongly marked the sheet closed so Back left the whole viewer. The flag resets on open/close and when Back asks the sheet to close.
       reply(true, { signedIn: signed });
       const want = _nbStoryOpenComment;
       if (want && want.slug === m.slug) {
