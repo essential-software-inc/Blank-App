@@ -1281,6 +1281,8 @@ body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17
 /* The selection tick (.al-chk) is only styled, and hidden until select mode, on alert cards and on .nb-nsel note cards. Published/Stories
    cards reuse _nbCardActionsHtml but have neither class and no select mode, so the bare tick showed at the end of the action row. */
 .guide-card:not(.alert-card):not(.nb-nsel) .al-chk { display: none }
+/* Published / Subscribed (feed) cards aren't .nb-nsel, so the global no-select rule left their title and description unselectable. Same opt-in as .nb-nsel cards. */
+#nb-notes-grid .guide-card:not(.alert-card):not(.nb-nsel) .gc-title, #nb-notes-grid .guide-card:not(.alert-card):not(.nb-nsel) .gc-desc-text { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default }
 #nb-alert-fabs { position: fixed; right: .9rem; bottom: calc(58px + env(safe-area-inset-bottom, 0px) + .9rem); z-index: 95; display: flex; align-items: center; gap: .6rem; opacity: 0; transform: translateY(10px) scale(.96); visibility: hidden; pointer-events: none; transition: opacity .18s, transform .18s, visibility 0s .18s }
 #nb-alert-fabs.on { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition: opacity .18s, transform .18s }
 .al-fab { height: 48px; min-width: 48px; box-sizing: border-box; padding: 0 1rem; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: .4rem; font: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; border: 1px solid #dde6ff; background: #fff; color: var(--al-acc); box-shadow: var(--al-fsh); transition: transform .12s }
@@ -21009,18 +21011,34 @@ function _nbNoteUiReset() {
     if (_nbNoteCardLocked(card)) { _nbNoteLockedToast(); return; }
     _nbNoteToggle(hit(card));
   }, true);
-  // Tapping away from any selected text (empty space, the story strip, a card, anywhere) drops the selection; tapping the selected text itself or an editable field leaves it. Registered after the click handler above so it still sees the selection first.
-  document.addEventListener('click', e => {
+  // Tapping away from any selected text (empty space, above the carousel, the story strip, a card, anywhere) drops the selection; tapping the selected text itself, an editable field, or the end of a drag-select leaves it. Registered after the click handler above so it still sees the selection first.
+  // The test is where the tap landed (inside the selected text's rects), not what element it hit: a big container around the selection is a target too, so an element test kept the selection on empty space.
+  let dx = 0, dy = 0;
+  const dropSel = e => {
     try {
       const g = window.getSelection && window.getSelection();
       if (!g || !g.rangeCount || g.isCollapsed) return;
+      if (!e.detail && !e.clientX && !e.clientY && e.type === 'click') return; // keyboard-triggered click: no position
+      if (Math.abs(e.clientX - dx) > 6 || Math.abs(e.clientY - dy) > 6) return; // a drag that ended here, not a tap
       const t = e.target, an = g.anchorNode, ae = an && an.nodeType === 3 ? an.parentNode : an;
       const ed = 'input, textarea, select, [contenteditable=""], [contenteditable="true"]';
       if ((t && t.closest && t.closest(ed)) || (ae && ae.closest && ae.closest(ed))) return;
-      if (t && t.nodeType === 1 && g.containsNode(t, true)) return;
+      for (let i = 0; i < g.rangeCount; i++) {
+        for (const r of g.getRangeAt(i).getClientRects()) {
+          if (e.clientX >= r.left - 6 && e.clientX <= r.right + 6 && e.clientY >= r.top - 6 && e.clientY <= r.bottom + 6) return;
+        }
+      }
       g.removeAllRanges();
     } catch (x) {}
-  }, true);
+  };
+  document.addEventListener('pointerdown', e => { dx = e.clientX; dy = e.clientY; }, true);
+  // pointerup as well as click: some taps never produce a click (controls that cancel the touch), and the selection must still drop.
+  document.addEventListener('pointerup', dropSel, true);
+  document.addEventListener('click', dropSel, true);
+  // Focus moving into an iframe (the editor, the story viewer) never reaches this document as a tap, so drop the selection when the window loses focus to one.
+  window.addEventListener('blur', () => { try { const ae = document.activeElement; if (ae && ae.tagName === 'IFRAME') { const g = window.getSelection(); if (g && !g.isCollapsed) g.removeAllRanges(); } } catch (x) {} });
+  // Escape drops a text selection too (not while typing in a field).
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; try { const t = e.target; if (t && t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) return; const g = window.getSelection(); if (g && !g.isCollapsed) g.removeAllRanges(); } catch (x) {} }, true);
   document.addEventListener('keydown', e => {
     if (e.key !== 'Enter' || !_nbNoteSel.size) return;
     const card = _nbNoteCardOf(e.target);
@@ -28366,6 +28384,25 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
     $('md-mini-pp').innerHTML = IC.play(22);
     EDGE_FRAMES.forEach(function (id) { var fr = $(id); if (fr) fr.addEventListener('load', hookEditorFrame); });
     hookEditorFrame();
+    // The story viewer's page is cross-origin (served from the publish worker), so its touches never reach this document and hookFrame can't listen inside it:
+    // the edge swipe only worked on the header. A thin strip over the frame's left edge catches the swipe in this document instead, where the hook above already handles it.
+    (function () {
+      var ov = $('story-viewer-overlay'), fr = $('story-viewer-frame');
+      if (!ov || !fr) return;
+      var st = document.createElement('div');
+      st.id = 'sv-edge'; st.setAttribute('aria-hidden', 'true');
+      st.style.cssText = 'position:absolute;left:0;bottom:0;width:24px;z-index:3;touch-action:none;display:none';
+      ov.appendChild(st);
+      function sync() {
+        var on = false; try { on = !!window._nbSt('mediaSwipe'); } catch (x) {}
+        var open = ov.classList.contains('open') && on;
+        st.style.display = open ? 'block' : 'none';
+        if (open) st.style.top = fr.offsetTop + 'px';
+      }
+      new MutationObserver(sync).observe(ov, { attributes: true, attributeFilter: ['class'] });
+      window.addEventListener('resize', sync, { passive: true });
+      sync();
+    })();
     $('md-body').addEventListener('scroll', function () { scr.classList.toggle('md-scrolled', this.scrollTop > 2); MD.lastScroll = NOW(); syncFab(); syncTitle(); syncGh(); }, { passive: true });
     $('md-np-scroll').addEventListener('scroll', syncNpTop, { passive: true });
     window.addEventListener('resize', function () { syncFab(); syncTitle(); syncNpTop(); }, { passive: true });
