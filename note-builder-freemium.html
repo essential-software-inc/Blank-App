@@ -18848,14 +18848,19 @@ function _nbMlOptAsk(fromSettings) {
       _nbMlOptBusy = false;
     } finally {
       _pubSetBtnLoading(btn, false);
+      paint();
     }
   };
-  // Reopened from Settings, tick the answer that is on now. A fresh label each time, so a tick never carries over to the next opening.
-  const cur = _nbMlOptGet();
-  no.textContent = (cur === true ? '\u2713 ' : '') + 'No, keep out';
-  yes.textContent = (cur === false ? '\u2713 ' : '') + 'Yes, allow';
-  no.setAttribute('aria-pressed', String(cur === true));
-  yes.setAttribute('aria-pressed', String(cur === false));
+  // Reopened from Settings, a check on "Yes, allow" shows when that is the saved choice. Keeping out is never marked, so the dialog
+  // doesn't nudge anyone toward it. Painted fresh on every opening, and again after a failed save puts the plain label back.
+  const CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-right:.4rem;vertical-align:-2px"><polyline points="5 12.5 10 17.5 19 7"/></svg>';
+  const paint = () => {
+    const allowed = _nbMlOptGet() === false;
+    no.textContent = 'No, keep out'; no.removeAttribute('aria-pressed');
+    yes.innerHTML = (allowed ? CHECK : '') + 'Yes, allow';
+    if (allowed) yes.setAttribute('aria-pressed', 'true'); else yes.removeAttribute('aria-pressed');
+  };
+  paint();
   no.onclick = () => answer(true, no);
   yes.onclick = () => answer(false, yes);
   ov.onclick = fromSettings ? (e => { if (e.target === ov) _nbMlOptClose(); }) : null; // at sign-in a tap outside is not an answer; from Settings it just closes
