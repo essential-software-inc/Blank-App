@@ -28251,7 +28251,7 @@ var el=document.getElementById('nb-onboard-carousel');if(el)el.classList.add('ca
   // Called first by the Android back handler. Returns true when it consumed the press.
   window.nbMediaBack = function () {
     if (!MD.open) return false;
-    var sv = $('story-viewer-overlay'); if (sv && sv.classList.contains('open')) { nbCloseStory(); return true; }
+    var sv = $('story-viewer-overlay'); if (sv && sv.classList.contains('open') && sv.classList.contains('over-media')) { nbStoryBack(); return true; } // only a viewer sitting above Media; one underneath stays until Media closes
     if ($('md-sheet').classList.contains('open')) { sheetBack(); return true; }
     if (MD.np) { closeNP(); return true; }
     if (MD.sel.on) { exitSel(); return true; }
