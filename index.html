@@ -4523,8 +4523,17 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
   function checkPw(v) { return verify(FP, v, 's', 'h'); }
   function checkAns(v) { return verify(FA, v, 'qs', 'qh', norm); }
   function toast(m) { try { if (window.showToast) window.showToast(m); } catch (e) {} }
-  function theme() { var t = 'light'; try { t = localStorage.getItem('nb_theme_v1') || 'light'; } catch (e) {} return (t === 'dark' || t === 'pink') ? t : 'light'; }
-  function glass() { try { return JSON.parse(localStorage.getItem('nb_settings_v1') || '{}').glassMode !== false; } catch (e) { return true; } }
+  // What the app is showing right now is the truth: body.night / body.pink for the theme, body.glass for Glass mode. Storage is only
+  // the fallback for the startup lock, which goes up before the app has applied either.
+  function appReady() { return typeof window._nbSt === 'function' && !!document.body; }
+  function theme() {
+    if (appReady()) { var c = document.body.classList; return c.contains('pink') ? 'pink' : c.contains('night') ? 'dark' : 'light'; }
+    var t = 'light'; try { t = localStorage.getItem('nb_theme_v1') || 'light'; } catch (e) {} return (t === 'dark' || t === 'pink') ? t : 'light';
+  }
+  function glass() {
+    if (appReady()) { try { return !!window._nbSt('glassMode'); } catch (e) {} }
+    try { return JSON.parse(localStorage.getItem('nb_settings_v1') || '{}').glassMode !== false; } catch (e) { return true; }
+  }
   function css() {
     if (document.getElementById('nb-lock-css')) return;
     var s = document.createElement('style'); s.id = 'nb-lock-css';
@@ -4579,6 +4588,19 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
       '@media (prefers-reduced-motion:reduce){.nbl,.nbl-card,.nbl-b>button{animation:none}}' +
       'body.nb-reduce-motion .nbl,body.nb-reduce-motion .nbl-card,body.nb-reduce-motion .nbl-b>button{animation:none}';
     document.head.appendChild(s);
+    watchTheme();
+  }
+  // The dialog picks its theme and glass look when it is built. If the app changes either while a lock dialog is up (an account sync
+  // carrying a theme from another device, Glass mode toggled, the startup lock waiting on the app to load), repaint the open dialog.
+  var themeWatch = false;
+  function watchTheme() {
+    if (themeWatch || !document.body || !window.MutationObserver) return;
+    themeWatch = true;
+    new MutationObserver(function () {
+      if (!cur || !cur.el || !appReady()) return; // appReady: not during startup, when nothing has changed yet
+      cur.el.classList.remove('nbl-light', 'nbl-dark', 'nbl-pink'); cur.el.classList.add('nbl-' + theme());
+      cur.el.classList.toggle('nbl-glass', glass());
+    }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
   var ICON = '<svg class="nbl-ic" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
   var CUSTOM = '__custom';
@@ -5942,6 +5964,13 @@ body.pink #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);
 #edit-dialog {max-height:85vh}
 #publish-sheet {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
 #publish-sheet.is-live {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
+/* Tighter spacing in the Publish sheet so the status line under the address (e.g. "No changes to save") shows without scrolling. */
+#pub-state-live,#pub-state-new {gap:.55rem}
+#publish-sheet .pub-opts .nb-switch-wrap {padding:.28rem 0}
+#publish-sheet .pub-opts .nb-switch-wrap:first-child {padding-top:0}
+#publish-sheet #pub-live-url {padding:.5rem .8rem}
+#publish-sheet #pub-slug-input {padding:.55rem .9rem .55rem .15rem}
+#publish-sheet #publish-body {padding-bottom:.5rem}
 #edit-dhdr,
 #publish-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
 #edit-dhdr-title,
@@ -13994,7 +14023,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
     ['Privacy', [
-      { t: 'link', l: 'Published pages & comments', show: () => nbIsSignedIn(), s: () => { const v = _nbMlOptGet(); return v === true ? 'Your pages and comments are kept out' : v === false ? 'We may use your pages and comments' : 'Not chosen yet'; }, go: () => _nbMlOptAsk(true) }]],
+      { t: 'link', l: 'Published pages & comments', show: () => nbIsSignedIn(), s: () => { const v = _nbMlOptGet(); const d = _nbStAcctGet(); if (!d || d.mlOptOut === undefined) return '\u2014'; return v === true ? 'Kept out of app improvements' : v === false ? 'May be used to improve our apps' : 'Not chosen yet'; }, go: () => _nbStMlTileTap() }]],
     ['Security', [
       { t: 'sw', k: 'appLock', get: () => !!(window.nbLock && window.nbLock.enabled()), toggle: (done) => { const L = window.nbLock; if (!L) { done(false); return; } if (L.enabled()) L.disable(done); else L.enable(done); }, l: 'App lock', s: 'Ask for a PIN or password each time the app starts, and when you return after more than 30 seconds away. It stays on this device. If you forget it, answering your recovery question gets you back in.' },
       { t: 'link', l: 'Change PIN or password', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.change(() => { try { window._nbStRender(); } catch (e) {} }) },
@@ -14049,6 +14078,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     try { _nbSettingsAcctFetch(); } catch (e) { _nbLog('settings acct fetch', e); }
     root.style.minHeight = '';
     if (window._nbSigninRowBusy) { try { _nbStSigninBusy(true); } catch (e) {} }
+    if (window._nbMlRowBusy) { try { _nbStMlBusy(true); } catch (e) {} }
     if (Math.abs(window.scrollY - _stY) > 1) window.scrollTo({ top: _stY, behavior: 'instant' });
   };
   const root = document.getElementById('st-root');
@@ -14980,6 +15010,35 @@ async function _nbProbeConnectivity() {
 }
 // The Settings "Sign in" row shows the same spinner + "Signing in…" label as the account screen's button while sign-in runs.
 // Settings can redraw mid sign-in, so the flag is re-applied after every redraw (see _nbStRender).
+// Settings > Privacy tile: while its answer isn't known yet (shows \u2014), a tap loads it first, with plain "Loading\u2026" text in the row, like the ad level.
+function _nbStMlRow() { return Array.from(document.querySelectorAll('#st-root .st-link')).find(r => { const l = r.querySelector('.st-l'); return l && l.textContent === 'Published pages & comments'; }) || null; }
+function _nbStMlBusy(busy) {
+  window._nbMlRowBusy = !!busy;
+  const row = _nbStMlRow(), s = row && row.querySelector('.st-s');
+  if (!row || !s) return;
+  if (busy) {
+    if (row.dataset.busy) return;
+    row.dataset.busy = '1'; row.dataset.origSub = s.textContent;
+    s.textContent = 'Loading\u2026';
+    row.style.pointerEvents = 'none'; row.setAttribute('aria-disabled', 'true');
+  } else {
+    if (!row.dataset.busy) return;
+    delete row.dataset.busy;
+    s.textContent = row.dataset.origSub || '\u2014'; delete row.dataset.origSub;
+    row.style.pointerEvents = ''; row.removeAttribute('aria-disabled');
+  }
+}
+async function _nbStMlTileTap() {
+  const known = () => { const d = _nbStAcctGet(); return !!d && d.mlOptOut !== undefined; };
+  if (known()) { _nbMlOptAsk(true); return; }
+  if (_pubOfflineGuard()) return;
+  _nbStMlBusy(true);
+  try { await _nbSettingsAcctFetch(true); } catch (e) { _nbLog('ml tile load', e); }
+  _nbStMlBusy(false);
+  if (!nbIsSignedIn()) return;
+  if (known()) { _nbMlOptAsk(true); return; }
+  showToast('Couldn\u2019t load your choice. Try again');
+}
 function _nbStSigninBusy(busy) {
   window._nbSigninRowBusy = !!busy;
   const row = document.querySelector('#st-root .st-accent');
@@ -18748,6 +18807,7 @@ function _nbMlOptClose() {
 function _nbMlOptGet() { const d = _nbStAcctGet(); return d && typeof d.mlOptOut === 'boolean' ? d.mlOptOut : null; }
 function _nbMlOptStore(on) {
   _nbStAcctGet();
+  _nbStAcctSeq++; // a stats fetch already in flight predates this choice; its answer is dropped so it can't put the old value back
   _nbStAcctStats = Object.assign({}, _nbStAcctStats || {}, { mlOptOut: on });
   const k = _nbStAcctKey();
   if (k) { try { localStorage.setItem(k, JSON.stringify(_nbStAcctStats)); } catch (e) {} }
@@ -18790,6 +18850,12 @@ function _nbMlOptAsk(fromSettings) {
       _pubSetBtnLoading(btn, false);
     }
   };
+  // Reopened from Settings, tick the answer that is on now. A fresh label each time, so a tick never carries over to the next opening.
+  const cur = _nbMlOptGet();
+  no.textContent = (cur === true ? '\u2713 ' : '') + 'No, keep out';
+  yes.textContent = (cur === false ? '\u2713 ' : '') + 'Yes, allow';
+  no.setAttribute('aria-pressed', String(cur === true));
+  yes.setAttribute('aria-pressed', String(cur === false));
   no.onclick = () => answer(true, no);
   yes.onclick = () => answer(false, yes);
   ov.onclick = fromSettings ? (e => { if (e.target === ov) _nbMlOptClose(); }) : null; // at sign-in a tap outside is not an answer; from Settings it just closes
@@ -22267,8 +22333,9 @@ async function _nbSettingsAcctFetch(force, auto) {
     _nbStAcctStats = next;
     const k = _nbStAcctKey();
     if (k) { try { localStorage.setItem(k, JSON.stringify(next)); } catch (e) {} }
-    _nbStAcctTries = 0; _nbStAcctToasted = false;
+    if (next.mlOptOut !== undefined) { _nbStAcctTries = 0; _nbStAcctToasted = false; }
     if (changed && typeof window._nbStRefresh === 'function') window._nbStRefresh();
+    if (next.mlOptOut === undefined) throw new Error('acct stats: reply had no privacy choice'); // the tile reads it, so retry like any failed load
   } catch (e) {
     _nbStAcctAt = 0; _nbLog('settings acct stats', e); // 0 = last try failed, so the next render or reconnect retries
     if (_nbStAcctTries < 3) { // and so does a timer: 5s, 10s, 15s while Settings is still showing
