@@ -20916,7 +20916,7 @@ function _nbNoteCardLocked(c) {
   const n = _pubFindNote(id);
   return !n || !!n.publishedSlug;
 }
-function _nbNoteLockedToast() { showToast('Published notes can\u2019t be selected. Unpublish first.'); }
+function _nbNoteLockedToast() { if (!_nbNoteSel.size) return; showToast('Published notes can\u2019t be selected. Unpublish first.'); }
 function _nbNoteShownIds() {
   const grid = document.getElementById('nb-notes-grid');
   return grid ? [...grid.querySelectorAll('.guide-card.nb-nsel[data-note-id]:not(.nb-nlocked)')].map(el => el.getAttribute('data-note-id')) : [];
@@ -20966,7 +20966,7 @@ function _nbNoteUiReset() {
   let tm = 0, sx = 0, sy = 0, pc = null, pt = false, tp = null;
   const clr = () => { if (tm) { clearTimeout(tm); tm = 0; } pc = null; pt = false; };
   // Locked card, text hold on touch: the text still selects, and this toast shows once, when the selection starts (or after the hold delay if it hasn't).
-  const txToast = () => { if (!tp || tp.done || Date.now() - tp.t > 2000) return; tp.done = true; showToast('Published notes can\u2019t be multi-selected. Unpublish first.'); try { if (navigator.vibrate) navigator.vibrate(12); } catch (x) {} };
+  const txToast = () => { if (!_nbNoteSel.size || !tp || tp.done || Date.now() - tp.t > 2000) return; tp.done = true; showToast('Published notes can\u2019t be multi-selected. Unpublish first.'); try { if (navigator.vibrate) navigator.vibrate(12); } catch (x) {} };
   const hit = c => c.getAttribute('data-note-id') || '';
   document.addEventListener('pointerdown', e => {
     _nbNoteLpSup = 0; clr(); tp = null;
@@ -21008,6 +21008,18 @@ function _nbNoteUiReset() {
     e.preventDefault(); e.stopPropagation();
     if (_nbNoteCardLocked(card)) { _nbNoteLockedToast(); return; }
     _nbNoteToggle(hit(card));
+  }, true);
+  // Tapping away from any selected text (empty space, the story strip, a card, anywhere) drops the selection; tapping the selected text itself or an editable field leaves it. Registered after the click handler above so it still sees the selection first.
+  document.addEventListener('click', e => {
+    try {
+      const g = window.getSelection && window.getSelection();
+      if (!g || !g.rangeCount || g.isCollapsed) return;
+      const t = e.target, an = g.anchorNode, ae = an && an.nodeType === 3 ? an.parentNode : an;
+      const ed = 'input, textarea, select, [contenteditable=""], [contenteditable="true"]';
+      if ((t && t.closest && t.closest(ed)) || (ae && ae.closest && ae.closest(ed))) return;
+      if (t && t.nodeType === 1 && g.containsNode(t, true)) return;
+      g.removeAllRanges();
+    } catch (x) {}
   }, true);
   document.addEventListener('keydown', e => {
     if (e.key !== 'Enter' || !_nbNoteSel.size) return;
