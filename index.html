@@ -5222,6 +5222,7 @@ body.pink .st-danger .st-l{color:#bd2856}
 .st-chip{padding:.38rem .8rem;border-radius:999px;border:1px solid var(--st-line);background:none;color:var(--st-fg);font:inherit;font-size:.8rem;cursor:pointer}
 .st-chip.on{background:var(--st-acc);border-color:var(--st-acc);color:var(--st-on);font-weight:600}
 .st-foot{font-size:.72rem;color:var(--st-sub);text-align:center;line-height:1.6;padding:0 1rem}
+.st-foot-logo{display:block;margin:0 auto .55rem;color:var(--st-acc);opacity:.9}
 body.nb-no-tips #nb-onboard-carousel{display:none!important}
 body.nb-no-mdcount .md-chip i{display:none}
 body.nb-reduce-motion *:not(.ptr-spinner),body.nb-reduce-motion *:not(.ptr-spinner)::before,body.nb-reduce-motion *:not(.ptr-spinner)::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
@@ -6498,7 +6499,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 
 <div id="story-viewer-overlay">
   <div id="story-viewer-header">
-    <button id="story-viewer-back" onclick="nbCloseStory()" aria-label="Back to Notes">
+    <button id="story-viewer-back" onclick="nbStoryBack()" aria-label="Back to Notes">
       <svg width="10" height="14" viewBox="2 0 10 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,2 4,7 9,12"/></svg>
     </button>
     <span id="story-viewer-title"><span class="hdr-title-inner" id="story-viewer-title-text"></span></span>
@@ -14068,7 +14069,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     const root = document.getElementById('st-root'); if (!root) return;
     // Redrawing swaps every row at once; hold the height and the scroll position so the page doesn't drop to the top
     const _stY = window.scrollY, _stH = root.offsetHeight;
-    const _stHtml = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot">\u00a9 2026 Essential Software<br>All rights reserved.</div>';
+    const _stHtml = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot"><svg class="st-foot-logo" width="40" height="46" viewBox="0 0 90 105" fill="none" aria-hidden="true"><defs><clipPath id="st-clip-front"><polygon points="90,90 90,38 38,90"/></clipPath></defs><g opacity=".28"><rect x="6" y="28.5" width="54" height="27" rx="6" transform="rotate(55 33 42)" stroke="currentColor" stroke-width="13"/></g><rect x="30" y="48.5" width="54" height="27" rx="6" transform="rotate(55 57 62)" stroke="currentColor" stroke-width="13"/><rect x="6" y="28.5" width="54" height="27" rx="6" transform="rotate(55 33 42)" stroke="currentColor" stroke-width="13" clip-path="url(#st-clip-front)"/></svg>\u00a9 2026 Essential Software<br>All rights reserved.</div>';
     // Dialogs, sync and theme changes ask for a redraw even when nothing on this screen changed; swapping identical
     // markup in only made the screen flash, so an unchanged page is left exactly as it is.
     if (root.childElementCount && window._nbStLastHtml === _stHtml) return;
@@ -14820,7 +14821,7 @@ const NB_BACK_LAYERS = [
   { id: 'publish-overlay', close: () => _pubUserClose() },
   { id: 'backup-overlay', close: () => closeBackupSheet() },
   { id: 'edit-overlay', close: () => nbCloseSaveDialog() },
-  { id: 'story-viewer-overlay', close: () => nbCloseStory() },
+  { id: 'story-viewer-overlay', close: () => nbStoryBack() },
   { id: 'account-screen', close: () => closeAccountScreen() },
   { id: 'md-screen', close: () => { if (window.nbMediaBack) window.nbMediaBack(); } } // closes its own sheet, player, selection or view first
 ];
@@ -18842,7 +18843,7 @@ function _nbMlOptAsk(fromSettings) {
       _nbMlOptBusy = false;
       _nbMlOptStore(keepOut);
       ov.classList.remove('open');
-      if (keepOut) showToast('Your pages and comments are kept out of machine learning');
+      showToast(keepOut ? 'Kept out of app improvements' : 'Allowed for app improvements');
     } catch (e) {
       _nbLog('ml opt-out', e);
       showToast('Couldn\u2019t save your choice' + _nbFailureReason(e));
@@ -19312,6 +19313,8 @@ function _nbStoryHoldFrame() {
   _nbStoryHoldTimer = setTimeout(_nbStoryRevealFrame, NB_STORY_HOLD_MAX_MS);
 }
 function nbOpenStory(slug, authorSub, title, markSeen) { // markSeen: only a tap on a story avatar in the strip counts as viewing the story
+  _nbStoryRetryStop();
+  _nbStoryCommentsOpen = false;
   _nbCurrentStoryAuthorSub = authorSub;
   _nbCurrentStorySlug = slug;
   _nbStoryNoAuthorSlug = null;
@@ -19376,9 +19379,41 @@ function nbOpenStory(slug, authorSub, title, markSeen) { // markSeen: only a tap
 // Reuses /meta/:slug (same endpoint nbGoToNoteLink already calls to
 // resolve a pasted link) rather than re-fetching the full story page —
 // it's the cheap way to ask "does this still exist / can we reach it".
+// A load that failed for a connection reason (offline, dropped, server error — not a 404) keeps retrying while that note is
+// still open: right when the connection comes back, and otherwise on a growing delay. Success reloads the frame.
+let _nbStoryFailed = false, _nbStoryRetryT = null, _nbStoryRetryN = 0;
+function _nbStoryRetryStop() { clearTimeout(_nbStoryRetryT); _nbStoryRetryT = null; _nbStoryFailed = false; _nbStoryRetryN = 0; }
+function _nbStoryRetryOpen(slug) { const ov = document.getElementById('story-viewer-overlay'); return _nbStoryFailed && _nbCurrentStorySlug === slug && !!ov && ov.classList.contains('open'); }
+function _nbStoryRetrySchedule(slug) {
+  clearTimeout(_nbStoryRetryT);
+  _nbStoryRetryT = setTimeout(() => _nbStoryRetryTry(slug), Math.min(3000 + _nbStoryRetryN * 2000, 15000));
+}
+function _nbStoryMarkFailed(slug) { _nbStoryFailed = true; _nbStoryRetrySchedule(slug); }
+function _nbStoryRetryTry(slug) {
+  clearTimeout(_nbStoryRetryT); _nbStoryRetryT = null;
+  if (!_nbStoryRetryOpen(slug)) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) { _nbStoryRetrySchedule(slug); return; }
+  _nbStoryRetryN++;
+  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(slug), { cache: 'no-store' })
+    .then(res => {
+      if (!_nbStoryRetryOpen(slug)) return;
+      if (res.status === 404) { _nbStoryRetryStop(); showToast('Couldn\u2019t load that note. It isn\u2019t available anymore.'); return; }
+      if (!res.ok) throw new Error('load failed: ' + res.status);
+      return res.json().then(data => {
+        if (!_nbStoryRetryOpen(slug)) return;
+        _nbStoryRetryStop();
+        _nbStoryHoldFrame();
+        document.getElementById('story-viewer-frame').src = _pubUrlFor(slug);
+        if (data && data.found) _nbApplyStoryMeta(slug, data);
+      });
+    })
+    .catch(() => { if (_nbStoryRetryOpen(slug)) _nbStoryRetrySchedule(slug); });
+}
+window.addEventListener('online', () => { if (_nbStoryFailed && _nbCurrentStorySlug) _nbStoryRetryTry(_nbCurrentStorySlug); });
 function _nbCheckStoryReachable(slug) {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     showToast('Couldn\u2019t load that note. No internet connection.');
+    _nbStoryMarkFailed(slug);
     return;
   }
   fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(slug))
@@ -19387,7 +19422,7 @@ function _nbCheckStoryReachable(slug) {
       // to a different one, or closing the viewer, retires this check.
       if (_nbCurrentStorySlug !== slug || !document.getElementById('story-viewer-overlay').classList.contains('open')) return;
       if (res.status === 404) { showToast('Couldn\u2019t load that note. It isn\u2019t available anymore.'); return; }
-      if (!res.ok) { showToast('Couldn\u2019t load that note' + (_nbFailureReason(new Error('load failed: ' + res.status)) || '. Try again later.')); return; }
+      if (!res.ok) { showToast('Couldn\u2019t load that note' + (_nbFailureReason(new Error('load failed: ' + res.status)) || '. Try again later.')); _nbStoryMarkFailed(slug); return; }
       return res.json().then(data => {
         if (_nbCurrentStorySlug !== slug) return;
         if (!data || !data.found) showToast('Couldn\u2019t load that note. It isn\u2019t available anymore.');
@@ -19398,7 +19433,18 @@ function _nbCheckStoryReachable(slug) {
       if (_nbCurrentStorySlug !== slug || !document.getElementById('story-viewer-overlay').classList.contains('open')) return;
       _nbLog('story reachability check', e);
       showToast('Couldn\u2019t load that note' + _nbFailureReason(e));
+      _nbStoryMarkFailed(slug);
     });
+}
+// The comments sheet lives in the published page. The page reports it opening/closing ({type:'nb-cm', op:'sheet', open}),
+// and back asks it to close ('nb-cm-close') instead of leaving the viewer.
+let _nbStoryCommentsOpen = false;
+function nbStoryBack() {
+  if (_nbStoryCommentsOpen) {
+    const fr = document.getElementById('story-viewer-frame');
+    try { fr.contentWindow.postMessage({ type: 'nb-cm-close' }, '*'); return; } catch (e) { _nbStoryCommentsOpen = false; }
+  }
+  nbCloseStory();
 }
 function nbCloseStory() {
   const _ov = document.getElementById('story-viewer-overlay');
@@ -19407,6 +19453,8 @@ function nbCloseStory() {
   document.getElementById('story-viewer-frame').src = 'about:blank';
   _nbCurrentStorySlug = null;
   _nbStoryOpenComment = null;
+  _nbStoryRetryStop();
+  _nbStoryCommentsOpen = false;
   _nbStoryRevealFrame();
   unlockScroll();
   if (_wasOverMedia) lockScroll(); // Media screen is still open underneath
@@ -20675,7 +20723,9 @@ async function _nbCommentsBridge(e) {
     return d;
   };
   try {
+    if (m.op === 'sheet') { _nbStoryCommentsOpen = !!m.open; return; }
     if (m.op === 'hello') {
+      _nbStoryCommentsOpen = false;
       reply(true, { signedIn: signed });
       const want = _nbStoryOpenComment;
       if (want && want.slug === m.slug) {
