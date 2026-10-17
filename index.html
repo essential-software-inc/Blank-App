@@ -1262,7 +1262,8 @@ body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17
 #nb-notes-grid.al-selmode .alert-card .al-chk { display: flex }
 
 /* Notes: hold-to-select, same look as Alerts. Published notes are locked (a toast explains). */
-.guide-card.nb-nsel { -webkit-touch-callout: none }
+.guide-card.nb-nsel, .guide-card.nb-nsel * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none }
+.guide-card.nb-nsel .gc-title, .guide-card.nb-nsel .gc-desc-text { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default }
 .guide-card.nb-nsel::before, .guide-card.nb-nsel::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .15s }
 .guide-card.nb-nsel::before { z-index: -1; background: var(--al-acc) }
 .guide-card.nb-nsel::after { box-shadow: inset 0 0 0 1.5px var(--al-acc) }
@@ -1273,7 +1274,7 @@ body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17
 .guide-card.nb-nsel.is-sel .al-chk { background: var(--al-acc); opacity: 1 }
 .guide-card.nb-nsel.is-sel .al-chk svg { display: block }
 #nb-notes-grid.nb-nselmode { padding-bottom: 8.5rem }
-#nb-notes-grid.nb-nselmode .guide-card.nb-nsel { -webkit-user-select: none; user-select: none }
+#nb-notes-grid.nb-nselmode .guide-card.nb-nsel, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none }
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-fav, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-edit, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-trash { display: none }
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel:not(.nb-nlocked) .al-chk { display: flex }
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel.nb-nlocked { opacity: .45 }
@@ -20717,6 +20718,24 @@ function nbAlertsEmptySub() { return nbEmptyLead() + 'Announcements from us and 
 // They stay highlighted until tapped and are forgotten once another category is opened. Selection works like the Media
 // screen: hold a card to start, tap others to toggle; the FABs show while at least one alert is selected.
 var _nbAlertSel = new Set(), _nbAlertUnreadIds = new Set(), _nbAlertLpSup = 0;
+// True when (x, y) is over an actual line of text inside root, not just the blank part of a full-width block.
+function _nbOverText(root, x, y) {
+  if (!root || !(x || y)) return true; // no coordinates (keyboard): treat as text
+  try {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const r = document.createRange();
+    for (let n = w.nextNode(); n; n = w.nextNode()) {
+      if (!n.nodeValue.trim()) continue;
+      r.selectNodeContents(n);
+      for (const b of r.getClientRects()) if (x >= b.left - 4 && x <= b.right + 4 && y >= b.top - 4 && y <= b.bottom + 4) return true;
+    }
+  } catch (err) { return true; }
+  return false;
+}
+// True when some text inside card is selected, so the click that ends a drag-select doesn't also open the card.
+function _nbSelInCard(card) {
+  try { const g = window.getSelection && window.getSelection(); return !!(g && g.rangeCount && !g.isCollapsed && card.contains(g.anchorNode)); } catch (err) { return false; }
+}
 function _nbAlertCaptureUnread(rows) {
   let pick = rows.filter(a => a && (a.seen === false || a.unread === true || a.read === false)); // if the server flags them, trust it
   if (!pick.length && _nbAlertUnread > 0) pick = rows.slice().sort((a, b) => _nbSubEpoch(b.createdAt) - _nbSubEpoch(a.createdAt)).slice(0, _nbAlertUnread);
@@ -20792,6 +20811,9 @@ function _nbAlertUiReset() {
     if (_nbActiveCat !== 'Alerts' || e.button > 0 || !e.target.closest) return;
     const card = e.target.closest('#nb-notes-grid .alert-card[data-slug]');
     if (!card || e.target.closest('a, .gc-trash, .nb-carousel-viewport, .alert-md-tablewrap')) return;
+    // Holding the message text selects text (native); hold the card's edges or time row to select the card. Once a card is selected, a hold works anywhere.
+    const am = e.target.closest('.alert-md');
+    if (!_nbAlertSel.size && am && _nbOverText(am, e.clientX, e.clientY)) return;
     sx = e.clientX; sy = e.clientY; pk = card.getAttribute('data-slug');
     tm = setTimeout(() => {
       tm = 0; const k = pk; pk = '';
@@ -20804,13 +20826,16 @@ function _nbAlertUiReset() {
   }, true);
   document.addEventListener('pointermove', e => { if (tm && (Math.abs(e.clientX - sx) > 9 || Math.abs(e.clientY - sy) > 9)) clr(); }, true);
   ['pointerup', 'pointercancel'].forEach(n => document.addEventListener(n, clr, true));
-  document.addEventListener('contextmenu', e => { if (_nbActiveCat === 'Alerts' && e.target.closest && e.target.closest('#nb-notes-grid .alert-card')) e.preventDefault(); });
+  document.addEventListener('contextmenu', e => { if (_nbActiveCat === 'Alerts' && e.target.closest && e.target.closest('#nb-notes-grid .alert-card') && (_nbAlertSel.size || !_nbOverText(e.target.closest('.alert-md'), e.clientX, e.clientY))) e.preventDefault(); });
+  // A hold that just toggled the card must not also start a text selection (reset on the next press).
+  document.addEventListener('selectstart', e => { if (!_nbAlertLpSup) return; const n = e.target, el = n && n.nodeType === 3 ? n.parentNode : n; if (el && el.closest && el.closest('#nb-notes-grid .alert-card')) e.preventDefault(); }, true);
   // Capture phase, so while selecting a tap toggles the card instead of opening it or following a link; a tap on an unread alert clears its highlight.
   document.addEventListener('click', e => {
     if (_nbActiveCat !== 'Alerts' || !e.target.closest) return;
     const card = e.target.closest('#nb-notes-grid .alert-card[data-slug]');
     if (!card) return;
     if (_nbAlertLpSup) { _nbAlertLpSup = 0; e.preventDefault(); e.stopPropagation(); return; }
+    if (!_nbAlertSel.size && _nbSelInCard(card)) { e.preventDefault(); e.stopPropagation(); return; }
     const k = card.getAttribute('data-slug');
     if (_nbAlertSel.size) { e.preventDefault(); e.stopPropagation(); _nbAlertToggle(k); return; }
     if (_nbAlertUnreadIds.has(k)) { _nbAlertUnreadIds.delete(k); _nbAlertPaint(k); }
@@ -20887,18 +20912,28 @@ function _nbNoteUiReset() {
   _nbNoteSelUi();
 }
 (function () {
-  let tm = 0, sx = 0, sy = 0, pc = null;
-  const clr = () => { if (tm) { clearTimeout(tm); tm = 0; } pc = null; };
+  let tm = 0, sx = 0, sy = 0, pc = null, pt = false, tp = null;
+  const clr = () => { if (tm) { clearTimeout(tm); tm = 0; } pc = null; pt = false; };
+  // Locked card, text hold on touch: the text still selects, and this toast shows once, when the selection starts (or after the hold delay if it hasn't).
+  const txToast = () => { if (!tp || tp.done || Date.now() - tp.t > 2000) return; tp.done = true; showToast('Published notes can\u2019t be multi-selected. Unpublish first.'); try { if (navigator.vibrate) navigator.vibrate(12); } catch (x) {} };
   const hit = c => c.getAttribute('data-note-id') || '';
   document.addEventListener('pointerdown', e => {
-    _nbNoteLpSup = 0; clr();
+    _nbNoteLpSup = 0; clr(); tp = null;
     if (e.button > 0) return;
     const card = _nbNoteCardOf(e.target);
     if (!card || e.target.closest('button, a, input, .nb-carousel-viewport')) return;
+    // Holding the title or description selects text (native); hold the time, tags, images or padding to select the card. Once a card is selected, a hold works anywhere.
+    const tx = e.target.closest('.gc-title, .gc-desc-text');
+    // On a locked (published) card a hold on the text still selects the text and also shows the locked toast (pt = text hold: toast only).
+    const onTx = !_nbNoteSel.size && tx && _nbOverText(tx, e.clientX, e.clientY);
+    if (onTx && !_nbNoteCardLocked(card)) return;
+    pt = !!onTx;
+    if (pt) tp = { t: Date.now(), done: false, card: card, mouse: e.pointerType === 'mouse' }; // a mouse gets the toast from the hold timer only (a drag-select moves, which cancels it)
     sx = e.clientX; sy = e.clientY; pc = card;
     tm = setTimeout(() => {
-      tm = 0; const c = pc; pc = null;
+      tm = 0; const c = pc, txh = pt; pc = null; pt = false;
       if (!c || !c.isConnected) return;
+      if (txh) { txToast(); return; }
       _nbNoteLpSup = 1; // the release of this press must not also count as a tap
       if (_nbNoteCardLocked(c)) _nbNoteLockedToast();
       else _nbNoteToggle(hit(c));
@@ -20908,13 +20943,15 @@ function _nbNoteUiReset() {
   }, true);
   document.addEventListener('pointermove', e => { if (tm && (Math.abs(e.clientX - sx) > 9 || Math.abs(e.clientY - sy) > 9)) clr(); }, true);
   ['pointerup', 'pointercancel'].forEach(n => document.addEventListener(n, clr, true));
-  document.addEventListener('contextmenu', e => { if (_nbNoteCardOf(e.target)) e.preventDefault(); });
+  document.addEventListener('contextmenu', e => { { const c = _nbNoteCardOf(e.target); if (c && (_nbNoteSel.size || !_nbOverText(e.target.closest('.gc-title, .gc-desc-text'), e.clientX, e.clientY))) e.preventDefault(); } });
+  // Selecting text is only for the title and description, and only before a card is selected; anywhere else on a card a selection never starts.
+  document.addEventListener('selectstart', e => { const n = e.target, el = n && n.nodeType === 3 ? n.parentNode : n; if (tp && !tp.done && !tp.mouse && el && el.closest && tp.card.contains(el) && el.closest('.gc-title, .gc-desc-text')) txToast(); if (_nbNoteCardOf(el) && (_nbNoteLpSup || _nbNoteSel.size || !el.closest('.gc-title, .gc-desc-text'))) e.preventDefault(); }, true);
   // Capture phase: while selecting, a tap toggles the card instead of opening it; a locked card shows the toast.
   document.addEventListener('click', e => {
     const card = _nbNoteCardOf(e.target);
     if (!card) return;
     if (_nbNoteLpSup) { _nbNoteLpSup = 0; e.preventDefault(); e.stopPropagation(); return; }
-    if (!_nbNoteSel.size) return;
+    if (!_nbNoteSel.size) { if (_nbSelInCard(card)) { e.preventDefault(); e.stopPropagation(); } return; }
     e.preventDefault(); e.stopPropagation();
     if (_nbNoteCardLocked(card)) { _nbNoteLockedToast(); return; }
     _nbNoteToggle(hit(card));
