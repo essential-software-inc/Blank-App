@@ -411,6 +411,7 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
 }
 
 #reset-dialog, #delete-dialog, #restore-dialog, #unpublish-dialog, #delete-account-dialog, #signout-dialog, #sync-conflict-dialog,
+#ml-dialog,
 #mic-dialog {
   background: #fff;
   border-radius: 18px;
@@ -421,17 +422,20 @@ body.pink input[type="search"]::-webkit-search-cancel-button {
   font-family: inherit
 }
 
-#terms-dialog .rdlg-body a {
+#terms-dialog .rdlg-body a,
+#ml-dialog .rdlg-body a {
   color: #3366cc;
   text-decoration: none;
   cursor: pointer
 }
 
-body.night #terms-dialog .rdlg-body a {
+body.night #terms-dialog .rdlg-body a,
+body.night #ml-dialog .rdlg-body a {
   color: #f0f0f0
 }
 
-body.pink #terms-dialog .rdlg-body a {
+body.pink #terms-dialog .rdlg-body a,
+body.pink #ml-dialog .rdlg-body a {
   color: #c8365e
 }
 
@@ -1233,6 +1237,8 @@ body:not(.night):not(.pink) #story-viewer-like-btn.is-liked {
 .pub-opts { display: flex; flex-direction: column }
 .pub-opts .nb-switch-wrap { justify-content: space-between; padding: .5rem 0 }
 .pub-opts .nb-switch-wrap:first-child { padding-top: 0 }
+/* "Allow new comments" does nothing while the comments button is hidden, so its row is dimmed and its switch locked until the button is shown. */
+.pub-opts .nb-switch-wrap.pub-opt-off { opacity: .45 }
 .alert-card.alert-tap { cursor: pointer }
 /* Alerts: unread highlight, hold-to-select and the select / delete FABs. The accent follows the theme: blue in Light, near-white in Night (no blue), rose in Pink. */
 body { --al-acc: #3366cc; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17; --al-fsh: 0 4px 14px rgba(20, 30, 50, .18), 0 1px 3px rgba(20, 30, 50, .10) }
@@ -1271,6 +1277,9 @@ body.pink { --al-acc: #bd2856; --al-on: #fff; --al-tint: .09; --al-tint-sel: .17
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-fav, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-edit, #nb-notes-grid.nb-nselmode .guide-card.nb-nsel .gc-trash { display: none }
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel:not(.nb-nlocked) .al-chk { display: flex }
 #nb-notes-grid.nb-nselmode .guide-card.nb-nsel.nb-nlocked { opacity: .45 }
+/* The selection tick (.al-chk) is only styled, and hidden until select mode, on alert cards and on .nb-nsel note cards. Published/Stories
+   cards reuse _nbCardActionsHtml but have neither class and no select mode, so the bare tick showed at the end of the action row. */
+.guide-card:not(.alert-card):not(.nb-nsel) .al-chk { display: none }
 #nb-alert-fabs { position: fixed; right: .9rem; bottom: calc(58px + env(safe-area-inset-bottom, 0px) + .9rem); z-index: 95; display: flex; align-items: center; gap: .6rem; opacity: 0; transform: translateY(10px) scale(.96); visibility: hidden; pointer-events: none; transition: opacity .18s, transform .18s, visibility 0s .18s }
 #nb-alert-fabs.on { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition: opacity .18s, transform .18s }
 .al-fab { height: 48px; min-width: 48px; box-sizing: border-box; padding: 0 1rem; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: .4rem; font: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; border: 1px solid #dde6ff; background: #fff; color: var(--al-acc); box-shadow: var(--al-fsh); transition: transform .12s }
@@ -1858,7 +1867,7 @@ body.pink .bn-item.active {
   box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
   overflow: hidden
 }
-#publish-sheet.is-live { height: min(264px, 80vh) }
+#publish-sheet.is-live { height: min(302px, 80vh) } /* 264 + one more switch row (Allow new comments) */
 #publish-hdr {
   display: flex;
   align-items: center;
@@ -1892,7 +1901,7 @@ body.pink .bn-item.active {
 .pub-live-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem }
 .pub-live-top .bkp-help { flex: 1; min-width: 0 }
 .nb-switch-wrap { display: flex; align-items: center; gap: .45rem; cursor: pointer; flex-shrink: 0 }
-.nb-switch-label { font-size: .78rem; color: rgba(32,33,34,.65); white-space: nowrap }
+.nb-switch-label { font-size: .92rem; font-weight: 600; color: rgba(32,33,34,.65); white-space: nowrap }
 .nb-switch { position: relative; display: inline-flex; align-items: center; width: 38px; height: 22px; flex-shrink: 0 }
 .nb-switch-input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1 }
 .nb-switch-track { position: absolute; inset: 0; background: #d5d8e0; border-radius: 999px; transition: background .18s ease }
@@ -2086,6 +2095,7 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 
 #delete-account-overlay,
 #signout-overlay,
+#ml-overlay,
 #mic-overlay {
   display: none;
   position: fixed;
@@ -2098,6 +2108,7 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 
 #delete-account-overlay.open,
 #signout-overlay.open,
+#ml-overlay.open,
 #mic-overlay.open {
   display: flex
 }
@@ -2519,7 +2530,8 @@ body.night #terms-dialog {
   background: #111111
 }
 
-body.night #terms-dialog .rdlg-body a {
+body.night #terms-dialog .rdlg-body a,
+body.night #ml-dialog .rdlg-body a {
   color: #f0f0f0
 }
 
@@ -2559,7 +2571,8 @@ body.pink #terms-dialog {
   background: #fff2f7
 }
 
-body.pink #terms-dialog .rdlg-body a {
+body.pink #terms-dialog .rdlg-body a,
+body.pink #ml-dialog .rdlg-body a {
   color: #c8365e
 }
 
@@ -3125,6 +3138,7 @@ body.night .ebtn-pri:disabled {
 }
 
 body.night #reset-dialog, body.night #delete-dialog, body.night #restore-dialog, body.night #unpublish-dialog, body.night #paywall-dialog, body.night #delete-account-dialog, body.night #signout-dialog, body.night #sync-conflict-dialog,
+body.night #ml-dialog,
 body.night #mic-dialog {
   background: #111111;
   border: 1px solid #282828;
@@ -3470,6 +3484,7 @@ body.pink .ebtn-pri:disabled {
 }
 
 body.pink #reset-dialog, body.pink #delete-dialog, body.pink #restore-dialog, body.pink #unpublish-dialog, body.pink #paywall-dialog, body.pink #delete-account-dialog, body.pink #signout-dialog, body.pink #sync-conflict-dialog,
+body.pink #ml-dialog,
 body.pink #mic-dialog {
   background: #fff2f7;
   border: none;
@@ -4508,8 +4523,17 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
   function checkPw(v) { return verify(FP, v, 's', 'h'); }
   function checkAns(v) { return verify(FA, v, 'qs', 'qh', norm); }
   function toast(m) { try { if (window.showToast) window.showToast(m); } catch (e) {} }
-  function theme() { var t = 'light'; try { t = localStorage.getItem('nb_theme_v1') || 'light'; } catch (e) {} return (t === 'dark' || t === 'pink') ? t : 'light'; }
-  function glass() { try { return JSON.parse(localStorage.getItem('nb_settings_v1') || '{}').glassMode !== false; } catch (e) { return true; } }
+  // What the app is showing right now is the truth: body.night / body.pink for the theme, body.glass for Glass mode. Storage is only
+  // the fallback for the startup lock, which goes up before the app has applied either.
+  function appReady() { return typeof window._nbSt === 'function' && !!document.body; }
+  function theme() {
+    if (appReady()) { var c = document.body.classList; return c.contains('pink') ? 'pink' : c.contains('night') ? 'dark' : 'light'; }
+    var t = 'light'; try { t = localStorage.getItem('nb_theme_v1') || 'light'; } catch (e) {} return (t === 'dark' || t === 'pink') ? t : 'light';
+  }
+  function glass() {
+    if (appReady()) { try { return !!window._nbSt('glassMode'); } catch (e) {} }
+    try { return JSON.parse(localStorage.getItem('nb_settings_v1') || '{}').glassMode !== false; } catch (e) { return true; }
+  }
   function css() {
     if (document.getElementById('nb-lock-css')) return;
     var s = document.createElement('style'); s.id = 'nb-lock-css';
@@ -4564,6 +4588,19 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
       '@media (prefers-reduced-motion:reduce){.nbl,.nbl-card,.nbl-b>button{animation:none}}' +
       'body.nb-reduce-motion .nbl,body.nb-reduce-motion .nbl-card,body.nb-reduce-motion .nbl-b>button{animation:none}';
     document.head.appendChild(s);
+    watchTheme();
+  }
+  // The dialog picks its theme and glass look when it is built. If the app changes either while a lock dialog is up (an account sync
+  // carrying a theme from another device, Glass mode toggled, the startup lock waiting on the app to load), repaint the open dialog.
+  var themeWatch = false;
+  function watchTheme() {
+    if (themeWatch || !document.body || !window.MutationObserver) return;
+    themeWatch = true;
+    new MutationObserver(function () {
+      if (!cur || !cur.el || !appReady()) return; // appReady: not during startup, when nothing has changed yet
+      cur.el.classList.remove('nbl-light', 'nbl-dark', 'nbl-pink'); cur.el.classList.add('nbl-' + theme());
+      cur.el.classList.toggle('nbl-glass', glass());
+    }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
   var ICON = '<svg class="nbl-ic" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
   var CUSTOM = '__custom';
@@ -5687,8 +5724,10 @@ body:not(.reader-mode) #nb-alert-fabs #al-fab-del{background:color-mix(in srgb,#
 @keyframes dlg-fade{from{opacity:0}to{opacity:1}}
 @keyframes dlg-rise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
 #edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay,
+#ml-overlay,
 #mic-overlay {background:rgba(10,10,12,.5);animation:dlg-fade .2s}
 body.pink #edit-reset-overlay,body.pink #sync-conflict-overlay,body.pink #delete-overlay,body.pink #unpublish-overlay,body.pink #delete-account-overlay,body.pink #signout-overlay,
+body.pink #ml-overlay,
 body.pink #mic-overlay {background:rgba(70,12,32,.45)}
 #reset-dialog,
 #sync-conflict-dialog,
@@ -5696,6 +5735,7 @@ body.pink #mic-overlay {background:rgba(70,12,32,.45)}
 #unpublish-dialog,
 #delete-account-dialog,
 #signout-dialog,
+#ml-dialog,
 #mic-dialog {
   background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(213,222,242,.6);border-radius:20px;padding:1.4rem 1.2rem 1.2rem;max-width:320px;
   box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)
@@ -5706,6 +5746,7 @@ body.night #delete-dialog,
 body.night #unpublish-dialog,
 body.night #delete-account-dialog,
 body.night #signout-dialog,
+body.night #ml-dialog,
 body.night #mic-dialog {
   background:rgba(17,17,17,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.1);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6)
 }
@@ -5715,6 +5756,7 @@ body.pink #delete-dialog,
 body.pink #unpublish-dialog,
 body.pink #delete-account-dialog,
 body.pink #signout-dialog,
+body.pink #ml-dialog,
 body.pink #mic-dialog {
   background:rgba(255,248,251,.72);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(245,197,216,.6);border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22)
 }
@@ -5724,6 +5766,7 @@ body.pink #mic-dialog {
 #unpublish-dialog .rdlg-title,
 #delete-account-dialog .rdlg-title,
 #signout-dialog .rdlg-title,
+#ml-dialog .rdlg-title,
 #mic-dialog .rdlg-title {
   font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5rem
 }
@@ -5733,6 +5776,7 @@ body.pink #mic-dialog {
 #unpublish-dialog .rdlg-body,
 #delete-account-dialog .rdlg-body,
 #signout-dialog .rdlg-body,
+#ml-dialog .rdlg-body,
 #mic-dialog .rdlg-body {
   font-size:.9rem;line-height:1.45;margin-bottom:1.2rem
 }
@@ -5742,6 +5786,7 @@ body.night #delete-dialog .rdlg-body,
 body.night #unpublish-dialog .rdlg-body,
 body.night #delete-account-dialog .rdlg-body,
 body.night #signout-dialog .rdlg-body,
+body.night #ml-dialog .rdlg-body,
 body.night #mic-dialog .rdlg-body {color:#8f98a3}
 body.pink #reset-dialog .rdlg-body,
 body.pink #sync-conflict-dialog .rdlg-body,
@@ -5749,6 +5794,7 @@ body.pink #delete-dialog .rdlg-body,
 body.pink #unpublish-dialog .rdlg-body,
 body.pink #delete-account-dialog .rdlg-body,
 body.pink #signout-dialog .rdlg-body,
+body.pink #ml-dialog .rdlg-body,
 body.pink #mic-dialog .rdlg-body {color:#875068}
 #reset-dialog .rdlg-btns,
 #sync-conflict-dialog .rdlg-btns,
@@ -5756,6 +5802,7 @@ body.pink #mic-dialog .rdlg-body {color:#875068}
 #unpublish-dialog .rdlg-btns,
 #delete-account-dialog .rdlg-btns,
 #signout-dialog .rdlg-btns,
+#ml-dialog .rdlg-btns,
 #mic-dialog .rdlg-btns {
   flex-wrap:wrap;gap:.6rem
 }
@@ -5771,7 +5818,9 @@ body.pink #mic-dialog .rdlg-body {color:#875068}
 #unpublish-dialog .rdlg-ok,
 #delete-account-dialog .rdlg-ok,
 #signout-dialog .rdlg-ok,
+#ml-dialog .rdlg-cancel,
 #mic-dialog .rdlg-cancel,
+#ml-dialog .rdlg-ok,
 #mic-dialog .rdlg-ok {
   flex:1 1 0;min-width:0;height:46px;box-sizing:border-box;padding:0 .8rem;border-radius:14px;
   display:inline-flex;align-items:center;justify-content:center;text-align:center;
@@ -5789,7 +5838,9 @@ body.pink #mic-dialog .rdlg-body {color:#875068}
 #unpublish-dialog .rdlg-ok:active,
 #delete-account-dialog .rdlg-ok:active,
 #signout-dialog .rdlg-ok:active,
+#ml-dialog .rdlg-cancel:active,
 #mic-dialog .rdlg-cancel:active,
+#ml-dialog .rdlg-ok:active,
 #mic-dialog .rdlg-ok:active {transform:scale(.97)}
 #reset-dialog .rdlg-cancel,
 #sync-conflict-dialog .rdlg-cancel,
@@ -5797,6 +5848,7 @@ body.pink #mic-dialog .rdlg-body {color:#875068}
 #unpublish-dialog .rdlg-cancel,
 #delete-account-dialog .rdlg-cancel,
 #signout-dialog .rdlg-cancel,
+#ml-dialog .rdlg-cancel,
 #mic-dialog .rdlg-cancel {
   background:rgba(246,248,252,.6);color:#3366cc;border:1px solid rgba(20,30,50,.12)
 }
@@ -5806,6 +5858,7 @@ body.night #delete-dialog .rdlg-cancel,
 body.night #unpublish-dialog .rdlg-cancel,
 body.night #delete-account-dialog .rdlg-cancel,
 body.night #signout-dialog .rdlg-cancel,
+body.night #ml-dialog .rdlg-cancel,
 body.night #mic-dialog .rdlg-cancel {
   background:rgba(28,28,28,.6);color:#b0b0b0;border:1px solid #383838
 }
@@ -5815,15 +5868,19 @@ body.pink #delete-dialog .rdlg-cancel,
 body.pink #unpublish-dialog .rdlg-cancel,
 body.pink #delete-account-dialog .rdlg-cancel,
 body.pink #signout-dialog .rdlg-cancel,
+body.pink #ml-dialog .rdlg-cancel,
 body.pink #mic-dialog .rdlg-cancel {
   background:rgba(255,224,236,.6);color:#c8365e;border:1px solid rgba(200,54,94,.2)
 }
 @media (prefers-reduced-motion:reduce){
 #edit-reset-overlay,#sync-conflict-overlay,#delete-overlay,#unpublish-overlay,#delete-account-overlay,#signout-overlay,#reset-dialog,#sync-conflict-dialog,#delete-dialog,#unpublish-dialog,#delete-account-dialog,#signout-dialog,
+#ml-overlay,
 #mic-overlay,
+#ml-dialog,
 #mic-dialog {animation:none}
 }
 body.nb-reduce-motion #edit-reset-overlay,body.nb-reduce-motion #sync-conflict-overlay,body.nb-reduce-motion #delete-overlay,body.nb-reduce-motion #unpublish-overlay,body.nb-reduce-motion #delete-account-overlay,body.nb-reduce-motion #signout-overlay,
+body.nb-reduce-motion #ml-overlay,
 body.nb-reduce-motion #mic-overlay {animation:none}
 body.nb-reduce-motion #reset-dialog,
 body.nb-reduce-motion #sync-conflict-dialog,
@@ -5831,6 +5888,7 @@ body.nb-reduce-motion #delete-dialog,
 body.nb-reduce-motion #unpublish-dialog,
 body.nb-reduce-motion #delete-account-dialog,
 body.nb-reduce-motion #signout-dialog,
+body.nb-reduce-motion #ml-dialog,
 body.nb-reduce-motion #mic-dialog {animation:none}
 /* Dialog / sheet buttons slide in from the right when the dialog opens, one after another (the overlay is display:none until opened, so this replays on every open). `backwards` fill only: once it ends, the button's own transform/press rules apply as normal. */
 @keyframes dlg-btn-in{from{opacity:0;transform:translateX(34px)}}
@@ -5906,6 +5964,13 @@ body.pink #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);
 #edit-dialog {max-height:85vh}
 #publish-sheet {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
 #publish-sheet.is-live {height:min(calc(376px + env(safe-area-inset-bottom,0px)),85vh)}
+/* Tighter spacing in the Publish sheet so the status line under the address (e.g. "No changes to save") shows without scrolling. */
+#pub-state-live,#pub-state-new {gap:.55rem}
+#publish-sheet .pub-opts .nb-switch-wrap {padding:.28rem 0}
+#publish-sheet .pub-opts .nb-switch-wrap:first-child {padding-top:0}
+#publish-sheet #pub-live-url {padding:.5rem .8rem}
+#publish-sheet #pub-slug-input {padding:.55rem .9rem .55rem .15rem}
+#publish-sheet #publish-body {padding-bottom:.5rem}
 #edit-dhdr,
 #publish-hdr {background:transparent !important;color:var(--sh-fg) !important;border:none !important;border-bottom:none !important;box-shadow:none !important;padding:.9rem .8rem .3rem 1.2rem;gap:.5rem}
 #edit-dhdr-title,
@@ -6336,6 +6401,17 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
   </div>
 </div>
 
+<div id="ml-overlay">
+  <div id="ml-dialog" style="z-index:911" role="dialog" aria-modal="true" aria-labelledby="ml-dialog-title">
+    <div class="rdlg-title" id="ml-dialog-title">Use your published pages and comments?</div>
+    <div class="rdlg-body">We may use your published pages and the comments you write to improve our apps, including with machine learning. <a onclick="openPrivacy()">Read more</a></div>
+    <div class="rdlg-btns">
+      <button class="rdlg-cancel" id="ml-dialog-no">No, keep out</button>
+      <button class="rdlg-ok rdlg-ok--blue" id="ml-dialog-yes">Yes, allow</button>
+    </div>
+  </div>
+</div>
+
 
 <div id="restore-overlay">
   <div id="restore-dialog" style="z-index:501">
@@ -6439,10 +6515,10 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 16 October 2026</em></p>
+      <p><em>Effective 17 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
-      <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists and theme choice, are also backed up to our servers (see below).</p>
+      <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists, theme choice and your "All my notes" switches from Settings, are also backed up to our servers (see below). Those switches are kept on your device separately for each account, so one account's choices never touch another account's pages, even on a shared phone.</p>
       <h3>App lock</h3>
       <p>App lock is optional. If you turn it on, Bluebook asks for a PIN or password whenever you open the app fresh or refresh the page, and again when you come back after being away for more than 30 seconds, so other people can't peek at your notes.</p>
       <p>Your PIN or password is never saved the way you typed it. The app turns it into a scrambled code (called a hash) and keeps only that code, on your device. When you type it later, the app scrambles what you typed and checks whether the two codes match. Nothing about your lock is sent to us or saved to your account, so we can't see it, reset it or recover it for you.</p>
@@ -6451,12 +6527,16 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>If you forget both your PIN and your recovery answer, we can't get you back in, and we can't reset it for you. The only way past it is to clear Bluebook's data in your phone or browser settings. Notes you backed up by signing in can be restored afterwards, but anything that only lived on this device is gone. So pick a PIN and answer you'll remember, and keep backups.</p>
       <p>One last thing: app lock is like a door lock for the app. It doesn't scramble the notes stored on your device. For extra privacy, keep your phone's own screen lock on too.</p>
       <h3>Google sign-in &amp; sync</h3>
-      <p>Signing in is totally optional, and Google handles it, so we never see your Google password. We get your Google account ID and email address, and we keep them along with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a code that keeps you signed in (a session lasts up to 30 days). While you're signed in, your notes (including embedded images and voice notes), your favorites, your playlists (their names and the songs and videos you put in them) and your theme choice are backed up to our servers so you can restore them on another device. Your Pro purchase (if you have one) and any ad view-credit balance (see "In-app purchases" below) are linked to your account too, so they come with you. Signing out stops syncing. Your backup stays put, so you can pick it up again when you sign back in, and deleting your account removes it, as described below. If an image in your backup isn't used by any note any more (for example, after you delete a note or swap an image), the nightly clean-up deletes it once it's more than 14 days old.</p>
+      <p>Signing in is totally optional, and Google handles it, so we never see your Google password. We get your Google account ID and email address, and we keep them along with your sign-up date, your last sign-in date, the last time the app was active on your account (see "Activity counts" below), and a code that keeps you signed in (a session lasts up to 30 days). While you're signed in, your notes (including embedded images and voice notes), your favorites, your playlists (their names and the songs and videos you put in them), your theme choice and your "All my notes" switches (see "All my notes" below) are backed up to our servers so you can restore them on another device. Your Pro purchase (if you have one) and any ad view-credit balance (see "In-app purchases" below) are linked to your account too, so they come with you. Signing out stops syncing. Your backup stays put, so you can pick it up again when you sign back in, and deleting your account removes it, as described below. If an image in your backup isn't used by any note any more (for example, after you delete a note or swap an image), the nightly clean-up deletes it once it's more than 14 days old.</p>
       <p>Your account is yours to keep or remove. You can delete it any time by tapping the account icon and choosing Delete account under Show more. That signs this device out and schedules your account for deletion in 30 days. The deletion happens during our nightly clean-up, so it can land up to a day after the 30 days are up. When it does, we permanently delete your account record, synced notes, images, voice notes and playlists, profile name and picture, subscriptions (the ones you made and the ones to you), records of the stories you've opened, your likes and follows (including the times we noted for them), running ads and their view statistics, your invite code and any invites you made or used, your ad access record, your alerts (including ones you deleted from your list), and any unspent ad view-credit balance. We also take down every page you published (we keep a copy of each page, along with its record, for about 30 more days, as described under "Publishing a page"). Until then, your published pages and stories stay online. Changed your mind? Sign back in with the same Google account during the 30 days and the deletion is cancelled, with full access restored. Every device where you're signed in gets signed out as part of the deletion (each one finds out the next time the app contacts our server, usually within about a minute). Deleting your account doesn't delete anything held by Google or RevenueCat. Their own policies cover that.</p>
       <h3>In-app purchases</h3>
       <p>Unlocking Pro and buying ad view-credit packages are both purchases made through Google Play Billing. RevenueCat, a third-party subscription service, handles them for us. RevenueCat gets the purchase details it needs to confirm what you bought, linked to an ID. Before you sign in, that's an anonymous ID RevenueCat makes for your install. Once you sign in, it's your Google account ID, which is what lets a purchase follow you to another device. After that, the two work differently. The app checks directly with RevenueCat (not through our servers) to see whether Pro is active. It keeps a saved copy of that answer on your device, and refreshes it from RevenueCat when the app launches and after a purchase or restore. Ad view-credits do go through our servers. They hear from RevenueCat (not from Google directly) that you bought views, and add the views to your account. We keep a list of your view credits: each purchase (for a particular ad, or added to your balance from Settings), each time views are put on an ad (with that ad's address), each refund or return, and each gift of free views for an invite, all with the time. Views returned to you stay in your balance, and you can put them on an ad without buying again. That doesn't involve Google Play or RevenueCat. If Google Play refunds a purchase, we take those views back. That list is deleted with your account. We never get your payment details, because Google handles those directly. See <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat's own privacy policy</a> for how it handles what it receives.</p>
       <h3>Publishing a page</h3>
       <p>Publishing is always your choice, and it only happens when you tap Publish. We receive your page's content, its title, description and tags (if you've added them), when the note was created, and the address you choose, and we store them so the page can be shown at a public link. Anyone with that link can view the page. If you've given the note a category, we save that too. It's just your own private label, so it doesn't show on the page or on any card. We only send it back to you when you're signed in, so if you ever restore a page as a note, it goes back into the right category. You can publish without signing in, and then the page isn't linked to any account. If you later sign in and, using that page's private token on your device, turn on "Show in stories" or save an update to it, we link the page to your account from then on. It then shows up among your published pages, counts toward your account's page limit, and is taken down if you delete your account. We also give you a private token for each page. It's stored on your device, and we don't keep it in its original form. We only keep a scrambled version, just enough to check that it matches when you send it back to update or unpublish. Updating a published page sends the new content the same way. Unpublishing takes the page down, and if it was running as an ad, the ad stops too. We may keep a copy for about 30 days afterward (our clean-up runs nightly), in case of an abuse report or takedown request, and then delete it. If the page was reported as child sexual abuse material, we keep the copy for 18 months instead (see "Reporting a published page"). The page's own record is kept for the same time and then deleted. It holds the address, a scrambled form of the private token, the title, description, tags and category, and, if the page was linked to an account, that account's internal ID. That's why it stays even after the account itself is deleted. If we remove a page because of a takedown request or abuse report, its address is reserved permanently. To keep that reservation in place, we keep a small record for as long as the address stays reserved: the address, a scrambled form of the private token, the title, description, tags and category, and, if the page was linked to an account, that account's internal ID. This record stays even after the copy or the account is deleted, because deleting it would lift the reservation. Publishing also briefly counts requests from your IP address to limit spam. That count sits in a short-lived counter that disappears on its own after about a minute, and it isn't kept afterward or linked to your account or the page. Separately, to stop spam, we also count how often you like, subscribe, mark stories as seen, add an invite code or back up. That count is linked to your account and disappears within a couple of minutes.</p>
+      <h3>Using published pages and comments</h3>
+      <p>We may use the pages you've published, and the comments on them, to run, build, test and improve Bluebook and our other apps, including by using machine learning. This only covers published pages and their comments, which anyone who opens the page can already see. It doesn't cover notes that are only backed up to your account.</p>
+      <p>If you live somewhere with data protection laws, like the EU or the UK, we do this because we have a good reason to improve our apps (the law calls this a "legitimate interest"). You can say no any time. Choose "No, keep out" when we ask the first time you sign in, or change your choice any time in Settings under Privacy, and from then on we stop using your published pages, and the comments you write, for this. It covers everything on your account, old and new. Pages you published without signing in aren't linked to an account, so the switch can't reach them, but you can unpublish them. The page or comment itself stays where it is unless you unpublish or delete it.</p>
+      <p>There are limits to what we can undo. If we've already used a page or comment to build or train something, we may not be able to take it back out. And we can't control copies other people have already made, like a page someone saved or shared.</p>
       <h3>Publishing as an ad</h3>
       <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a starting template when they start a new note in Write (or in Share, for a Share note). It isn't just for people who have the page's link, like a regular published page. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it disappears from Write and Share right away, and any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device.</p>
       <h3>Ad access &amp; invites</h3>
@@ -6469,7 +6549,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>Alerts</h3>
       <p>We want you to know what's happening with your account and the app. When one of your pages is reported, or we remove or pause something of yours, or change your account's status, you'll get an automatic message (an alert) that says why. We also use alerts for good news and updates, like announcements, new features, a bigger ad package unlocking, a friend adding your invite code, planned maintenance, safety tips, or a change to this policy or our terms. They can go to every account or to specific ones, and they're saved, shown and deleted the same way as the others. Alerts show up under Alerts in your library, which only appears once your account has at least one. A number on it shows how many have arrived since you last looked at the list, and the list's title shows how many you have in total. We save the text of each alert (which can name the page or item it's about), when it was sent, and when you deleted it. We also save one marker on your account for the newest alert you've been shown, so the count follows you across your devices. Deleting an alert only removes it from your list. We keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes who reported, or the details they wrote, because we don't pass those on. If you delete your account, your alerts and that marker are deleted too.</p>
       <h3>Voice notes</h3>
-      <p>When you record a voice note, the app asks your device for permission to use the microphone. It only records after you tap record, and it stops when you tap stop, after 5 minutes, or if you leave the app. The recording is saved inside the note on your device, just like a photo. If you're signed in, it's backed up to your account along with your other notes, and it's deleted if you delete your account. If you publish the note, the recording becomes part of the published page, so anyone with the link can listen. Voice notes can't be used in ads. We never listen to your recordings, turn them into text, or study them. When you play a voice note, it plays right on your device.</p>
+      <p>When you record a voice note, the app asks your device for permission to use the microphone. It only records after you tap record, and it stops when you tap stop, after 5 minutes, or if you leave the app. The recording is saved inside the note on your device, just like a photo. If you're signed in, it's backed up to your account along with your other notes, and it's deleted if you delete your account. If you publish the note, the recording becomes part of the published page, so anyone with the link can listen. Voice notes can't be used in ads. We don't listen to your recordings or turn them into text. The one exception is a note you publish: its page, recording included, may be used as described under "Using published pages and comments" above. Recordings that only live in your notes or your backup aren't part of that. When you play a voice note, it plays right on your device.</p>
       <h3>External images &amp; embeds</h3>
       <p>Images you add to a page by URL are loaded straight from their source when the page is built. Instagram, X, Streamable, YouTube and Spotify embeds load straight from those services. We have nothing to do with these third-party hosts, with one exception: when you paste an Instagram share link or an X (t.co) short link using the editor's own tools, our server follows the link just to find out which post it points to. It doesn't read the page. It also counts requests from your IP address in a short-lived counter that disappears on its own after about a minute, and that isn't kept afterward or linked to your account. A page published as an ad can only use images linked directly from Wikipedia or Wikimedia Commons, and can't contain images uploaded from your device or voice notes. We check this automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
@@ -6478,12 +6558,26 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>From a published note's Publish sheet, you can turn on "Show in stories" (you need to sign in). That adds the note to a stories strip that other people using the app can see, not only people who have the link. It's similar to Publish as Ad, but without purchased views. Our servers save the note's web address, title, description and tags (if you've added them), when the note was created, and up to three preview images from the note's published page (plus how many images the note has, so a feed card can show how many more there are), along with your account ID. Your story shows the title. The Subscribed feed of anyone who subscribes to you shows the title, description, tags, how long ago the note was created, and how many likes it has. Preview images that come from your device are copied to our servers, and they can be loaded without a sign-in check while the story is showing. A preview image added by URL isn't copied, so viewers' devices load it straight from its source when they see your story or feed card, and that host can see their IP address. If you turn the toggle off within the first 24 hours, or unpublish the note at any time, we delete the saved copies, including the saved description and tags. Other people's devices never get your Google account ID or email. Instead, each account has a separate random author ID that means nothing outside the app. It's sent with your stories, so your picture and display name can go with them and a Subscribe tap can reach the right account. We make it ourselves, it isn't made from your Google account, and it's deleted with your account. To tell you apart from other authors, viewers see your display name, picture, or the note's title. A story can appear in the strip for 24 hours from when you turn on "Show in stories" (editing the note doesn't restart that clock). After that, it leaves the strip and your Stories tab. The strip isn't a list of every story. It shows a selection of other people's stories that reshuffles every few hours, so a story still within its 24 hours may or may not be shown to a given viewer. Your own live stories always lead your own strip, and stories from accounts a viewer already follows show up in their Subscribed feed instead of the strip. A story stays in the Subscribed feed of people who follow you (from when they followed you onward) for 7 days from when you turned on "Show in stories", or until you unpublish the note, whichever comes first. After that it leaves the feed, but the published page itself stays online. After the first 24 hours the toggle turns itself off. That just tells you the story has left the strip and your Stories tab. It stays in your followers' feeds for the rest of the 7 days. If you turn the toggle off yourself within the first 24 hours, the story disappears from the strip and from your followers' feeds.</p>
       <p>A display name and profile picture are both optional. If you set a display name, it's shown on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed. If you leave it blank, viewers just see the note's title in both places. A display name can be up to 30 characters. If you set a profile picture, it's only shown on your stories, as the ring around your avatar in the stories strip. It doesn't show on your notes in the Subscribed feed. A picture you upload is stored on our servers and served from a web address based on your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing (or to you, when you're signed in). So anyone who has your author ID, for example from seeing one of your stories, can load it during that time, and no one else can. Once you have no stories showing, the picture is no longer shown to others. If you remove the picture, it's deleted from our servers. With no picture, the story ring uses the note's own image if it has one, and only then an initial letter, taken from your display name (or the note's title if you haven't set one). That initial is never taken from your account email, which is never sent to other viewers at all.</p>
       <p>A signed-in account can subscribe to (follow) another account from that account's story. We save who follows whom so we can build your Subscribed feed, show whether you're already following someone, and keep your follows on every device you sign in on. You can see how many accounts follow you as a total, never who, and how many accounts you follow. The app also keeps a copy of who you follow on your device, so it can show the Subscribe/Subscribed button without asking our servers each time. We also record, under your account, which stories you've opened, so a story you've already seen doesn't keep grabbing your attention in the strip. Searching your Subscribed feed happens on your device, within the stories already loaded. What you type is never sent to us. A signed-in account can also like a published note. We record, under your account, which notes you've liked so the heart shows correctly across your devices. For each note you like or unlike, and each account you follow or unfollow, we also note the time of your most recent action. That way, taps made on different devices (or offline and sent later) are applied in the right order. That note stays after you unlike or unfollow, and is removed once the like or follow is gone and the note is more than 30 days old, or when your account is deleted. Each published note's own like count shows on its card wherever that card appears: your Published and Stories tabs, and the Subscribed feed or Liked tab of anyone who sees the note, but never who liked it. You can also see one total on your account screen: the number of likes across all your published notes. If you unpublish a note, the likes it received are removed, so both that note's count and the combined total go down. When a published note that isn't showing as a story appears as a card, either in its author's Published tab or in someone's Liked tab, we may copy up to three preview images from that page to our servers. Like story preview images, these copies can be loaded without a sign-in check, and they're deleted when the note is unpublished or its author's account is deleted.</p>
+      <h3>All my notes</h3>
+      <p>In Settings, the "All my notes" section has four switches that change lots of your published pages at once, so you don't have to do them one by one in the Publish sheet: "Always show in stories", "Always show comments", "Hide comments on all pages" and "Disable comments on all pages". You need to be signed in to use them. When you turn one on, the app changes every page you've already published, and every page you publish after that. When you turn one off, it just stops changing pages. Your pages keep whatever they're set to at that moment. If you later change a single page's own switches in its Publish sheet, that page's choice wins.</p>
+      <p>Here's what that means for your data. The three comment switches send a request to our servers, and our servers update the comments setting on every live page linked to your account, even pages that aren't on the device you're holding. It's the same setting you'd get from the Publish sheet, and nothing extra is saved about it. "Always show comments" and "Hide comments on all pages" are opposites, so turning one on turns the other off. "Always show in stories" works one page at a time, exactly like tapping "Show in stories" on each page yourself, so everything described under "Stories, subscriptions &amp; likes" above applies to each page it adds.</p>
+      <p>The switches themselves (on or off for each of the four, plus the time you last changed them) are saved on your device for your account, and they're backed up with your notes and theme, so they follow you to your other devices. If you change them on two devices, the newest change wins. When another device finds out that "Always show in stories" was turned on, that device's published pages join stories too. Nothing is saved while you're signed out. If you delete your account, these switches are deleted along with the rest of your backup.</p>
       <h3>Third-party requests &amp; server logs</h3>
       <p>Using the app makes a few requests to other companies, which can see your IP address, like any website you visit. A script library (three.js) is loaded from Cloudflare's cdnjs when the app opens. Google's sign-in code is loaded from Google when you sign in. The app sometimes asks Google (gstatic.com) for a tiny blank page, just to check whether you're online. And if you paste a Spotify link using the editor's own tools, the app asks Spotify (open.spotify.com) for that link's embed details. Requests to our servers run on Cloudflare, which processes them and may keep standard request logs (like the time, the address requested, and your IP address) that we can use to run and fix the service. We don't use them for analytics or tracking.</p>
       <h3>Activity counts</h3>
       <p>We'd like to know roughly how many people use the app, and how many are using it right now, so our servers note when the app is open. While it's open, the app contacts our server when it launches, when you come back to it, and about every four minutes, sending the same anonymous device ID described under "Publishing as an ad" above. If you're signed in, this (and any other request you make while signed in) saves only the time your account was last active, on your account. If you're not signed in, the server saves the device ID with the times it was first and last seen (plus the daily log described below), and nothing else. It isn't linked to a name, email address or Google account, and if you later sign in on that device, the signed-out record is deleted. We use these records for private, overall totals (like total, new and currently active users and devices), to look up an account's last activity when we're running the service, and, for signed-in accounts, to count recent active days toward ad access and invites (see "Ad access &amp; invites"). They're never shown to other people, shared, or used for advertising. The last-activity record is deleted about 90 days after the last activity (an account's is also deleted with the account). Separately, so usage can be charted across weeks, months and years, the server keeps a minimal daily log. For each day an account or device was active, it holds one entry with just that date and the account or device ID, with no name, email or content. We use these entries for those overall charts and for the active-day counts in "Ad access &amp; invites", and they're removed automatically after 800 days (about 26 months). They aren't removed early when you delete your account or sign in on a device that was signed out. There's no setting to turn this off, because we don't collect anything beyond this. If you clear the app's storage, you get a fresh anonymous ID from then on.</p>
       <h3>Analytics</h3>
       <p>We do not collect usage tracking or crash reports from this app, and do not track what you do inside it. The only usage figures it keeps are the two uses of the anonymous device ID described above: counting an ad's unique viewers (see "Publishing as an ad"), and the activity counts (see "Activity counts").</p>
+      <h3>Keeping things safe</h3>
+      <p>We work to keep what's on our servers safe, but no app or website can be 100% secure, so we can't promise nothing bad will ever happen. Anything you publish is public, so please don't put private things in a published page.</p>
+      <h3>Children</h3>
+      <p>Bluebook isn't meant for children under 13, or older where the rules where you live say so. We don't knowingly collect information from children that young. If a child under that age has made an account, they or their parent or guardian can delete it by tapping the account icon and choosing Delete account under Show more.</p>
+      <h3>Your rights</h3>
+      <p>Depending on where you live, you may have the right to ask to see the information we hold about you, fix it, delete it, get a copy of it, or object to how we use it, and to complain to your local data protection authority. You can do some of this yourself in the app, like deleting your account (see "Google sign-in &amp; sync" above). For anything else, see Contact below.</p>
+      <h3>Where your information goes</h3>
+      <p>Our servers, and the companies that help us run Bluebook (like Cloudflare and Google), may be in other countries, so your information may be handled outside the country where you live.</p>
+      <h3>Changes to this policy</h3>
+      <p>We may update this policy from time to time. When we do, we'll change the date at the top, and we may also send you an alert. If you keep using the app after a change, that means you're OK with it.</p>
       <h3>Contact</h3>
       <p>Questions about this policy? We're happy to help at <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
     </div>
@@ -6497,16 +6591,18 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 16 October 2026</em></p>
-      <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language, and you're welcome to reach out anytime with questions.</p>
+      <p><em>Effective 17 October 2026</em></p>
+      <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language.</p>
+      <h3>Who Can Use Bluebook</h3>
+      <p>You need to be at least 13 to use Bluebook, or older if the rules where you live say so. If you're under 18, please read these terms with a parent or guardian and make sure they're OK with you using the app.</p>
       <h3>Responsible Use</h3>
       <p>Please use Bluebook kindly and lawfully. You agree to use it for lawful purposes only, and not to create, store, or export content that is illegal, harmful, threatening, abusive, untrue and damaging to someone's reputation, or that breaks someone else's rights. This applies with extra weight to anything you publish (see below).</p>
       <h3>Your Content</h3>
-      <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to our servers so you can restore them on another device. Without an account, your content lives only on your device: we have no copy and can't recover it if it's lost. Signing in, or keeping your own backups, is how you protect it.</p>
+      <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to our servers so you can restore them on another device. Your "All my notes" switches from Settings are backed up the same way. Without an account, your content lives only on your device: we have no copy and can't recover it if it's lost. Signing in, or keeping your own backups, is how you protect it.</p>
       <h3>Your Account</h3>
       <p>Signing in is optional and handled by Google. Keep your Google account secure. Anyone with access to it can access your synced notes, Pro purchase, and ad view credits through this app. We record when your account was last active, and count active devices, only to run and understand the service; see the Privacy Policy's "Activity counts" section.</p>
       <h3>Published Content</h3>
-      <p>A published page is stored on our servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. We may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. A page you publish while signed out isn't linked to an account; if you later sign in and use its private token to show it in stories or save an update, it becomes part of your account, counts toward your account's page limit, and is taken down if you delete your account. Unpublish it yourself and its address frees up right away for reuse. If we remove it instead, for a takedown or abuse report, the address stays permanently reserved and can't be reclaimed or republished.</p>
+      <p>A published page is stored on our servers and can be viewed by anyone with the link. You're responsible for what you publish and for having the rights to it. We may remove a published page if it breaks these terms, gets a valid takedown request, or is reported and found to be abusive. A page you publish while signed out isn't linked to an account; if you later sign in and use its private token to show it in stories or save an update, it becomes part of your account, counts toward your account's page limit, and is taken down if you delete your account. Unpublish it yourself and its address frees up right away for reuse. If we remove it instead, for a takedown or abuse report, the address stays permanently reserved and can't be reclaimed or republished. You still own what you publish. By publishing a page, you give us permission to host it and show it to people. You also give us permission to use it to run, build, test and improve Bluebook and our other apps, including by using machine learning. You can opt out of that any time, and the Privacy Policy's "Using published pages and comments" section explains how. This permission is free, works anywhere in the world, and covers copying, resizing, reformatting and showing your page as needed, including by companies that help us run Bluebook. It still covers anything we've already done with your page after you unpublish it or delete your account. You promise you have the right to give us this permission.</p>
       <h3>Reports, Alerts &amp; Suspension</h3>
       <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad), or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages show up under Alerts in your library. We may also use Alerts to share announcements and updates about the app, like new features, maintenance, or changes to these terms. A profile picture that looks like it's pretending to be someone else may be removed. <strong>To keep the app safe for everyone, lots of reports about your content, or repeated rule-breaking, can lead to your account being suspended. When we remove or pause pages, stories, ads, profile pictures or display names, and when we suspend accounts, those count as strikes on your account for 60 days (unless we excuse one). Strikes affect which ad packages you can start (see Ad Access &amp; Invites below).</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, so we can run and moderate the service.</p>
       <h3>Advertising (Publish as Ad)</h3>
@@ -6514,12 +6610,15 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>A running ad is shown to other people using this app as a starting template on their Write screen (or their Share screen, for a page made in Share), not only to people who have its link. We can't promise an ad will get any particular number of views in a given time, that the ad service will always be available, or any particular result from an ad being shown.</p>
       <p>A <strong>view</strong> is counted once someone actually starts editing a note that was handed to them as your ad, not just when it's shown on their Write or Share screen. Every view counts: a repeat view from the same person or device still counts and is still taken from your view balance. Views aren't limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> number next to your ad's view count, just for your information. It's worked out from an anonymous ID made and stored on each device, which tells us whether a device has already been counted for a given ad (and, separately, is used for the activity counts in the Privacy Policy). It isn't linked to a Google account or any other identity, and it's sent whether or not you're signed in. Because it identifies a device rather than a person, someone using two devices counts as two unique viewers, and reinstalling the app or clearing its storage makes that device count as new from then on. The unique viewers number doesn't change your view balance or how views are taken from it.</p>
       <p>If Google Play refunds a view purchase, we take those views back out of your balance. If that leaves your balance below zero, your running ads stop, and you can't start a new ad until your balance covers it again.</p>
-      <p>Purchased views are a one-time purchase through Google Play that gets used up. For anything about the purchase itself, see Google Play's own refund policy. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad by mistake after approving it, <a href="mailto:essentialsoftware.support@gmail.com">contact us</a> and we'll decide whether to credit or refund the affected views. That's separate from, and doesn't replace, Google Play's own refund process for the purchase itself. If you unpublish an ad, it stops being shown and any views it had left go unused (so check your balance first). Those views aren't returned to your account or moved to another ad, and any unspent view-credit balance also goes unused if your account is deleted. Taking down the ad doesn't affect the published page, which stays live until you unpublish it separately. Views we return to your account (for example, a refund of an ad's unused views) stay in your balance, and you can put any amount of them on one of your ads from the Publish as Ad tab without buying again.</p>
+      <p>Purchased views are a one-time purchase through Google Play that gets used up. For anything about the purchase itself, see Google Play's own refund policy. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad by mistake after approving it, we'll decide whether to credit or refund the affected views. That's separate from, and doesn't replace, Google Play's own refund process for the purchase itself. If you unpublish an ad, it stops being shown and any views it had left go unused (so check your balance first). Those views aren't returned to your account or moved to another ad, and any unspent view-credit balance also goes unused if your account is deleted. Taking down the ad doesn't affect the published page, which stays live until you unpublish it separately. Views we return to your account (for example, a refund of an ad's unused views) stay in your balance, and you can put any amount of them on one of your ads from the Publish as Ad tab without buying again.</p>
       <h3>Comments</h3>
-      <p>If you turn on "Show comments" in a note's Publish sheet, signed-in people can comment on it and reply to each other. A comment is saved with its text, the time, and the commenter's profile picture and display name (or shown as Anonymous if they have no name), and appears on the live page for anyone who opens it. Comments count toward ad access like likes do. The commenter or the note's author can delete a comment, which also removes its replies. Turning comments off hides them; unpublishing the note or deleting an account removes them.</p>
+      <p>If you turn on "Show comments button" in a note's Publish sheet, signed-in people can comment on it and reply to each other. A comment is saved with its text, the time, and the commenter's profile picture and display name (or shown as Anonymous if they have no name), and appears on the live page for anyone who opens it. Comments count toward ad access like likes do. The commenter or the note's author can delete a comment, which also removes its replies. Turning off "Show comments button" hides them. Turning off "Allow new comments" keeps the ones already there but stops people from adding new comments or replies. Unpublishing the note or deleting an account removes them. You still own your comments. By posting one, you give us permission to use it in the same ways as published pages, as described in the Privacy Policy's "Using published pages and comments" section, and you promise you have the right to give us that permission. You can also change these for all your pages at once from Settings (see "All My Notes" below).</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
       <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags and preview images. It also lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description and tags, just like anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. Your display name and profile picture are optional. If you add them, they're shown on your stories and to your subscribers. They don't have to be your real name or photo, but they can't pretend to be another person, account or brand, or mislead viewers about who's posting.</p>
       <p>A signed-in account can also like a published note. Likes are a simple way to say thanks. As its author, you can see each note's own like count on its card in your Published and Stories tabs, and anyone who sees the note in their Subscribed feed or Liked tab can see it too. Nobody sees who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. Please don't misuse likes, like using multiple accounts or automated tools to push a note's count up or down. We may remove likes, or suspend your ability to like, for the same reasons we can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what's recorded about likes.</p>
+      <h3>All My Notes (Settings)</h3>
+      <p>In Settings, "All my notes" gives you four shortcuts that change all your published pages at once: "Always show in stories", "Always show comments", "Hide comments on all pages" and "Disable comments on all pages". They only work when you're signed in. Turning one on changes every page you've already published and every page you publish after that. Turning one off just stops it from changing pages. It doesn't undo anything, so your pages keep their current settings until you change them. "Always show comments" and "Hide comments on all pages" are opposites, so turning one on turns the other off. If you change one page's own switches in its Publish sheet later, that page's choice wins.</p>
+      <p>These shortcuts are saved with your account and backed up with your notes, so they follow you to your other devices. When one is on, it's the same as tapping that switch yourself on each page, so everything else in these terms still applies. You're responsible for what shows up in stories and comments on all of your pages, including older ones, and the Responsible Use section applies. Before you turn on "Always show in stories", remember that it puts every page you've published (and every new one) in front of other people using the app, not only people who have the link. "Disable comments on all pages" means visitors can't add new comments or replies. They'll see a note that you turned them off, and the comments already there stay. We can still remove or pause pages or stories for the reasons in these terms, even when one of these shortcuts is on.</p>
       <h3>Ad Access &amp; Invites</h3>
       <p>Bigger ad packages are earned, not only bought. Everyone who's signed in can use the 1,000-view package. Larger packages, and running more ads at once, unlock as your account grows in the app. We look at subscribers, published notes, likes you've received, likes you give to other notes, accounts you follow, days you've been active, stories, and friends you've invited. Every running ad also needs at least five published notes behind it. The Publish as Ad tab shows your progress toward each requirement. We may change the requirements or packages in the future, but ads that are already running aren't affected. A strike (see Reports, Alerts &amp; Suspension) keeps larger packages locked until it expires after 60 days. One strike limits you to the 5,000-view package, and two or more limit you to the 1,000-view package. A limit only stops new ads from starting, and you'll get an alert when it lifts. Views you bought for a package that is limited or still locked stay in your balance until you can use them.</p>
       <p>Every signed-in account has an invite code it can share. A new account can add one friend's code, once, in its first 14 days. You can't use your own code, and two accounts can't invite each other. When someone adds your code, you get an alert, and they can choose to subscribe to you at the same time (they're asked first). An invite counts toward your ad access once your friend has published a note and been active on at least two days. For packages from 5,000 views up, each invite that counts is worth three subscribers, for up to five invites. When an invite counts, we also add 100 free views to your balance, for up to five friends. Free views work like any other views in your balance: you can put them on any of your ads from the Publish as Ad tab without buying a package, but they can't be cashed out or handed to someone else. Your friend doesn't get anything. If we cancel an invite because of abuse, we take its free views back out of your balance, and return them if we restore it. Please only invite real people. Making or using extra accounts (or asking others to) to push up invites, subscribers, likes or any other number used here isn't allowed. If that happens, we may stop counting invites or any of these numbers, limit your packages, or suspend accounts. An invite also stops counting while the invited account is suspended or being deleted, and counts again if that ends.</p>
@@ -6528,6 +6627,10 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>All buying of view packages goes through Google Play Billing (RevenueCat handles it for us). Any age or account requirements for buying are set and enforced by Google Play, not by us. By buying a view package, you confirm that Google Play's own terms allow you to make purchases on the account you're using.</p>
       <h3>Third-Party Content</h3>
       <p>Images, video, and audio you embed by URL are loaded straight from the source you give us. You're responsible for having the right to use anything you embed. The same goes for voice notes you record: they're your responsibility, and you need permission from anyone whose voice is in them. Images in an ad are limited as described above. The required attribution notice is there because third-party logos, trademarks and brand names may show up in an ad's content or images. You're still responsible for having the right to use whatever you include, and the notice doesn't give you any rights by itself.</p>
+      <h3>No Promises &amp; Limits on Our Responsibility</h3>
+      <p>We work hard to make Bluebook good, but we can't promise it'll be perfect. It's provided "as is" and "as available", which means we don't promise it'll always work, be free of bugs, or never lose anything. Please keep your own backups of notes that matter to you. As far as the law allows, we're not responsible for knock-on losses, like lost notes, lost data, lost profits or lost chances, or for anything other people post, publish, comment or do. Some places don't allow these limits, so they only apply as far as the law lets them, and nothing here limits anything the law says we can't limit.</p>
+      <h3>The Fine Print</h3>
+      <p>These terms and the Privacy Policy are the whole agreement between you and us about Bluebook. If part of these terms can't be enforced, the rest still counts. If we don't enforce something right away, it doesn't mean we've given up the right to later. We may hand over our rights and duties under these terms to someone else, for example if Bluebook is sold or taken over by another company. You can't do that without our OK.</p>
       <h3>Changes to These Terms</h3>
       <p>We may update these terms from time to time. If you keep using the app after changes are posted, you're accepting the revised terms.</p>
       <h3>Contact</h3>
@@ -6635,9 +6738,16 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
               </span>
             </label>
             <label class="nb-switch-wrap" for="pub-comments-switch">
-              <span class="nb-switch-label">Show comments</span>
+              <span class="nb-switch-label">Show comments button</span>
               <span class="nb-switch">
                 <input type="checkbox" id="pub-comments-switch" class="nb-switch-input" onchange="_pubOnCommentsToggle(this.checked)">
+                <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
+              </span>
+            </label>
+            <label class="nb-switch-wrap" id="pub-allow-row" for="pub-allow-switch">
+              <span class="nb-switch-label">Allow new comments</span>
+              <span class="nb-switch">
+                <input type="checkbox" id="pub-allow-switch" class="nb-switch-input" onchange="_pubOnAllowCommentsToggle(this.checked)">
                 <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
               </span>
             </label>
@@ -13881,6 +13991,13 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     setTimeout(() => document.body.classList.remove('theme-switching'), 200);
     try { _nbSchedulePullThenPush(); } catch (e) {}
   }
+  // One "All my notes" switch. Turning it on applies it to every published page first (_nbAllNotesApply) and only then keeps it on;
+  // `clears` is the opposite rule, which turns off when this one turns on. The rules belong to the signed-in account and sync with it.
+  const allRule = (k, l, s, clears) => ({ t: 'sw', k, l, s, get: () => _nbAllNotesGet(k), toggle: done => {
+    const want = !_nbAllNotesGet(k);
+    if (!want) { _nbAllNotesSet({ [k]: false }); done(true); return; }
+    _nbAllNotesApply(k).then(ok => { if (ok) _nbAllNotesSet(clears ? { [k]: true, [clears]: false } : { [k]: true }); done(ok); });
+  } });
   const GROUPS = [
     ['Appearance', [
       { t: 'chips', k: 'theme', l: 'Theme', o: [['light', 'Light'], ['dark', 'Dark'], ['pink', 'Pink']], get: curTheme, set: setTheme },
@@ -13897,9 +14014,16 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'sw', k: 'hideLibCount', l: 'Hide Library category counts', s: 'Hide the note counts on the Library category pills (All, Favorites, Alerts, Published, Stories, Subscribed, Liked, Uncategorized and your own categories).', after: () => buildCatBar() },
       { t: 'sw', k: 'hideMdCount', l: 'Hide Media category counts', s: 'Hide the counts on the Media tabs (Audio, Videos, Albums and Playlists).' },
       { t: 'sw', k: 'mediaSwipe', l: 'Swipe from left edge to open Media', s: 'Swipe in from the left edge of the screen, on any screen in the app, to open Media (audio, videos, albums, playlists).' }]],
+    ['All my notes', [
+      allRule('allStories', 'Always show in stories', 'Show all your published pages in stories now, and every page you publish from here on. Turning it off leaves your pages as they are.'),
+      allRule('allShowComments', 'Always show comments', 'Show the comments button on all your published pages now, and on every page you publish from here on. Turns off \u201cHide comments on all pages\u201d.', 'allHideComments'),
+      allRule('allHideComments', 'Hide comments on all pages', 'Hide the comments button and comments on all your published pages now, and on every page you publish from here on. Turns off \u201cAlways show comments\u201d.', 'allShowComments'),
+      allRule('allDisableComments', 'Disable comments on all pages', 'Visitors can\u2019t add new comments or replies on any of your pages; they see a note that you turned them off. Existing comments stay.')]],
     ['Writing', [
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
+    ['Privacy', [
+      { t: 'link', l: 'Published pages & comments', show: () => nbIsSignedIn(), s: () => { const v = _nbMlOptGet(); const d = _nbStAcctGet(); if (!d || d.mlOptOut === undefined) return '\u2014'; return v === true ? 'Kept out of app improvements' : v === false ? 'May be used to improve our apps' : 'Not chosen yet'; }, go: () => _nbStMlTileTap() }]],
     ['Security', [
       { t: 'sw', k: 'appLock', get: () => !!(window.nbLock && window.nbLock.enabled()), toggle: (done) => { const L = window.nbLock; if (!L) { done(false); return; } if (L.enabled()) L.disable(done); else L.enable(done); }, l: 'App lock', s: 'Ask for a PIN or password each time the app starts, and when you return after more than 30 seconds away. It stays on this device. If you forget it, answering your recovery question gets you back in.' },
       { t: 'link', l: 'Change PIN or password', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.change(() => { try { window._nbStRender(); } catch (e) {} }) },
@@ -13924,7 +14048,6 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     ['About & Support', [
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
-      { t: 'link', l: 'Support', s: 'essentialsoftware.support@gmail.com', go: () => { window.location.href = 'mailto:essentialsoftware.support@gmail.com'; } },
       { t: 'info', l: 'App version', s: 'v3.2.9' }]]
   ];
   const E = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -13944,7 +14067,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     const root = document.getElementById('st-root'); if (!root) return;
     // Redrawing swaps every row at once; hold the height and the scroll position so the page doesn't drop to the top
     const _stY = window.scrollY, _stH = root.offsetHeight;
-    const _stHtml = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot">\u00a9 Essential Software<br>These settings are saved on this device. Your theme also syncs when you\u2019re signed in.</div>';
+    const _stHtml = GROUPS.map((g, gi) => { const rows = g[1].map((r, ri) => (r.show && !r.show()) ? '' : row(r, gi, ri)).join(''); return rows ? '<div class="st-grp">' + (g[0] ? '<div class="st-h">' + E(g[0]) + '</div>' : '') + '<div class="st-card">' + rows + '</div></div>' : ''; }).join('') + '<div class="st-foot">\u00a9 2026 Essential Software<br>All rights reserved.</div>';
     // Dialogs, sync and theme changes ask for a redraw even when nothing on this screen changed; swapping identical
     // markup in only made the screen flash, so an unchanged page is left exactly as it is.
     if (root.childElementCount && window._nbStLastHtml === _stHtml) return;
@@ -13955,6 +14078,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     try { _nbSettingsAcctFetch(); } catch (e) { _nbLog('settings acct fetch', e); }
     root.style.minHeight = '';
     if (window._nbSigninRowBusy) { try { _nbStSigninBusy(true); } catch (e) {} }
+    if (window._nbMlRowBusy) { try { _nbStMlBusy(true); } catch (e) {} }
     if (Math.abs(window.scrollY - _stY) > 1) window.scrollTo({ top: _stY, behavior: 'instant' });
   };
   const root = document.getElementById('st-root');
@@ -14677,6 +14801,7 @@ function _nbClickEl(id) { const b = document.getElementById(id); if (b) b.click(
 // The layer visually on top (highest z-index; on a tie, the earlier entry here) goes first, so a dialog over a
 // sheet closes before the sheet. Terms is the first-run gate: back from it leaves the app.
 const NB_BACK_LAYERS = [
+  { id: 'ml-overlay', close: () => _nbMlOptClose() },
   { id: 'mic-overlay', close: () => _nbClickEl('mic-dialog-cancel') },
   { id: 'signout-overlay', close: () => _nbClickEl('signout-dialog-cancel') },
   { id: 'delete-account-overlay', close: () => _nbClickEl('delete-account-dialog-cancel') },
@@ -14885,6 +15010,35 @@ async function _nbProbeConnectivity() {
 }
 // The Settings "Sign in" row shows the same spinner + "Signing in…" label as the account screen's button while sign-in runs.
 // Settings can redraw mid sign-in, so the flag is re-applied after every redraw (see _nbStRender).
+// Settings > Privacy tile: while its answer isn't known yet (shows \u2014), a tap loads it first, with plain "Loading\u2026" text in the row, like the ad level.
+function _nbStMlRow() { return Array.from(document.querySelectorAll('#st-root .st-link')).find(r => { const l = r.querySelector('.st-l'); return l && l.textContent === 'Published pages & comments'; }) || null; }
+function _nbStMlBusy(busy) {
+  window._nbMlRowBusy = !!busy;
+  const row = _nbStMlRow(), s = row && row.querySelector('.st-s');
+  if (!row || !s) return;
+  if (busy) {
+    if (row.dataset.busy) return;
+    row.dataset.busy = '1'; row.dataset.origSub = s.textContent;
+    s.textContent = 'Loading\u2026';
+    row.style.pointerEvents = 'none'; row.setAttribute('aria-disabled', 'true');
+  } else {
+    if (!row.dataset.busy) return;
+    delete row.dataset.busy;
+    s.textContent = row.dataset.origSub || '\u2014'; delete row.dataset.origSub;
+    row.style.pointerEvents = ''; row.removeAttribute('aria-disabled');
+  }
+}
+async function _nbStMlTileTap() {
+  const known = () => { const d = _nbStAcctGet(); return !!d && d.mlOptOut !== undefined; };
+  if (known()) { _nbMlOptAsk(true); return; }
+  if (_pubOfflineGuard()) return;
+  _nbStMlBusy(true);
+  try { await _nbSettingsAcctFetch(true); } catch (e) { _nbLog('ml tile load', e); }
+  _nbStMlBusy(false);
+  if (!nbIsSignedIn()) return;
+  if (known()) { _nbMlOptAsk(true); return; }
+  showToast('Couldn\u2019t load your choice. Try again');
+}
 function _nbStSigninBusy(busy) {
   window._nbSigninRowBusy = !!busy;
   const row = document.querySelector('#st-root .st-accent');
@@ -15005,6 +15159,8 @@ async function _nbCompleteGoogleSignIn(idToken) {
   if (signinBtn) _pubSetBtnLoading(signinBtn, false);
   nbRenderAccountDialog();
   closeAccountScreen();
+  if (typeof data.mlOptOut === 'boolean') _nbMlOptStore(data.mlOptOut);
+  if (data.mlOptOut == null) setTimeout(_nbMlOptAsk, 700); // this account has never answered the machine-learning question
   // Refresh the notes screen against the now-signed-in account right
   // away — nbVisibleNotes() depends on nbAccount(), so this newly-signed
   // -in account's own previously-synced notes (or another account's,
@@ -15461,7 +15617,7 @@ function _nbHealSharedSlugs(arr, acct) {
       || ((a.createdAt || 0) - (b.createdAt || 0))
       || String(a.id).localeCompare(String(b.id)));
     list.slice(1).forEach(n => {
-      Object.assign(n, { publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, updatedAt: Date.now() });
+      Object.assign(n, { publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true, updatedAt: Date.now() });
       if (!/\(copy\)$/.test(n.title || '')) n.title = (n.title || 'Untitled note') + ' (copy)';
       if (acct) n.acct = acct.sub;
       healed++;
@@ -15490,7 +15646,7 @@ function _nbMakeConflictCopy(src, acct) {
     id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     title: (src.title || 'Untitled') + ' (conflict copy)',
     createdAt: Date.now(), updatedAt: Date.now(),
-    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
   });
   delete c.syncBaseAt; delete c.seedProvisional; delete c.seedEdited; delete c.seedReseeded;
   if (acct) c.acct = acct.sub;
@@ -15532,7 +15688,7 @@ async function nbSyncPush(showFeedback) {
     app: 'Bluebook', version: imgRes.legacy ? 1 : 2, notes: notes.map(_nbStripLocalSyncFields), deletedIds,
     favorites: _nbFavoritesForSync(new Set(notes.map(n => n.id))),
     playlists: _nbPlaylistsForSync(),
-    settings: { theme: { v: themeNow, t: _nbThemeTs() } }
+    settings: Object.assign({ theme: { v: themeNow, t: _nbThemeTs() } }, _nbAllNotesForSync() ? { allNotes: _nbAllNotesForSync() } : {})
   }, imgRes.legacy ? { images } : {}));
   if (new TextEncoder().encode(payload).length > NB_SYNC_MAX_BYTES) return _nbSyncTooLarge(showFeedback);
   if (_nbSyncEtag && payload === _nbLastPushedPayload && _nbSyncEtag === _nbLastPushedEtag) return { ok: true, skipped: true };
@@ -15649,6 +15805,7 @@ async function nbSyncPull(showFeedback) {
     _nbSaveDeletedIds([...tombstones.values()]);
     const favChanged = _nbMergeIncomingFavorites(data && data.favorites);
     _nbMergeIncomingTheme(data && data.settings && data.settings.theme);
+    try { _nbMergeIncomingAllNotes(data && data.settings && data.settings.allNotes); } catch (e) { _nbLog('pull: all-notes rules', e); }
     if (_nbMergeIncomingPlaylists(data && data.playlists)) { try { if (window.nbMediaPlaylistsChanged) window.nbMediaPlaylistsChanged(); } catch (e) { _nbLog('pull: playlists', e); } }
     let existing = nbLoadNotes();
     const indexById = new Map(existing.map((n, i) => [n.id, i]));
@@ -18002,7 +18159,7 @@ function nbOpenPublishSheet(id, keepTab) {
     liveFooter.style.display = '';
     document.getElementById('pub-live-url').textContent = _pubUrlFor(note.publishedSlug);
     document.getElementById('pub-stories-switch').checked = !!note.showInStories;
-    document.getElementById('pub-comments-switch').checked = !!note.showComments;
+    _pubPaintCommentSwitches(note);
     _pubSyncCommentsFlag(note.id);
     // Decide the Save button's state by comparing current content against
     // what's live: without a comparison the button would just sit at
@@ -18302,6 +18459,7 @@ async function nbPublishNote() {
       return;
     }
     showToast('Note published');
+    try { _nbApplyPublishRules(note.id); } catch (e) { _nbLog('publish rules', e); }
     endBusy();
     if (_pubNoteId === note.id) closePublishSheet();
     nbRenderNotesScreen();
@@ -18437,7 +18595,7 @@ async function nbUpdatePublishedNote() {
     if (res.status === 404) {
       try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('update 404: strip', e); }
       if (_pubSaveNoteFields(note.id, {
-        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+        publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
       }) === false) return;
       showToast('That page is no longer live. Publish again to bring it back.');
       if (_pubNoteId === note.id) closePublishSheet();
@@ -18467,19 +18625,21 @@ async function nbUpdatePublishedNote() {
 // same session run one after another (_pubStoriesChain) so a quick on/off can't reach the server
 // out of order.
 let _pubStoriesChain = Promise.resolve();
-// ---- Comments switch (Publish sheet) ----
-// Optimistic like the stories switch: the flag is saved on the note at once and PUT /publish/:slug/comments
-// follows; a failure puts it back. The server owns the truth, so opening the sheet re-reads it.
+// ---- Comments switches (Publish sheet) ----
+// "Show comments button" (note.showComments) puts the comments button and the comments themselves on the published page.
+// "Allow new comments" (note.allowComments, true unless set) lets visitors write comments and replies; off, the page shows
+// the comments it has with a note that the author disabled new ones. Optimistic like the stories switch: the flag is saved
+// on the note at once and PUT /publish/:slug/comments follows; a failure puts it back. The server owns the truth, so opening
+// the sheet re-reads it.
 let _pubCommentsChain = Promise.resolve(), _pubCommentsPending = 0;
-function _pubOnCommentsToggle(checked) {
-  const note = _pubFindNote(_pubNoteId);
-  const sw = document.getElementById('pub-comments-switch');
-  if (!note || !note.publishedSlug) return;
-  if (_pubOfflineGuard()) { if (sw) sw.checked = !!note.showComments; return; }
-  if (!nbIsSignedIn()) { showToast('Sign in to turn on comments'); if (sw) sw.checked = !!note.showComments; return; }
-  const id = note.id, was = !!note.showComments;
-  _pubSaveNoteFields(id, { showComments: checked });
-  showToast(checked ? 'Comments on' : 'Comments off');
+function _pubPaintCommentSwitches(note) {
+  const show = document.getElementById('pub-comments-switch'), allow = document.getElementById('pub-allow-switch'), row = document.getElementById('pub-allow-row');
+  if (show) show.checked = !!note.showComments;
+  if (allow) { allow.checked = note.allowComments !== false; allow.disabled = !note.showComments; }
+  if (row) row.classList.toggle('pub-opt-off', !note.showComments);
+}
+// Queues one PUT for a page's comment switches (fields: { showComments?, allowComments? }); `was` holds the values to put back if it fails.
+function _pubQueueCommentFlags(id, fields, was, failText) {
   _pubCommentsPending++;
   _pubCommentsChain = _pubCommentsChain.then(async () => {
     const n = _pubFindNote(id);
@@ -18488,18 +18648,42 @@ function _pubOnCommentsToggle(checked) {
       const res = await _nbFetchOwned(n, tok => fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/publish/' + encodeURIComponent(n.publishedSlug) + '/comments', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
-        body: JSON.stringify({ token: tok, showComments: checked })
+        body: JSON.stringify({ token: tok, ...fields })
       }));
       if (!res.ok) throw new Error('comments toggle failed: ' + res.status);
       setTimeout(() => { try { _nbPollLikeCounts(); } catch (e) {} }, 400);
     } catch (e) {
       _nbLog('comments toggle', e);
-      _pubSaveNoteFields(id, { showComments: was });
-      const sw2 = document.getElementById('pub-comments-switch');
-      if (sw2 && _pubNoteId === id) sw2.checked = was;
-      showToast('Couldn\u2019t turn comments ' + (checked ? 'on' : 'off') + _nbFailureReason(e) + '. Change undone.');
+      _pubSaveNoteFields(id, was);
+      const back = _pubFindNote(id);
+      if (back && _pubNoteId === id) _pubPaintCommentSwitches(back);
+      showToast(failText + _nbFailureReason(e) + '. Change undone.');
     } finally { _pubCommentsPending--; }
   }).catch(e => _nbLog('comments chain', e));
+}
+function _pubOnCommentsToggle(checked) {
+  const note = _pubFindNote(_pubNoteId);
+  const sw = document.getElementById('pub-comments-switch');
+  if (!note || !note.publishedSlug) return;
+  if (_pubOfflineGuard()) { if (sw) sw.checked = !!note.showComments; return; }
+  if (!nbIsSignedIn()) { showToast('Sign in to turn on comments'); if (sw) sw.checked = !!note.showComments; return; }
+  const id = note.id, was = { showComments: !!note.showComments };
+  _pubSaveNoteFields(id, { showComments: checked });
+  _pubPaintCommentSwitches(_pubFindNote(id) || note);
+  showToast(checked ? 'Comments button shown' : 'Comments hidden');
+  _pubQueueCommentFlags(id, { showComments: checked }, was, 'Couldn’t ' + (checked ? 'show' : 'hide') + ' comments');
+}
+function _pubOnAllowCommentsToggle(checked) {
+  const note = _pubFindNote(_pubNoteId);
+  const sw = document.getElementById('pub-allow-switch');
+  if (!note || !note.publishedSlug) return;
+  const wasAllow = note.allowComments !== false;
+  if (_pubOfflineGuard()) { if (sw) sw.checked = wasAllow; return; }
+  if (!nbIsSignedIn()) { showToast('Sign in to change comment settings'); if (sw) sw.checked = wasAllow; return; }
+  const id = note.id;
+  _pubSaveNoteFields(id, { allowComments: checked });
+  showToast(checked ? 'New comments allowed' : 'New comments disabled');
+  _pubQueueCommentFlags(id, { allowComments: checked }, { allowComments: wasAllow }, 'Couldn’t ' + (checked ? 'allow' : 'disable') + ' new comments');
 }
 async function _pubSyncCommentsFlag(id) {
   const note = _pubFindNote(id);
@@ -18510,11 +18694,199 @@ async function _pubSyncCommentsFlag(id) {
     const d = await res.json();
     if (!d || typeof d.enabled !== 'boolean' || _pubCommentsPending) return;
     const cur = _pubFindNote(id);
-    if (!cur || d.enabled === !!cur.showComments) return;
-    _pubSaveNoteFields(id, { showComments: d.enabled });
-    const sw = document.getElementById('pub-comments-switch');
-    if (sw && _pubNoteId === id) sw.checked = d.enabled;
+    if (!cur) return;
+    const fields = {};
+    if (d.enabled !== !!cur.showComments) fields.showComments = d.enabled;
+    if (typeof d.allow === 'boolean' && d.allow !== (cur.allowComments !== false)) fields.allowComments = d.allow; // an older worker sends no allow: leave it
+    if (!Object.keys(fields).length) return;
+    _pubSaveNoteFields(id, fields);
+    const now = _pubFindNote(id);
+    if (now && _pubNoteId === id) _pubPaintCommentSwitches(now);
   } catch (e) { _nbLog('comments flag sync', e); }
+}
+// ---- Settings > All my notes ----
+// Four rules that apply to every published page at once and to each page published afterwards (this device). Turning a rule on
+// applies it right away; turning it off only stops applying it, pages keep whatever they are set to. Per-page switches still win
+// afterwards. Comments go through one account-wide call (every page the account owns, even ones not on this device); stories
+// go page by page through the same path as the Publish-sheet switch, since each page has its own story.
+// The rules are kept per account (so one account's rules never apply to another's pages on a shared device) and travel in the
+// account backup next to the theme: settings.allNotes = { v: { allStories, ... }, t }, newest write wins. Nothing is stored while signed out.
+const NB_ALLNOTES_KEY = 'nb_allnotes_v1';
+function _nbAllNotesStore() {
+  const a = nbAccount();
+  if (!a) return null;
+  try {
+    const o = JSON.parse(localStorage.getItem(NB_ALLNOTES_KEY + ':' + a.sub) || 'null');
+    return (o && o.v && typeof o.v === 'object' && typeof o.t === 'number') ? o : { v: {}, t: 0 };
+  } catch (e) { return { v: {}, t: 0 }; }
+}
+function _nbAllNotesGet(k) { const s = _nbAllNotesStore(); return !!(s && s.v[k]); }
+function _nbAllNotesWrite(v, t) {
+  const a = nbAccount();
+  if (!a) return false;
+  const clean = {};
+  ['allStories', 'allShowComments', 'allHideComments', 'allDisableComments'].forEach(k => { clean[k] = !!(v && v[k]); });
+  try { localStorage.setItem(NB_ALLNOTES_KEY + ':' + a.sub, JSON.stringify({ v: clean, t })); return true; } catch (e) { return false; }
+}
+function _nbAllNotesSet(vals) { // a change made here: stamp it now and push it to the account
+  const s = _nbAllNotesStore();
+  if (!s) return;
+  if (_nbAllNotesWrite(Object.assign({}, s.v, vals), Date.now())) { try { _nbSchedulePullThenPush(); } catch (e) {} }
+}
+function _nbAllNotesForSync() { const s = _nbAllNotesStore(); return s && s.t ? { v: s.v, t: s.t } : null; }
+// A newer copy from the account (another device changed the rules). The comment rules were already applied to every page by the
+// device that set them, so only "always show in stories" has something left to do here: this device's own pages join stories.
+function _nbMergeIncomingAllNotes(remote) {
+  const s = _nbAllNotesStore();
+  if (!s || !remote || typeof remote.t !== 'number' || !remote.v || typeof remote.v !== 'object' || remote.t <= s.t) return false;
+  const wasStories = !!s.v.allStories;
+  if (!_nbAllNotesWrite(remote.v, remote.t)) return false;
+  if (!wasStories && remote.v.allStories) { try { _nbBulkStories(true).catch(e => _nbLog('synced rule: stories', e)); } catch (e) { _nbLog('synced rule: stories', e); } }
+  try { if (window._nbStRefresh) window._nbStRefresh(); } catch (e) {}
+  return true;
+}
+async function _nbBulkComments(fields) {
+  const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/comments', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+    body: JSON.stringify(fields)
+  });
+  let d = null; try { d = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error((d && d.error) || ('apply to all failed: ' + res.status));
+  nbVisibleNotes().filter(n => n.publishedSlug).forEach(n => _pubSaveNoteFields(n.id, fields));
+  setTimeout(() => { try { _nbPollLikeCounts(); } catch (e) {} }, 400);
+  return (d && d.updated) || 0;
+}
+async function _nbBulkStories(on) {
+  const notes = nbVisibleNotes().filter(n => n.publishedSlug && !!n.showInStories !== on);
+  let failed = 0;
+  notes.forEach(n => {
+    const wasShowing = _nbStoryOverrides.has(n.publishedSlug) ? !!_nbStoryOverrides.get(n.publishedSlug).show : !!n.showInStories;
+    _nbStoryOptimistic(n, on);
+    if (wasShowing !== on) _nbBumpPubCount('stories', on ? 1 : -1);
+    _pubStoriesChain = _pubStoriesChain
+      .then(() => _pubSendStoriesToggle(n.id, on, true))
+      .then(ok => { if (!ok) failed++; })
+      .catch(e => { failed++; _nbLog('bulk stories', e); });
+  });
+  await _pubStoriesChain;
+  return { total: notes.length, failed };
+}
+// k = the rule's settings key. Resolves true when it can be turned on (applied everywhere), false to put the switch back.
+async function _nbAllNotesApply(k) {
+  if (!nbIsSignedIn()) { showToast('Sign in to apply this to your pages'); return false; }
+  if (_pubOfflineGuard()) return false;
+  try {
+    if (k === 'allStories') {
+      const r = await _nbBulkStories(true);
+      if (r.failed) showToast('Added ' + (r.total - r.failed) + ' of ' + r.total + ' pages to stories. The rest couldn’t be added' + (r.total - r.failed ? '' : ' right now') + '.');
+      else showToast(r.total ? 'Showing ' + r.total + (r.total === 1 ? ' page' : ' pages') + ' in stories' : 'Pages you publish will show in stories');
+      return r.failed < r.total || !r.total;
+    }
+    const fields = k === 'allShowComments' ? { showComments: true } : k === 'allHideComments' ? { showComments: false } : { allowComments: false };
+    const n = await _nbBulkComments(fields);
+    const what = k === 'allShowComments' ? 'Comments button shown on ' : k === 'allHideComments' ? 'Comments hidden on ' : 'New comments disabled on ';
+    showToast(n ? what + n + (n === 1 ? ' page' : ' pages') : 'Will apply to pages you publish');
+    return true;
+  } catch (e) {
+    _nbLog('apply to all notes', e);
+    showToast('Couldn’t apply to all pages' + _nbFailureReason(e));
+    return false;
+  }
+}
+// Asked once per account, the first time it signs in (/auth/google answers null until it has chosen), and once per app start for
+// an account that signed in before this existed and still hasn't. Settings > Privacy reopens it to change the choice. Same confirm dialog as the others
+// (themes and glass included). Both buttons save the choice on the account, so no device asks again; a tap outside does nothing, and
+// Back closes it without answering, so it comes back at the next sign-in. "No, keep out" turns on the account's machine-learning
+// opt-out (the worker marks its pages and comments); "Yes, allow" saves that it said yes.
+let _nbMlOptBusy = false;
+function _nbMlOptClose() {
+  if (_nbMlOptBusy) return;
+  const ov = document.getElementById('ml-overlay'); if (ov) ov.classList.remove('open');
+}
+function _nbMlOptGet() { const d = _nbStAcctGet(); return d && typeof d.mlOptOut === 'boolean' ? d.mlOptOut : null; }
+function _nbMlOptStore(on) {
+  _nbStAcctGet();
+  _nbStAcctSeq++; // a stats fetch already in flight predates this choice; its answer is dropped so it can't put the old value back
+  _nbStAcctStats = Object.assign({}, _nbStAcctStats || {}, { mlOptOut: on });
+  const k = _nbStAcctKey();
+  if (k) { try { localStorage.setItem(k, JSON.stringify(_nbStAcctStats)); } catch (e) {} }
+  try { if (window._nbStRefresh) window._nbStRefresh(); } catch (e) {}
+}
+// Once per app start for an account that has signed in before but never answered (the dialog above only asks at sign-in).
+// Skipped while the first-run Terms screen or another dialog is up, and when this device already knows the answer.
+async function _nbMlOptLaunchAsk() {
+  if (!nbIsSignedIn() || _nbMlOptGet() !== null) return; // already answered, as far as this device knows
+  await _nbSettingsAcctFetch(true);
+  const d = _nbStAcctGet();
+  if (!nbIsSignedIn() || !d || d.mlOptOut !== null) return;
+  if (document.querySelector('#terms-overlay.open, #ml-overlay.open, #account-overlay.open, #publish-overlay.open')) return;
+  _nbMlOptAsk();
+}
+function _nbMlOptAsk(fromSettings) {
+  const ov = document.getElementById('ml-overlay'), no = document.getElementById('ml-dialog-no'), yes = document.getElementById('ml-dialog-yes');
+  if (!ov || !no || !yes || !nbIsSignedIn()) return;
+  const answer = async (keepOut, btn) => {
+    if (_nbMlOptBusy || _pubOfflineGuard()) return;
+    _nbMlOptBusy = true;
+    _pubSetBtnLoading(btn, true, 'Saving\u2026');
+    try {
+      const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/ml-opt-out', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+        body: JSON.stringify({ on: keepOut })
+      });
+      let d = null; try { d = await res.json(); } catch (e) {}
+      if (!res.ok) throw new Error((d && d.error) || ('ml opt-out failed: ' + res.status));
+      _nbMlOptBusy = false;
+      _nbMlOptStore(keepOut);
+      ov.classList.remove('open');
+      if (keepOut) showToast('Your pages and comments are kept out of machine learning');
+    } catch (e) {
+      _nbLog('ml opt-out', e);
+      showToast('Couldn\u2019t save your choice' + _nbFailureReason(e));
+      _nbMlOptBusy = false;
+    } finally {
+      _pubSetBtnLoading(btn, false);
+    }
+  };
+  // Reopened from Settings, tick the answer that is on now. A fresh label each time, so a tick never carries over to the next opening.
+  const cur = _nbMlOptGet();
+  no.textContent = (cur === true ? '\u2713 ' : '') + 'No, keep out';
+  yes.textContent = (cur === false ? '\u2713 ' : '') + 'Yes, allow';
+  no.setAttribute('aria-pressed', String(cur === true));
+  yes.setAttribute('aria-pressed', String(cur === false));
+  no.onclick = () => answer(true, no);
+  yes.onclick = () => answer(false, yes);
+  ov.onclick = fromSettings ? (e => { if (e.target === ov) _nbMlOptClose(); }) : null; // at sign-in a tap outside is not an answer; from Settings it just closes
+  ov.classList.add('open');
+}
+// A page that was just published picks up the rules that are on.
+function _nbApplyPublishRules(noteId) {
+  if (!nbIsSignedIn()) return;
+  const on = k => _nbAllNotesGet(k);
+  const n = _pubFindNote(noteId);
+  if (!n || !n.publishedSlug) return;
+  if (on('allStories') && !n.showInStories) {
+    _nbStoryOptimistic(n, true);
+    _nbBumpPubCount('stories', 1);
+    // Saved on the note at once, like the comment switches below, so the Publish sheet shows Show in stories on straight away
+    // instead of after the server answers; put back if it can't be done.
+    _pubSaveNoteFields(noteId, { showInStories: true });
+    _pubStoriesChain = _pubStoriesChain
+      .then(() => _pubSendStoriesToggle(noteId, true, false))
+      .then(ok => { if (!ok) { _pubSaveNoteFields(noteId, { showInStories: false }); const sw = document.getElementById('pub-stories-switch'); if (sw && _pubNoteId === noteId) sw.checked = false; } })
+      .catch(e => _nbLog('publish rule: stories', e));
+  }
+  const f = {};
+  if (on('allShowComments') && !n.showComments) f.showComments = true;
+  else if (on('allHideComments') && n.showComments) f.showComments = false;
+  if (on('allDisableComments') && n.allowComments !== false) f.allowComments = false;
+  if (Object.keys(f).length) {
+    const was = { showComments: !!n.showComments, allowComments: n.allowComments !== false };
+    _pubSaveNoteFields(noteId, f);
+    _pubQueueCommentFlags(noteId, f, was, 'Couldn’t apply your comment settings');
+  }
 }
 function _pubOnStoriesToggle(checked) {
   const note = _pubFindNote(_pubNoteId);
@@ -18535,14 +18907,15 @@ function _pubOnStoriesToggle(checked) {
     .then(() => _pubSendStoriesToggle(noteId, checked))
     .catch(e => _nbLog('stories toggle chain', e));
 }
-async function _pubSendStoriesToggle(noteId, checked) {
+async function _pubSendStoriesToggle(noteId, checked, quiet) { // quiet: the caller (Settings > All my notes) reports one summary instead of a toast per page; resolves true on success
   const note = _pubFindNote(noteId);
-  if (!note || !note.publishedSlug) return;
+  if (!note || !note.publishedSlug) return true;
   const slug = note.publishedSlug;
   try {
     const story = await _pubPutStoriesFlag(note, checked);
     _pubSaveNoteFields(noteId, { showInStories: checked });
     if (checked && story) _nbStoryServerRow(slug, story); // the server's own row replaces the provisional one
+    return true;
   } catch (e) {
     _nbLog('stories toggle', e);
     _nbStoryOverrides.delete(slug);
@@ -18550,7 +18923,8 @@ async function _pubSendStoriesToggle(noteId, checked) {
     const sw = document.getElementById('pub-stories-switch');
     if (sw && _pubNoteId === noteId) sw.checked = !!note.showInStories; // put the switch back to what's actually saved
     nbRenderStoriesStrip().catch(err => _nbLog('stories toggle: strip refresh', err));
-    showToast('Couldn\u2019t ' + (checked ? 'add to stories' : 'remove from stories') + _nbFailureReason(e) + '. Change undone.');
+    if (!quiet) showToast('Couldn\u2019t ' + (checked ? 'add to stories' : 'remove from stories') + _nbFailureReason(e) + '. Change undone.');
+    return false;
   }
 }
 // Sends the flag. Preferred route: PUT /publish/:slug/stories, which carries only the flag (no page
@@ -21511,7 +21885,7 @@ async function _pubUnpublish(note, signal) {
   // Drop it from the story strip now, while the slug is still on the note; the strip otherwise only catches up on the next fetch.
   try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('unpublish: strip', e); }
   if (_pubSaveNoteFields(note.id, {
-    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+    publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
   }) === false) throw Object.assign(new Error('unpublish save failed'), { storageFull: true }); // the page is down; a retry gets a 404 (= gone) and saves again
 }
 // Cancel aborts the unpublish request, but the server may already have taken the page down. Ask it before saying what happened;
@@ -21530,7 +21904,7 @@ async function _pubSettleCancelledUnpublish(note) {
     if (!down) return 'live';
     try { _nbStoryOptimistic(note, false); } catch (e) { _nbLog('cancelled unpublish: strip', e); }
     if (_pubSaveNoteFields(note.id, {
-      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false
+      publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
     }) === false) return 'unknown';
     return 'down';
   } catch (e) { _nbLog('cancelled unpublish check', e); return 'unknown'; }
@@ -21954,13 +22328,14 @@ async function _nbSettingsAcctFetch(force, auto) {
     if (!res.ok) throw new Error('acct stats: ' + res.status);
     const d = await res.json();
     if (seq !== _nbStAcctSeq || !nbIsSignedIn() || _nbStAcctSub !== who) return;
-    const next = { count: d.count || 0, likes: d.likes || 0, following: d.following == null ? null : d.following, createdAt: d.createdAt || null };
+    const next = { count: d.count || 0, likes: d.likes || 0, following: d.following == null ? null : d.following, createdAt: d.createdAt || null, mlOptOut: d.mlOptOut === undefined ? undefined : d.mlOptOut };
     const changed = JSON.stringify(next) !== JSON.stringify(_nbStAcctStats) || nameBefore !== _nbLoadCachedProfileName();
     _nbStAcctStats = next;
     const k = _nbStAcctKey();
     if (k) { try { localStorage.setItem(k, JSON.stringify(next)); } catch (e) {} }
-    _nbStAcctTries = 0; _nbStAcctToasted = false;
+    if (next.mlOptOut !== undefined) { _nbStAcctTries = 0; _nbStAcctToasted = false; }
     if (changed && typeof window._nbStRefresh === 'function') window._nbStRefresh();
+    if (next.mlOptOut === undefined) throw new Error('acct stats: reply had no privacy choice'); // the tile reads it, so retry like any failed load
   } catch (e) {
     _nbStAcctAt = 0; _nbLog('settings acct stats', e); // 0 = last try failed, so the next render or reconnect retries
     if (_nbStAcctTries < 3) { // and so does a timer: 5s, 10s, 15s while Settings is still showing
@@ -23875,7 +24250,7 @@ _nbFetchSubscriberCount(); // warm the cache at boot so the sign-out sheet doesn
 // in the background, and a browser tab throttles but doesn't always stop
 // timers) so a signed-in device left backgrounded isn't polling a server
 // nobody's about to look at.
-if (nbIsSignedIn()) { nbSyncPullThenPush(); _nbFetchProfileName(); _nbReconcileAccountActions(); }
+if (nbIsSignedIn()) { nbSyncPullThenPush(); _nbFetchProfileName(); _nbReconcileAccountActions(); setTimeout(() => _nbMlOptLaunchAsk().catch(e => _nbLog('ml opt-out launch', e)), 6000); }
 let _nbSyncPollBusy = false, _nbPollTick = 0;
 setInterval(() => {
   if (!nbIsSignedIn() || document.hidden || _nbSyncPollBusy || !_nbStPollDue()) return;
