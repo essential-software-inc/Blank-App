@@ -20973,6 +20973,7 @@ function _nbNoteUiReset() {
     if (e.button > 0) return;
     const card = _nbNoteCardOf(e.target);
     if (!card || e.target.closest('button, a, input, .nb-carousel-viewport')) return;
+    if (!card.getAttribute('data-note-id')) return; // Published feed card: nothing there can be selected, so a touch or hold shows no toast
     // Holding the title or description selects text (native); hold the time, tags, images or padding to select the card. Once a card is selected, a hold works anywhere.
     const tx = e.target.closest('.gc-title, .gc-desc-text');
     // On a locked (published) card a hold on the text still selects the text and also shows the locked toast (pt = text hold: toast only).
@@ -20983,7 +20984,7 @@ function _nbNoteUiReset() {
     sx = e.clientX; sy = e.clientY; pc = card;
     tm = setTimeout(() => {
       tm = 0; const c = pc, txh = pt; pc = null; pt = false;
-      if (!c || !c.isConnected) return;
+      if (!c || !c.isConnected || !c.matches(':active')) return;
       if (txh) { txToast(); return; }
       _nbNoteLpSup = 1; // the release of this press must not also count as a tap
       if (_nbNoteCardLocked(c)) _nbNoteLockedToast();
@@ -20993,7 +20994,8 @@ function _nbNoteUiReset() {
     }, 420);
   }, true);
   document.addEventListener('pointermove', e => { if (tm && (Math.abs(e.clientX - sx) > 9 || Math.abs(e.clientY - sy) > 9)) clr(); }, true);
-  ['pointerup', 'pointercancel'].forEach(n => document.addEventListener(n, clr, true));
+  ['pointerup', 'pointercancel', 'touchend', 'touchcancel', 'dragstart'].forEach(n => document.addEventListener(n, clr, true));
+  document.addEventListener('scroll', clr, { capture: true, passive: true });
   document.addEventListener('contextmenu', e => { { const c = _nbNoteCardOf(e.target); if (c && (_nbNoteSel.size || !_nbOverText(e.target.closest('.gc-title, .gc-desc-text'), e.clientX, e.clientY))) e.preventDefault(); } });
   // Selecting text is only for the title and description, and only before a card is selected; anywhere else on a card a selection never starts.
   document.addEventListener('selectstart', e => { const n = e.target, el = n && n.nodeType === 3 ? n.parentNode : n; if (tp && !tp.done && !tp.mouse && el && el.closest && tp.card.contains(el) && el.closest('.gc-title, .gc-desc-text')) txToast(); if (_nbNoteCardOf(el) && (_nbNoteLpSup || _nbNoteSel.size || !el.closest('.gc-title, .gc-desc-text'))) e.preventDefault(); }, true);
