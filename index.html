@@ -20724,6 +20724,7 @@ async function _nbCommentsBridge(e) {
   };
   try {
     if (m.op === 'sheet') { _nbStoryCommentsOpen = !!m.open; return; }
+    if (m.op === 'toast') { const t = String(m.text == null ? '' : m.text).slice(0, 200); if (t) showToast(t); return; } // the comments page's messages, in the app's own toast
     if (m.op === 'hello') {
       _nbStoryCommentsOpen = false;
       reply(true, { signedIn: signed });
