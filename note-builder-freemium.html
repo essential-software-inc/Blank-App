@@ -970,6 +970,25 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 #story-viewer-overlay.sv-loading-on #story-viewer-loading { display: grid }
 body.night #story-viewer-loading { color: #e8e8e8 }
 body.pink #story-viewer-loading { color: #bd2856 }
+
+/* Ad before a note: the skip button sits bottom left, opposite the comments button the note page draws at the right. */
+#story-ad-fab {
+  display: none; position: absolute; left: .9rem; bottom: 1.1rem; z-index: 3;
+  width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%;
+  align-items: center; justify-content: center;
+  background: rgba(24, 24, 28, .86); color: #fff; font: 600 16px/1 system-ui, -apple-system, sans-serif;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .28); -webkit-tap-highlight-color: transparent
+}
+#story-viewer-overlay.sv-ad #story-ad-fab { display: flex }
+#story-ad-fab .ring { position: absolute; inset: 0; transform: rotate(-90deg); pointer-events: none }
+#story-ad-fab .ring-bg { stroke: rgba(255, 255, 255, .28) }
+#story-ad-fab .ring-fg { stroke: #fff; transition: stroke-dashoffset .25s linear }
+#story-ad-fab .skip { display: none }
+#story-ad-fab.ready { background: #fff; color: #1a1a1a }
+#story-ad-fab.ready .ring, #story-ad-fab.ready #story-ad-num { display: none }
+#story-ad-fab.ready .skip { display: block }
+#story-ad-fab:active { transform: scale(.94) }
+/* Back works during an ad: it closes the viewer and the note that was asked for is not opened. */
 @keyframes svSpin { to { transform: rotate(360deg) } }
 /* Subscribed-feed note cards get the author's profile name shown before
    the title (cosmetic display name, not the real identity). */
@@ -6510,6 +6529,11 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
   </div>
   <iframe id="story-viewer-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
   <div id="story-viewer-loading" aria-hidden="true"></div>
+  <button id="story-ad-fab" type="button" onclick="nbStoryAdSkip()" aria-label="Skip ad" disabled>
+    <svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="19" fill="none" stroke-width="3"/><circle class="ring-fg" id="story-ad-ring" cx="22" cy="22" r="19" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="0"/></svg>
+    <span id="story-ad-num"></span>
+    <svg class="skip" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5l9 7-9 7V5z"/><rect x="17" y="5" width="2.6" height="14" rx="1"/></svg>
+  </button>
 </div>
 
 <div id="privacy-overlay" onclick="if(event.target===this)closePrivacy()">
@@ -6519,7 +6543,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 17 October 2026</em></p>
+      <p><em>Effective 18 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists, theme choice and your "All my notes" switches from Settings, are also backed up to our servers (see below). Those switches are kept on your device separately for each account, so one account's choices never touch another account's pages, even on a shared phone.</p>
@@ -6542,14 +6566,16 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>If you live somewhere with data protection laws, like the EU or the UK, we do this because we have a good reason to improve our apps (the law calls this a "legitimate interest"). You can say no any time. Choose "No, keep out" when we ask the first time you sign in, or change your choice any time in Settings under Privacy, and from then on we stop using your published pages, and the comments you write, for this. It covers everything on your account, old and new. Pages you published without signing in aren't linked to an account, so the switch can't reach them, but you can unpublish them. The page or comment itself stays where it is unless you unpublish or delete it.</p>
       <p>There are limits to what we can undo. If we've already used a page or comment to build or train something, we may not be able to take it back out. And we can't control copies other people have already made, like a page someone saved or shared.</p>
       <h3>Publishing as an ad</h3>
-      <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a starting template when they start a new note in Write (or in Share, for a Share note). It isn't just for people who have the page's link, like a regular published page. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it disappears from Write and Share right away, and any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device.</p>
+      <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a full-screen ad before a note they open, whether it's from the stories strip, Subscribed, Liked, Media or Go to note. It isn't just for people who have the page's link, like a regular published page. Everyone sees ads, including people who've bought Pro, but never before their own notes. So that ads don't come too often, the app keeps a small count of the notes you've opened and the time of your last ad. It stays on your device and we never see it. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever it asks for an ad or a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it stops being shown right away, though someone whose phone already loaded it might still see it once. Any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device.</p>
+      <h3>Making sure ad views are real (Android)</h3>
+      <p>Some people try to fake ad views with scripts. To stop that, the Android app asks Google to confirm that it's the real app, installed from Google Play, on a real phone. When the app needs an ad, it sends Google's answer to our servers, along with a random code, the app's name and the same anonymous device ID described above. Our servers ask Google if the answer is good, and we don't keep it. If it is, we give the app a pass that lasts about a day, and the app shows that pass each time it asks for an ad. We keep the random code for about ten minutes, and the pass (linked to the device ID) for about a day. We use them only to limit how often one phone can ask for ads. None of this tells us who you are, and it isn't linked to your account.</p>
       <h3>Ad access &amp; invites</h3>
       <p>Some bigger ad packages have to be earned. To work out which packages you can start and how many ads you can run at once, our servers count these things, using the records described in this policy: your subscribers, published notes, stories, likes and comments you've received and given, accounts you follow, how many of the last 30 days your account was active, your running ads, and any strikes. A strike comes from an alert we sent you about a removal, pause or suspension. We keep those alerts for up to a year, but a strike only counts for 60 days, or until we excuse it. You see these counts as your progress. We use them to enforce the limits, and other people never see them.</p>
       <p>Every signed-in account gets a random 8-character invite code, saved with the account. When someone adds a code, we save a record of who entered whose code, when it happened, and whether and why it stopped counting (the invited account was suspended or being deleted, or we removed it for abuse). A friend can add one code, in their first 14 days. You get an alert when a friend joins, but it doesn't say who. You only see totals: how many friends added your code and how many count right now, never who. An invite counts once your friend has published a note and been active on at least two days. If your friend chooses to subscribe at the same time, that's saved like any other subscription. When you share your code, it goes through your device's share sheet or clipboard, so the message is sent by the app you pick and we never see it. When an invite counts, we add 100 free views to your balance. We add it to the list of your view credits, together with the invited account's internal ID, so the same invite can't be rewarded twice. That entry stays in that list (and only there) until you delete your account, even if your friend's account is deleted first. If either account is deleted, the record of the invite itself is deleted.</p>
       <h3>Reporting a published page</h3>
       <p>Reports help keep Bluebook a good place for everyone. Anyone can report a published page from its public link. To stop spam, we count how many reports come from an IP address. That count lives in a short-lived counter that disappears on its own about a minute after the last report from that address. It's never saved as part of the report. We only keep the reason and details that were sent, which page it's about, and when. A report doesn't record who sent it. A report stays on file until someone reviews it, even if the page is unpublished or its author's account is deleted in the meantime. After it's handled, it's deleted. The exception is reports of child sexual abuse material. We keep those for 18 months, along with a copy of the reported page. The report's 18 months start when it's closed. The page copy's 18 months start when it was reported, or when it was most recently reported if it's reported again. The same period covers any other copy we hold of that page. We may also send a notification with the page's address, the reason and the details to our private alerts channel. We handle reports of child sexual abuse material the way the law requires, including passing them to the proper authority. We keep a short record of each one we pass on (the page's address, the date, the authority's reference for it, and a brief note) for 18 months from the latest. When we take an action (like a takedown, a dismissed report, or a restored page), we write down the action, the page's address, the time, and a short note such as the reason given. We keep that for about 13 months, as a record of what was done.</p>
       <p>Pages running as ads work the same way. An ad and its published page are exactly the same thing at the same web address, so there's only one way to report either: go to that page's address and use the report link there. There's no separate process for ads.</p>
-      <p>Right now, the app doesn't show you that address when an ad appears as a starting point on the Write or Share screen. To find it, save the ad without adding anything new, then open the Publish sheet for that note. It fills in the ad's own web address automatically. Open that address in a browser and you'll see the report link.</p>
+      <p>An ad you see in the app is just the published page, so it has the same &ldquo;Report an issue&rdquo; link at the bottom as any other page. Scroll down to find it. If you run an ad, you can find its address on the Publish sheet for that note.</p>
       <h3>Alerts</h3>
       <p>We want you to know what's happening with your account and the app. When one of your pages is reported, or we remove or pause something of yours, or change your account's status, you'll get an automatic message (an alert) that says why. We also use alerts for good news and updates, like announcements, new features, a bigger ad package unlocking, a friend adding your invite code, planned maintenance, safety tips, or a change to this policy or our terms. They can go to every account or to specific ones, and they're saved, shown and deleted the same way as the others. Alerts show up under Alerts in your library, which only appears once your account has at least one. A number on it shows how many have arrived since you last looked at the list, and the list's title shows how many you have in total. We save the text of each alert (which can name the page or item it's about), when it was sent, and when you deleted it. We also save one marker on your account for the newest alert you've been shown, so the count follows you across your devices. Deleting an alert only removes it from your list. We keep the record, including deleted ones, for up to a year so we can review what was sent to an account. An alert never includes who reported, or the details they wrote, because we don't pass those on. If you delete your account, your alerts and that marker are deleted too.</p>
       <h3>Voice notes</h3>
@@ -6595,7 +6621,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 17 October 2026</em></p>
+      <p><em>Effective 18 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language.</p>
       <h3>Who Can Use Bluebook</h3>
       <p>You need to be at least 13 to use Bluebook, or older if the rules where you live say so. If you're under 18, please read these terms with a parent or guardian and make sure they're OK with you using the app.</p>
@@ -6611,8 +6637,8 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>Anyone can report a published page. When one of your pages is reported, or we remove or pause something of yours (a profile picture, display name, page, story or ad), or change the status of your account, we may send you an automatic message with the reason, so you know what happened and why. These messages show up under Alerts in your library. We may also use Alerts to share announcements and updates about the app, like new features, maintenance, or changes to these terms. A profile picture that looks like it's pretending to be someone else may be removed. <strong>To keep the app safe for everyone, lots of reports about your content, or repeated rule-breaking, can lead to your account being suspended. When we remove or pause pages, stories, ads, profile pictures or display names, and when we suspend accounts, those count as strikes on your account for 60 days (unless we excuse one). Strikes affect which ad packages you can start (see Ad Access &amp; Invites below).</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, so we can run and moderate the service.</p>
       <h3>Advertising (Publish as Ad)</h3>
       <p>You can turn a page you've already published into an ad, and buy a set number of views through Google Play Billing (handled for us by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be allowed as an ad, a page must: have no added text or captions beyond blank lines; keep the required attribution notice in place, unedited, and easy to see at its original size; have no more than two images; have no voice notes (those are recorded on your device); and use only images linked directly from Wikipedia or Wikimedia Commons (no images uploaded from your device). A page can also have video, audio, and social-post embeds added with the editor's own tools. YouTube, Spotify, Instagram, X and Streamable are the allowed sources, with one embed per platform at most. Embeds added any other way aren't allowed. Ads still follow the Responsible Use section above. They also can't contain sexual or adult content, or use images, embeds, attribution or branding to pretend to be a person, brand or organization, or to mislead viewers about who or what the ad is from. We check these rules automatically before an ad can go live or be updated. We may refuse or take down an ad that no longer follows them, or that breaks these terms. An ad and its page are the same thing, so reporting one reports the other.</p>
-      <p>A running ad is shown to other people using this app as a starting template on their Write screen (or their Share screen, for a page made in Share), not only to people who have its link. We can't promise an ad will get any particular number of views in a given time, that the ad service will always be available, or any particular result from an ad being shown.</p>
-      <p>A <strong>view</strong> is counted once someone actually starts editing a note that was handed to them as your ad, not just when it's shown on their Write or Share screen. Every view counts: a repeat view from the same person or device still counts and is still taken from your view balance. Views aren't limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> number next to your ad's view count, just for your information. It's worked out from an anonymous ID made and stored on each device, which tells us whether a device has already been counted for a given ad (and, separately, is used for the activity counts in the Privacy Policy). It isn't linked to a Google account or any other identity, and it's sent whether or not you're signed in. Because it identifies a device rather than a person, someone using two devices counts as two unique viewers, and reinstalling the app or clearing its storage makes that device count as new from then on. The unique viewers number doesn't change your view balance or how views are taken from it.</p>
+      <p>A running ad is shown to other people using this app, full-screen, before a note they open. It isn't only for people who have its link. Everyone sees ads, including people who've bought Pro, but not before every note, because the app spaces them out. People can skip an ad once a short countdown finishes, or go back at any time. We can't promise an ad will get any particular number of views in a given time, that the ad service will always be available, or any particular result from an ad being shown.</p>
+      <p>A <strong>view</strong> is counted as soon as the ad appears on screen, even if the person goes back before the countdown ends. Every view counts: a repeat view from the same person or device still counts and is still taken from your view balance. Views aren't limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> number next to your ad's view count, just for your information. It's worked out from an anonymous ID made and stored on each device, which tells us whether a device has already been counted for a given ad (and, separately, is used for the activity counts in the Privacy Policy). It isn't linked to a Google account or any other identity, and it's sent whether or not you're signed in. Because it identifies a device rather than a person, someone using two devices counts as two unique viewers, and reinstalling the app or clearing its storage makes that device count as new from then on. The unique viewers number doesn't change your view balance or how views are taken from it.</p>
       <p>If Google Play refunds a view purchase, we take those views back out of your balance. If that leaves your balance below zero, your running ads stop, and you can't start a new ad until your balance covers it again.</p>
       <p>Purchased views are a one-time purchase through Google Play that gets used up. For anything about the purchase itself, see Google Play's own refund policy. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad by mistake after approving it, we'll decide whether to credit or refund the affected views. That's separate from, and doesn't replace, Google Play's own refund process for the purchase itself. If you unpublish an ad, it stops being shown and any views it had left go unused (so check your balance first). Those views aren't returned to your account or moved to another ad, and any unspent view-credit balance also goes unused if your account is deleted. Taking down the ad doesn't affect the published page, which stays live until you unpublish it separately. Views we return to your account (for example, a refund of an ad's unused views) stay in your balance, and you can put any amount of them on one of your ads from the Publish as Ad tab without buying again.</p>
       <h3>Comments</h3>
@@ -6762,7 +6788,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       </div>
       <div id="pub-ad-tab" style="display:none">
         <div id="pub-ad-need-web" class="bkp-panel" style="display:none">
-          <p class="bkp-help">Publish this note to the web first. Once it's live, buy a view package and publish it as an ad here. It'll then be shown automatically as a starting template when someone opens Write to start a new note (or Share, if this is a Share note). Each time that happens, one view counts against the package until it runs out.</p>
+          <p class="bkp-help">Publish this note to the web first. Once it's live, buy a view package and publish it as an ad here. It'll then show automatically as a full-screen ad before other people's notes. Each time your ad appears on someone's screen, one view is used up until the package runs out.</p>
           <p class="bkp-help">A typical eligible ad is simple: up to two images linked from Wikipedia or Wikimedia Commons, embedded YouTube videos, Spotify players, Instagram posts, X posts, or Streamable videos, plus one short disclaimer.</p>
         </div>
         <div id="pub-ad-need-signin" class="bkp-panel" style="display:none">
@@ -6772,7 +6798,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
           <div id="pub-ad-elig" class="bkp-panel"></div>
           <div id="pub-ad-loading" class="pub-ad-loading" role="status" aria-live="polite" style="display:none"><span class="pub-ad-spin" id="pub-ad-spin"></span><span id="pub-ad-loading-txt"></span><button type="button" class="ebtn-sec" id="pub-ad-retry" style="display:none" onclick="_pubRefreshAdTab()">Try again</button></div>
           <div id="pub-ad-state-new" class="bkp-panel" style="display:none">
-            <p class="bkp-help">Buy a view package for this note, or use views already in your balance. It'll show as a starting template on other people's Write screen (or Share screen, for a Share note) until the views run out.</p>
+            <p class="bkp-help">Buy a view package for this note, or use views already in your balance. It'll show as a full-screen ad before other people's notes until the views run out.</p>
             <div id="pub-ad-standing"></div>
             <div id="pub-ad-pkgs" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0"></div>
             <div id="pub-ad-bal" class="pub-bal" style="display:none">
@@ -19293,6 +19319,7 @@ function _nbSetSubBtnState(subBtn, isSubscribed) {
 const NB_STORY_SETTLE_MS = 300, NB_STORY_HOLD_MAX_MS = 4500;
 let _nbStorySettleTimer = null, _nbStoryHoldTimer = null;
 function _nbStoryRevealFrame() {
+  if (_nbStoryAd && !_nbStoryAd.began) _nbStoryAdBegin(); // the ad is on screen now: the skip countdown starts
   clearTimeout(_nbStorySettleTimer); clearTimeout(_nbStoryHoldTimer);
   _nbStorySettleTimer = _nbStoryHoldTimer = null;
   const fr = document.getElementById('story-viewer-frame'), ov = document.getElementById('story-viewer-overlay');
@@ -19314,7 +19341,168 @@ function _nbStoryHoldFrame() {
   fr.classList.add('sv-loading'); ov.classList.add('sv-loading-on');
   _nbStoryHoldTimer = setTimeout(_nbStoryRevealFrame, NB_STORY_HOLD_MAX_MS);
 }
+// ---- Ads before a note ----------------------------------------------------------------------------------------------
+// Every way into a note (the Stories strip, Subscribed, Liked, Media, Go to note) goes through nbOpenStory. Every
+// NB_STORY_AD_EVERY-th open shows an ad first: another person's published note, in this same viewer, with a skip button at the
+// bottom left (opposite the comments button the note page draws). The advertiser is charged one view as soon as the ad is on screen, even if it is backed out of. The button counts down NB_STORY_AD_SECS seconds from the moment the ad is on
+// screen, then skips to the note that was asked for. Back (the arrow or the system button) works at any time: it closes the ad and the note is not opened. Nothing here ever delays a note: the ad is fetched a step ahead, and when one
+// is due but none is ready the note simply opens and the next open gets the ad.
+const NB_STORY_AD_EVERY = 3;                       // an ad on every 3rd open...
+const NB_STORY_AD_MIN_GAP_MS = 2 * 60 * 1000;      // ...but never within 2 minutes of the last one
+const NB_STORY_AD_MAX_AGE_MS = 4 * 60 * 60 * 1000; // a fetched ad is dropped after this (its view token lives 6 hours)
+const NB_STORY_AD_STORE = 'nb_story_ad_v1';        // {n: opens since the last ad, t: when that ad started}
+const NB_STORY_AD_SECS = 7;                        // the skip button's countdown: fixed, same for every ad
+const NB_STORY_AD_RING = 119.4;                    // the countdown ring's length (2 * pi * 19)
+let _nbStoryAd = null;          // the ad on screen: {slug, token, pending: the note asked for, secs, began, ready, left, timer}
+let _nbStoryAdNext = null;      // an ad fetched ahead: {ad, at}
+let _nbStoryAdFetching = false;
+// The view is charged the moment the ad is on screen. If the request fails it is kept and retried (the worker's view token lasts 6 hours),
+// on the next ad, when the connection comes back, and at launch, so a shown ad is not lost to a bad signal.
+const NB_STORY_AD_VIEWQ = 'nb_story_ad_viewq_v1';
+const NB_STORY_AD_VIEWQ_MAX_AGE_MS = 5 * 60 * 60 * 1000;
+function _nbStoryAdViewQ() { try { const q = JSON.parse(localStorage.getItem(NB_STORY_AD_VIEWQ) || '[]'); return Array.isArray(q) ? q : []; } catch (e) { return []; } }
+function _nbStoryAdViewQSave(q) { try { localStorage.setItem(NB_STORY_AD_VIEWQ, JSON.stringify(q.slice(-20))); } catch (e) {} }
+async function _nbStoryAdSendView(v) { // true when the worker answered (counted or not), false when it should be tried again later
+  try {
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/' + encodeURIComponent(v.slug) + '/view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ viewerId: _nbDeviceId(), viewToken: v.token })
+    });
+    return res.status < 500 && res.status !== 429;
+  } catch (e) { return false; }
+}
+function _nbStoryAdChargeView(a) {
+  if (!a.token) return;
+  const v = { slug: a.slug, token: a.token, t: Date.now() };
+  _nbStoryAdSendView(v).then(ok => { if (!ok) _nbStoryAdViewQSave(_nbStoryAdViewQ().concat([v])); else _nbStoryAdFlushViews(); }); // a good connection also clears any earlier misses
+}
+let _nbStoryAdFlushing = false;
+async function _nbStoryAdFlushViews() {
+  if (_nbStoryAdFlushing) return;
+  const q = _nbStoryAdViewQ().filter(v => v && v.slug && v.token && Date.now() - v.t < NB_STORY_AD_VIEWQ_MAX_AGE_MS);
+  if (!q.length) { _nbStoryAdViewQSave([]); return; }
+  _nbStoryAdFlushing = true;
+  const keep = [];
+  for (const v of q) { if (!(await _nbStoryAdSendView(v))) keep.push(v); }
+  _nbStoryAdViewQSave(keep);
+  _nbStoryAdFlushing = false;
+}
+window.addEventListener('online', () => { _nbStoryAdFlushViews(); });
+setTimeout(_nbStoryAdFlushViews, 5000);
+function _nbStoryAdLoad() {
+  try { const s = JSON.parse(localStorage.getItem(NB_STORY_AD_STORE) || 'null'); return { n: Math.max(0, +(s && s.n) || 0), t: +(s && s.t) || 0 }; }
+  catch (e) { return { n: 0, t: 0 }; }
+}
+function _nbStoryAdSave(s) { try { localStorage.setItem(NB_STORY_AD_STORE, JSON.stringify(s)); } catch (e) {} }
+function _nbStoryAdPrefetch() {
+  if (_nbStoryAdNext || _nbStoryAdFetching) return;
+  _nbStoryAdFetching = true;
+  _nbFetchNextAd('story')
+    .then(ad => { if (ad && ad.slug) _nbStoryAdNext = { ad, at: Date.now() }; })
+    .catch(() => {})
+    .then(() => { _nbStoryAdFetching = false; });
+}
+// The ad to show before this open, or null. Counts the open either way.
+function _nbStoryAdForOpen(slug, authorSub) {
+  if (_nbStoryAd) return null;
+  if (_nbIsOwnAuthor(authorSub) || _nbMyPublishedSlugs().has(slug)) return null; // your own notes never get an ad
+  const st = _nbStoryAdLoad();
+  st.n = Math.min(st.n + 1, 99);
+  const now = Date.now();
+  if (_nbStoryAdNext && now - _nbStoryAdNext.at >= NB_STORY_AD_MAX_AGE_MS) _nbStoryAdNext = null;
+  let ad = null;
+  if (st.n >= NB_STORY_AD_EVERY && now - st.t >= NB_STORY_AD_MIN_GAP_MS && _nbStoryAdNext && navigator.onLine !== false) {
+    if (_nbStoryAdNext.ad.slug !== slug) { ad = _nbStoryAdNext.ad; st.n = 0; st.t = now; } // an ad is never shown ahead of its own page
+    _nbStoryAdNext = null;
+  }
+  _nbStoryAdSave(st);
+  if (!ad && st.n >= NB_STORY_AD_EVERY - 1) _nbStoryAdPrefetch(); // line one up for the next open
+  return ad;
+}
 function nbOpenStory(slug, authorSub, title, markSeen) { // markSeen: only a tap on a story avatar in the strip counts as viewing the story
+  const ad = _nbStoryAdForOpen(slug, authorSub);
+  if (ad) _nbStoryAdOpen(ad, { slug, authorSub, title, markSeen });
+  else _nbOpenStoryNow(slug, authorSub, title, markSeen);
+}
+function _nbStoryAdOpen(ad, pending) {
+  _nbStoryRetryStop();
+  _nbStoryCommentsOpen = false;
+  _nbStoryAd = { slug: ad.slug, token: ad.viewToken || null, pending, secs: NB_STORY_AD_SECS, began: false, ready: false, left: 0, timer: null };
+  _nbCurrentStoryAuthorSub = '';
+  _nbCurrentStorySlug = ad.slug;
+  _nbStoryNoAuthorSlug = null;
+  const ov = document.getElementById('story-viewer-overlay'), titleEl = document.getElementById('story-viewer-title');
+  const inner = document.getElementById('story-viewer-title-text');
+  inner.textContent = 'Ad';
+  nbUpdateTitleMarquee(titleEl, inner, true);
+  document.getElementById('story-viewer-like-btn').style.display = 'none';
+  document.getElementById('story-viewer-sub-btn').style.display = 'none';
+  document.getElementById('story-viewer-header').classList.remove('has-actions');
+  ov.classList.add('sv-ad', 'sv-ad-wait');
+  _nbStoryAdPaint();
+  _nbStoryHoldFrame();
+  document.getElementById('story-viewer-frame').src = _pubUrlFor(ad.slug);
+  const mdScr = document.getElementById('md-screen');
+  ov.classList.toggle('over-media', !!(mdScr && mdScr.classList.contains('open')));
+  ov.classList.add('open');
+  lockScroll();
+}
+// The ad is on screen (see _nbStoryRevealFrame): start the clock. It runs only while the app is in view, so backgrounding the app
+// pauses it, and a long gap between ticks (a suspended app) never counts as time watched.
+function _nbStoryAdBegin() {
+  const a = _nbStoryAd;
+  if (!a || a.began) return;
+  a.began = true;
+  a.left = a.secs * 1000;
+  _nbStoryAdChargeView(a); // the advertiser is charged for every ad that gets on screen, whether or not it is watched to the end
+  _nbStoryAdPaint();
+  let last = Date.now();
+  a.timer = setInterval(() => {
+    const now = Date.now(), dt = now - last;
+    last = now;
+    if (document.hidden) return;
+    a.left -= Math.min(dt, 1000);
+    if (a.left <= 0) _nbStoryAdReady(); else _nbStoryAdPaint();
+  }, 250);
+}
+function _nbStoryAdPaint() {
+  const a = _nbStoryAd;
+  if (!a) return;
+  const secsLeft = Math.max(0, Math.ceil(a.left / 1000));
+  document.getElementById('story-ad-num').textContent = a.began && !a.ready ? String(secsLeft) : '';
+  document.getElementById('story-ad-ring').style.strokeDashoffset = a.began ? String(NB_STORY_AD_RING * (1 - a.left / (a.secs * 1000))) : '0';
+  document.getElementById('story-ad-fab').setAttribute('aria-label', a.ready ? 'Skip ad' : (a.began ? 'Skip ad in ' + secsLeft + ' seconds' : 'Ad loading'));
+}
+function _nbStoryAdReady() {
+  const a = _nbStoryAd;
+  if (!a || a.ready) return;
+  clearInterval(a.timer); a.timer = null;
+  a.ready = true; a.left = 0;
+  const fab = document.getElementById('story-ad-fab');
+  fab.disabled = false; fab.classList.add('ready');
+  document.getElementById('story-viewer-overlay').classList.remove('sv-ad-wait');
+  _nbStoryAdPaint();
+}
+function nbStoryAdSkip() {
+  const a = _nbStoryAd;
+  if (!a || !a.ready) return;
+  const p = a.pending;
+  _nbStoryAdReset();
+  _nbOpenStoryNow(p.slug, p.authorSub, p.title, p.markSeen); // the viewer is already open: this swaps the ad for the note that was asked for
+}
+function _nbStoryAdReset() {
+  const a = _nbStoryAd;
+  if (!a) return;
+  clearInterval(a.timer);
+  _nbStoryAd = null;
+  document.getElementById('story-viewer-overlay').classList.remove('sv-ad', 'sv-ad-wait');
+  const fab = document.getElementById('story-ad-fab');
+  fab.disabled = true; fab.classList.remove('ready');
+  document.getElementById('story-ad-num').textContent = '';
+}
+function _nbOpenStoryNow(slug, authorSub, title, markSeen) { // markSeen: only a tap on a story avatar in the strip counts as viewing the story
+  _nbStoryAdReset();
   _nbStoryRetryStop();
   _nbStoryCommentsOpen = false;
   _nbCurrentStoryAuthorSub = authorSub;
@@ -19449,6 +19637,7 @@ function nbStoryBack() {
   nbCloseStory();
 }
 function nbCloseStory() {
+  _nbStoryAdReset();
   const _ov = document.getElementById('story-viewer-overlay');
   const _wasOverMedia = _ov.classList.contains('over-media');
   _ov.classList.remove('open', 'over-media');
@@ -20713,7 +20902,7 @@ function nbAlertOpen(id) {
 // The comments inside a page shown in the story viewer talk to the app (the page can't carry the account's session itself).
 async function _nbCommentsBridge(e) {
   const fr = document.getElementById('story-viewer-frame'), m = e.data;
-  if (!fr || e.source !== fr.contentWindow || !_nbCurrentStorySlug || m.slug !== _nbCurrentStorySlug) return;
+  if (!fr || e.source !== fr.contentWindow || !_nbCurrentStorySlug || m.slug !== _nbCurrentStorySlug || _nbStoryAd) return; // no comments on an ad
   const reply = (ok, data, error) => { try { e.source.postMessage({ type: 'nb-cm-res', rid: m.rid, ok, data, error }, '*'); } catch (err) {} };
   const base = NB_PUBLISH_API.replace(/\/$/, '');
   const signed = nbIsSignedIn();
@@ -23194,6 +23383,9 @@ function nbAdUnpublish() {
 // ---- when one's active, and count the edit-time view once they actually
 // ---- start editing it (see _nbCurrentBase/nbRenderCanvas below for how
 // ---- this plugs in).
+// Ads no longer replace a fresh Write/Share note with an ad template: ads now run only before a note (see 'Ads before a note').
+// Flip to true to bring the template ads back; the code that hands them out and counts their view is otherwise unchanged.
+const NB_WRITE_SHARE_ADS = false;
 let _nbPendingAdSlug = null; // slug of the ad template currently loaded into a fresh draft, if any
 // Set the moment insertBlock() adds a new component on top of that ad
 // template. Saving with this still false means the draft is exactly the ad
@@ -23229,6 +23421,52 @@ let _nbPendingAdFragment = null;
 let _nbAdViewCounted = false; // guards the one-time POST /ads/:slug/view per draft session
 let _nbPendingAdViewToken = null; // single-use token GET /ads/next issued with that ad; the view count only lands with it
 
+// Play Integrity attestation (Android app only). The native PlayIntegrity plugin (added at build time by
+// scripts/add-play-integrity.py) returns a Google-signed token; the worker's POST /ads/attest verifies it and hands back an "ad key"
+// good for a day, which GET /ads/next presents. Everything here is background work: it never delays opening a note, and outside the
+// compiled app (no plugin) it does nothing and the ad fetch behaves as before.
+const NB_AD_KEY_STORE = 'nb_ad_key';
+let _nbAdKeyInflight = null;
+function _nbPlayIntegrityPlugin() {
+  const cap = window.Capacitor && window.Capacitor.Plugins;
+  return (cap && cap.PlayIntegrity) || null;
+}
+function _nbCachedAdKey() {
+  try {
+    const k = JSON.parse(localStorage.getItem(NB_AD_KEY_STORE) || 'null');
+    return k && k.key && k.exp > Date.now() + 60000 ? k.key : null;
+  } catch (e) { return null; }
+}
+function _nbEnsureAdKey(force) {
+  const plugin = _nbPlayIntegrityPlugin();
+  if (!plugin) return Promise.resolve(null);
+  if (!force) { const have = _nbCachedAdKey(); if (have) return Promise.resolve(have); }
+  if (_nbAdKeyInflight) return _nbAdKeyInflight;
+  _nbAdKeyInflight = (async () => {
+    try {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      const nonce = btoa(String.fromCharCode.apply(null, bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const r = await plugin.requestToken({ nonce });
+      const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/attest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ viewerId: _nbDeviceId(), appId: r.appId, nonce, integrityToken: r.token })
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || !data.adKey) return null;
+      localStorage.setItem(NB_AD_KEY_STORE, JSON.stringify({ key: data.adKey, exp: Date.now() + (data.expiresIn || 3600) * 1000 }));
+      return data.adKey;
+    } catch (e) {
+      _nbLog('ad attest', e);
+      return null;
+    } finally {
+      _nbAdKeyInflight = null;
+    }
+  })();
+  return _nbAdKeyInflight;
+}
+
 async function _nbFetchNextAd(kind) {
   // Short client-side timeout: a slow/unreachable network here should
   // never delay opening a fresh note, just silently fall back to the
@@ -23237,9 +23475,18 @@ async function _nbFetchNextAd(kind) {
   const timer = controller ? setTimeout(() => controller.abort(), 3000) : null;
   try {
     // Write asks without a kind (what every older app version sends), Share asks for its own pool.
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/next' + (kind === 'share' ? '?kind=share' : ''), controller ? { signal: controller.signal } : {});
+    // The attested ad key rides along when there is one; with none yet, attestation starts in the background for next time.
+    const ak = _nbCachedAdKey();
+    if (!ak) _nbEnsureAdKey(false);
+    const qs = [];
+    if (kind === 'share' || kind === 'story') qs.push('kind=' + kind);
+    if (kind === 'story') qs.push('vid=' + encodeURIComponent(_nbDeviceId())); // lets the worker hold one device to its hourly share of ads when it serves one
+    if (ak) qs.push('ak=' + encodeURIComponent(ak));
+    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/ads/next' + (qs.length ? '?' + qs.join('&') : ''), controller ? { signal: controller.signal } : {});
     if (!res.ok) return null;
     const data = await res.json();
+    // The worker wants a (fresh) attested key: get one in the background; this screen falls back to the template.
+    if (data && data.needAttest) { _nbEnsureAdKey(true); return null; }
     return (data && data.ad) || null;
   } catch (e) {
     return null;
@@ -25719,7 +25966,7 @@ function _nbShowDraftWithAd(kind) {
   // already resolved for it) always renders immediately, unchanged from
   // before, so resuming work never waits on a network round-trip.
   const freshDraft = !_nbLoadDraftUiState(_nbGetDraftId()) && !_nbPendingAdSlug;
-  if (freshDraft) {
+  if (NB_WRITE_SHARE_ADS && freshDraft) {
     const fetchDraftId = _nbGetDraftId();
     if (_nbAdFetchInFlightDraftId === fetchDraftId) {
       // Already fetching for this exact draft — e.g. the person left
