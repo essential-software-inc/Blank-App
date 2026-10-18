@@ -81,6 +81,9 @@ workflows:
               content = f.read()
           old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
           new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if "setVerticalScrollBarEnabled(false)" in content:
+              print("Native scrollbar already disabled in", path)
+              raise SystemExit(0)
           if old not in content:
               raise SystemExit(
                   "ERROR: CapacitorWebView.java didn't match the expected "
@@ -166,6 +169,9 @@ workflows:
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
+          if "signingConfigs.release" in content:
+              print("Release signingConfig already present in", path)
+              raise SystemExit(0)
 
           # 1. Point the existing (unsigned) release build type at a signing
           #    config we add next. Must run before step 2 below — the fresh
@@ -260,6 +266,9 @@ workflows:
               content = f.read()
           old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
           new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if "setVerticalScrollBarEnabled(false)" in content:
+              print("Native scrollbar already disabled in", path)
+              raise SystemExit(0)
           if old not in content:
               raise SystemExit(
                   "ERROR: CapacitorWebView.java didn't match the expected "
@@ -337,6 +346,9 @@ workflows:
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
+          if "signingConfigs.release" in content:
+              print("Release signingConfig already present in", path)
+              raise SystemExit(0)
 
           content = re.sub(
               r"(release\s*\{)",
@@ -428,6 +440,9 @@ workflows:
               content = f.read()
           old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
           new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if "setVerticalScrollBarEnabled(false)" in content:
+              print("Native scrollbar already disabled in", path)
+              raise SystemExit(0)
           if old not in content:
               raise SystemExit(
                   "ERROR: CapacitorWebView.java didn't match the expected "
@@ -507,12 +522,43 @@ workflows:
               f.write(content)
           print("Added audio permissions to", path)
           PY
+      - name: Remove unused location permissions
+        script: |
+          # Library manifests merge these in; the app has no geolocation code. Re-applied every build like the mic step.
+          python3 - <<'PY'
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path) as f:
+              content = f.read()
+          perms = ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+          if all('android.permission.%s" tools:node="remove"' % p in content for p in perms):
+              print("Location permissions already removed in", path)
+              raise SystemExit(0)
+          if "</manifest>" not in content or "<manifest " not in content:
+              raise SystemExit("ERROR: AndroidManifest.xml has no <manifest> tag pair - the Capacitor template may have changed. Update this patch step to match.")
+          if "xmlns:tools=" not in content:
+              content = content.replace("<manifest ", '<manifest xmlns:tools="http://schemas.android.com/tools" ', 1)
+          drops = "".join('    <uses-permission android:name="android.permission.%s" tools:node="remove" />\n' % p for p in perms)
+          content = content.replace("</manifest>", drops + "</manifest>", 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Removed location permissions in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
       - name: Sync Capacitor (copies www/ + plugins into android/)
         script: |
           npx cap sync android
+      - name: Trim bundled pdf.js (source maps, sample PDF)
+        script: |
+          PDF_DIR="android/app/src/main/assets/public/pdfjs"
+          if [ -d "$PDF_DIR" ]; then
+            find "$PDF_DIR" -name "*.map" -delete
+            rm -f "$PDF_DIR/web/compressed.tracemonkey-pldi-09.pdf"
+            echo "Trimmed pdf.js in $PDF_DIR"
+          else
+            echo "No pdf.js folder at $PDF_DIR, nothing to trim"
+          fi
       - name: Set Android app version
         script: |
           sed -i.bak -E "s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
@@ -528,6 +574,9 @@ workflows:
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
+          if "signingConfigs.release" in content:
+              print("Release signingConfig already present in", path)
+              raise SystemExit(0)
 
           content = re.sub(
               r"(release\s*\{)",
@@ -609,6 +658,9 @@ workflows:
               content = f.read()
           old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
           new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if "setVerticalScrollBarEnabled(false)" in content:
+              print("Native scrollbar already disabled in", path)
+              raise SystemExit(0)
           if old not in content:
               raise SystemExit(
                   "ERROR: CapacitorWebView.java didn't match the expected "
@@ -688,12 +740,43 @@ workflows:
               f.write(content)
           print("Added audio permissions to", path)
           PY
+      - name: Remove unused location permissions
+        script: |
+          # Library manifests merge these in; the app has no geolocation code. Re-applied every build like the mic step.
+          python3 - <<'PY'
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path) as f:
+              content = f.read()
+          perms = ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+          if all('android.permission.%s" tools:node="remove"' % p in content for p in perms):
+              print("Location permissions already removed in", path)
+              raise SystemExit(0)
+          if "</manifest>" not in content or "<manifest " not in content:
+              raise SystemExit("ERROR: AndroidManifest.xml has no <manifest> tag pair - the Capacitor template may have changed. Update this patch step to match.")
+          if "xmlns:tools=" not in content:
+              content = content.replace("<manifest ", '<manifest xmlns:tools="http://schemas.android.com/tools" ', 1)
+          drops = "".join('    <uses-permission android:name="android.permission.%s" tools:node="remove" />\n' % p for p in perms)
+          content = content.replace("</manifest>", drops + "</manifest>", 1)
+          with open(path, "w") as f:
+              f.write(content)
+          print("Removed location permissions in", path)
+          PY
       - name: Generate app icon from assets/logo.png
         script: |
           npx capacitor-assets generate --android
       - name: Sync Capacitor (copies www/ + plugins into android/)
         script: |
           npx cap sync android
+      - name: Trim bundled pdf.js (source maps, sample PDF)
+        script: |
+          PDF_DIR="android/app/src/main/assets/public/pdfjs"
+          if [ -d "$PDF_DIR" ]; then
+            find "$PDF_DIR" -name "*.map" -delete
+            rm -f "$PDF_DIR/web/compressed.tracemonkey-pldi-09.pdf"
+            echo "Trimmed pdf.js in $PDF_DIR"
+          else
+            echo "No pdf.js folder at $PDF_DIR, nothing to trim"
+          fi
       - name: Set Android app version
         script: |
           sed -i.bak -E "s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
@@ -709,6 +792,9 @@ workflows:
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
+          if "signingConfigs.release" in content:
+              print("Release signingConfig already present in", path)
+              raise SystemExit(0)
 
           content = re.sub(
               r"(release\s*\{)",
@@ -812,6 +898,9 @@ workflows:
               content = f.read()
           old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
           new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if "setVerticalScrollBarEnabled(false)" in content:
+              print("Native scrollbar already disabled in", path)
+              raise SystemExit(0)
           if old not in content:
               raise SystemExit(
                   "ERROR: CapacitorWebView.java didn't match the expected "
@@ -889,6 +978,9 @@ workflows:
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
+          if "signingConfigs.release" in content:
+              print("Release signingConfig already present in", path)
+              raise SystemExit(0)
 
           content = re.sub(
               r"(release\s*\{)",
@@ -974,6 +1066,9 @@ workflows:
               content = f.read()
           old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
           new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if "setVerticalScrollBarEnabled(false)" in content:
+              print("Native scrollbar already disabled in", path)
+              raise SystemExit(0)
           if old not in content:
               raise SystemExit(
                   "ERROR: CapacitorWebView.java didn't match the expected "
@@ -1051,6 +1146,9 @@ workflows:
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
+          if "signingConfigs.release" in content:
+              print("Release signingConfig already present in", path)
+              raise SystemExit(0)
 
           content = re.sub(
               r"(release\s*\{)",
@@ -1164,6 +1262,9 @@ workflows:
               content = f.read()
           old = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n    }"
           new = "    public CapacitorWebView(Context context, AttributeSet attrs) {\n        super(context, attrs);\n        setVerticalScrollBarEnabled(false);\n        setHorizontalScrollBarEnabled(false);\n    }"
+          if "setVerticalScrollBarEnabled(false)" in content:
+              print("Native scrollbar already disabled in", path)
+              raise SystemExit(0)
           if old not in content:
               raise SystemExit(
                   "ERROR: CapacitorWebView.java didn't match the expected "
@@ -1238,6 +1339,9 @@ workflows:
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
+          if "signingConfigs.release" in content:
+              print("Release signingConfig already present in", path)
+              raise SystemExit(0)
 
           content = re.sub(
               r"(release\s*\{)",
@@ -1327,6 +1431,9 @@ workflows:
           path = sys.argv[1]
           with open(path) as f:
               content = f.read()
+          if "pinchGestureRecognizer" in content:
+              print("Pinch-zoom already disabled in", path)
+              raise SystemExit(0)
           if "import Capacitor" not in content:
               content = content.replace("import UIKit", "import UIKit\nimport Capacitor", 1)
           pattern = r"(func applicationDidBecomeActive\(_ application: UIApplication\) \{)"
