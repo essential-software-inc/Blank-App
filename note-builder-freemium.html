@@ -19434,11 +19434,22 @@ function _nbStoryAdOpen(ad, pending) {
   _nbStoryNoAuthorSlug = null;
   const ov = document.getElementById('story-viewer-overlay'), titleEl = document.getElementById('story-viewer-title');
   const inner = document.getElementById('story-viewer-title-text');
-  inner.textContent = 'Ad';
+  // The header looks exactly like a note's: @slug title, Like and Subscribe. The skip button already says it is an ad, and a like is
+  // feedback to the advertiser. The ad's payload carries the author (an older worker's
+  // does not, and then /meta is asked, as for a note opened by pasted link), so Subscribe is ready at once and hides if the author is you.
+  inner.textContent = '@' + ad.slug;
   nbUpdateTitleMarquee(titleEl, inner, true);
-  document.getElementById('story-viewer-like-btn').style.display = 'none';
-  document.getElementById('story-viewer-sub-btn').style.display = 'none';
-  document.getElementById('story-viewer-header').classList.remove('has-actions');
+  const subBtn = document.getElementById('story-viewer-sub-btn');
+  const likeBtn = document.getElementById('story-viewer-like-btn');
+  _nbSetSubBtnState(subBtn, false);
+  subBtn.style.display = '';
+  likeBtn.style.display = '';
+  document.getElementById('story-viewer-header').classList.add('has-actions');
+  _nbSetLikeBtnState(likeBtn, _nbLikedSlugs().has(ad.slug));
+  _nbRefreshLikeState(ad.slug);
+  if (typeof ad.authorSub === 'string' && ad.authorSub) _nbAdoptStoryAuthor(ad.slug, ad.authorSub); // the worker sent the author: Subscribe is ready now (hidden if it is you)
+  else if (ad.authorSub === null) { _nbStoryNoAuthorSlug = ad.slug; subBtn.style.display = 'none'; } // published without an account: nobody to subscribe to
+  else _nbResolveStoryAuthor(ad.slug).catch(e => _nbLog('ad author lookup', e)); // an older worker sends no author: ask /meta; a failure is retried when Subscribe is tapped
   ov.classList.add('sv-ad', 'sv-ad-wait');
   _nbStoryAdPaint();
   _nbStoryHoldFrame();
