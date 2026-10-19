@@ -6580,7 +6580,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 18 October 2026</em></p>
+      <p><em>Effective 19 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you follow (signing out clears the follow copy). It keeps a short queue of any likes or follows you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favorites, playlists, theme choice and your "All my notes" switches from Settings, are also backed up to our servers (see below). Those switches are kept on your device separately for each account, so one account's choices never touch another account's pages, even on a shared phone.</p>
@@ -6602,7 +6602,10 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>We may use the pages you've published, and the comments on them, to run, build, test and improve Bluebook and our other apps, including by using machine learning. This only covers published pages and their comments, which anyone who opens the page can already see. It doesn't cover notes that are only backed up to your account.</p>
       <p>If you live somewhere with data protection laws, like the EU or the UK, we do this because we have a good reason to improve our apps (the law calls this a "legitimate interest"). You can say no any time. Choose "No, keep out" when we ask the first time you sign in, or change your choice any time in Settings under Privacy, and from then on we stop using your published pages, and the comments you write, for this. It covers everything on your account, old and new. Pages you published without signing in aren't linked to an account, so the switch can't reach them, but you can unpublish them. The page or comment itself stays where it is unless you unpublish or delete it.</p>
       <p>There are limits to what we can undo. If we've already used a page or comment to build or train something, we may not be able to take it back out. And we can't control copies other people have already made, like a page someone saved or shared.</p>
-      <h3>Publishing as an ad</h3>
+      <h3>Comments</h3>
+      <p>If a page's author turns on comments, people who are signed in can comment on it and reply to each other. For each comment we save what it says, when it was written, whether it's a reply, your account ID and your random author ID. Comments show up on the live page for anyone who opens it. Normally a comment shows your display name and profile picture, or "Anonymous" if you haven't set a display name. If you'd rather not be named, go to Settings, under Privacy, and set "Comment as" to Anonymous. Then your comments show as Anonymous, with no name or picture, and the alerts they send say "Someone" instead of your name. This choice is saved with your account, so it's the same on every device you sign in on. It covers all your comments, old and new. So if you switch back to your name and picture, they'll show on all your comments again. Changing your display name changes it on all of them too, unless you're commenting as Anonymous.</p>
+      <p>Anonymous only hides you from other people. We can still tell which account wrote each comment. That lets you delete your own comments, lets replies reach you, and lets us act on comments that break the terms. If you're the author of the page, your comments on it still show a tag saying they're from the author. We keep comments until you or the page's author deletes them, the page is unpublished, or your account is deleted.</p>
+            <h3>Publishing as an ad</h3>
       <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a full-screen ad before a note they open, whether it's from the stories strip, Subscribed, Liked, Media or Go to note. It isn't just for people who have the page's link, like a regular published page. Everyone sees ads, including people who've bought Pro, but never before their own notes. So that ads don't come too often, the app keeps a small count of the notes you've opened and the time of your last ad. It stays on your device and we never see it. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save an anonymous ID that each device makes, keeps, and sends whenever it asks for an ad or a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. See "Analytics" below too. When you unpublish an ad, it stops being shown right away, though someone whose phone already loaded it might still see it once. Any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device.</p>
       <h3>Making sure ad views are real (Android)</h3>
       <p>Some people try to fake ad views with scripts. To stop that, the Android app asks Google to confirm that it's the real app, installed from Google Play, on a real phone. When the app needs an ad, it sends Google's answer to our servers, along with a random code, the app's name and the same anonymous device ID described above. Our servers ask Google if the answer is good, and we don't keep it. If it is, we give the app a pass that lasts about a day, and the app shows that pass each time it asks for an ad. We keep the random code for about ten minutes, and the pass (linked to the device ID) for about a day. We use them only to limit how often one phone can ask for ads. None of this tells us who you are, and it isn't linked to your account.</p>
@@ -6623,7 +6626,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>This section is about links inside the app. In preview, tapping a link in a page shows its address in a sheet with a copy option. The app doesn't open or load the linked page, except when the link is the full address of a published note: then it opens that note in the app's story viewer, the same as pasting it in the search box and tapping GO. Nothing is fetched, and we can't see what links a page contains. A published page works a bit differently, depending on how you're viewing it. If someone opens its public web address directly, outside the app, they're looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Inside the app, opening a story or a note you found through search shows that same published page in the app's own built-in viewer (see "Stories, subscriptions &amp; likes" below), so you don't leave the app to see it. A link you tap inside that viewer opens in your own browser, which takes you out of the app, unless it's the full address of another published note, which opens in the viewer instead. The app doesn't load the linked page itself, and we have nothing to do with that site, but like any site you open in a browser, it can see your IP address. If the app can't open the link, it copies the address instead.</p>
       <h3>Stories, subscriptions &amp; likes</h3>
       <p>From a published note's Publish sheet, you can turn on "Show in stories" (you need to sign in). That adds the note to a stories strip that other people using the app can see, not only people who have the link. It's similar to Publish as Ad, but without purchased views. Our servers save the note's web address, title, description and tags (if you've added them), when the note was created, and up to three preview images from the note's published page (plus how many images the note has, so a feed card can show how many more there are), along with your account ID. Your story shows the title. The Subscribed feed of anyone who subscribes to you shows the title, description, tags, how long ago the note was created, and how many likes it has. Preview images that come from your device are copied to our servers, and they can be loaded without a sign-in check while the story is showing. A preview image added by URL isn't copied, so viewers' devices load it straight from its source when they see your story or feed card, and that host can see their IP address. If you turn the toggle off within the first 24 hours, or unpublish the note at any time, we delete the saved copies, including the saved description and tags. Other people's devices never get your Google account ID or email. Instead, each account has a separate random author ID that means nothing outside the app. It's sent with your stories, so your picture and display name can go with them and a Subscribe tap can reach the right account. We make it ourselves, it isn't made from your Google account, and it's deleted with your account. To tell you apart from other authors, viewers see your display name, picture, or the note's title. A story can appear in the strip for 24 hours from when you turn on "Show in stories" (editing the note doesn't restart that clock). After that, it leaves the strip and your Stories tab. The strip isn't a list of every story. It shows a selection of other people's stories that reshuffles every few hours, so a story still within its 24 hours may or may not be shown to a given viewer. Your own live stories always lead your own strip, and stories from accounts a viewer already follows show up in their Subscribed feed instead of the strip. A story stays in the Subscribed feed of people who follow you (from when they followed you onward) for 7 days from when you turned on "Show in stories", or until you unpublish the note, whichever comes first. After that it leaves the feed, but the published page itself stays online. After the first 24 hours the toggle turns itself off. That just tells you the story has left the strip and your Stories tab. It stays in your followers' feeds for the rest of the 7 days. If you turn the toggle off yourself within the first 24 hours, the story disappears from the strip and from your followers' feeds.</p>
-      <p>A display name and profile picture are both optional. If you set a display name, it's shown on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed. If you leave it blank, viewers just see the note's title in both places. A display name can be up to 30 characters. If you set a profile picture, it's only shown on your stories, as the ring around your avatar in the stories strip. It doesn't show on your notes in the Subscribed feed. A picture you upload is stored on our servers and served from a web address based on your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing (or to you, when you're signed in). So anyone who has your author ID, for example from seeing one of your stories, can load it during that time, and no one else can. Once you have no stories showing, the picture is no longer shown to others. If you remove the picture, it's deleted from our servers. With no picture, the story ring uses the note's own image if it has one, and only then an initial letter, taken from your display name (or the note's title if you haven't set one). That initial is never taken from your account email, which is never sent to other viewers at all.</p>
+      <p>A display name and profile picture are both optional. If you set a display name, it's shown on your stories and, to anyone who subscribes to you, on your notes in their Subscribed feed. If you leave it blank, viewers just see the note's title in both places. A display name can be up to 30 characters. If you set a profile picture, it shows on your stories, as the ring around your avatar in the stories strip, and next to your name on your comments (see "Comments" below). It doesn't show on your notes in the Subscribed feed. You get to pick what your ring shows. In Settings, under Privacy, tap "Story strip picture" and choose your profile picture (that's the default), the first image in your note, or never your picture. If you pick the note's first image, the ring shows it when the note has one. If not, it falls back to your picture, and then to a letter. If you pick never, the ring shows the note's first image, or a letter if there isn't one, and your picture isn't used in the strip. Your choice is saved with your account, so it works on every device, and it's sent along with your stories so other people's apps follow it. It only changes what the strip shows. It doesn't delete your picture, and it doesn't stop your picture from loading from the address below. A picture you upload is stored on our servers and served from a web address based on your random author ID. That address isn't behind a sign-in check, but it only serves your picture while you have at least one story showing, or at least one comment showing your name (or to you, when you're signed in). So anyone who has your author ID, for example from seeing one of your stories or comments, can load it during that time, and no one else can. Once you have no stories or named comments showing, the picture is no longer shown to others. If you remove the picture, it's deleted from our servers. With no picture, or if your choice means it isn't used, the story ring uses the note's own image if it has one, and only then an initial letter, taken from your display name (or the note's title if you haven't set one). That initial is never taken from your account email, which is never sent to other viewers at all.</p>
       <p>A signed-in account can subscribe to (follow) another account from that account's story. We save who follows whom so we can build your Subscribed feed, show whether you're already following someone, and keep your follows on every device you sign in on. You can see how many accounts follow you as a total, never who, and how many accounts you follow. The app also keeps a copy of who you follow on your device, so it can show the Subscribe/Subscribed button without asking our servers each time. We also record, under your account, which stories you've opened, so a story you've already seen doesn't keep grabbing your attention in the strip. Searching your Subscribed feed happens on your device, within the stories already loaded. What you type is never sent to us. A signed-in account can also like a published note. We record, under your account, which notes you've liked so the heart shows correctly across your devices. For each note you like or unlike, and each account you follow or unfollow, we also note the time of your most recent action. That way, taps made on different devices (or offline and sent later) are applied in the right order. That note stays after you unlike or unfollow, and is removed once the like or follow is gone and the note is more than 30 days old, or when your account is deleted. Each published note's own like count shows on its card wherever that card appears: your Published and Stories tabs, and the Subscribed feed or Liked tab of anyone who sees the note, but never who liked it. You can also see one total on your account screen: the number of likes across all your published notes. If you unpublish a note, the likes it received are removed, so both that note's count and the combined total go down. When a published note that isn't showing as a story appears as a card, either in its author's Published tab or in someone's Liked tab, we may copy up to three preview images from that page to our servers. Like story preview images, these copies can be loaded without a sign-in check, and they're deleted when the note is unpublished or its author's account is deleted.</p>
       <h3>All my notes</h3>
       <p>In Settings, the "All my notes" section has four switches that change lots of your published pages at once, so you don't have to do them one by one in the Publish sheet: "Always show in stories", "Always show comments", "Hide comments on all pages" and "Disable comments on all pages". You need to be signed in to use them. When you turn one on, the app changes every page you've already published, and every page you publish after that. When you turn one off, it just stops changing pages. Your pages keep whatever they're set to at that moment. If you later change a single page's own switches in its Publish sheet, that page's choice wins.</p>
@@ -6658,7 +6661,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 18 October 2026</em></p>
+      <p><em>Effective 19 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language.</p>
       <h3>Who Can Use Bluebook</h3>
       <p>You need to be at least 13 to use Bluebook, or older if the rules where you live say so. If you're under 18, please read these terms with a parent or guardian and make sure they're OK with you using the app.</p>
@@ -6679,9 +6682,9 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>If Google Play refunds a view purchase, we take those views back out of your balance. If that leaves your balance below zero, your running ads stop, and you can't start a new ad until your balance covers it again.</p>
       <p>Purchased views are a one-time purchase through Google Play that gets used up. For anything about the purchase itself, see Google Play's own refund policy. Separately, if we fail to deliver a view-credit balance you paid for, or take down an ad by mistake after approving it, we'll decide whether to credit or refund the affected views. That's separate from, and doesn't replace, Google Play's own refund process for the purchase itself. If you unpublish an ad, it stops being shown and any views it had left go unused (so check your balance first). Those views aren't returned to your account or moved to another ad, and any unspent view-credit balance also goes unused if your account is deleted. Taking down the ad doesn't affect the published page, which stays live until you unpublish it separately. Views we return to your account (for example, a refund of an ad's unused views) stay in your balance, and you can put any amount of them on one of your ads from the Publish as Ad tab without buying again.</p>
       <h3>Comments</h3>
-      <p>If you turn on "Show comments button" in a note's Publish sheet, signed-in people can comment on it and reply to each other. A comment is saved with its text, the time, and the commenter's profile picture and display name (or shown as Anonymous if they have no name), and appears on the live page for anyone who opens it. Comments count toward ad access like likes do. The commenter or the note's author can delete a comment, which also removes its replies. Turning off "Show comments button" hides them. Turning off "Allow new comments" keeps the ones already there but stops people from adding new comments or replies. Unpublishing the note or deleting an account removes them. You still own your comments. By posting one, you give us permission to use it in the same ways as published pages, as described in the Privacy Policy's "Using published pages and comments" section, and you promise you have the right to give us that permission. You can also change these for all your pages at once from Settings (see "All My Notes" below).</p>
+      <p>If you turn on "Show comments button" in a note's Publish sheet, signed-in people can comment on it and reply to each other. A comment is saved with what it says and when it was written, and it shows up on the live page for anyone who opens it. Normally it shows the commenter's display name and profile picture (or "Anonymous" if they haven't set a display name). If you'd rather not be named, you can set "Comment as" to Anonymous in Settings, and your comments will show with no name or picture. That choice is saved with your account, so it's the same on every device you sign in on, and it covers all your comments, old and new. You can change it whenever you like. Anonymous only hides you from other people. Your comments are still linked to your account, and everything in these terms still applies to them. Comments count toward ad access like likes do. The commenter or the note's author can delete a comment, which also removes its replies. Turning off "Show comments button" hides them. Turning off "Allow new comments" keeps the ones already there but stops people from adding new comments or replies. Unpublishing the note or deleting an account removes them. You still own your comments. By posting one, you give us permission to use it in the same ways as published pages, as described in the Privacy Policy's "Using published pages and comments" section, and you promise you have the right to give us that permission. You can also change these for all your pages at once from Settings (see "All My Notes" below).</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
-      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags and preview images. It also lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description and tags, just like anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. Your display name and profile picture are optional. If you add them, they're shown on your stories and to your subscribers. They don't have to be your real name or photo, but they can't pretend to be another person, account or brand, or mislead viewers about who's posting.</p>
+      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags and preview images. It also lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description and tags, just like anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. Your display name and profile picture are optional. If you add them, they show on your stories, on your comments (unless you comment as Anonymous), and to your subscribers. In Settings, "Story strip picture" lets you choose whether your story ring shows your profile picture, the first image in your note, or never your picture. That choice is saved with your account. They don't have to be your real name or photo, but they can't pretend to be another person, account or brand, or mislead viewers about who's posting.</p>
       <p>A signed-in account can also like a published note. Likes are a simple way to say thanks. As its author, you can see each note's own like count on its card in your Published and Stories tabs, and anyone who sees the note in their Subscribed feed or Liked tab can see it too. Nobody sees who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. Please don't misuse likes, like using multiple accounts or automated tools to push a note's count up or down. We may remove likes, or suspend your ability to like, for the same reasons we can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what's recorded about likes.</p>
       <h3>All My Notes (Settings)</h3>
       <p>In Settings, "All my notes" gives you four shortcuts that change all your published pages at once: "Always show in stories", "Always show comments", "Hide comments on all pages" and "Disable comments on all pages". They only work when you're signed in. Turning one on changes every page you've already published and every page you publish after that. Turning one off just stops it from changing pages. It doesn't undo anything, so your pages keep their current settings until you change them. "Always show comments" and "Hide comments on all pages" are opposites, so turning one on turns the other off. If you change one page's own switches in its Publish sheet later, that page's choice wins.</p>
@@ -14272,7 +14275,7 @@ a.blk-btn:hover{filter:brightness(.95)}
         emit();
       });
     });
-    variantSheet.querySelectorAll('.blk-variant-swatch').forEach(function(swatchBtn) {
+    variantSheet.querySelectorAll('.blk-variant-swatch[data-color-idx]').forEach(function(swatchBtn) {
       swatchBtn.addEventListener('click', function() {
         var idx = +swatchBtn.dataset.colorIdx;
         var opt = colorOptions[idx];
@@ -14288,7 +14291,7 @@ a.blk-btn:hover{filter:brightness(.95)}
             ccwSetLastColor('variant', hex);
             swatchBtn.style.background = hex;
             selectedColorIdx = idx;
-            variantSheet.querySelectorAll('.blk-variant-swatch').forEach(function(b) {
+            variantSheet.querySelectorAll('.blk-variant-swatch[data-color-idx]').forEach(function(b) {
               b.classList.toggle('blk-variant-swatch-selected', b === swatchBtn);
             });
             emit();
@@ -14297,7 +14300,7 @@ a.blk-btn:hover{filter:brightness(.95)}
         }
         customGrad = null; // a palette pick replaces a gradient
         selectedColorIdx = idx;
-        variantSheet.querySelectorAll('.blk-variant-swatch').forEach(function(b) {
+        variantSheet.querySelectorAll('.blk-variant-swatch[data-color-idx]').forEach(function(b) {
           b.classList.toggle('blk-variant-swatch-selected', b === swatchBtn);
         });
         emit();
@@ -16336,7 +16339,9 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
     ['Privacy', [
-      { t: 'link', l: 'Published pages & comments', show: () => nbIsSignedIn(), s: () => { const v = _nbMlOptGet(); const d = _nbStAcctGet(); if (!d || d.mlOptOut === undefined) return '\u2014'; return v === true ? 'Kept out of app improvements' : v === false ? 'May be used to improve our apps' : 'Not chosen yet'; }, go: () => _nbStMlTileTap() }]],
+      { t: 'link', l: 'Published pages & comments', show: () => nbIsSignedIn(), s: () => { const v = _nbMlOptGet(); const d = _nbStAcctGet(); if (!d || d.mlOptOut === undefined) return '\u2014'; return v === true ? 'Kept out of app improvements' : v === false ? 'May be used to improve our apps' : 'Not chosen yet'; }, go: () => _nbStMlTileTap() },
+      { t: 'chips', k: 'storyAvatar', l: 'Story strip picture', show: () => nbIsSignedIn(), s: 'What the ring around your stories shows to other people. Profile picture shows your picture, then the note\u2019s first image. Note image shows the first image in the note, then your picture if the note has none. Never my picture keeps your picture out of the strip and shows the note\u2019s first image, then a letter.', o: [['picture', 'Profile picture'], ['note', 'Note image'], ['never', 'Never my picture']], get: () => _nbStoryAvatarGet(), set: v => _nbSetDisplayPref({ storyAvatar: v }) },
+      { t: 'chips', k: 'commentAs', l: 'Comment as', show: () => nbIsSignedIn(), s: 'Name & picture shows your display name and profile picture on your comments (Anonymous if you have no display name). Anonymous never shows them. This applies to all your comments, old and new.', o: [['profile', 'Name & picture'], ['anonymous', 'Anonymous']], get: () => _nbCommentAsGet(), set: v => _nbSetDisplayPref({ commentAs: v }) }]],
     ['Security', [
       { t: 'sw', k: 'appLock', get: () => !!(window.nbLock && window.nbLock.enabled()), toggle: (done) => { const L = window.nbLock; if (!L) { done(false); return; } if (L.enabled()) L.disable(done); else L.enable(done); }, l: 'App lock', s: 'Ask for a PIN or password each time the app starts, and when you return after more than 30 seconds away. It stays on this device. If you forget it, answering your recovery question gets you back in.' },
       { t: 'link', l: 'Change PIN or password', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.change(() => { try { window._nbStRender(); } catch (e) {} }) },
@@ -17537,6 +17542,7 @@ async function _nbCompleteGoogleSignIn(idToken) {
   nbRenderAccountDialog();
   closeAccountScreen();
   if (typeof data.mlOptOut === 'boolean') _nbMlOptStore(data.mlOptOut);
+  { const dp = {}; if (data.storyAvatar !== undefined) dp.storyAvatar = data.storyAvatar; if (data.commentAs !== undefined) dp.commentAs = data.commentAs; if (Object.keys(dp).length) _nbDisplayPrefStore(dp); }
   if (data.mlOptOut == null) setTimeout(_nbMlOptAsk, 700); // this account has never answered the machine-learning question
   // Refresh the notes screen against the now-signed-in account right
   // away — nbVisibleNotes() depends on nbAccount(), so this newly-signed
@@ -21358,6 +21364,44 @@ function _nbMlOptStore(on) {
   if (k) { try { localStorage.setItem(k, JSON.stringify(_nbStAcctStats)); } catch (e) {} }
   try { if (window._nbStRefresh) window._nbStRefresh(); } catch (e) {}
 }
+// Two more account choices that other people see the effect of: what the ring around your stories shows (storyAvatar: picture | note |
+// never) and how your comments are shown (commentAs: profile | anonymous). The worker keeps both on the account and sends the ring choice
+// with each story, so every viewer's strip follows it. Cached with the account stats, like the machine-learning choice, so Settings shows
+// them offline. A change shows at once and goes back, with a toast, if the worker can't save it.
+function _nbStoryAvatarGet() { const d = _nbStAcctGet(); return d && (d.storyAvatar === 'note' || d.storyAvatar === 'never') ? d.storyAvatar : 'picture'; }
+function _nbCommentAsGet() { const d = _nbStAcctGet(); return d && d.commentAs === 'anonymous' ? 'anonymous' : 'profile'; }
+function _nbDisplayPrefStore(patch) {
+  _nbStAcctGet();
+  _nbStAcctSeq++; // a stats fetch already in flight predates this choice; its answer is dropped so it can't put the old value back
+  _nbStAcctStats = Object.assign({}, _nbStAcctStats || {}, patch);
+  const k = _nbStAcctKey();
+  if (k) { try { localStorage.setItem(k, JSON.stringify(_nbStAcctStats)); } catch (e) {} }
+  if (patch.storyAvatar !== undefined) { // your own rings follow right away instead of at the next /stories load
+    let touched = false;
+    _nbStoriesCache.forEach(function (s) { if (_nbIsOwnAuthor(s.authorSub) && s.avatarMode !== patch.storyAvatar) { s.avatarMode = patch.storyAvatar; touched = true; } });
+    if (touched) { try { _nbPaintStoriesStrip(); } catch (e) {} }
+  }
+  try { if (window._nbStRefresh) window._nbStRefresh(); } catch (e) {}
+}
+async function _nbSetDisplayPref(patch) {
+  if (!nbIsSignedIn() || _pubOfflineGuard()) { try { if (window._nbStRefresh) window._nbStRefresh(); } catch (e) {} return; }
+  const was = { storyAvatar: _nbStoryAvatarGet(), commentAs: _nbCommentAsGet() }, prev = {};
+  Object.keys(patch).forEach(function (k) { prev[k] = was[k]; });
+  _nbDisplayPrefStore(patch);
+  try {
+    const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/display-prefs', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
+      body: JSON.stringify(patch)
+    });
+    let d = null; try { d = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error((d && d.error) || ('display prefs failed: ' + res.status));
+  } catch (e) {
+    _nbLog('display prefs', e);
+    _nbDisplayPrefStore(prev);
+    showToast('Couldn\u2019t save your choice' + _nbFailureReason(e));
+  }
+}
 // Once per app start for an account that has signed in before but never answered (the dialog above only asks at sign-in).
 // Skipped while the first-run Terms screen or another dialog is up, and when this device already knows the answer.
 async function _nbMlOptLaunchAsk() {
@@ -21631,6 +21675,7 @@ function _nbStoryOptimistic(note, show) {
     title: note.title || 'Untitled note',
     authorSub: acct.authorId || '',
     authorProfileName: _nbLoadCachedProfileName() || null,
+    avatarMode: _nbStoryAvatarGet(),
     createdAt: Date.now(),
     seen: false,
     imageUrl: null
@@ -21712,8 +21757,8 @@ function _nbStoryImgError(imgEl, fallback) {
   span.textContent = fallback;
   imgEl.replaceWith(span);
 }
-// First tier of the ring avatar's fallback chain: the author's profile
-// picture (src set in _nbPaintStoriesStrip) failed to load — either they
+// Middle tier of the ring avatar's fallback chain (it tries one other image, then the letter). With the default choice the
+// author's profile picture (src set in _nbPaintStoriesStrip) failed to load — either they
 // never set one, or the request errored. Try the note's own first image
 // next, if this story has one; a second failure (or no story image to
 // try) falls through to the initial letter via _nbStoryImgError. The
@@ -21757,10 +21802,16 @@ function _nbPaintStoriesStrip() {
     const initial = initialSrc ? initialSrc.charAt(0).toUpperCase() : '?';
     const initialAttr = escJs(initial);
     const storyImgAttr = escJs(s.imageUrl);
-    const profileImgUrl = s.authorSub
+    // The author's own choice (Settings > Privacy > Story strip picture), sent with each story: 'picture' (the default, and what a
+    // row without the field gets) leads with the profile picture, 'note' leads with the note's first image, 'never' never uses the picture.
+    const avMode = s.avatarMode === 'note' || s.avatarMode === 'never' ? s.avatarMode : 'picture';
+    const profileImgUrl = s.authorSub && avMode !== 'never'
       ? NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(s.authorSub) + '?v=' + _nbProfileImageVersion
       : null;
-    const avatarInner = profileImgUrl
+    const profileImgAttr = escJs(profileImgUrl);
+    const avatarInner = (avMode === 'note' && s.imageUrl)
+      ? `<img class="nb-story-ring-img" src="${esc(s.imageUrl)}" alt="" loading="lazy" onerror="_nbStoryAvatarFallback(this,'${profileImgAttr}','${initialAttr}')">`
+      : profileImgUrl
       ? `<img class="nb-story-ring-img" src="${esc(profileImgUrl)}" alt="" loading="lazy" onerror="_nbStoryAvatarFallback(this,'${storyImgAttr}','${initialAttr}')">`
       : (s.imageUrl
           ? `<img class="nb-story-ring-img" src="${esc(s.imageUrl)}" alt="" loading="lazy" onerror="_nbStoryImgError(this,'${initialAttr}')">`
@@ -25177,9 +25228,14 @@ async function _nbSettingsAcctFetch(force, auto) {
     if (!res.ok) throw new Error('acct stats: ' + res.status);
     const d = await res.json();
     if (seq !== _nbStAcctSeq || !nbIsSignedIn() || _nbStAcctSub !== who) return;
-    const next = { count: d.count || 0, likes: d.likes || 0, following: d.following == null ? null : d.following, createdAt: d.createdAt || null, mlOptOut: d.mlOptOut === undefined ? undefined : d.mlOptOut };
+    const next = { count: d.count || 0, likes: d.likes || 0, following: d.following == null ? null : d.following, createdAt: d.createdAt || null, mlOptOut: d.mlOptOut === undefined ? undefined : d.mlOptOut, storyAvatar: d.storyAvatar, commentAs: d.commentAs };
     const changed = JSON.stringify(next) !== JSON.stringify(_nbStAcctStats) || nameBefore !== _nbLoadCachedProfileName();
     _nbStAcctStats = next;
+    if (next.storyAvatar !== undefined) { // a change made on another device reaches your own rings here too
+      let t = false;
+      _nbStoriesCache.forEach(function (s) { if (_nbIsOwnAuthor(s.authorSub) && s.avatarMode !== next.storyAvatar) { s.avatarMode = next.storyAvatar; t = true; } });
+      if (t) { try { _nbPaintStoriesStrip(); } catch (e) {} }
+    }
     const k = _nbStAcctKey();
     if (k) { try { localStorage.setItem(k, JSON.stringify(next)); } catch (e) {} }
     if (next.mlOptOut !== undefined) { _nbStAcctTries = 0; _nbStAcctToasted = false; }
@@ -25197,6 +25253,19 @@ async function _nbSettingsAcctFetch(force, auto) {
     }
   }
 }
+// Account choices (story strip picture, Comment as, the machine-learning choice) can be changed on another device. While Settings is showing,
+// reload them when the app comes back to the foreground and every 30 seconds, so the switches follow without leaving the screen.
+// Only while Settings is showing: anywhere else the next visit to Settings loads them anyway, and a quiet background failure shouldn't toast.
+let _nbStAcctLiveAt = 0;
+function _nbStAcctLive() {
+  const sc = document.getElementById('screen-settings');
+  if (document.hidden || !nbIsSignedIn() || !sc || !sc.classList.contains('active') || Date.now() - _nbStAcctLiveAt < 10000) return;
+  _nbStAcctLiveAt = Date.now();
+  _nbSettingsAcctFetch(true, true);
+}
+document.addEventListener('visibilitychange', _nbStAcctLive);
+window.addEventListener('focus', _nbStAcctLive);
+setInterval(_nbStAcctLive, 30000);
 // Settings > Display name: open the Account sheet with the name field already unlocked.
 function nbSettingsEditDisplayName() {
   if (!nbIsSignedIn()) { openAccountScreen(); return; }
