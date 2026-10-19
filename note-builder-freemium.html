@@ -7642,7 +7642,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 .blk-panel[data-ga="flow"]{background-size:300% 300%!important;animation:nbGaFlow 8s ease-in-out infinite alternate}
 .blk-panel[data-ga="spin"]{animation:nbGaSpin 10s linear infinite}
 .blk-panel[data-ga="pulse"]{background-position:center!important;background-size:100% 100%;animation:nbGaPulse 6s ease-in-out infinite alternate}
-.ccg-live-wrap{position:sticky;top:-.25rem;z-index:3;background:#fff;padding:.25rem 0 .1rem}
+.ccg-live-wrap{position:sticky;top:-.25rem;z-index:3;background:#fff;margin:0 -.6rem;padding:.25rem .6rem .1rem}
 .ccw-preview.ccg-live{width:100%;height:44px;border-radius:10px;flex-shrink:1;margin:0 0 .6rem}
 .ccg-live[data-ga="flow"]{background-size:300% 300%;animation:nbGaFlow 8s ease-in-out infinite alternate}
 .ccg-live[data-ga="spin"]{animation:nbGaSpin 10s linear infinite}
@@ -7721,8 +7721,8 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
    nothing is applied until .blk-variant-confirm is tapped, so a person
    can browse Design and pick a color before committing, unlike the flat
    picker's tap-to-apply-and-close. */
-.blk-variant-tabs,.blk-variant-subtabs{display:flex;gap:.3rem;margin:.1rem 0 .7rem;border-bottom:1px solid #ebebe6}
-.blk-variant-tab,.blk-variant-subtab{flex:1;text-align:center;border:none;background:none;color:#8f8f89;font-size:.78rem;font-weight:700;font-family:inherit;padding:.5rem 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s,border-color .12s}
+.blk-variant-tabs,.blk-variant-subtabs{display:flex;gap:.3rem;margin:0 0 .45rem;border-bottom:1px solid #ebebe6}
+.blk-variant-tab,.blk-variant-subtab{flex:1;text-align:center;border:none;background:none;color:#8f8f89;font-size:.78rem;font-weight:700;font-family:inherit;padding:.4rem 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s,border-color .12s}
 .blk-variant-tab:hover,.blk-variant-subtab:hover{color:#4a4a46}
 .blk-variant-tab-active,.blk-variant-subtab-active{color:#5b5bd6;border-bottom-color:#5b5bd6}
 .blk-variant-tabpanel{display:none}
@@ -7754,7 +7754,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
    while still spacing every column evenly. */
 .blk-variant-color-row{display:grid;grid-template-columns:repeat(6,auto);justify-content:space-between;row-gap:.6rem}
 /* Color | Gradient tabs reuse the sheet's existing tab styling (shared selectors below). */
-.blk-variant-body .blk-variant-substick{position:sticky;top:-.25rem;z-index:3;background:#fff;padding-top:.25rem}
+.blk-variant-body .blk-variant-substick{position:sticky;top:-.25rem;z-index:3;background:#fff;margin:0 -.6rem;padding:.25rem .6rem 0}
 .blk-variant-subpanel{display:none}
 .blk-variant-subpanel-active{display:block}
 .ccg-body{padding:4px;margin:0 -4px}
@@ -7913,9 +7913,9 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 
 .img-pick-overlay{position:fixed;inset:0;background:rgba(20,20,18,.45);display:flex;align-items:flex-end;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .15s}
 .img-pick-overlay.img-pick-open{opacity:1;pointer-events:auto}
-.img-pick-box{width:100%;max-width:360px;background:#fff;border-radius:16px 16px 0 0;padding:1.1rem 1rem calc(1rem + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);transform:translateY(12px);transition:transform .15s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+.img-pick-box{width:100%;max-width:360px;background:#fff;border-radius:16px 16px 0 0;padding:.8rem 1rem calc(1rem + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);transform:translateY(12px);transition:transform .15s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .img-pick-overlay.img-pick-open .img-pick-box{transform:translateY(0)}
-.img-pick-title{font-size:.95rem;font-weight:700;color:#202122;margin:0 0 .7rem;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+.img-pick-title{font-size:.95rem;font-weight:700;color:#202122;margin:0 0 .5rem;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .img-pick-opt{width:100%;display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;margin-bottom:.5rem;border:1px solid #e5e5e0;border-radius:10px;background:#fafaf8;color:#2c2c29;font-size:.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .12s,background .12s}
 .img-pick-opt svg{width:19px;height:19px;flex-shrink:0;color:#5b5bd6}
 .img-pick-opt:hover,.img-pick-opt:active{border-color:#c9c9f5;background:#f5f5fd}
@@ -7928,7 +7928,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 .cv-link-btn-row{display:flex;gap:.5rem}
 .cv-link-btn-row .img-pick-cancel{width:auto;flex:1}
 .img-pick-cancel:hover,.img-pick-cancel:active{border-color:#d8d8d1;background:#fafaf8}
-.img-pick-handle{width:100%;display:flex;justify-content:center;padding:.15rem 0 .6rem;margin:-.2rem 0 0;cursor:grab;touch-action:none}
+.img-pick-handle{width:100%;display:flex;justify-content:center;padding:.1rem 0 .4rem;margin:-.2rem 0 0;cursor:grab;touch-action:none}
 .img-pick-handle span{width:36px;height:4px;border-radius:99px;background:#d9d9d3}
 .img-pick-handle:active{cursor:grabbing}
 .link-info-url{width:100%;border:1px solid #e5e5e0;border-radius:10px;background:#fafaf8;color:#2c2c29;font-size:.85rem;padding:.75rem .9rem;word-break:break-all;box-sizing:border-box}
@@ -11888,7 +11888,8 @@ a.blk-btn:hover{filter:brightness(.95)}
         if (k === 'pnC1' && block.dataset.pnStops) { var ps = pnStopsOf(block); ps[0] = String(v).toLowerCase(); pnSetStops(block, ps); }
       }
       applyPanel(block);
-    }).then(function() {
+    }).then(function(res) {
+      if (res !== true) { hcRevertBlock(block, before); return; }
       blockAnimDone(block);
       if (!picking) {
         // Closed on Image with no photo chosen: go back to the fill that was there.
@@ -12067,7 +12068,7 @@ a.blk-btn:hover{filter:brightness(.95)}
     var st = bgRead(pg, 'pageBg', true);
     pg.classList.toggle('cv-bg-dark', st.fill === 'image' || (pg.dataset.pageBg === 'custom' && bgIsDark(st)));
   }
-  function openBgDesign(el, key, isPage, title, begin, commit) {
+  function openBgDesign(el, key, isPage, title, begin, commit, revert) {
     var stale = bgImgEl(el, isPage);
     if (stale && !bgImgHas(stale)) { stale.remove(); if (!isPage) delete el.dataset.bgImg; }
     var staleFg = fgImgEl(el, isPage);
@@ -12121,7 +12122,8 @@ a.blk-btn:hover{filter:brightness(.95)}
       }
       else st[k] = (k === 'fill' || k === 'pos' || k === 'shade' || k === 'bw' || k === 'bpos') ? v : String(v).toLowerCase();
       bgWrite(el, key, st, isPage, stash);
-    }).then(function() {
+    }).then(function(res) {
+      if (res !== true) { if (revert) revert(before); return; }
       if (!picking) { commit(before); return; }
       if (picking === 'fg') {
         var fim = fgImgEl(el, isPage) || stash.fgImg;
@@ -12137,7 +12139,7 @@ a.blk-btn:hover{filter:brightness(.95)}
           fgWrite(el, isPage, fst, stash);
           commit(fpre);
         });
-        imgPicker.open(fim, function() { openBgDesign(el, key, isPage, title, begin, commit); });
+        imgPicker.open(fim, function() { openBgDesign(el, key, isPage, title, begin, commit, revert); });
         return;
       }
       var im = bgImgEl(el, isPage) || stash.img;
@@ -12157,7 +12159,7 @@ a.blk-btn:hover{filter:brightness(.95)}
         bgWrite(el, key, st, isPage, stash);
         commit(pre);
       });
-      imgPicker.open(im, function() { openBgDesign(el, key, isPage, title, begin, commit); });
+      imgPicker.open(im, function() { openBgDesign(el, key, isPage, title, begin, commit, revert); });
     });
   }
 
@@ -12232,7 +12234,7 @@ a.blk-btn:hover{filter:brightness(.95)}
       if (k === 'op') { blockOpApply(block, v); return; }
       block.dataset[k] = v;
       applyButton(block);
-    }).then(function() { blockAnimDone(block); hcCommitBlock(block, before); });
+    }).then(function(res) { if (res !== true) { hcRevertBlock(block, before); return; } blockAnimDone(block); hcCommitBlock(block, before); });
   }
 
   /* ---------- Icon ---------- */
@@ -12282,19 +12284,20 @@ a.blk-btn:hover{filter:brightness(.95)}
       h += dzAnimSecs(block);
       return h;
     }
-    dzSheet('Icon design', render, function(k, v) { if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; } if (k === 'op') { blockOpApply(block, v); return; } block.dataset[k] = v; applyIcon(block); }).then(function() { blockAnimDone(block); hcCommitBlock(block, before); });
+    dzSheet('Icon design', render, function(k, v) { if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; } if (k === 'op') { blockOpApply(block, v); return; } block.dataset[k] = v; applyIcon(block); }).then(function(res) { if (res !== true) { hcRevertBlock(block, before); return; } blockAnimDone(block); hcCommitBlock(block, before); });
   }
 
   /* ---------- Text spacing (block-level, any text block or panel) ---------- */
   function openSpacing(block) {
     if (!block) return Promise.resolve();
+    var before = hcBeginBlock(block);
     function render() {
       return dzTab('Spacing', 'Text spacing') + dzSec('Letter spacing', dzChips('tracking', [['', 'Normal'], ['tight', 'Tight'], ['wide', 'Wide'], ['wider', 'Wider']], block.dataset.tracking || '')) +
         dzSec('Line height', dzChips('leading', [['', 'Normal'], ['tight', 'Tight'], ['loose', 'Roomy']], block.dataset.leading || '')) +
         dzSec('Capitals', dzChips('caps', [['', 'As typed'], ['1', 'ALL CAPS']], block.dataset.caps || '')) +
         dzTab('Effects', 'Text effects') + dzSec('Opacity', dzSlider('op', blockOpPct(block))) + dzAnimSecs(block);
     }
-    return dzSheet('Text spacing', render, function(k, v) { if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; } if (k === 'op') { blockOpApply(block, v); return; } if (v) block.dataset[k] = v; else delete block.dataset[k]; }).then(function() { blockAnimDone(block); });
+    return dzSheet('Text spacing', render, function(k, v) { if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; } if (k === 'op') { blockOpApply(block, v); return; } if (v) block.dataset[k] = v; else delete block.dataset[k]; }).then(function(res) { if (res !== true) { hcRevertBlock(block, before); return false; } blockAnimDone(block); return true; });
   }
 
   /* ---------- Starters: ready-made layouts built only from the blocks above and the existing ones ---------- */
@@ -12540,13 +12543,9 @@ a.blk-btn:hover{filter:brightness(.95)}
     var type = block.dataset.type, label = type.charAt(0).toUpperCase() + type.slice(1), before = hcBeginBlock(block);
     var flat = type === 'image' ? IMAGE_STYLE_OPTIONS : type === 'media' ? MEDIA_STYLE_OPTIONS : null;
     if (flat) {
-      askVariant(label, flat, { field: 'imgStyle', current: block.dataset.imgStyle || '', onStyle: function(o) { if (o.imgStyle) block.dataset.imgStyle = o.imgStyle; else delete block.dataset.imgStyle; if (block._imgSync) block._imgSync(); try { layoutClassicCanvas(); } catch (e) {} }, border: (type === 'image' || type === 'media') ? { bw: blockBorderGet(block).bw, bc: blockBorderGet(block).bc, onChange: function(w, c) { blockBorderApply(block, w, c); } } : null, opacity: { value: blockOpPct(block), onChange: function(v) { blockOpApply(block, v); } }, anim: { value: block.dataset.blkAnim || '', speed: block.dataset.blkAnimS || '', play: block.dataset.blkAnimR || '', onChange: function(k, v) { blockAnimApply(block, k, v); } } }).then(function(opt) {
+      askVariant(label, flat, { field: 'imgStyle', current: block.dataset.imgStyle || '', onStyle: function(o) { if (o.imgStyle) block.dataset.imgStyle = o.imgStyle; else delete block.dataset.imgStyle; if (block._imgSync) block._imgSync(); try { layoutClassicCanvas(); } catch (e) {} }, border: (type === 'image' || type === 'media') ? { bw: blockBorderGet(block).bw, bc: blockBorderGet(block).bc, onChange: function(w, c) { blockBorderApply(block, w, c); } } : null, opacity: { value: blockOpPct(block), onChange: function(v) { blockOpApply(block, v); } }, anim: { value: block.dataset.blkAnim || '', speed: block.dataset.blkAnimS || '', play: block.dataset.blkAnimR || '', onChange: function(k, v) { blockAnimApply(block, k, v); } } }).then(function(res) {
+        if (res !== true) { hcRevertBlock(block, before); return; }
         blockAnimDone(block);
-        if (opt) {
-          if (opt.imgStyle) block.dataset.imgStyle = opt.imgStyle; else delete block.dataset.imgStyle;
-          if (block._imgSync) block._imgSync();
-          try { layoutClassicCanvas(); } catch (e) {}
-        }
         hcCommitBlock(block, before);
       });
       return;
@@ -12555,7 +12554,7 @@ a.blk-btn:hover{filter:brightness(.95)}
       current: { style: block.dataset.style || '', design: block.dataset.design || '', color: block.dataset.color || '', customColor: block.style.getPropertyValue('--blk-custom').trim() },
       onChange: function(r) { blockStyleApply(block, r); },
       opacity: { value: blockOpPct(block), onChange: function(v) { blockOpApply(block, v); } }, anim: { value: block.dataset.blkAnim || '', speed: block.dataset.blkAnimS || '', play: block.dataset.blkAnimR || '', onChange: function(k, v) { blockAnimApply(block, k, v); } }
-    }).then(function() { blockAnimDone(block); hcCommitBlock(block, before); });
+    }).then(function(res) { if (res !== true) { hcRevertBlock(block, before); return; } blockAnimDone(block); hcCommitBlock(block, before); });
   }
   function wireBlockStyle(block) {
     var type = block.dataset.type;
@@ -12758,7 +12757,7 @@ a.blk-btn:hover{filter:brightness(.95)}
     html += '</div><div class="blk-variant-body">';
     if (vTabs.length > 1) html += vPanel('style', optsHtml, true) + (bdHtml ? vPanel('border', bdHtml) : '') + (fxHtml ? vPanel('effects', fxHtml) : '');
     else html += optsHtml;
-    html += '</div><div class="blk-variant-foot"><button type="button" class="img-pick-cancel">' + (edit ? 'Done' : 'Cancel') + '</button></div>';
+    html += '</div><div class="blk-variant-foot"><button type="button" class="' + (edit ? 'blk-variant-confirm' : 'img-pick-cancel') + '">' + (edit ? 'Done' : 'Cancel') + '</button></div>';
     variantSheet.insertAdjacentHTML('beforeend', html);
     variantWireTabs();
     variantSyncTitle();
@@ -12776,7 +12775,7 @@ a.blk-btn:hover{filter:brightness(.95)}
         closeVariantSheet(opt);
       });
     });
-    variantSheet.querySelector('.img-pick-cancel').addEventListener('click', function() { closeVariantSheet(null); });
+    variantSheet.querySelector('.blk-variant-foot button').addEventListener('click', function() { closeVariantSheet(edit ? true : null); });
     window.lockScroll();
     requestAnimationFrame(function() { variantOverlay.classList.add('img-pick-open'); });
     return new Promise(function(resolve) { variantResolve = resolve; });
@@ -13270,7 +13269,7 @@ a.blk-btn:hover{filter:brightness(.95)}
     }
     btn._bgWired = true;
     btn.addEventListener('click', function() {
-      openBgDesign(block, 'bg', false, 'Block background', function() { return hcBeginBlock(block); }, function(b) { hcCommitBlock(block, b); });
+      openBgDesign(block, 'bg', false, 'Block background', function() { return hcBeginBlock(block); }, function(b) { hcCommitBlock(block, b); }, function(b) { hcRevertBlock(block, b); });
     });
   }
 
@@ -14032,7 +14031,7 @@ a.blk-btn:hover{filter:brightness(.95)}
     // the page element, saved as part of the note's own HTML.
     if (bgFab) {
       bgFab.addEventListener('click', function() {
-        openBgDesign(page, 'pageBg', true, 'Canvas background', hcBeginPage, function(b) { hcCommitPage(b); revealFabs(); });
+        openBgDesign(page, 'pageBg', true, 'Canvas background', hcBeginPage, function(b) { hcCommitPage(b); revealFabs(); }, function(b) { histApplyPageSide(b); revealFabs(); });
       });
     }
 
@@ -15279,7 +15278,7 @@ a.blk-btn:hover{filter:brightness(.95)}
             if (spHost.nodeType === 3) spHost = spHost.parentElement;
             var spBlock = spHost && spHost.closest ? spHost.closest('.blk') : null;
             if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-            openSpacing(spBlock).then(function() { if (spBlock && spHistBlock) hcCommitBlock(spHistBlock, spHistBefore); });
+            openSpacing(spBlock).then(function(ok) { if (ok && spBlock && spHistBlock) hcCommitBlock(spHistBlock, spHistBefore); });
             break;
           case 'clear': clearFormatting(range); break;
         }
@@ -15411,6 +15410,21 @@ a.blk-btn:hover{filter:brightness(.95)}
     if (afterHtml === beforeHtml) return;
     if (histNormalize(afterHtml) === histNormalize(beforeHtml)) return;
     histPush({ blocks: [{ id: block.dataset.blkId, before: beforeHtml, after: afterHtml }] });
+  }
+  // Put a block back to the snapshot hcBeginBlock took when an editing sheet opened. Used when such a sheet is dismissed without Done.
+  function hcRevertBlock(block, beforeHtml) {
+    if (!block || beforeHtml == null) return;
+    var tmp = document.createElement('div');
+    tmp.innerHTML = beforeHtml;
+    var fresh = tmp.firstElementChild;
+    if (!fresh) return;
+    if (classicBlockSizeObserver) classicBlockSizeObserver.unobserve(block);
+    histApplying = true;
+    block.replaceWith(fresh);
+    wireBlock(fresh);
+    reorderClassicDom();
+    layoutClassicCanvas();
+    histApplying = false;
   }
   // A brand-new block, just inserted.
   function hcRecordInsert(block) {
