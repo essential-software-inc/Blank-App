@@ -9223,6 +9223,20 @@ a.blk-btn:hover{filter:brightness(.95)}
       clearTimeout(timer);
       timer = setTimeout(function() { if (st && !sheetsOpen()) release(); }, 400);
     };
+    // Called by the host page when the editor is left or its canvas is rebuilt while a sheet may still be open. Those paths never
+    // go through a sheet's own close(), so the lock (here and on the parent page) was never released. Close every open sheet via its
+    // own backdrop handler, then release unconditionally.
+    window.nbDismissEditorSheets = function() {
+      clearTimeout(timer);
+      document.querySelectorAll('.img-pick-open').forEach(function(ov) {
+        try { ov.dispatchEvent(new MouseEvent('click', { bubbles: true })); } catch (e) {}
+      });
+      document.querySelectorAll('.img-pick-open').forEach(function(ov) { ov.classList.remove('img-pick-open'); });
+      release();
+      callApp(appUnlock, 'unlockScroll');
+    };
+    // Canvas document going away (reload / replaced) with a lock held: hand the parent page's lock back.
+    window.addEventListener('pagehide', function() { if (st) callApp(appUnlock, 'unlockScroll'); });
   })();
   // Extra scroll room reserved below the last row for the duration of a
   // Classic drag. Without this, canvas.style.height (set in
@@ -26909,7 +26923,7 @@ function nbGoScreen(name) {
   // call sites that can leave it (nbNotesNavClick's auto-save-and-leave,
   // the Save dialog's confirm handler, etc.) — including any added later.
   const leavingEditor = document.getElementById('screen-create').classList.contains('active') && name !== 'create';
-  if (leavingEditor) { try { const _w = document.getElementById('markup-iframe').contentWindow; if (_w) { if (_w.nbStopVoice) _w.nbStopVoice(); if (_w.nbParkEmbeds) _w.nbParkEmbeds(true); } } catch (e) {} } // the Editor iframe stays alive when hidden, so a playing voice note or embed would keep going
+  if (leavingEditor) { try { const _w = document.getElementById('markup-iframe').contentWindow; if (_w) { if (_w.nbStopVoice) _w.nbStopVoice(); if (_w.nbParkEmbeds) _w.nbParkEmbeds(true); if (_w.nbDismissEditorSheets) _w.nbDismissEditorSheets(); } } catch (e) {} } // the Editor iframe stays alive when hidden, so a playing voice note or embed would keep going
   document.querySelectorAll('.nb-screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
   const screen = document.getElementById('screen-' + name);
@@ -27841,6 +27855,8 @@ function nbRenderCanvas(forcePreview) {
   // display:none box is never rendered. Only reveal once it's settled, so
   // whatever the layout looked like a moment into that process is simply
   // never shown.
+  // A sheet open in the outgoing canvas would take its scroll lock down with it, so dismiss it first.
+  try { const _ow = iframe.contentWindow; if (_ow && _ow.nbDismissEditorSheets) _ow.nbDismissEditorSheets(); } catch (e) {}
   wrap.classList.remove('show');
   // When the app itself runs in a sandbox without allow-same-origin (opaque origin), the iframe's document is cross-origin:
   // contentDocument is null and contentWindow.document throws a SecurityError. Fall back to srcdoc, which works either way.
