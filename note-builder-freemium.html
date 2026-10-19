@@ -85,6 +85,7 @@ body {
   background: #fff;
   line-height: 1.6;
   overflow-x: hidden;
+  overflow-x: clip; /* clip, not hidden: hidden makes body a scroll container whenever html is locked, which un-sticks #site-header */
   overscroll-behavior-y: none;
   -webkit-touch-callout: none
 }
@@ -9219,69 +9220,65 @@ a.blk-btn:hover{filter:brightness(.95)}
   var classicPadding = _classicKit.padding;
   var migrateClassicPositions = _classicKit.migrate;
   var layoutClassicCanvas = _classicKit.layout;
-  // Editor scroll lock. The canvas is its own iframe document, so the app's lockScroll() (bridged to the parent window) never
-  // stopped the canvas itself, or the scroll containers around it, from scrolling behind an open sheet. This version locks
-  // everything that can scroll the editor: the canvas document, the canvas scroller, and any scrolling ancestor of the iframe.
-  // It still calls the app's own lockScroll/unlockScroll so the rest of the page behaves as before.
+  // Editor scroll lock. held = a sheet asked for the lock; the lock is released as soon as no sheet is open, whichever
+  // path closed it (a MutationObserver watches the sheets' open class), so a close path that never calls unlockScroll()
+  // can no longer leave the editor stuck. The canvas document is locked through html overflow only: locking body would
+  // make body the scroll container and un-stick #cv-toolbar. The app page is locked/unlocked through the host's own
+  // lockScroll()/unlockScroll() (bridged to the parent window).
   (function() {
-    var appLock = window.lockScroll, appUnlock = window.unlockScroll, st = null, timer = null;
-    function callApp(fn, name) {
+    // The canvas document is rewritten in place on every render, so this window (and what an earlier render left on it)
+    // survives. Never capture window.lockScroll here: that is the previous render's override, and chaining onto it made
+    // several copies each snapshot html overflow after the last had already set it to hidden, so the final restore put
+    // hidden back and the editor stayed locked. Always call the app page's own lock directly.
+    var held = false, seen = false, saved = null;
+    function callApp(name) {
       try {
-        if (typeof fn === 'function') fn();
-        else if (window.parent && window.parent !== window && typeof window.parent[name] === 'function') window.parent[name]();
+        var p = window.parent;
+        if (p && p !== window && typeof p[name] === 'function') p[name]();
       } catch (e) {}
     }
     function sheetsOpen() { return !!document.querySelector('.img-pick-open'); }
-    function release() {
-      if (!st) return;
-      var s = st; st = null;
-      document.documentElement.style.overflow = s.ho;
-      document.body.style.overflow = s.bo;
-      if (s.sc) { s.sc.style.overflow = s.so; s.sc.scrollTop = s.st; s.sc.scrollLeft = s.sl; }
-      s.anc.forEach(function(a) { a.el.style.overflow = a.ov; a.el.scrollTop = a.top; });
-      try { window.scrollTo({ left: s.x, top: s.y, behavior: 'instant' }); } catch (e) {}
-    }
-    window.lockScroll = function() {
-      callApp(appLock, 'lockScroll');
-      if (st) return;
+    function engage() {
+      if (held) return;
+      held = true; seen = sheetsOpen();
       var sc = document.querySelector('.cv-canvas-scroll');
-      st = { x: window.scrollX, y: window.scrollY, sc: sc, st: sc ? sc.scrollTop : 0, sl: sc ? sc.scrollLeft : 0, so: sc ? sc.style.overflow : '',
-             ho: document.documentElement.style.overflow, bo: document.body.style.overflow, anc: [] };
-      try {
-        var el = window.frameElement;
-        while (el && el.nodeType === 1) {
-          var cs = el.ownerDocument.defaultView.getComputedStyle(el);
-          if ((cs.overflowY === 'auto' || cs.overflowY === 'scroll') && el.scrollHeight > el.clientHeight) st.anc.push({ el: el, ov: el.style.overflow, top: el.scrollTop });
-          el = el.parentElement;
-        }
-      } catch (e) {}
+      saved = { x: window.scrollX, y: window.scrollY, ho: document.documentElement.style.overflow,
+                sc: sc, so: sc ? sc.style.overflow : '', st: sc ? sc.scrollTop : 0, sl: sc ? sc.scrollLeft : 0 };
       document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
       if (sc) sc.style.overflow = 'hidden';
-      st.anc.forEach(function(a) { a.el.style.overflow = 'hidden'; });
-    };
-    window.unlockScroll = function() {
-      callApp(appUnlock, 'unlockScroll');
-      if (!st) return;
-      if (!sheetsOpen()) { release(); return; }
-      // Another sheet is still open (e.g. the colour wheel closed over a Design sheet): stay locked. Re-check once the close transition is over, in case the sheet's class is cleared after this call.
-      clearTimeout(timer);
-      timer = setTimeout(function() { if (st && !sheetsOpen()) release(); }, 400);
-    };
-    // Called by the host page when the editor is left or its canvas is rebuilt while a sheet may still be open. Those paths never
-    // go through a sheet's own close(), so the lock (here and on the parent page) was never released. Close every open sheet via its
-    // own backdrop handler, then release unconditionally.
+      callApp('lockScroll');
+    }
+    function release() {
+      if (!held) return;
+      held = false; seen = false;
+      var s = saved; saved = null;
+      if (s) {
+        document.documentElement.style.overflow = s.ho;
+        if (s.sc) { s.sc.style.overflow = s.so; s.sc.scrollTop = s.st; s.sc.scrollLeft = s.sl; }
+        try { window.scrollTo({ left: s.x, top: s.y, behavior: 'instant' }); } catch (e) {}
+      }
+      callApp('unlockScroll');
+    }
+    window.lockScroll = function() { engage(); };
+    window.unlockScroll = function() { if (!sheetsOpen()) release(); };
+    // A sheet that was opened has now closed: release. (seen stops an unrelated DOM change from releasing a lock whose sheet is still about to open.)
+    new MutationObserver(function() {
+      if (!held) return;
+      if (sheetsOpen()) seen = true;
+      else if (seen) release();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+    // Called by the host page when the editor is left or its canvas is rebuilt while a sheet may still be open. Close every
+    // open sheet via its own backdrop handler, then release unconditionally.
     window.nbDismissEditorSheets = function() {
-      clearTimeout(timer);
       document.querySelectorAll('.img-pick-open').forEach(function(ov) {
         try { ov.dispatchEvent(new MouseEvent('click', { bubbles: true })); } catch (e) {}
       });
       document.querySelectorAll('.img-pick-open').forEach(function(ov) { ov.classList.remove('img-pick-open'); });
       release();
-      callApp(appUnlock, 'unlockScroll');
+      callApp('unlockScroll');
     };
     // Canvas document going away (reload / replaced) with a lock held: hand the parent page's lock back.
-    window.addEventListener('pagehide', function() { if (st) callApp(appUnlock, 'unlockScroll'); });
+    window.addEventListener('pagehide', function() { if (held) callApp('unlockScroll'); });
   })();
   // Extra scroll room reserved below the last row for the duration of a
   // Classic drag. Without this, canvas.style.height (set in
