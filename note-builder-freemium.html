@@ -10344,7 +10344,7 @@ a.blk-btn:hover{filter:brightness(.95)}
     var best = null, bestZ = -Infinity;
     for (var i = 0; i < blocks.length; i++) {
       var b = blocks[i];
-      if (b === block) continue;
+      if (b === block || b.hasAttribute('data-locked')) continue; // a locked block is never a swap partner
       var r = b.getBoundingClientRect();
       var inset = (b === current) ? CLASSIC_SWAP_KEEP_INSET : CLASSIC_SWAP_INSET;
       var ix = r.width * inset, iy = r.height * inset;
@@ -15400,7 +15400,12 @@ a.blk-btn:hover{filter:brightness(.95)}
   /* Starters build into the page as a live preview: nodes carry data-st-draft until Done, and the autosave snapshot leaves them out.
      Every block a starter makes keeps data-st-g (its group) and data-st-k (which layout), so its settings sheet can offer a chevron back to the Starters sheet. */
   function stNewGid() { return 'sg' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
-  function stDerived(block) { return !!(block && block.dataset && block.dataset.stG); }
+  // The chevron back to Starters swaps the whole group, so it is not offered while any block of that group is locked.
+  function stDerived(block) {
+    var g = block && block.dataset && block.dataset.stG;
+    if (!g) return false;
+    return !Array.prototype.some.call(canvas.querySelectorAll('.blk[data-locked]'), function(b) { return b.dataset.stG === g; });
+  }
   function stCanBack(block) { return function() { return stDerived(block); }; }
   function stBackFn() { closeVariantSheet(ST_BACK); }
   function stReopen(block) { var g = block && block.dataset ? block.dataset.stG : ''; setTimeout(function() { openStarters(g); }, 0); }
