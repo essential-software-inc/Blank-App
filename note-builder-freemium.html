@@ -8679,11 +8679,48 @@ function nbTextboxKit() {
     if (t === 'y') s = labelText(f);
     return s;
   }
+  var ddInit = false;
+  function ddClose(except) { Array.prototype.slice.call(document.querySelectorAll('.blk-tb-dd.is-open')).forEach(function(d) { if (d !== except && d._tbOpen) d._tbOpen(false); }); }
+  // Custom dropdown (no native <select>): the wrapper exposes value / disabled and a bubbling 'change', so the rest of the kit treats it like a select.
   function mkSelect(f) {
-    var s = ce('select', 'blk-tb-i'), o = ce('option');
-    o.value = ''; o.textContent = f.getAttribute('data-ph') || 'Choose\u2026'; s.appendChild(o);
-    optsOf(f).forEach(function(x) { var op = ce('option'); op.value = x[0]; op.textContent = x[1]; s.appendChild(op); });
-    return s;
+    var w = ce('div', 'blk-tb-i blk-tb-dd'), bt = ce('button', 'blk-tb-ddb'), lab = ce('span'), ls = ce('div', 'blk-tb-ddl'), val = '', opts = [], dis = false;
+    bt.type = 'button'; bt.setAttribute('aria-haspopup', 'listbox'); bt.setAttribute('aria-expanded', 'false');
+    bt.appendChild(lab);
+    bt.insertAdjacentHTML('beforeend', '<svg class="blk-tb-ddc" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>');
+    ls.setAttribute('role', 'listbox');
+    w.appendChild(bt); w.appendChild(ls);
+    function setOpen(on) { ls.classList.toggle('open', on); w.classList.toggle('is-open', on); bt.setAttribute('aria-expanded', on ? 'true' : 'false'); }
+    function pick(o) { val = o.getAttribute('data-v'); lab.textContent = o.textContent; w.classList.toggle('blk-tb-ph', !val); opts.forEach(function(x) { var on = x === o; x.classList.toggle('is-selected', on); x.setAttribute('aria-selected', on ? 'true' : 'false'); }); }
+    function focusOpt(o) { if (!o) return; opts.forEach(function(x) { x.tabIndex = -1; }); o.tabIndex = 0; o.focus(); }
+    function commit(o) { var ch = val !== o.getAttribute('data-v'); pick(o); setOpen(false); bt.focus(); if (ch) w.dispatchEvent(new Event('change', { bubbles: true })); }
+    [['', f.getAttribute('data-ph') || 'Choose\u2026']].concat(optsOf(f)).forEach(function(x) {
+      var o = ce('div', 'blk-tb-ddo');
+      o.setAttribute('role', 'option'); o.tabIndex = -1; o.setAttribute('data-v', x[0]); o.textContent = x[1];
+      o.addEventListener('click', function() { commit(o); });
+      opts.push(o); ls.appendChild(o);
+    });
+    pick(opts[0]);
+    Object.defineProperty(w, 'value', { get: function() { return val; } });
+    Object.defineProperty(w, 'disabled', { get: function() { return dis; }, set: function(v) { dis = !!v; bt.disabled = dis; w.classList.toggle('is-dis', dis); if (dis) setOpen(false); } });
+    w._tbOpen = setOpen;
+    w._tbReset = function() { pick(opts[0]); setOpen(false); };
+    bt.addEventListener('click', function() { var on = !ls.classList.contains('open'); ddClose(w); setOpen(on); });
+    bt.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); ddClose(w); setOpen(true); focusOpt(ls.querySelector('.is-selected') || opts[0]); }
+      else if (e.key === 'Escape' && ls.classList.contains('open')) { e.stopPropagation(); setOpen(false); }
+    });
+    ls.addEventListener('keydown', function(e) {
+      var i = opts.indexOf(document.activeElement), k = e.key;
+      if (k === 'ArrowDown') { e.preventDefault(); focusOpt(opts[Math.min(i + 1, opts.length - 1)]); }
+      else if (k === 'ArrowUp') { e.preventDefault(); focusOpt(opts[Math.max(i - 1, 0)]); }
+      else if (k === 'Home') { e.preventDefault(); focusOpt(opts[0]); }
+      else if (k === 'End') { e.preventDefault(); focusOpt(opts[opts.length - 1]); }
+      else if (k === 'Enter' || k === ' ') { e.preventDefault(); if (i > -1) commit(opts[i]); }
+      else if (k === 'Escape') { e.stopPropagation(); setOpen(false); bt.focus(); }
+      else if (k === 'Tab') setOpen(false);
+    });
+    if (!ddInit) { ddInit = true; document.addEventListener('click', function(e) { ddClose(e.target && e.target.closest ? e.target.closest('.blk-tb-dd') : null); }); }
+    return w;
   }
   function mkGroup(b, f, t) {
     var g = ce('div', 'blk-tb-g'), list = t === 'y' ? [['1', labelText(f)]] : optsOf(f);
@@ -8702,7 +8739,7 @@ function nbTextboxKit() {
     var S = b._tbS, list = b.querySelector('.blk-tb-fields'), h, hi;
     fieldEls(b).forEach(function(f) {
       var t = f.getAttribute('data-ft'), id = f.getAttribute('data-fid'), lab = f.querySelector('.blk-tb-fl'), c = cOf(f), grp = isGroup(t);
-      var tag = grp ? 'div' : t === 'l' ? 'textarea' : t === 'c' ? 'select' : 'input', sig = sigOf(f, t), hp, ht;
+      var tag = grp ? 'div' : t === 'l' ? 'textarea' : t === 'c' ? 'div' : 'input', sig = sigOf(f, t), hp, ht;
       if (c && (c.tagName.toLowerCase() !== tag || c._tbSig !== sig)) { c.parentNode.removeChild(c); c = null; }
       if (!c) {
         c = grp ? mkGroup(b, f, t) : t === 'c' ? mkSelect(f) : ce(tag, 'blk-tb-i');
@@ -8710,12 +8747,13 @@ function nbTextboxKit() {
         if (lab && lab.nextSibling) f.insertBefore(c, lab.nextSibling); else f.appendChild(c);
       }
       c.id = b._tbU + '-' + id;
+      if (t === 'c') { var ddb = c.querySelector('.blk-tb-ddb'); if (ddb) ddb.id = c.id + '-b'; }
       if (grp) {
         if (lab) { lab.id = c.id + '-l'; lab.removeAttribute('for'); }
         if (t === 'y') c.setAttribute('aria-label', labelText(f)); else if (lab) c.setAttribute('aria-labelledby', lab.id);
       } else {
         c.setAttribute('name', 'tb-' + id);
-        if (lab) lab.setAttribute('for', c.id);
+        if (lab) lab.setAttribute('for', t === 'c' ? c.id + '-b' : c.id);
         if (tag === 'input') {
           c.setAttribute('type', { e: 'email', n: 'number', p: 'tel', u: 'url', d: 'date', t: 'time' }[t] || 'text');
           if (t === 'n') { c.setAttribute('step', 'any'); c.setAttribute('inputmode', 'decimal'); }
@@ -8807,6 +8845,7 @@ function nbTextboxKit() {
   function resetControls(b) {
     fieldEls(b).forEach(function(f) {
       var c = cOf(f); if (!c) return;
+      if (c._tbReset) c._tbReset();
       parts(c).forEach(function(x) { if (x.tagName === 'SELECT') x.selectedIndex = 0; else if (x.type === 'checkbox' || x.type === 'radio') x.checked = false; else if (x !== c || c.tagName !== 'DIV') x.value = ''; });
     });
   }
@@ -8866,7 +8905,7 @@ function nbTextboxKit() {
       if (m) { mark(c, true); if (!bad) bad = { c: c, m: m }; }
     }
     if (!bad && !any) bad = { c: first, m: need };
-    if (bad) { say(b, bad.m, 'err', true); try { if (bad.c && !S.editor) (bad.c.tagName === 'DIV' ? bad.c.querySelector('input') : bad.c).focus(); } catch (e) {} return; }
+    if (bad) { say(b, bad.m, 'err', true); try { if (bad.c && !S.editor) (bad.c.tagName === 'DIV' ? bad.c.querySelector('input,button') : bad.c).focus(); } catch (e) {} return; }
     if (S.editor) { say(b, 'Preview only. Nothing is sent from the editor.', '', true); return; }
     hp = b.querySelector('.blk-tb-hp input');
     var t0 = Date.now();
@@ -9314,7 +9353,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 
 .blk{position:relative;border-radius:10px;padding:.6rem .75rem;margin-bottom:.2rem;transition:background .15s,box-shadow .15s,opacity .15s,transform .2s cubic-bezier(.22,.8,.24,1);flex:1 1 100%;--blk-custom:#5b5bd6}
 /* hover/focus tint only on blocks with no background of their own; otherwise touching a colored/image block wiped its color */
-.blk:not([data-bg]):not([data-bg-img]):not(.py-fp>.blk):hover,.blk:not([data-bg]):not([data-bg-img]):not(.py-fp>.blk):focus-within{background:rgba(91,91,214,.055)}
+@media (hover:hover){.blk:not([data-bg]):not([data-bg-img]):not(.py-fp>.blk):hover{background:rgba(91,91,214,.055)}}
 .blk.dragging{background:#fff;box-shadow:0 14px 30px rgba(20,20,20,.16),0 1px 2px rgba(20,20,20,.06);opacity:.96;cursor:grabbing}
 /* Rotate-in-place (see .blk-rotate-btn / wireBlockRotate() below). The
    tilt lives on the --blk-rotate custom property and is applied by the
@@ -10724,8 +10763,21 @@ html[data-nb-glass="1"] .blk[data-pl-st="line"] .blk-pl-o{background:transparent
 .blk-tb-f[data-ft="y"] > .blk-tb-fl{display:none}
 .blk-tb-fo{display:none}
 .blk-tb-i{font:inherit;color:inherit;box-sizing:border-box;width:100%;margin:0;padding:.7rem .85rem;border:1.5px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:var(--tb-r);background:transparent;line-height:1.35;outline:none}
-select.blk-tb-i{appearance:auto;-webkit-appearance:menulist}
-select.blk-tb-i option{color:#1c1c1a;background:#fff}
+.blk-tb-dd{position:relative;display:block;padding:0}
+.blk-tb-dd.is-open{z-index:30}
+.blk-tb-dd.is-dis{opacity:.55}
+.blk-tb-ddb{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;box-sizing:border-box;margin:0;padding:.7rem .85rem;border:0;border-radius:inherit;background:transparent;color:inherit;font:inherit;line-height:1.35;text-align:left;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent}
+.blk-tb-ddb:disabled{cursor:default}
+.blk-tb-ddb>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blk-tb-dd.blk-tb-ph .blk-tb-ddb>span{opacity:.45}
+.blk-tb-ddc{flex:none;opacity:.55;transition:transform .18s,color .18s,opacity .18s}
+.blk-tb-dd.is-open .blk-tb-ddc{transform:rotate(180deg);color:var(--tb-c);opacity:1}
+.blk-tb-ddl{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:3;max-height:230px;overflow-y:auto;box-sizing:border-box;background:#fff;color:#1c1c1a;border:1px solid #e3e3dc;border-radius:12px;box-shadow:0 10px 28px rgba(20,20,20,.18);text-align:left;font-size:.95rem}
+.blk-tb-ddl.open{display:block}
+.blk-tb-ddo{padding:.68rem .85rem;line-height:1.3;cursor:pointer;outline:none}
+.blk-tb-ddo:hover{background:color-mix(in srgb,var(--tb-c) 8%,#fff)}
+.blk-tb-ddo.is-selected{color:var(--tb-c);font-weight:600;background:color-mix(in srgb,var(--tb-c) 12%,#fff)}
+.blk-tb-ddo:focus{box-shadow:inset 0 0 0 2px var(--tb-c);background:color-mix(in srgb,var(--tb-c) 8%,#fff)}
 textarea.blk-tb-i{min-height:3rem;resize:vertical;border-radius:min(var(--tb-r),1.25rem)}
 .blk-tb-i::placeholder{color:inherit;opacity:.45}
 .blk-tb-i:focus{border-color:var(--tb-c)}
@@ -10741,6 +10793,8 @@ textarea.blk-tb-i{min-height:3rem;resize:vertical;border-radius:min(var(--tb-r),
 .blk-tb-hp{position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0}
 .blk[data-tb-st="filled"] .blk-tb-i{border-color:transparent;background:color-mix(in srgb,currentColor 9%,transparent)}
 .blk[data-tb-st="filled"] .blk-tb-i:focus{border-color:var(--tb-c)}
+.blk-tb-dd:focus-within,.blk-tb-dd.is-open,.blk[data-tb-st="filled"] .blk-tb-dd:focus-within,.blk[data-tb-st="filled"] .blk-tb-dd.is-open{border-color:var(--tb-c)}
+.blk[data-tb-st="line"] .blk-tb-ddb{padding-left:0;padding-right:0}
 .blk[data-tb-st="filled"] .blk-tb-i.blk-tb-bad{border-color:#c93a3a}
 .blk[data-tb-st="line"] .blk-tb-i{border-width:0 0 2px;border-radius:0;padding-left:.1rem;padding-right:.1rem}
 .blk[data-tb-st="line"] textarea.blk-tb-i{border-radius:0}
