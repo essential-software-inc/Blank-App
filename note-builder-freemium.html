@@ -95,14 +95,18 @@ body {
    editor, comments, dialogs and sheets) or for text meant to be read and copied.
    :where() keeps this at zero specificity, so a specific class can still opt out. */
 body :where(*:not(input, textarea, select, [contenteditable], [contenteditable] *,
-    .alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body, #cterms-body *,
+    .alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body,
+#about-body, #cterms-body *,
+#about-body *,
     #terms-dialog-body, #terms-dialog-body *)) {
   -webkit-user-select: none;
   user-select: none
 }
 
 input, textarea, select, [contenteditable], [contenteditable] *,
-.alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body, #cterms-body *,
+.alert-md, .alert-md *, #privacy-body, #privacy-body *, #cterms-body,
+#about-body, #cterms-body *,
+#about-body *,
 #terms-dialog-body, #terms-dialog-body * {
   -webkit-user-select: text;
   user-select: text;
@@ -699,7 +703,7 @@ body .cat-pill.active, body .md-chip.on, body .md-srcb.on, body .st-chip.on, bod
 #markup-iframe-wrap {
   height: calc(100vh - var(--hdr-h, 44px) - var(--sub-h, 0px));
   position: sticky;
-  top: calc(var(--hdr-h, 44px)+var(--sub-h, 0px))
+  top: calc(var(--hdr-h, 44px) + var(--sub-h, 0px))
 }
 
 #feed-search-wrap,
@@ -2473,7 +2477,8 @@ body.pink #logout-following-count { color: #875068 }
   to { transform: rotate(360deg) }
 }
 
-#privacy-overlay, #cterms-overlay, #einfo-overlay {
+#privacy-overlay, #cterms-overlay,
+#about-overlay, #einfo-overlay {
   display: none;
   position: fixed;
   inset: 0;
@@ -2484,11 +2489,13 @@ body.pink #logout-following-count { color: #875068 }
   padding: .75rem
 }
 
-#privacy-overlay.open, #cterms-overlay.open, #einfo-overlay.open {
+#privacy-overlay.open, #cterms-overlay.open,
+#about-overlay.open, #einfo-overlay.open {
   display: flex
 }
 
-#privacy-dialog, #cterms-dialog, #einfo-dialog {
+#privacy-dialog, #cterms-dialog,
+#about-dialog, #einfo-dialog {
   background: #fff;
   border-radius: 18px;
   width: min(480px, 96vw);
@@ -2500,7 +2507,8 @@ body.pink #logout-following-count { color: #875068 }
   font-family: inherit
 }
 
-#privacy-dhdr, #cterms-dhdr, #einfo-dhdr {
+#privacy-dhdr, #cterms-dhdr,
+#about-dhdr, #einfo-dhdr {
   background: #fff;
   border-bottom: 1px solid #f0f5ff;
   padding: .65rem .9rem;
@@ -2509,14 +2517,16 @@ body.pink #logout-following-count { color: #875068 }
   flex-shrink: 0
 }
 
-#privacy-dhdr-title, #cterms-dhdr-title, #einfo-dhdr-title {
+#privacy-dhdr-title, #cterms-dhdr-title,
+#about-dhdr-title, #einfo-dhdr-title {
   font-size: .9rem;
   font-weight: bold;
   color: #202122;
   flex: 1
 }
 
-#privacy-closebtn, #cterms-closebtn, #einfo-closebtn {
+#privacy-closebtn, #cterms-closebtn,
+#about-closebtn, #einfo-closebtn {
   background: #f0f5ff;
   border: none;
   cursor: pointer;
@@ -2531,7 +2541,8 @@ body.pink #logout-following-count { color: #875068 }
   flex-shrink: 0
 }
 
-#privacy-body, #cterms-body, #einfo-body {
+#privacy-body, #cterms-body,
+#about-body, #einfo-body {
   overflow-y: auto;
   padding: .8rem 1rem;
   font-size: .82rem;
@@ -2540,7 +2551,8 @@ body.pink #logout-following-count { color: #875068 }
   -webkit-overflow-scrolling: touch
 }
 
-#privacy-body h3, #cterms-body h3, #einfo-body h3 {
+#privacy-body h3, #cterms-body h3,
+#about-body h3, #einfo-body h3 {
   font-size: .84rem;
   font-weight: bold;
   margin: .8rem 0 .25rem;
@@ -2548,20 +2560,24 @@ body.pink #logout-following-count { color: #875068 }
   font-family: inherit
 }
 
-#privacy-body h3:first-child, #cterms-body h3:first-child, #einfo-body h3:first-child {
+#privacy-body h3:first-child, #cterms-body h3:first-child,
+#about-body h3:first-child, #einfo-body h3:first-child {
   margin-top: 0
 }
 
-#privacy-body p, #cterms-body p, #einfo-body p {
+#privacy-body p, #cterms-body p,
+#about-body p, #einfo-body p {
   margin: .35rem 0;
   font-family: inherit
 }
 
-#privacy-body ul, #cterms-body ul, #einfo-body ul {
+#privacy-body ul, #cterms-body ul,
+#about-body ul, #einfo-body ul {
   margin: .35rem 0 .35rem 1.2rem
 }
 
-#privacy-body li, #cterms-body li, #einfo-body li {
+#privacy-body li, #cterms-body li,
+#about-body li, #einfo-body li {
   margin: .15rem 0;
   font-family: inherit
 }
@@ -2575,35 +2591,42 @@ body.night #ml-dialog .rdlg-body a {
   color: #f0f0f0
 }
 
-body.night #privacy-dialog, body.night #cterms-dialog, body.night #einfo-dialog {
+body.night #privacy-dialog, body.night #cterms-dialog,
+body.night #about-dialog, body.night #einfo-dialog {
   background: #111111;
   border: 1px solid #282828;
   border-radius: 18px
 }
 
-body.night #privacy-dhdr, body.night #cterms-dhdr, body.night #einfo-dhdr {
+body.night #privacy-dhdr, body.night #cterms-dhdr,
+body.night #about-dhdr, body.night #einfo-dhdr {
   background: #111111;
   border-color: #282828
 }
 
-body.night #privacy-dhdr-title, body.night #cterms-dhdr-title, body.night #einfo-dhdr-title {
+body.night #privacy-dhdr-title, body.night #cterms-dhdr-title,
+body.night #about-dhdr-title, body.night #einfo-dhdr-title {
   color: #e8e8e8
 }
 
-body.night #privacy-closebtn, body.night #cterms-closebtn, body.night #einfo-closebtn {
+body.night #privacy-closebtn, body.night #cterms-closebtn,
+body.night #about-closebtn, body.night #einfo-closebtn {
   background: #1c1c1c;
   color: #999999
 }
 
-body.night #privacy-body, body.night #cterms-body, body.night #einfo-body {
+body.night #privacy-body, body.night #cterms-body,
+body.night #about-body, body.night #einfo-body {
   color: #e8e8e8
 }
 
-body.night #privacy-body h3, body.night #cterms-body h3, body.night #einfo-body h3 {
+body.night #privacy-body h3, body.night #cterms-body h3,
+body.night #about-body h3, body.night #einfo-body h3 {
   color: #aaaaaa
 }
 
-body.night #privacy-body a, body.night #cterms-body a, body.night #einfo-body a {
+body.night #privacy-body a, body.night #cterms-body a,
+body.night #about-body a, body.night #einfo-body a {
   color: #f0f0f0
 }
 
@@ -2616,33 +2639,40 @@ body.pink #ml-dialog .rdlg-body a {
   color: #c8365e
 }
 
-body.pink #privacy-dialog, body.pink #cterms-dialog, body.pink #einfo-dialog {
+body.pink #privacy-dialog, body.pink #cterms-dialog,
+body.pink #about-dialog, body.pink #einfo-dialog {
   background: #fff2f7
 }
 
-body.pink #privacy-dhdr, body.pink #cterms-dhdr, body.pink #einfo-dhdr {
+body.pink #privacy-dhdr, body.pink #cterms-dhdr,
+body.pink #about-dhdr, body.pink #einfo-dhdr {
   background: #fff2f7;
   border-color: #f6d9e4
 }
 
-body.pink #privacy-dhdr-title, body.pink #cterms-dhdr-title, body.pink #einfo-dhdr-title {
+body.pink #privacy-dhdr-title, body.pink #cterms-dhdr-title,
+body.pink #about-dhdr-title, body.pink #einfo-dhdr-title {
   color: #5c2f42
 }
 
-body.pink #privacy-closebtn, body.pink #cterms-closebtn, body.pink #einfo-closebtn {
+body.pink #privacy-closebtn, body.pink #cterms-closebtn,
+body.pink #about-closebtn, body.pink #einfo-closebtn {
   background: #f6d9e4;
   color: #875068
 }
 
-body.pink #privacy-body, body.pink #cterms-body, body.pink #einfo-body {
+body.pink #privacy-body, body.pink #cterms-body,
+body.pink #about-body, body.pink #einfo-body {
   color: #5c2f42
 }
 
-body.pink #privacy-body h3, body.pink #cterms-body h3, body.pink #einfo-body h3 {
+body.pink #privacy-body h3, body.pink #cterms-body h3,
+body.pink #about-body h3, body.pink #einfo-body h3 {
   color: #875068
 }
 
-body.pink #privacy-body a, body.pink #cterms-body a, body.pink #einfo-body a {
+body.pink #privacy-body a, body.pink #cterms-body a,
+body.pink #about-body a, body.pink #einfo-body a {
   color: #c8365e
 }
 
@@ -5698,6 +5728,10 @@ body:not(.reader-mode) #nb-app #site-header{border-bottom:1px solid var(--nb-hbd
    and more washed as it rises. Only a hairline ring + faint lift keeps the edges readable. */
 body:not(.reader-mode) #nb-notes-grid .guide-card{background:color-mix(in srgb,var(--nb-bg) 35%,transparent)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:none!important;box-shadow:0 0 0 1px var(--nb-card-ring),0 1px 3px var(--nb-card-lift)!important}
 body:not(.reader-mode) #nb-notes-grid .guide-card:active{background:color-mix(in srgb,var(--nb-bg) 55%,transparent)!important}
+/* One note + the onboarding carousel can overlap on a short screen: the carousel then tucks under the card (JS toggles .nb-tuck / .nb-car-tuck, see _nbCarouselTuckCheck). The cards go opaque so it doesn't show through their glass. */
+#nb-onboard-carousel.nb-tuck{z-index:1}
+#nb-notes-grid.nb-car-tuck > .guide-card{z-index:2}
+body:not(.reader-mode) #nb-notes-grid.nb-car-tuck .guide-card,body:not(.reader-mode) #nb-notes-grid.nb-car-tuck .guide-card:active{background:var(--nb-bg)!important}
 body{--nb-card-ring:rgba(213,222,242,.6);--nb-card-lift:rgba(20,30,50,.05);--nb-card-press:rgba(51,102,204,.06)}
 body.night{--nb-card-ring:rgba(255,255,255,.08);--nb-card-lift:rgba(0,0,0,.35);--nb-card-press:rgba(255,255,255,.05)}
 body.pink{--nb-card-ring:rgba(200,54,94,.18);--nb-card-lift:rgba(200,54,94,.08);--nb-card-press:rgba(200,54,94,.06)}
@@ -5988,6 +6022,7 @@ body.nb-reduce-motion #backup-body .bkp-panel>.bkp-btn,body.nb-reduce-motion .rd
 #restore-overlay,
 #privacy-overlay,
 #cterms-overlay,
+#about-overlay,
 #einfo-overlay {--sh-bg:rgba(255,255,255,.7);--sh-fg:#202122;--sh-sub:#54595d;--sh-div:rgba(20,30,50,.1);--sh-shadow:rgba(0,0,0,.25);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(246,248,252,.6);--sh-secf:#3366cc;--sh-secb:rgba(20,30,50,.12);--sh-field:var(--nb-fill);--sh-fieldsh:inset 0 1px 3px var(--nb-in-sh),0 0 0 1px var(--nb-card-ring);--sh-fieldf:var(--nb-fill-hi);--sh-fieldfsh:inset 0 1px 2px var(--nb-in-sh),0 0 0 3px var(--nb-focus)}
 body.night #edit-overlay,
 body.night #publish-overlay,
@@ -5998,6 +6033,7 @@ body.night #paywall-overlay,
 body.night #restore-overlay,
 body.night #privacy-overlay,
 body.night #cterms-overlay,
+body.night #about-overlay,
 body.night #einfo-overlay {--sh-bg:rgba(17,17,17,.72);--sh-fg:#e8e8e8;--sh-sub:#8f98a3;--sh-div:rgba(255,255,255,.07);--sh-shadow:rgba(0,0,0,.6);--sh-scrim:rgba(10,10,12,.5);--sh-secbg:rgba(28,28,28,.6);--sh-secf:#b0b0b0;--sh-secb:#383838;--sh-field:var(--nb-fill);--sh-fieldsh:inset 0 1px 3px var(--nb-in-sh),0 0 0 1px var(--nb-card-ring);--sh-fieldf:var(--nb-fill-hi);--sh-fieldfsh:inset 0 1px 2px var(--nb-in-sh),0 0 0 3px var(--nb-focus)}
 body.pink #edit-overlay,
 body.pink #publish-overlay,
@@ -6008,6 +6044,7 @@ body.pink #paywall-overlay,
 body.pink #restore-overlay,
 body.pink #privacy-overlay,
 body.pink #cterms-overlay,
+body.pink #about-overlay,
 body.pink #einfo-overlay {--sh-bg:rgba(255,248,251,.72);--sh-fg:#1a0a12;--sh-sub:#875068;--sh-div:rgba(200,54,94,.16);--sh-shadow:rgba(200,54,94,.2);--sh-scrim:rgba(70,12,32,.45);--sh-secbg:rgba(255,224,236,.6);--sh-secf:#c8365e;--sh-secb:rgba(200,54,94,.2);--sh-field:var(--nb-fill);--sh-fieldsh:inset 0 1px 3px var(--nb-in-sh),0 0 0 1px var(--nb-card-ring);--sh-fieldf:var(--nb-fill-hi);--sh-fieldfsh:inset 0 1px 2px var(--nb-in-sh),0 0 0 3px var(--nb-focus)}
 #edit-overlay,
 #publish-overlay,
@@ -6018,6 +6055,7 @@ body.pink #einfo-overlay {--sh-bg:rgba(255,248,251,.72);--sh-fg:#1a0a12;--sh-sub
 #restore-overlay,
 #privacy-overlay,
 #cterms-overlay,
+#about-overlay,
 #einfo-overlay {background:var(--sh-scrim);animation:sh-fade .2s}
 #edit-dialog,
 #publish-sheet {background:var(--sh-bg) !important;color:var(--sh-fg);border:none !important;border-radius:16px 16px 0 0;box-shadow:0 -4px 30px var(--sh-shadow) !important;backdrop-filter:blur(22px) saturate(180%) !important;-webkit-backdrop-filter:blur(22px) saturate(180%) !important;animation:sh-up .28s cubic-bezier(.4,0,.2,1)}
@@ -6196,54 +6234,71 @@ body.pink #restore-dialog .rdlg-body {color:#875068}
 #restore-dialog .ebtn-pri:active {transform:scale(.97)}
 #privacy-dialog,
 #cterms-dialog,
+#about-dialog,
 #einfo-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:none;border-radius:20px;box-shadow:0 8px 24px rgba(20,30,50,.18);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
 #privacy-dhdr,
 #cterms-dhdr,
+#about-dhdr,
 #einfo-dhdr {background:transparent;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
 #privacy-dhdr-title,
 #cterms-dhdr-title,
+#about-dhdr-title,
 #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
 #privacy-closebtn,
 #cterms-closebtn,
+#about-closebtn,
 #einfo-closebtn {background:rgba(127,127,127,.14);color:var(--sh-sub);width:34px;height:34px}
 #privacy-body,
 #cterms-body,
+#about-body,
 #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
 body.night #privacy-dialog,
 body.night #cterms-dialog,
+body.night #about-dialog,
 body.night #einfo-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.07);border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.6);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
 body.night #privacy-dhdr,
 body.night #cterms-dhdr,
+body.night #about-dhdr,
 body.night #einfo-dhdr {background:transparent;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
 body.night #privacy-dhdr-title,
 body.night #cterms-dhdr-title,
+body.night #about-dhdr-title,
 body.night #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
 body.night #privacy-closebtn,
 body.night #cterms-closebtn,
+body.night #about-closebtn,
 body.night #einfo-closebtn {background:rgba(127,127,127,.14);color:var(--sh-sub);width:34px;height:34px}
 body.night #privacy-body,
 body.night #cterms-body,
+body.night #about-body,
 body.night #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
 body.pink #privacy-dialog,
 body.pink #cterms-dialog,
+body.pink #about-dialog,
 body.pink #einfo-dialog {background:var(--sh-bg) !important;-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:none;border-radius:20px;box-shadow:0 8px 24px rgba(200,54,94,.22);animation:dlg-rise .24s cubic-bezier(.4,0,.2,1)}
 body.pink #privacy-dhdr,
 body.pink #cterms-dhdr,
+body.pink #about-dhdr,
 body.pink #einfo-dhdr {background:transparent;border-bottom:1px solid var(--sh-div);padding:1.1rem .8rem .7rem 1.2rem;gap:.5rem}
 body.pink #privacy-dhdr-title,
 body.pink #cterms-dhdr-title,
+body.pink #about-dhdr-title,
 body.pink #einfo-dhdr-title {color:var(--sh-fg);font-size:1.2rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
 body.pink #privacy-closebtn,
 body.pink #cterms-closebtn,
+body.pink #about-closebtn,
 body.pink #einfo-closebtn {background:rgba(127,127,127,.14);color:var(--sh-sub);width:34px;height:34px}
 body.pink #privacy-body,
 body.pink #cterms-body,
+body.pink #about-body,
 body.pink #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
 #privacy-body h3,
 #cterms-body h3,
+#about-body h3,
 #einfo-body h3 {font-size:.92rem;font-weight:800;letter-spacing:-.01em;margin-top:1.1rem}
 #privacy-body h3:first-child,
 #cterms-body h3:first-child,
+#about-body h3:first-child,
 #einfo-body h3:first-child {margin-top:0}
 #delete-dialog-row2:not(:empty) {margin-top:.6rem}
 #delete-dialog #delete-dialog-confirm {margin-top:0 !important}
@@ -6274,6 +6329,7 @@ body.pink #_wptoast .toast-ok {background:rgba(255,224,236,.6);color:#c8365e;bor
 #restore-overlay,
 #privacy-overlay,
 #cterms-overlay,
+#about-overlay,
 #einfo-overlay,
 #edit-dialog,
 #publish-sheet,
@@ -6282,6 +6338,7 @@ body.pink #_wptoast .toast-ok {background:rgba(255,224,236,.6);color:#c8365e;bor
 #restore-dialog,
 #privacy-dialog,
 #cterms-dialog,
+#about-dialog,
 #einfo-dialog {animation:none}
 }
 body.nb-reduce-motion #edit-overlay,
@@ -6293,6 +6350,7 @@ body.nb-reduce-motion #paywall-overlay,
 body.nb-reduce-motion #restore-overlay,
 body.nb-reduce-motion #privacy-overlay,
 body.nb-reduce-motion #cterms-overlay,
+#about-overlay,
 body.nb-reduce-motion #einfo-overlay,
 body.nb-reduce-motion #edit-dialog,
 body.nb-reduce-motion #publish-sheet,
@@ -6301,6 +6359,7 @@ body.nb-reduce-motion #paywall-dialog,
 body.nb-reduce-motion #restore-dialog,
 body.nb-reduce-motion #privacy-dialog,
 body.nb-reduce-motion #cterms-dialog,
+#about-dialog,
 body.nb-reduce-motion #einfo-dialog {animation:none}
 </style>
 <script>try{if(JSON.parse(localStorage.getItem('nb_settings_v1')||'{}').glassMode!==false)document.currentScript.previousElementSibling.media='all'}catch(e){}</script>
@@ -6674,6 +6733,76 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>We may update this policy from time to time. When we do, we'll change the date at the top, and we may also send you an alert. If you keep using the app after a change, that means you're OK with it.</p>
       <h3>Contact</h3>
       <p>Questions about this policy? We're happy to help at <a href="mailto:essentialsoftware.support@gmail.com">essentialsoftware.support@gmail.com</a>.</p>
+    </div>
+  </div>
+</div>
+
+<div id="about-overlay" onclick="if(event.target===this)closeAbout()">
+  <div id="about-dialog">
+    <div id="about-dhdr">
+      <span id="about-dhdr-title">About</span>
+      <button id="about-closebtn" onclick="closeAbout()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
+    </div>
+    <div id="about-body">
+      <h3>Bluebook: Notes, Stories &amp; People</h3>
+      <p>Build scrapbook-style notes and mini websites from blocks: text, photos, voice notes, videos, music, polls, forms, payment buttons and more. Keep them private, or publish them as a link or a 24-hour Story and grow an audience.</p>
+      <p>Bluebook is a block-based editor for rich, visual notes. Write a journal, plan a trip, collect recipes, build a mood board, or publish a whole page. Arrange everything exactly how you want it.</p>
+      <h3>Build your page</h3>
+      <p>Tap a block in the toolbar to add it:</p>
+      <ul>
+        <li><strong>Text:</strong> headings, subheadings, text, quotes, code, to-do lists and tables</li>
+        <li><strong>Photos:</strong> single images, and carousels of up to 10 slides</li>
+        <li><strong>Media:</strong> YouTube videos, Spotify songs, albums and playlists, Streamable videos, and Instagram and X posts</li>
+        <li><strong>Voice notes:</strong> record up to 5 minutes right in the note</li>
+        <li><strong>Layout:</strong> dividers, spacers, panels (colored boxes you can type in), buttons and icons</li>
+        <li><strong>Navigation:</strong> nav bars that link to other pages in your note, to links, or to pop-up messages</li>
+        <li><strong>Marquees:</strong> rows that glide sideways like scrolling headlines</li>
+        <li><strong>Starters:</strong> ready-made layouts such as banners, highlight cards and pricing tables</li>
+      </ul>
+      <p>Drag blocks anywhere, resize them, tilt them, and duplicate them. Change colors, gradients, fonts, borders, opacity and entrance animations. Style selected text with bold, italic, underline, highlight, links and more. Use the eye button to preview your note as visitors will see it.</p>
+      <p>A single note can hold several pages that link to each other, so it works as a small website.</p>
+      <h3>Interactive blocks</h3>
+      <p>Add these to a published page to hear back from your visitors. Visitors don&rsquo;t need to sign in.</p>
+      <ul>
+        <li><strong>Polls:</strong> single choice, multiple choice, Yes / No, or a 1 to 5 or 1 to 10 rating. You choose when results show and can set a close date. You only see totals, never who voted.</li>
+        <li><strong>Text boxes:</strong> a message box, or a form with up to 30 fields. Messages arrive in the app, with an alert when a new one comes in.</li>
+        <li><strong>Payments:</strong> let people tip or support you with a link to Stripe, PayPal, Ko-fi and more, or with a Stripe Buy Button on the page. The money goes straight to your own account.</li>
+      </ul>
+      <h3>Share and grow</h3>
+      <ul>
+        <li>Publish any note as a web page with your own address</li>
+        <li>Show it in the <strong>Stories</strong> strip, where it stays for 24 hours</li>
+        <li>Let people <strong>like</strong>, <strong>comment on</strong> and <strong>subscribe</strong> to you. Subscribers get your notes in their Subscribed feed.</li>
+        <li>Turn comments on, hide them, or disable new ones, for a single page or all of your pages at once</li>
+        <li>Pick a display name and picture, or comment anonymously</li>
+        <li>Open any published note by pasting its link into search</li>
+        <li>Promote a page with <strong>Publish as Ad</strong>. Buy a view package and your page appears full screen before other people&rsquo;s notes.</li>
+      </ul>
+      <h3>Library and Media</h3>
+      <ul>
+        <li>Search all your notes, and sort them by recently edited, newest, oldest or A to Z</li>
+        <li>Favorite notes and sort them into your own categories</li>
+        <li>Filter by Favorites, Published, Stories, Subscribed, Liked or Uncategorized</li>
+        <li>Get Alerts for messages, announcements and account news</li>
+        <li><strong>Media</strong> gathers every video, song, album and voice note from your notes. It has playlists, a mini-player and a now-playing screen.</li>
+      </ul>
+      <h3>Private by design</h3>
+      <ul>
+        <li>Everything is stored on your device, and it works fully offline</li>
+        <li>Optional <strong>app lock</strong> with a PIN or password and a recovery question</li>
+        <li>Hide your email address inside the app</li>
+        <li>Optional Google sign-in with cloud sync across devices</li>
+        <li>Back up your notes to a file and restore them later</li>
+        <li>Light, Dark and Pink themes, an optional Glass mode, and a reduce-motion setting</li>
+      </ul>
+      <h3>Free &amp; Pro</h3>
+      <p>The free version includes up to <strong>5 notes</strong>.</p>
+      <p><strong>Bluebook Pro</strong> unlocks:</p>
+      <ul>
+        <li>Unlimited notes</li>
+        <li>Restoring notes from backup files</li>
+      </ul>
+      <p>Bluebook brings together notes, stories, and people, so you can create, share, and grow.</p>
     </div>
   </div>
 </div>
@@ -26606,6 +26735,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Sign out', danger: true, show: () => nbIsSignedIn(), go: () => openSettingsSignOutConfirm() },
       { t: 'link', l: 'Sign in', accent: true, show: () => !nbIsSignedIn(), go: () => nbSignInWithGoogle('settings') }]],
     ['About & Support', [
+      { t: 'link', l: 'About', go: () => openAbout() },
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
       { t: 'info', l: 'App version', s: 'v3.2.9' }]]
@@ -27459,6 +27589,7 @@ const NB_BACK_LAYERS = [
   { id: 'paywall-overlay', close: () => _nbPaywallOk() },
   { id: 'privacy-overlay', close: () => closePrivacy() },
   { id: 'cterms-overlay', close: () => closeConsumerTerms() },
+  { id: 'about-overlay', close: () => closeAbout() },
   { id: 'einfo-overlay', close: () => closeEditorInfo() },
   { id: 'terms-overlay', close: (AppPlugin) => { try { AppPlugin.exitApp(); } catch (e) {} } },
   { id: 'account-overlay', close: () => closeLogoutConfirm() },
@@ -29134,6 +29265,8 @@ function openLogoutConfirm() {
   if (nameInput) { nameInput.value = _nbLoadCachedProfileName(); nameInput.disabled = true; }
   if (nameEditBtn) { _nbSetProfileNameBtnMode('edit'); nameEditBtn.disabled = false; }
   if (nameStatus) nameStatus.textContent = '';
+  const avatarStatus = document.getElementById('logout-avatar-status');
+  if (avatarStatus) avatarStatus.textContent = '';
   _nbFetchProfileName(); // reconcile with the server in case another device set it
   _nbRefreshProfileAvatar();
   document.getElementById('logout-subscriber-count').textContent = _nbLoadCachedSubscriberCount();
@@ -29178,6 +29311,7 @@ function closeLogoutConfirm() {
   unlockScroll();
   _nbProfileNameOfflinePending = false;
   _nbProfileImageOfflinePending = false;
+  ['logout-profile-name-status', 'logout-avatar-status'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
 }
 // Confirmed from the "Log out?" dialog: sign out, then land on the same
 // full-screen view a signed-out tap of the header icon would open —
@@ -29316,6 +29450,14 @@ function nbGateRestoreBackup(e) {
   e.preventDefault();
   openPaywallDialog();
   return false;
+}
+function openAbout() {
+  document.getElementById('about-overlay').classList.add('open');
+  lockScroll();
+}
+function closeAbout() {
+  document.getElementById('about-overlay').classList.remove('open');
+  unlockScroll();
 }
 function openConsumerTerms() {
   _nbLegalApply('terms');
@@ -31283,7 +31425,7 @@ function _pubOnSlugInput(raw) {
       // treat it the same as being offline from the start, so the existing
       // 'online' listener (see _pubSlugOfflinePending above) retries this
       // once connectivity returns instead of leaving the message stuck.
-      if (typeof navigator !== 'undefined' && navigator.onLine === false) _pubSlugOfflinePending = true;
+      if (_nbIsNetworkFailure(e)) _pubSlugOfflinePending = true;
       statusEl.textContent = 'Could not check availability. Try again.';
       statusEl.className = 'pub-status taken';
     }
@@ -34905,11 +35047,11 @@ async function _nbSaveProfileName(raw) {
   const acctSub = (nbAccount() || {}).sub;
   _nbProfileNameSeq++;
   try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-name', {
+    const res = await _nbFetchTimeout(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-name', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
       body: JSON.stringify({ name })
-    });
+    }, 20000);
     if (!res.ok) throw new Error('profile name save failed: ' + res.status);
     if (!nbIsSignedIn() || (nbAccount() || {}).sub !== acctSub) return false; // account changed mid-flight — don't file it under another one
     _nbProfileNameSeq++;
@@ -35078,7 +35220,15 @@ let _nbProfileImageSaving = 0;
 // a TypeError; an HTTP error (bad status) doesn't. Only the former is worth
 // re-arming for the reconnect retry — 'online' can fire before requests work.
 function _nbIsNetworkFailure(e) {
-  return (typeof navigator !== 'undefined' && navigator.onLine === false) || (e instanceof TypeError);
+  return (typeof navigator !== 'undefined' && navigator.onLine === false) || (e instanceof TypeError) || !!(e && e.name === 'AbortError');
+}
+// fetch() that gives up after `ms` instead of hanging forever on a dead connection (a hung request left
+// "Saving…"/"Uploading…" on screen with nothing to retry). The abort surfaces as a network failure above.
+function _nbFetchTimeout(url, opts, ms) {
+  if (typeof AbortController === 'undefined') return fetch(url, opts);
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), ms);
+  return fetch(url, Object.assign({}, opts, { signal: ctl.signal })).finally(() => clearTimeout(t));
 }
 // The one place a picture save's outcome touches the UI, shared by the
 // pick, remove and reconnect-retry paths so they can't drift apart again.
@@ -35116,11 +35266,11 @@ async function _nbSaveProfileImage(dataUrl) {
   }
   _nbProfileImageSaving++;
   try {
-    const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image', {
+    const res = await _nbFetchTimeout(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + nbSessionToken() },
       body: JSON.stringify({ dataUrl })
-    });
+    }, 45000);
     if (!res.ok) throw new Error('profile image save failed: ' + res.status);
     return true;
   } catch (e) {
@@ -35144,7 +35294,13 @@ async function _nbSaveProfileImage(dataUrl) {
 // someone who closed it (closeLogoutConfirm resets both flags) shouldn't
 // get a stale save re-fire on them.
 // Re-runs whichever Account-sheet save(s) are still pending (name, picture).
+let _nbProfileRetryBusy = false;
 async function _nbRetryPendingProfileSaves() {
+  if (_nbProfileRetryBusy) return;
+  _nbProfileRetryBusy = true;
+  try { await _nbRetryPendingProfileSavesInner(); } finally { _nbProfileRetryBusy = false; }
+}
+async function _nbRetryPendingProfileSavesInner() {
   if (_nbProfileNameOfflinePending) {
     const input = document.getElementById('logout-profile-name-input');
     if (input) {
@@ -35213,6 +35369,46 @@ window.addEventListener('online', () => {
     }, delays[i]);
   })(0);
 });
+// ---- Reconnect jobs ---------------------------------------------------------
+// Anything that showed an offline/"not saved" message and is waiting for the connection registers here. A job
+// runs while its own `pending()` is true: at once on 'online'/focus/visible, otherwise on a backoff (3s doubling
+// to 30s). pending() should also say whether its sheet is still open, so closing the sheet ends the retries.
+const _nbReconnectJobs = [];
+function nbAddReconnectJob(pending, run) { _nbReconnectJobs.push({ pending, run, k: 0, next: 0, busy: false }); }
+async function _nbRunReconnectJobs(force) {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  for (const j of _nbReconnectJobs) {
+    let p = false;
+    try { p = !!j.pending(); } catch (e) {}
+    if (!p) { j.k = 0; j.next = 0; continue; }
+    if (j.busy || (!force && Date.now() < j.next)) continue;
+    if (force) j.k = 0;
+    j.busy = true;
+    window._nbInReconnect = true;
+    try { await j.run(); } catch (e) { _nbLog('reconnect job', e); }
+    window._nbInReconnect = false;
+    j.busy = false;
+    j.k++;
+    j.next = Date.now() + Math.min(3000 * Math.pow(2, j.k - 1), 30000);
+  }
+}
+setInterval(() => _nbRunReconnectJobs(false), 3000);
+window.addEventListener('online', () => setTimeout(() => _nbRunReconnectJobs(true), 800));
+window.addEventListener('focus', () => _nbRunReconnectJobs(true));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) _nbRunReconnectJobs(true); });
+function _nbElOpen(id) { const el = document.getElementById(id); return !!(el && el.classList.contains('open')); }
+// Account sheet: name / picture saves that couldn't go through.
+nbAddReconnectJob(
+  () => (_nbProfileNameOfflinePending || _nbProfileImageOfflinePending) && _nbElOpen('account-overlay'),
+  () => _nbRetryPendingProfileSaves());
+// Publish sheet: address availability check.
+nbAddReconnectJob(
+  () => _pubSlugOfflinePending && _nbElOpen('publish-overlay') && !!document.getElementById('pub-slug-input'),
+  () => { _pubOnSlugInput(document.getElementById('pub-slug-input').value); });
+// Publish sheet: Ad tab load.
+nbAddReconnectJob(
+  () => { const t = document.getElementById('pub-ad-tab'); return _pubAdOfflinePending && _nbElOpen('publish-overlay') && !!t && t.style.display !== 'none'; },
+  () => _pubRefreshAdTab());
 // Single letter shown in the Log Out dialog avatar until (or unless) an
 // actual picture loads: the cached display name's initial if there is
 // one, else the account email's.
@@ -36080,8 +36276,8 @@ async function _pubRefreshAdTab() {
     if (_pubAdRefreshCallToken === _pubAdRefreshToken) _pubAdLoadingShow('Couldn\u2019t load ad packages.', { error: true });
     // Connection dropped between the guard above and the response — treat
     // it the same as being offline from the start, so it retries on 'online'.
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) _pubAdOfflinePending = true;
-    showToast('Couldn\u2019t load ad status' + _nbFailureReason(e));
+    if (_nbIsNetworkFailure(e)) _pubAdOfflinePending = true;
+    if (!window._nbInReconnect) showToast('Couldn\u2019t load ad status' + _nbFailureReason(e)); // quiet during automatic retries
     return;
   }
   // Stale: another refresh started (tab re-opened, 'online' retry, a
@@ -37405,6 +37601,56 @@ function _nbCarouselUnpin(c) {
     c.style.top = ''; c.style.bottom = '';
   }, 600); // keyboard close animation + the carousel's fade back in
 }
+// The carousel is fixed to the bottom while the note list scrolls above it. With a single note on a short screen (or a tall
+// card) the two overlap: the carousel then drops under the card instead of floating over it, and the card goes opaque.
+// Re-checked whenever either side changes size, content or visibility, and on scroll/resize/rotation.
+let _nbTuckRaf = 0;
+function _nbCarouselTuckCheck() {
+  const c = document.getElementById('nb-onboard-carousel');
+  const grid = document.getElementById('nb-notes-grid');
+  if (!c || !grid) return;
+  let tuck = false;
+  try {
+    if (c.style.display !== 'none' && grid.style.display !== 'none' && c.getClientRects().length) {
+      const cards = grid.querySelectorAll('.guide-card');
+      if (cards.length) {
+        // The carousel's own box without any slide/fade transform in progress: measure from the viewport edge instead of its rect.
+        const vp = c.querySelector('.nb-carousel-viewport');
+        const bottomGap = parseFloat(getComputedStyle(c).bottom) || 0;
+        const cr = c.getBoundingClientRect();
+        const top = c.dataset.pinned ? parseFloat(c.style.top) : (window.innerHeight - bottomGap - c.offsetHeight);
+        const bottom = top + (c.offsetHeight || (vp ? vp.offsetHeight : 0) || cr.height);
+        for (const card of cards) {
+          const r = card.getBoundingClientRect();
+          if (r.bottom > top && r.top < bottom) { tuck = true; break; }
+        }
+      }
+    }
+  } catch (e) { tuck = false; }
+  c.classList.toggle('nb-tuck', tuck);
+  grid.classList.toggle('nb-car-tuck', tuck);
+}
+function _nbCarouselTuckSoon() {
+  if (_nbTuckRaf) return;
+  _nbTuckRaf = requestAnimationFrame(() => { _nbTuckRaf = 0; _nbCarouselTuckCheck(); });
+}
+(function _nbCarouselTuckInit() {
+  const wire = () => {
+    const c = document.getElementById('nb-onboard-carousel');
+    const grid = document.getElementById('nb-notes-grid');
+    if (!c || !grid) return;
+    try {
+      new MutationObserver(_nbCarouselTuckSoon).observe(c, { attributes: true, attributeFilter: ['style'] });
+      new MutationObserver(_nbCarouselTuckSoon).observe(grid, { childList: true, attributes: true, attributeFilter: ['style'] });
+      if (typeof ResizeObserver !== 'undefined') { const ro = new ResizeObserver(_nbCarouselTuckSoon); ro.observe(grid); ro.observe(c); }
+    } catch (e) {}
+    window.addEventListener('scroll', _nbCarouselTuckSoon, { passive: true, capture: true });
+    window.addEventListener('resize', _nbCarouselTuckSoon);
+    window.addEventListener('orientationchange', () => setTimeout(_nbCarouselTuckSoon, 300));
+    _nbCarouselTuckSoon();
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+})();
 // Pin state can outlive the search focus that created it: switching screens never fires a blur, and a rotation
 // leaves the measured `top` stale. Either way the carousel stayed tucked away or parked at the wrong height, so
 // drop the pin (and the tucked state, unless the field really still has focus) at those moments.
