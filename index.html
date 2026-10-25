@@ -2551,7 +2551,7 @@ body.pink #logout-following-count { color: #875068 }
 }
 
 #privacy-body h3, #cterms-body h3,
-#about-body h3, #einfo-body h3 {
+#about-body h3, #about-body h2, #einfo-body h3 {
   font-size: .84rem;
   font-weight: bold;
   margin: .8rem 0 .25rem;
@@ -2560,7 +2560,7 @@ body.pink #logout-following-count { color: #875068 }
 }
 
 #privacy-body h3:first-child, #cterms-body h3:first-child,
-#about-body h3:first-child, #einfo-body h3:first-child {
+#about-body h3:first-child, #about-body h2:first-child, #einfo-body h3:first-child {
   margin-top: 0
 }
 
@@ -2620,7 +2620,7 @@ body.night #about-body, body.night #einfo-body {
 }
 
 body.night #privacy-body h3, body.night #cterms-body h3,
-body.night #about-body h3, body.night #einfo-body h3 {
+body.night #about-body h3, body.night #about-body h2, body.night #einfo-body h3 {
   color: #aaaaaa
 }
 
@@ -2666,7 +2666,7 @@ body.pink #about-body, body.pink #einfo-body {
 }
 
 body.pink #privacy-body h3, body.pink #cterms-body h3,
-body.pink #about-body h3, body.pink #einfo-body h3 {
+body.pink #about-body h3, body.pink #about-body h2, body.pink #einfo-body h3 {
   color: #875068
 }
 
@@ -6293,12 +6293,17 @@ body.pink #about-body,
 body.pink #einfo-body {color:var(--sh-fg);padding:.6rem 1.2rem 1.3rem;font-size:.88rem;line-height:1.6}
 #privacy-body h3,
 #cterms-body h3,
-#about-body h3,
+#about-body h3, #about-body h2,
 #einfo-body h3 {font-size:.92rem;font-weight:800;letter-spacing:-.01em;margin-top:1.1rem}
 #privacy-body h3:first-child,
 #cterms-body h3:first-child,
-#about-body h3:first-child,
+#about-body h3:first-child, #about-body h2:first-child,
 #einfo-body h3:first-child {margin-top:0}
+#about-body h1 {font-size:1.3rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin:0 0 .6rem;color:var(--sh-fg)}
+#about-body h2:first-child {margin-top:0}
+#about-body blockquote {margin:.5rem -1.2rem .5rem 0;padding:.05rem 1.2rem .05rem .9rem;border-left:3px solid color-mix(in srgb,var(--sh-fg) 28%,transparent)}
+#about-body blockquote p {margin:.3rem 0}
+body.pink #about-body blockquote {background:rgba(200,54,94,.08);border-left-color:rgba(200,54,94,.4);color:#7a4a5f}
 #delete-dialog-row2:not(:empty) {margin-top:.6rem}
 #delete-dialog #delete-dialog-confirm {margin-top:0 !important}
 .pub-pkg-btn {padding:.75rem .5rem;border-radius:14px;border-width:1px;font-size:13px;font-weight:700;transition:transform .12s}
@@ -6743,10 +6748,10 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="about-closebtn" onclick="closeAbout()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="about-body">
-      <h3>Bluebook: Notes, Stories &amp; People</h3>
-      <p>Build scrapbook-style notes and mini websites from blocks: text, photos, voice notes, videos, music, polls, forms, payment buttons and more. Keep them private, or publish them as a link or a 24-hour Story and grow an audience.</p>
+      <h1>Bluebook: Notes, Stories &amp; People</h1>
+      <blockquote><p>Build scrapbook-style notes and mini websites from blocks: text, photos, voice notes, videos, music, polls, forms, payment buttons and more. Keep them private, or publish them as a link or a 24-hour Story and grow an audience.</p></blockquote>
       <p>Bluebook is a block-based editor for rich, visual notes. Write a journal, plan a trip, collect recipes, build a mood board, or publish a whole page. Arrange everything exactly how you want it.</p>
-      <h3>Build your page</h3>
+      <h2>Build your page</h2>
       <p>Tap a block in the toolbar to add it:</p>
       <ul>
         <li><strong>Text:</strong> headings, subheadings, text, quotes, code, to-do lists and tables</li>
@@ -6760,14 +6765,14 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       </ul>
       <p>Drag blocks anywhere, resize them, tilt them, and duplicate them. Change colors, gradients, fonts, borders, opacity and entrance animations. Style selected text with bold, italic, underline, highlight, links and more. Use the eye button to preview your note as visitors will see it.</p>
       <p>A single note can hold several pages that link to each other, so it works as a small website.</p>
-      <h3>Interactive blocks</h3>
+      <h2>Interactive blocks</h2>
       <p>Add these to a published page to hear back from your visitors. Visitors don&rsquo;t need to sign in.</p>
       <ul>
         <li><strong>Polls:</strong> single choice, multiple choice, Yes / No, or a 1 to 5 or 1 to 10 rating. You choose when results show and can set a close date. You only see totals, never who voted.</li>
         <li><strong>Text boxes:</strong> a message box, or a form with up to 30 fields. Messages arrive in the app, with an alert when a new one comes in.</li>
         <li><strong>Payments:</strong> let people tip or support you with a link to Stripe, PayPal, Ko-fi and more, or with a Stripe Buy Button on the page. The money goes straight to your own account.</li>
       </ul>
-      <h3>Share and grow</h3>
+      <h2>Share and grow</h2>
       <ul>
         <li>Publish any note as a web page with your own address</li>
         <li>Show it in the <strong>Stories</strong> strip, where it stays for 24 hours</li>
@@ -6777,7 +6782,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
         <li>Open any published note by pasting its link into search</li>
         <li>Promote a page with <strong>Publish as Ad</strong>. Buy a view package and your page appears full screen before other people&rsquo;s notes.</li>
       </ul>
-      <h3>Library and Media</h3>
+      <h2>Library and Media</h2>
       <ul>
         <li>Search all your notes, and sort them by recently edited, newest, oldest or A to Z</li>
         <li>Favorite notes and sort them into your own categories</li>
@@ -6785,7 +6790,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
         <li>Get Alerts for messages, announcements and account news</li>
         <li><strong>Media</strong> gathers every video, song, album and voice note from your notes. It has playlists, a mini-player and a now-playing screen.</li>
       </ul>
-      <h3>Private by design</h3>
+      <h2>Private by design</h2>
       <ul>
         <li>Everything is stored on your device, and it works fully offline</li>
         <li>Optional <strong>app lock</strong> with a PIN or password and a recovery question</li>
@@ -6794,7 +6799,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
         <li>Back up your notes to a file and restore them later</li>
         <li>Light, Dark and Pink themes, an optional Glass mode, and a reduce-motion setting</li>
       </ul>
-      <h3>Free &amp; Pro</h3>
+      <h2>Free &amp; Pro</h2>
       <p>The free version includes up to <strong>5 notes</strong>.</p>
       <p><strong>Bluebook Pro</strong> unlocks:</p>
       <ul>
@@ -10589,6 +10594,11 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk[data-type="pay"][data-py-l="aurora"]:not([data-py-sf]) .blk-btn{background:#fff!important;color:color-mix(in srgb,var(--py-c,#5b5bd6) 55%,#000)!important;border-color:#fff!important}
 .blk[data-type="pay"][data-py-l="aurora"] :is(.blk-py-back,.blk-py-again){color:#fff}
 .blk[data-type="pay"][data-py-l="aurora"] .blk-py-n.err{color:#fff;font-weight:700}
+/* Stripe Buy Button placeholder (.blk-py-bbp) is drawn in the accent colour: on layouts whose panel IS the accent (banner, poster) or is built from it (aurora) or is dark (neon) it vanished, so those layouts give it their own ink. */
+.blk[data-type="pay"]:is([data-py-l="banner"],[data-py-l="poster"]) .blk-py-bbp{color:var(--py-ink,#fff);border-color:var(--py-ink,#fff);background:color-mix(in srgb,var(--py-ink,#fff) 14%,transparent)}
+.blk[data-type="pay"][data-py-l="aurora"] .blk-py-bbp{color:#fff;border-color:rgba(255,255,255,.8);background:rgba(255,255,255,.14)}
+.blk[data-type="pay"][data-py-l="neon"] .blk-py-bbp{color:#eaf6ff;border-color:var(--py-c,#5b5bd6);background:rgba(255,255,255,.06)}
+.blk[data-type="pay"][data-py-l="poster"] .blk-py-bbp{border-width:3px;border-radius:0}
 .blk[data-type="pay"][data-py-l="tiles"] .blk-py-amts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
 .blk[data-type="pay"][data-py-l="tiles"] .blk-py-a{min-width:0;padding:.9em .4em;border-radius:14px;font-size:1.25em;line-height:1.1}
 .blk[data-type="pay"][data-py-l="list"] .blk-py-amts{flex-direction:column;gap:.4rem}
