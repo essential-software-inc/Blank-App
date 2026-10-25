@@ -26577,7 +26577,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       allRule('allHideComments', 'Hide comments on all pages', 'Hide the comments button and comments on all your published pages now, and on every page you publish from here on. Turns off \u201cAlways show comments\u201d.', 'allShowComments'),
       allRule('allDisableComments', 'Disable comments on all pages', 'Visitors can\u2019t add new comments or replies on any of your pages; they see a note that you turned them off. Existing comments stay.')]],
     ['Writing', [
-      { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share']] },
+      { t: 'chips', k: 'startOn', l: 'Open Bluebook on', o: [['library', 'Library'], ['write', 'Write'], ['share', 'Share'], ['last', 'Last screen']] },
       { t: 'chips', k: 'resetSource', l: 'Reset to original', s: 'Last saved discards your edits and goes back to the version you last saved. Published copy fetches the live page and replaces the note with it (published notes only; other notes use Last saved).', o: [['saved', 'Last saved'], ['published', 'Published copy']] },
       { t: 'sw', k: 'confirmDelete', l: 'Confirm before deleting', s: 'Off removes a note the moment you tap the bin. Published notes still ask to unpublish first.' }]],
     ['Privacy', [
@@ -38035,12 +38035,12 @@ function nbCanvasRedo() {
    Where you were (screen, editor note, category, Media panel, scroll position) is kept in sessionStorage, so a page refresh lands
    back there. A copy also goes to localStorage with a timestamp: when Android recreates the app after a quick trip to the
    background (the same 30-minute window the splash already treats as a resume) the session copy is gone, so that one is used.
-   Any other fresh launch has neither and still follows Settings > Start on. */
+   Restoring only happens when Settings > Open Bluebook on is "Last screen"; otherwise every launch follows that setting. */
 function _nbRsRead() {
   let o = null;
   try { o = JSON.parse(sessionStorage.getItem('nb_restore_v1') || 'null'); } catch (e) {}
-  if (!o && window.__nbIsLikelyResume) {
-    try { const l = JSON.parse(localStorage.getItem('nb_restore_v1') || 'null'); if (l && l.ts && Date.now() - l.ts < 30 * 60 * 1000) o = l; } catch (e) {}
+  if (!o && (window.__nbIsLikelyResume || _nbSt('startOn') === 'last')) {
+    try { const l = JSON.parse(localStorage.getItem('nb_restore_v1') || 'null'); if (l && l.ts && (_nbSt('startOn') === 'last' || Date.now() - l.ts < 30 * 60 * 1000)) o = l; } catch (e) {}
   }
   return o;
 }
@@ -38091,7 +38091,7 @@ function _nbRsSettle(sc, target, ms, wins, done) {
   // gradient sweep waits while the scroll position is restored; every run has its own flag, since the page, the editor and Media can settle at the same time
   const _washKey = 'restore' + (window._nbRsRuns = (window._nbRsRuns || 0) + 1);
   if (window.nbWashFlag) window.nbWashFlag(_washKey, true);
-  const evs = ['touchstart', 'wheel', 'mousedown', 'keydown'], stop = function () { over = true; };
+  const evs = ['touchstart', 'wheel', 'mousedown', 'keydown'], stop = function () { if (window._nbLaunchHold) { wins.forEach(w => { try { evs.forEach(e => w.addEventListener(e, stop, { passive: true, once: true })); } catch (x) {} }); return; } over = true; }; // touches on the launch sign-in screen aren't the person scrolling the restored page, so re-arm
   wins.forEach(w => { try { evs.forEach(e => w.addEventListener(e, stop, { passive: true, once: true })); } catch (x) {} });
   (function tick() {
     let go = !over;
@@ -38258,7 +38258,7 @@ if (_pendingRestoreMsg) {
 } else {
   // Always boot to Notes now, rather than the old Editor-by-default (Settings can switch to Write).
   const _so = _nbSt('startOn');
-  const _rs = _nbRsRead(); // read before the nbGoScreen below overwrites it
+  const _rs = _so === 'last' ? _nbRsRead() : null; // only Start on > Last screen restores; read before the nbGoScreen below overwrites it
   window._nbRestoreBoot = _rs;
   nbGoScreen('notes'); // the Editor section starts .active in the HTML, so leave it first or nbCreateNew() sees "already there" and does nothing
   if (_rs) {
