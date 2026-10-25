@@ -8624,7 +8624,7 @@ function nbPollKit() {
 
 function nbTextboxKit() {
   var uid = 0, acked = false, ackOn = false;
-  var DEF_ML = { s: 200, l: 2000, e: 254, n: 40, p: 40, u: 500, d: 10 };
+  var DEF_ML = { s: 200, l: 2000, e: 254, n: 40, p: 40, u: 500, d: 10, t: 5 };
   function ce(t, c) { var e = document.createElement(t); if (c) e.className = c; return e; }
   function fieldEls(b) { return Array.prototype.slice.call(b.querySelectorAll('.blk-tb-f')); }
   function cOf(f) { return f.querySelector('.blk-tb-i, .blk-tb-g'); }
@@ -8717,7 +8717,7 @@ function nbTextboxKit() {
         c.setAttribute('name', 'tb-' + id);
         if (lab) lab.setAttribute('for', c.id);
         if (tag === 'input') {
-          c.setAttribute('type', { e: 'email', n: 'number', p: 'tel', u: 'url', d: 'date' }[t] || 'text');
+          c.setAttribute('type', { e: 'email', n: 'number', p: 'tel', u: 'url', d: 'date', t: 'time' }[t] || 'text');
           if (t === 'n') { c.setAttribute('step', 'any'); c.setAttribute('inputmode', 'decimal'); }
         }
         if (tag === 'input' || tag === 'textarea') {
@@ -8800,6 +8800,7 @@ function nbTextboxKit() {
     if (t === 'p') return !/^[+]?[0-9 ()\-.]{3,30}$/.test(v);
     if (t === 'u') return !/^https?:\/\/[^\s]{3,480}$/i.test(v);
     if (t === 'd') return !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v) || isNaN(Date.parse(v));
+    if (t === 't') return !/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(v);
     return false;
   }
   function mark(c, on) { if (!c) return; c.classList.toggle('blk-tb-bad', on); if (on) c.setAttribute('aria-invalid', 'true'); else c.removeAttribute('aria-invalid'); }
@@ -9313,7 +9314,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 
 .blk{position:relative;border-radius:10px;padding:.6rem .75rem;margin-bottom:.2rem;transition:background .15s,box-shadow .15s,opacity .15s,transform .2s cubic-bezier(.22,.8,.24,1);flex:1 1 100%;--blk-custom:#5b5bd6}
 /* hover/focus tint only on blocks with no background of their own; otherwise touching a colored/image block wiped its color */
-.blk:not([data-bg]):not([data-bg-img]):hover,.blk:not([data-bg]):not([data-bg-img]):focus-within{background:rgba(91,91,214,.055)}
+.blk:not([data-bg]):not([data-bg-img]):not(.py-fp>.blk):hover,.blk:not([data-bg]):not([data-bg-img]):not(.py-fp>.blk):focus-within{background:rgba(91,91,214,.055)}
 .blk.dragging{background:#fff;box-shadow:0 14px 30px rgba(20,20,20,.16),0 1px 2px rgba(20,20,20,.06);opacity:.96;cursor:grabbing}
 /* Rotate-in-place (see .blk-rotate-btn / wireBlockRotate() below). The
    tilt lives on the --blk-rotate custom property and is applied by the
@@ -10365,7 +10366,7 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk-py-cs{font-size:.85em;opacity:.75}
 .blk-py-cw{font-weight:700}
 .blk-py-ci{font:inherit;width:6.5em;padding:.45em .6em;border:2px solid color-mix(in srgb,var(--py-c,#5b5bd6) 45%,#fff);border-radius:10px;background:#fff;color:#1c1c1a;box-sizing:border-box;outline:none}
-.blk-py-ci:focus{border-color:var(--py-c,#5b5bd6);box-shadow:0 0 0 3px color-mix(in srgb,var(--py-c,#5b5bd6) 22%,transparent)}
+.blk-py-ci:is(:focus,[data-fpf]){border-color:var(--py-c,#5b5bd6);box-shadow:0 0 0 3px color-mix(in srgb,var(--py-c,#5b5bd6) 22%,transparent)}
 .blk-py-ci::placeholder{color:color-mix(in srgb,currentColor 45%,transparent);opacity:1}
 .blk-py-a:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 .blk-py-co,.blk-py-back,.blk-py-ty{display:none}
@@ -10506,13 +10507,13 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk[data-type="pay"][data-py-l="segmented"] .blk-py-ci{background:transparent;border:2px solid var(--py-c,#5b5bd6);border-radius:999px;color:inherit;padding-left:1em;padding-right:1em}
 .blk[data-type="pay"][data-py-l="inline"] .blk-py-ci{background:#fff;border:1px solid color-mix(in srgb,var(--py-c,#5b5bd6) 25%,#e5e5e0);border-radius:12px}
 .blk[data-type="pay"][data-py-l="badge"] .blk-py-ci{background:#fff;border:2px solid color-mix(in srgb,var(--py-c,#5b5bd6) 60%,transparent);border-radius:999px;text-align:center}
-.blk[data-type="pay"][data-py-l="elegant"] .blk-py-ci:focus{box-shadow:none}
-.blk[data-type="pay"][data-py-l="notebook"] .blk-py-ci:focus{box-shadow:none}
-.blk[data-type="pay"][data-py-l="receipt"] .blk-py-ci:focus{box-shadow:none}
-.blk[data-type="pay"][data-py-l="sticker"] .blk-py-ci:focus{box-shadow:3px 3px 0 var(--py-c,#5b5bd6)}
-.blk[data-type="pay"][data-py-l="poster"] .blk-py-ci:focus{box-shadow:none;border-color:var(--py-ink,#fff);background:rgba(255,255,255,.18)}
-.blk[data-type="pay"][data-py-l="banner"] .blk-py-ci:focus{box-shadow:none;border-color:#fff;background:rgba(255,255,255,.26)}
-.blk[data-type="pay"][data-py-l="aurora"] .blk-py-ci:focus{box-shadow:none;border-color:#fff;background:rgba(255,255,255,.26)}
+.blk[data-type="pay"][data-py-l="elegant"] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:none}
+.blk[data-type="pay"][data-py-l="notebook"] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:none}
+.blk[data-type="pay"][data-py-l="receipt"] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:none}
+.blk[data-type="pay"][data-py-l="sticker"] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:3px 3px 0 var(--py-c,#5b5bd6)}
+.blk[data-type="pay"][data-py-l="poster"] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:none;border-color:var(--py-ink,#fff);background:rgba(255,255,255,.18)}
+.blk[data-type="pay"][data-py-l="banner"] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:none;border-color:#fff;background:rgba(255,255,255,.26)}
+.blk[data-type="pay"][data-py-l="aurora"] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:none;border-color:#fff;background:rgba(255,255,255,.26)}
 /* Payments tweaks */
 .blk[data-type="pay"][data-type="pay"][data-py-sf="none"] .blk-py{background:none;color:inherit;box-shadow:none;border-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
 .blk[data-type="pay"][data-type="pay"][data-py-sf="white"] .blk-py{background:#fff;color:#1c1c1a}
@@ -10572,8 +10573,8 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk[data-type="pay"][data-type="pay"][data-py-is="line"] .blk-py-ci{background:transparent;border:0;border-bottom:2px solid var(--py-c,#5b5bd6);border-radius:0;color:inherit;box-shadow:none}
 .blk[data-type="pay"][data-type="pay"][data-py-is="soft"] .blk-py-ci{background:#fff;border:0;border-radius:14px;color:#1c1c1a;box-shadow:0 1px 5px rgba(28,28,26,.22)}
 .blk[data-type="pay"][data-type="pay"][data-py-is="dark"] .blk-py-ci{background:#14161c;border:2px solid #14161c;border-radius:10px;color:#fff;box-shadow:none}
-.blk[data-type="pay"][data-type="pay"][data-py-is] .blk-py-ci:focus{border-color:var(--py-c,#5b5bd6);outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--py-c,#5b5bd6) 25%,transparent)}
-.blk[data-type="pay"][data-type="pay"][data-py-is="line"] .blk-py-ci:focus{border-color:transparent;border-bottom-color:var(--py-c,#5b5bd6);box-shadow:none}
+.blk[data-type="pay"][data-type="pay"][data-py-is] .blk-py-ci:is(:focus,[data-fpf]){border-color:var(--py-c,#5b5bd6);outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--py-c,#5b5bd6) 25%,transparent)}
+.blk[data-type="pay"][data-type="pay"][data-py-is="line"] .blk-py-ci:is(:focus,[data-fpf]){border-color:transparent;border-bottom-color:var(--py-c,#5b5bd6);box-shadow:none}
 .blk[data-type="pay"][data-type="pay"][data-py-iz="s"] .blk-py-ci{font-size:.85em;padding:.3em .5em}
 .blk[data-type="pay"][data-type="pay"][data-py-iz="l"] .blk-py-ci{font-size:1.2em;padding:.6em .8em}
 .blk[data-type="pay"][data-type="pay"][data-py-iw="wide"] .blk-py-ci{width:10em}
@@ -10595,12 +10596,12 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ib="double"] .blk-py-ci{border:4px double var(--py-fb,var(--py-c,#5b5bd6))}
 .blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-fb] .blk-py-ci{border-color:var(--py-fb)}
 .blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="none"] .blk-py-ci{box-shadow:none}
-.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="soft"] .blk-py-ci{box-shadow:0 2px 8px rgba(28,28,26,.2)}
-.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="inset"] .blk-py-ci{box-shadow:inset 0 2px 5px rgba(28,28,26,.2)}
-.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="hard"] .blk-py-ci{box-shadow:3px 3px 0 var(--py-fb,var(--py-c,#5b5bd6))}
-.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="glow"] .blk-py-ci{box-shadow:0 0 14px color-mix(in srgb,var(--py-c,#5b5bd6) 55%,transparent)}
-.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-fc] .blk-py-ci:focus{border-color:var(--py-fc);box-shadow:0 0 0 3px color-mix(in srgb,var(--py-fc) 28%,transparent)}
-.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-is="line"][data-py-fc] .blk-py-ci:focus{box-shadow:none}
+.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="soft"] .blk-py-ci{box-shadow:0 2px 8px var(--py-fsa,rgba(28,28,26,.2))}
+.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="inset"] .blk-py-ci{box-shadow:inset 0 2px 5px var(--py-fsa,rgba(28,28,26,.2))}
+.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="hard"] .blk-py-ci{box-shadow:3px 3px 0 var(--py-fs,var(--py-fb,var(--py-c,#5b5bd6)))}
+.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ih="glow"] .blk-py-ci{box-shadow:0 0 14px var(--py-fsa,color-mix(in srgb,var(--py-c,#5b5bd6) 55%,transparent))}
+.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-fc] .blk-py-ci:is(:focus,[data-fpf]){border-color:var(--py-fc);box-shadow:0 0 0 3px color-mix(in srgb,var(--py-fc) 28%,transparent)}
+.blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-is="line"][data-py-fc] .blk-py-ci:is(:focus,[data-fpf]){box-shadow:none}
 .blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-fp] .blk-py-ci::placeholder{color:var(--py-fp);opacity:1}
 .blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ps="i"] .blk-py-ci::placeholder{font-style:italic}
 .blk[data-type="pay"][data-type="pay"][data-type="pay"][data-py-ps="b"] .blk-py-ci::placeholder{font-weight:700}
@@ -16828,6 +16829,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     function draw() {
       var swapped = false;
       if (ctl.nextTab !== null) { if (ctl.nextTab !== curTab) { tabTops[curTab] = body.scrollTop; swapped = true; } curTab = ctl.nextTab; ctl.nextTab = null; }
+      var ae = document.activeElement, typingElse = !!(ae && body.contains(ae) && ae.matches('input,textarea,select') && !ae.hasAttribute('data-fpf'));
       var top = body.scrollTop, tabs = dzSplitTabs(render()), bar = variantSheet.querySelector('.blk-variant-tabs');
       if (ctl.nextTop !== null) { top = ctl.nextTop; ctl.nextTop = null; }
       else if (swapped) top = tabTops[curTab] || 0;
@@ -16841,6 +16843,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
         body.innerHTML = tabs[0][1];
       }
       body.scrollTop = top;
+      if (!typingElse) { var fpk = body.querySelector('.py-fp .blk-py-ci[data-fpf]'); if (fpk) fpk.focus({ preventScroll: true }); } // Field tab: a pinned preview keeps its caret
       gsIdx = null;
       gsBtn.hidden = tabs.length < 2;
       if (gsBtn.hidden && !gsRow.hidden) gsClose();
@@ -17278,9 +17281,9 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     });
   }
   function dzSec(label, inner) { return '<div class="dz-sec"><div class="dz-lab">' + label + '</div>' + inner + '</div>'; }
-  function dzChips(k, opts, cur, cols) {
+  function dzChips(k, opts, cur, cols, ctr) {
     cols = cols || (opts.length <= 5 ? opts.length : 3);
-    return '<div class="dz-chips" style="--dz-cols:' + cols + '">' + opts.map(function(o) {
+    return '<div class="dz-chips' + (ctr ? ' py-ctr' : '') + '" style="--dz-cols:' + cols + '">' + opts.map(function(o) {
       return '<button type="button" class="dz-chip' + (String(o[0]) === String(cur) ? ' dz-on' : '') + '" data-k="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>';
     }).join('') + '</div>';
   }
@@ -18116,7 +18119,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     if (!block.dataset.pyMin) block.dataset.pyMin = '1';
     if (!block.dataset.pyMax) block.dataset.pyMax = '500';
   }
-  var PY_FVAR = { pyFi: '--py-fi', pyFb: '--py-fb', pyFt: '--py-ft', pyFp: '--py-fp', pyFc: '--py-fc', pyFl: '--py-fl' }; // Field tab colors: one CSS variable each, set only when the color is a valid hex (fill may also be transparent)
+  var PY_FVAR = { pyFi: '--py-fi', pyFb: '--py-fb', pyFt: '--py-ft', pyFp: '--py-fp', pyFc: '--py-fc', pyFl: '--py-fl', pyFs: '--py-fs' }; // Field tab colors: one CSS variable each, set only when the color is a valid hex (fill may also be transparent)
   function applyPay(block) {
     applyButton(block);
     block.querySelectorAll('.blk-py-bbh').forEach(function(x) { x.remove(); }); // published holder, restored with the page; the editor shows .blk-py-bbp instead
@@ -18131,6 +18134,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       var v = block.dataset[k] || '';
       if (/^#[0-9a-f]{6}$/i.test(v) || (k === 'pyFi' && v === 'transparent')) block.style.setProperty(PY_FVAR[k], v); else block.style.removeProperty(PY_FVAR[k]);
     });
+    if (/^#[0-9a-f]{6}$/i.test(block.dataset.pyFs || '')) block.style.setProperty('--py-fsa', 'color-mix(in srgb,' + block.dataset.pyFs + ' 50%,transparent)'); else block.style.removeProperty('--py-fsa');
     if (pyIsCard(block)) {
       pyBuyClear(block);
       pyEnsureId(block);
@@ -18321,7 +18325,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     { k: 'badge', grp: 'Compact', t: 'Badge', d: 'Narrow centered card with a small capitals title', a: { btA: 'c', btFull: '1' } }
   ];
   var PY_OV = ['pyCr', 'pyBd', 'pySh', 'pySp', 'pySf', 'pyAs', 'pyAz', 'pyTz', 'pyCaps', 'pyDesc', 'pyFf', 'pyIs', 'pyIz', 'pyIw', 'pyIr', 'pyIb', 'pyIh', 'pyIa', 'pyIg', 'pyPs', 'pyLp', 'pyLs', 'pySy'];
-  var PY_FCOL = ['pyFi', 'pyFb', 'pyFt', 'pyFp', 'pyFc', 'pyFl'];
+  var PY_FCOL = ['pyFi', 'pyFb', 'pyFt', 'pyFp', 'pyFc', 'pyFl', 'pyFs'];
   var PY_FIELD = PY_OV.filter(function(k) { return k === 'pyIs' || k === 'pyIz' || k === 'pyIw' || /^py(I[rbhag]|Ps|Lp|Ls|Sy)$/.test(k); }).concat(PY_FCOL); // everything the Field tab's Reset clears (placeholder and label text stay)
   var PY_RESET = ['pyCr', 'pyBd', 'pySh', 'pySp', 'pySf', 'pyAs', 'pyAz', 'pyTz', 'pyIs', 'pyIr', 'pyIb', 'pyIh']; // a layout starts from its own look; color, font, capitals and description stay
   function pyLayoutOf(k) { var i; for (i = 0; i < PY_LAYOUTS.length; i++) if (PY_LAYOUTS[i].k === k) return PY_LAYOUTS[i]; return null; }
@@ -18378,6 +18382,21 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     return h;
   }
   // Field tab: the box where visitors type their own amount. Every setting is one data-py-* attribute (or one --py-f* color variable), drawn by plain CSS so the editor, the preview and the published page match.
+  // Field tab: tapping the preview input pins its focus look, so it survives the sheet redrawing (which rebuilds the input) after each color tap. Cleared when the sheet opens or when the sticky header is tapped outside the input.
+  var pyFpPin = false;
+  document.addEventListener('focusin', function(e) {
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('blk-py-ci') && t.closest && t.closest('.py-fp')) { pyFpPin = true; t.setAttribute('data-fpf', '1'); }
+  });
+  // A tap on the sticky preview header but not on the input itself (its label, currency symbol or empty space) lets the focus look go.
+  document.addEventListener('pointerdown', function(e) {
+    var t = e.target, i;
+    if (!pyFpPin || !t || !t.closest || !t.closest('.py-fp-stick')) return;
+    if (t.closest('.blk-py-ci')) { t.setAttribute('inputmode', 'numeric'); return; }
+    pyFpPin = false;
+    i = document.querySelector('.py-fp .blk-py-ci');
+    if (i) { i.removeAttribute('data-fpf'); if (document.activeElement === i) i.blur(); }
+  });
   function pyFieldPreview(block) {
     var at = '', vs = '', i, a, nm, am = String(block.dataset.pyAmts || ''), lb = String(block.dataset.pyLb || '').replace(/[<>"']/g, '').trim(), ph = String(block.dataset.pyPh || '').replace(/[<>"']/g, '').trim();
     var mn = parseInt(block.dataset.pyMin, 10) || 1, mx = parseInt(block.dataset.pyMax, 10) || 500;
@@ -18389,7 +18408,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     return '<div class="py-fp"><div class="blk" data-type="pay" data-bt-a="' + dzGet(block, 'btA', 'c') + '"' + at + ' style="' + dzEsc(vs) + '"><div class="blk-py"><div class="blk-py-card"><div class="blk-py-cust">' +
       (block.dataset.pyLs === '0' ? '' : '<span class="blk-py-cs">' + dzEsc(lb || (am.length ? 'Other amount' : 'Amount')) + '</span>') +
       (block.dataset.pySy === '0' ? '' : '<span class="blk-py-cw">' + dzEsc(PY_SYM[block.dataset.pyCur] || '$') + '</span>') +
-      '<input class="blk-py-ci" type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="' + dzEsc(ph || (mn + '\u2013' + mx)) + '" aria-label="Field preview"></div></div></div></div></div>';
+      '<input class="blk-py-ci" type="text" inputmode="' + (pyFpPin ? 'none' : 'numeric') + '" autocomplete="off" maxlength="5" placeholder="' + dzEsc(ph || (mn + '\u2013' + mx)) + '" aria-label="Field preview"' + (pyFpPin ? ' data-fpf="1"' : '') + '></div></div></div></div></div>';
   }
   function pyFieldTab(block, card) {
     var g = function(k) { return dzGet(block, k, ''); }, h = '', gap = '<div style="height:.4rem"></div>';
@@ -18404,6 +18423,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     h += dzSec('Field shadow', dzChips('pyIh', [['', 'Preset'], ['none', 'None'], ['soft', 'Soft'], ['inset', 'Inset'], ['hard', 'Hard'], ['glow', 'Glow']], g('pyIh'), 3));
     h += dzSec('Field fill', dzSwatches('pyFi', g('pyFi') === 'transparent' ? '' : g('pyFi')) + gap + dzChips('pyFi', [['transparent', 'Transparent fill']], g('pyFi'), 1) + '<div class="dz-hint">None keeps the color the layout gives the field.</div>');
     h += dzSec('Field border color', dzSwatches('pyFb', g('pyFb')) + '<div class="dz-hint">Shows once the field has a border. Pick one above if it has none.</div>');
+    h += dzSec('Field shadow color', dzSwatches('pyFs', g('pyFs')) + '<div class="dz-hint">For the Soft, Inset, Hard and Glow shadows above. None keeps each one\u2019s own color.</div>');
     h += dzSec('Field text color', dzSwatches('pyFt', g('pyFt')));
     h += dzSec('Placeholder color', dzSwatches('pyFp', g('pyFp')) + '<div class="dz-hint">The hint text inside the empty field.</div>');
     h += dzSec('Focus color', dzSwatches('pyFc', g('pyFc')) + '<div class="dz-hint">The border and glow while someone is typing.</div>');
@@ -18418,6 +18438,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     return h;
   }
   function openPayDesign(block, only) {
+    pyFpPin = false;
     var before = hcBeginBlock(block);
     var a = block.querySelector('.blk-btn');
     var RF = '<input type="text" data-k="pyRefresh" style="display:none" tabindex="-1" aria-hidden="true">';
@@ -18717,7 +18738,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       if (t === 'multi') {
         var mxo = [['0', 'Any']], k;
         for (k = 1; k < os.length && k <= 12; k++) mxo.push([String(k), String(k)]);
-        h += dzSec('Most options a visitor can pick', dzChips('plMx', mxo, dzGet(block, 'plMx', '0')));
+        h += dzSec('Most options a visitor can pick', dzChips('plMx', mxo, dzGet(block, 'plMx', '0'), 0, 1));
       }
       h += dzSec('Show results', dzChips('plRes', [['after', 'After voting'], ['always', 'Always'], ['hidden', 'Hidden']], dzGet(block, 'plRes', 'after')) +
         '<div class="dz-hint">Hidden results are only visible to you in the Results tab.</div>');
@@ -18887,7 +18908,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
   // Messages never live in the page; the author reads them in the Messages tab.
   var tbKit = (${nbTextboxKit.toString()})();
   var TB_MAX = 30, TB_MAX_OPTS = 30, tbOwner = { loading: false, err: '', boxes: null, msgs: null, next: null, box: '', seq: 0, rseq: 0, sort: { m: 'new', fid: '', dir: 'asc' }, sortKey: 'new' };
-  var TB_TYPES = [['s', 'Short'], ['l', 'Long'], ['e', 'Email'], ['n', 'Number'], ['p', 'Phone'], ['u', 'Link'], ['d', 'Date'], ['c', 'Dropdown'], ['r', 'Choice'], ['k', 'Checkboxes'], ['y', 'Tick box']];
+  var TB_TYPES = [['s', 'Short'], ['l', 'Long'], ['e', 'Email'], ['n', 'Number'], ['p', 'Phone'], ['u', 'Link'], ['d', 'Date'], ['t', 'Time'], ['c', 'Dropdown'], ['r', 'Choice'], ['k', 'Checkboxes'], ['y', 'Tick box']];
   function tbChoice(t) { return t === 'c' || t === 'r' || t === 'k'; }
   function tbFields(block) { return Array.prototype.slice.call(block.querySelectorAll('.blk-tb-f')); }
   function tbLabel(f) { var l = f.querySelector('.blk-tb-fl'); return l ? l.textContent : ''; }
@@ -19062,8 +19083,8 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       s += dzChips('tbSortM', [['new', 'Newest first'], ['old', 'Oldest first']].concat(fs.length ? [['field', 'By field']] : []), S.m);
       if (S.m === 'field' && cur) {
         t = cur.getAttribute('data-ft');
-        s += dzChips('tbSortF', fs.map(function(f) { return [f.getAttribute('data-fid'), tbLabel(f).slice(0, 24) || 'Field']; }), S.fid);
-        s += dzChips('tbSortD', t === 'n' ? [['asc', 'Low to high'], ['desc', 'High to low']] : t === 'd' ? [['asc', 'Earliest first'], ['desc', 'Latest first']] : (t === 'c' || t === 'r') ? [['asc', 'Option order'], ['desc', 'Reverse order']] : [['asc', 'A to Z'], ['desc', 'Z to A']], S.dir);
+        s += dzChips('tbSortF', fs.map(function(f) { return [f.getAttribute('data-fid'), tbLabel(f).slice(0, 24) || 'Field']; }), S.fid, 0, 1);
+        s += dzChips('tbSortD', t === 'n' ? [['asc', 'Low to high'], ['desc', 'High to low']] : (t === 'd' || t === 't') ? [['asc', 'Earliest first'], ['desc', 'Latest first']] : (t === 'c' || t === 'r') ? [['asc', 'Option order'], ['desc', 'Reverse order']] : [['asc', 'A to Z'], ['desc', 'Z to A']], S.dir);
         s += '<div class="dz-hint">Messages that left this field empty come last.</div>';
       }
       return dzSec('Sort', s);
@@ -22033,12 +22054,12 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       h += dzSec('When tapped', dzChips('nvAct', [['page', 'Page'], ['link', 'Link'], ['dialog', 'Dialog'], ['top', 'Top'], ['none', 'None']], act));
       if (act === 'page') {
         var cur = el.getAttribute('data-pg') || 'home';
-        h += dzSec('Opens page', '<div class="dz-chips" style="--dz-cols:2">' + pgPages().map(function(p) { return '<button type="button" class="dz-chip' + (p.id === cur ? ' dz-on' : '') + '" data-k="nvPg" data-v="' + p.id + '">' + dzEsc(p.title) + '</button>'; }).join('') + '<button type="button" class="dz-chip" data-k="nvPg" data-v="__new">+ New page</button></div>');
+        h += dzSec('Opens page', '<div class="dz-chips py-ctr" style="--dz-cols:2">' + pgPages().map(function(p) { return '<button type="button" class="dz-chip' + (p.id === cur ? ' dz-on' : '') + '" data-k="nvPg" data-v="' + p.id + '">' + dzEsc(p.title) + '</button>'; }).join('') + '<button type="button" class="dz-chip" data-k="nvPg" data-v="__new">+ New page</button></div>');
       } else if (act === 'link') {
         h += dzSec('Link', '<input type="text" class="dz-input" data-k="nvHref" value="' + dzEsc(el.getAttribute('data-href') || '') + '" placeholder="example.com or name@mail.com" autocapitalize="off" autocorrect="off" spellcheck="false">');
       } else if (act === 'dialog') {
         var dg = el.getAttribute('data-dg') || '';
-        h += dzSec('Opens dialog', '<div class="dz-chips" style="--dz-cols:2">' + nvDialogs(block).map(function(d) { return '<button type="button" class="dz-chip' + (d.getAttribute('data-dg') === dg ? ' dz-on' : '') + '" data-k="nvDg" data-v="' + d.getAttribute('data-dg') + '">' + dzEsc(d.querySelector('.nb-dlg-t').textContent || 'Dialog') + '</button>'; }).join('') + '<button type="button" class="dz-chip" data-k="nvDg" data-v="__new">+ New dialog</button></div>' + (dg ? '<div class="nv-btns"><button type="button" class="nv-btn nv-wide" data-k="nvEditDg" data-v="' + dg + '">Design this dialog</button></div>' : ''));
+        h += dzSec('Opens dialog', '<div class="dz-chips py-ctr" style="--dz-cols:2">' + nvDialogs(block).map(function(d) { return '<button type="button" class="dz-chip' + (d.getAttribute('data-dg') === dg ? ' dz-on' : '') + '" data-k="nvDg" data-v="' + d.getAttribute('data-dg') + '">' + dzEsc(d.querySelector('.nb-dlg-t').textContent || 'Dialog') + '</button>'; }).join('') + '<button type="button" class="dz-chip" data-k="nvDg" data-v="__new">+ New dialog</button></div>' + (dg ? '<div class="nv-btns"><button type="button" class="nv-btn nv-wide" data-k="nvEditDg" data-v="' + dg + '">Design this dialog</button></div>' : ''));
       }
       return h;
     }
@@ -22083,7 +22104,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       h += dzSec('Design', '<div class="dz-chips" style="--dz-cols:3">' + NV_DG_D.map(function(o) { return '<button type="button" class="dz-chip' + (dd === o[0] ? ' dz-on' : '') + '" data-k="dgD" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>');
       h += dzSec('Main button', '<input type="text" class="dz-input" data-k="dgP" value="' + dzEsc(pri ? pri.textContent : '') + '" placeholder="Leave empty for none" maxlength="30"><div style="height:.4rem"></div>' + dzChips('dgPa', [['close', 'Close'], ['link', 'Link'], ['page', 'Page']], pa));
       if (pa === 'link') h += dzSec('Button link', '<input type="text" class="dz-input" data-k="dgPh" value="' + dzEsc(pri.getAttribute('data-href') || '') + '" placeholder="example.com or name@mail.com" autocapitalize="off" autocorrect="off" spellcheck="false">');
-      if (pa === 'page') h += dzSec('Button opens', '<div class="dz-chips" style="--dz-cols:2">' + pgPages().map(function(p) { return '<button type="button" class="dz-chip' + (p.id === (pri.getAttribute('data-pg') || 'home') ? ' dz-on' : '') + '" data-k="dgPp" data-v="' + p.id + '">' + dzEsc(p.title) + '</button>'; }).join('') + '</div>');
+      if (pa === 'page') h += dzSec('Button opens', '<div class="dz-chips py-ctr" style="--dz-cols:2">' + pgPages().map(function(p) { return '<button type="button" class="dz-chip' + (p.id === (pri.getAttribute('data-pg') || 'home') ? ' dz-on' : '') + '" data-k="dgPp" data-v="' + p.id + '">' + dzEsc(p.title) + '</button>'; }).join('') + '</div>');
       h += dzSec('Second button', '<input type="text" class="dz-input" data-k="dgS" value="' + dzEsc(d.querySelector('.nb-dlg-sec') ? d.querySelector('.nb-dlg-sec').textContent : '') + '" placeholder="Leave empty for none" maxlength="30">');
       h += dzSec('Title', dzChips('dgNt', [['', 'Show'], ['1', 'Hide']], d.getAttribute('data-dg-not') || ''));
       h += dzSec('Footer note', '<input type="text" class="dz-input" data-k="dgFt" value="' + dzEsc((d.querySelector('.nb-dlg-ft') || { textContent: '' }).textContent) + '" placeholder="Small print under the buttons" maxlength="120">');
@@ -22198,7 +22219,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       if (stT === 'p') {
         function mg(n) { return block.getAttribute('data-nv-sb-' + n) || ''; }
         var mkd = _nv.menuKind(block), ovl = !!mkd, mdef = ({ navfull: 'Full screen', navpanel: 'Right panel', navpop: 'Popover' })[NV_OVERLAY[d0] ? ({ fullscreen: 'navfull', panel: 'navpanel', orb: 'navpop' })[d0] : ''] || '';
-        h += dzSec('Menu style', dzChips('nvMn', NV_MN.filter(function(o) { return o[0] !== 'inline' || !NV_OVERLAY[d0]; }), block.getAttribute('data-nv-mn') || '') + '<div class="dz-hint">How the menu opens from the menu button of the bar. Design keeps the menu this bar comes with' + (mdef ? ' (' + mdef + ')' : '') + '. A bar that shows its links inline opens it from its menu button, which shows when the bar is narrow unless you set Menu button below to Always.</div>');
+        h += dzSec('Menu style', (function(o) { return dzChips('nvMn', o, block.getAttribute('data-nv-mn') || '', o.length % 3 ? 4 : 0); })(NV_MN.filter(function(o) { return o[0] !== 'inline' || !NV_OVERLAY[d0]; })) + '<div class="dz-hint">How the menu opens from the menu button of the bar. Design keeps the menu this bar comes with' + (mdef ? ' (' + mdef + ')' : '') + '. A bar that shows its links inline opens it from its menu button, which shows when the bar is narrow unless you set Menu button below to Always.</div>');
         if (ovl && !NV_OVERLAY[d0]) h += dzSec('Menu button', dzChips('nvMw', [['', 'When narrow'], ['always', 'Always']], block.getAttribute('data-nv-mw') || '') + '<div class="dz-hint">Always replaces the inline links with the menu button on every screen size, so wide screens lose their visible links.</div>');
         if (ovl && mkd !== 'navpop') h += xOpts('mx', function(n) { return block.getAttribute('data-nv-mx' + n) || ''; }, 'Close button');
         h += xOpts('hb', function(n) { return block.getAttribute('data-nv-hb' + n) || ''; }, 'Menu button');
