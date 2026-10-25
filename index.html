@@ -10732,6 +10732,119 @@ span.blk-btn:not([role="button"]){cursor:default}
 .blk-pl-meta.blk-pl-done{opacity:1;font-weight:600}
 .blk[data-pl-sent="1"] .blk-pl-list,.blk[data-pl-sent="1"] .blk-pl-act{display:none}
 .blk[data-pl-sent="1"] .blk-pl-meta{font-size:1.05em}
+/* Poll customization: option, bar, box and button options. Each is one data-pl-* attribute (or one --pl-* color variable). */
+.blk[data-type="poll"][data-type="poll"][data-pl-lk="soft"] .blk-pl-o{border-color:transparent;background:#fff;color:#1c1c1a;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.blk[data-type="poll"][data-type="poll"][data-pl-lk="dark"] .blk-pl-o{border-color:transparent;background:#14161c;color:#f4f4f0}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="s"] .blk-pl-o{font-size:.88em}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="s"][data-pl-t]:not([data-pl-t="rating"]):not([data-pl-st="line"]):not([data-pl-st="solid"]) .blk-pl-o{padding-top:.45rem;padding-bottom:.45rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="s"][data-pl-st="solid"]:not([data-pl-t="rating"]) .blk-pl-o{padding-top:.45rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="l"] .blk-pl-o{font-size:1.12em}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="l"][data-pl-t]:not([data-pl-t="rating"]):not([data-pl-st="line"]):not([data-pl-st="solid"]) .blk-pl-o{padding-top:.9rem;padding-bottom:.9rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="l"][data-pl-st="solid"]:not([data-pl-t="rating"]) .blk-pl-o{padding-top:.9rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="xl"] .blk-pl-o{font-size:1.3em}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="xl"][data-pl-t]:not([data-pl-t="rating"]):not([data-pl-st="line"]):not([data-pl-st="solid"]) .blk-pl-o{padding-top:1.1rem;padding-bottom:1.1rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xz="xl"][data-pl-st="solid"]:not([data-pl-t="rating"]) .blk-pl-o{padding-top:1.1rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xg="s"] .blk-pl-list{gap:.2rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xg="l"] .blk-pl-list{gap:.9rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xg="xl"] .blk-pl-list{gap:1.3rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-xr="sq"]:not([data-pl-st="line"]) .blk-pl-o{border-radius:0}
+.blk[data-type="poll"][data-type="poll"][data-pl-xr="sm"]:not([data-pl-st="line"]) .blk-pl-o{border-radius:6px}
+.blk[data-type="poll"][data-type="poll"][data-pl-xr="md"]:not([data-pl-st="line"]) .blk-pl-o{border-radius:12px}
+.blk[data-type="poll"][data-type="poll"][data-pl-xr="lg"]:not([data-pl-st="line"]) .blk-pl-o{border-radius:20px}
+.blk[data-type="poll"][data-type="poll"][data-pl-xr="pill"]:not([data-pl-st="line"]) .blk-pl-o{border-radius:999px}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb="none"]:not([data-pl-st="line"]) .blk-pl-o{border-width:0}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb="thin"]:not([data-pl-st="line"]) .blk-pl-o{border-width:1px;border-style:solid}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb="mid"]:not([data-pl-st="line"]) .blk-pl-o{border-width:2px;border-style:solid}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb="bold"]:not([data-pl-st="line"]) .blk-pl-o{border-width:3px;border-style:solid}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb="dashed"]:not([data-pl-st="line"]) .blk-pl-o{border-width:2px;border-style:dashed}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb="dotted"]:not([data-pl-st="line"]) .blk-pl-o{border-width:2px;border-style:dotted}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb="double"]:not([data-pl-st="line"]) .blk-pl-o{border-width:4px;border-style:double}
+.blk[data-type="poll"][data-type="poll"][data-pl-xb]:not([data-pl-st="line"]) .blk-pl-o{border-color:var(--pl-xc,color-mix(in srgb,currentColor 30%,transparent))}
+.blk[data-type="poll"][data-type="poll"][data-pl-xc]:not([data-pl-st="line"]) .blk-pl-o{border-color:var(--pl-xc)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xh="none"] .blk-pl-o{box-shadow:none}
+.blk[data-type="poll"][data-type="poll"][data-pl-xh="soft"] .blk-pl-o{box-shadow:0 3px 10px color-mix(in srgb,var(--pl-xs,#000) 18%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xh="lift"] .blk-pl-o{box-shadow:0 8px 20px color-mix(in srgb,var(--pl-xs,#000) 24%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xh="hard"] .blk-pl-o{box-shadow:3px 3px 0 var(--pl-xs,currentColor)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xh="glow"] .blk-pl-o{box-shadow:0 0 14px color-mix(in srgb,var(--pl-xs,var(--pl-c)) 45%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xi] .blk-pl-o{background:var(--pl-xi)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xt] .blk-pl-o{color:var(--pl-xt)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xw="n"] .blk-pl-ot{font-weight:400}
+.blk[data-type="poll"][data-type="poll"][data-pl-xw="b"] .blk-pl-ot{font-weight:700}
+.blk[data-type="poll"][data-type="poll"][data-pl-xw="h"] .blk-pl-ot{font-weight:800}
+.blk[data-type="poll"][data-type="poll"] .blk-pl-o.on{border-color:var(--pl-xa,var(--pl-c))}
+.blk[data-type="poll"][data-type="poll"][data-pl-lk] .blk-pl-o:hover{border-color:color-mix(in srgb,var(--pl-c) 55%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-lk] .blk-pl-o.on{border-color:var(--pl-xa,var(--pl-c))}
+.blk[data-type="poll"][data-type="poll"][data-pl-xa] .blk-pl-o.on .blk-pl-in{border-color:var(--pl-xa);background:radial-gradient(circle,var(--pl-xa) 0 42%,transparent 46%)}
+.blk[data-type="poll"][data-type="poll"][data-pl-xa][data-pl-t="multi"] .blk-pl-o.on .blk-pl-in{background:var(--pl-xa)}
+.blk[data-type="poll"][data-type="poll"][data-pl-ys="sq"] .blk-pl-in{border-radius:.2rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-ys="rd"] .blk-pl-in{border-radius:50%}
+.blk[data-type="poll"][data-type="poll"][data-pl-ys="hide"] .blk-pl-in{display:none}
+.blk[data-type="poll"][data-type="poll"][data-pl-yc] .blk-pl-bar i{background:var(--pl-yc);opacity:.75}
+.blk[data-type="poll"][data-type="poll"][data-pl-yc] .blk-pl-o.on .blk-pl-bar i{background:var(--pl-yc);opacity:1}
+.blk[data-type="poll"][data-type="poll"][data-pl-yk][data-pl-st="line"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yk][data-pl-st="solid"] .blk-pl-bar{background:var(--pl-yk)}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="s"][data-pl-st="line"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yh="s"][data-pl-st="solid"] .blk-pl-bar{height:.25rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="s"][data-pl-st="solid"]:not([data-pl-t="rating"]) .blk-pl-o{padding-bottom:calc(.25rem + .75rem)}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="s"][data-pl-st="line"]:not([data-pl-t="rating"]) .blk-pl-o{padding-bottom:calc(.25rem + .45rem)}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="l"][data-pl-st="line"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yh="l"][data-pl-st="solid"] .blk-pl-bar{height:.8rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="l"][data-pl-st="solid"]:not([data-pl-t="rating"]) .blk-pl-o{padding-bottom:calc(.8rem + .75rem)}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="l"][data-pl-st="line"]:not([data-pl-t="rating"]) .blk-pl-o{padding-bottom:calc(.8rem + .45rem)}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="xl"][data-pl-st="line"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yh="xl"][data-pl-st="solid"] .blk-pl-bar{height:1.2rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="xl"][data-pl-st="solid"]:not([data-pl-t="rating"]) .blk-pl-o{padding-bottom:calc(1.2rem + .75rem)}
+.blk[data-type="poll"][data-type="poll"][data-pl-yh="xl"][data-pl-st="line"]:not([data-pl-t="rating"]) .blk-pl-o{padding-bottom:calc(1.2rem + .45rem)}
+.blk[data-type="poll"][data-type="poll"][data-pl-qz="s"] .blk-pl-q{font-size:.98em}
+.blk[data-type="poll"][data-type="poll"][data-pl-qz="l"] .blk-pl-q{font-size:1.45em}
+.blk[data-type="poll"][data-type="poll"][data-pl-qz="xl"] .blk-pl-q{font-size:1.9em}
+.blk[data-type="poll"][data-type="poll"][data-pl-qcaps="1"] .blk-pl-q{text-transform:uppercase;letter-spacing:.05em}
+.blk[data-type="poll"][data-type="poll"][data-pl-qc] .blk-pl-q{color:var(--pl-qc)}
+.blk[data-type="poll"][data-type="poll"][data-pl-qd="0"] .blk-pl-d{display:none}
+.blk[data-type="poll"][data-type="poll"]:is([data-pl-zs],[data-pl-zb],[data-pl-zh],[data-pl-zg]) .blk-pl{padding:1.1rem;border-radius:var(--pl-sr,16px)}
+.blk[data-type="poll"][data-type="poll"][data-pl-zs="white"] .blk-pl{background:#fff;color:var(--pl-tc,#1c1c1a)}
+.blk[data-type="poll"][data-type="poll"][data-pl-zs="tint"] .blk-pl{background:color-mix(in srgb,var(--pl-c) 9%,#fff);color:var(--pl-tc,#1c1c1a)}
+.blk[data-type="poll"][data-type="poll"][data-pl-zs="dark"] .blk-pl{background:#14161c;color:var(--pl-tc,#f4f4f0)}
+.blk[data-type="poll"][data-type="poll"][data-pl-zg] .blk-pl{background:var(--pl-zg);color:var(--pl-tc,var(--pl-zgt,inherit))}
+.blk[data-type="poll"][data-type="poll"][data-pl-zr="sq"]{--pl-sr:0}
+.blk[data-type="poll"][data-type="poll"][data-pl-zr="sm"]{--pl-sr:8px}
+.blk[data-type="poll"][data-type="poll"][data-pl-zr="md"]{--pl-sr:16px}
+.blk[data-type="poll"][data-type="poll"][data-pl-zr="lg"]{--pl-sr:28px}
+.blk[data-type="poll"][data-type="poll"][data-pl-zb="thin"] .blk-pl{border:1px solid var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="poll"][data-type="poll"][data-pl-zb="bold"] .blk-pl{border:3px solid var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="poll"][data-type="poll"][data-pl-zb="dashed"] .blk-pl{border:2px dashed var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="poll"][data-type="poll"][data-pl-zb="double"] .blk-pl{border:4px double var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="poll"][data-type="poll"][data-pl-zh="soft"] .blk-pl{box-shadow:0 6px 22px rgba(0,0,0,.12)}
+.blk[data-type="poll"][data-type="poll"][data-pl-zh="lift"] .blk-pl{box-shadow:0 14px 34px rgba(0,0,0,.2)}
+.blk[data-type="poll"][data-type="poll"][data-pl-zh="hard"] .blk-pl{box-shadow:5px 5px 0 var(--pl-zc,currentColor)}
+.blk[data-type="poll"][data-type="poll"][data-pl-zh="glow"] .blk-pl{box-shadow:0 0 26px color-mix(in srgb,var(--pl-zc,var(--pl-c)) 45%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-br="sq"] .blk-pl-vote,.blk[data-type="poll"][data-type="poll"][data-pl-br="sq"] .blk-pl-chg,.blk[data-type="poll"][data-type="poll"][data-pl-br="sq"] .blk-pl-back{border-radius:0}
+.blk[data-type="poll"][data-type="poll"][data-pl-br="sm"] .blk-pl-vote,.blk[data-type="poll"][data-type="poll"][data-pl-br="sm"] .blk-pl-chg,.blk[data-type="poll"][data-type="poll"][data-pl-br="sm"] .blk-pl-back{border-radius:6px}
+.blk[data-type="poll"][data-type="poll"][data-pl-br="rd"] .blk-pl-vote,.blk[data-type="poll"][data-type="poll"][data-pl-br="rd"] .blk-pl-chg,.blk[data-type="poll"][data-type="poll"][data-pl-br="rd"] .blk-pl-back{border-radius:12px}
+.blk[data-type="poll"][data-type="poll"][data-pl-br="lg"] .blk-pl-vote,.blk[data-type="poll"][data-type="poll"][data-pl-br="lg"] .blk-pl-chg,.blk[data-type="poll"][data-type="poll"][data-pl-br="lg"] .blk-pl-back{border-radius:20px}
+.blk[data-type="poll"][data-type="poll"][data-pl-br="pill"] .blk-pl-vote,.blk[data-type="poll"][data-type="poll"][data-pl-br="pill"] .blk-pl-chg,.blk[data-type="poll"][data-type="poll"][data-pl-br="pill"] .blk-pl-back{border-radius:999px}
+.blk[data-type="poll"][data-type="poll"][data-pl-bz="xl"] .blk-pl-vote{font-size:1.25em;padding:1rem 2rem}
+.blk[data-type="poll"][data-type="poll"][data-pl-bs="soft"] .blk-pl-vote{background:color-mix(in srgb,var(--pl-bc) 16%,transparent);color:var(--pl-bc);border-color:transparent}
+.blk[data-type="poll"][data-type="poll"][data-pl-bb="none"] .blk-pl-vote{border-width:0}
+.blk[data-type="poll"][data-type="poll"][data-pl-bb="thin"] .blk-pl-vote{border-width:1px;border-style:solid}
+.blk[data-type="poll"][data-type="poll"][data-pl-bb="mid"] .blk-pl-vote{border-width:2px;border-style:solid}
+.blk[data-type="poll"][data-type="poll"][data-pl-bb="bold"] .blk-pl-vote{border-width:3px;border-style:solid}
+.blk[data-type="poll"][data-type="poll"][data-pl-bb="dashed"] .blk-pl-vote{border-width:2px;border-style:dashed}
+.blk[data-type="poll"][data-type="poll"][data-pl-bb="dotted"] .blk-pl-vote{border-width:2px;border-style:dotted}
+.blk[data-type="poll"][data-type="poll"][data-pl-bb="double"] .blk-pl-vote{border-width:4px;border-style:double}
+.blk[data-type="poll"][data-type="poll"][data-pl-bs="soft"][data-pl-bb] .blk-pl-vote{border-color:var(--pl-bc)}
+.blk[data-type="poll"][data-type="poll"][data-pl-bt] .blk-pl-vote{color:var(--pl-bt)}
+.blk[data-type="poll"][data-type="poll"][data-pl-bh="soft"] .blk-pl-vote{box-shadow:0 4px 14px color-mix(in srgb,var(--pl-bc) 40%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-bh="lift"] .blk-pl-vote{box-shadow:0 8px 22px color-mix(in srgb,var(--pl-bc) 50%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-bh="hard"] .blk-pl-vote{box-shadow:4px 4px 0 color-mix(in srgb,var(--pl-bc) 55%,#000)}
+.blk[data-type="poll"][data-type="poll"][data-pl-bh="glow"] .blk-pl-vote{box-shadow:0 0 18px color-mix(in srgb,var(--pl-bc) 70%,transparent)}
+.blk[data-type="poll"][data-type="poll"][data-pl-bw="n"] .blk-pl-vote{font-weight:400}
+.blk[data-type="poll"][data-type="poll"][data-pl-bw="m"] .blk-pl-vote{font-weight:600}
+.blk[data-type="poll"][data-type="poll"][data-pl-bw="h"] .blk-pl-vote{font-weight:800}
+.blk[data-type="poll"][data-type="poll"][data-pl-bcp="1"] .blk-pl-vote{text-transform:uppercase;letter-spacing:.06em}
+/* Poll bar corners */
+.blk[data-type="poll"][data-type="poll"][data-pl-yr="sq"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yr="sq"] .blk-pl-bar i{border-radius:0}
+.blk[data-type="poll"][data-type="poll"][data-pl-yr="sm"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yr="sm"] .blk-pl-bar i{border-radius:6px}
+.blk[data-type="poll"][data-type="poll"][data-pl-yr="md"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yr="md"] .blk-pl-bar i{border-radius:12px}
+.blk[data-type="poll"][data-type="poll"][data-pl-yr="lg"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yr="lg"] .blk-pl-bar i{border-radius:20px}
+.blk[data-type="poll"][data-type="poll"][data-pl-yr="pill"] .blk-pl-bar,.blk[data-type="poll"][data-type="poll"][data-pl-yr="pill"] .blk-pl-bar i{border-radius:999px}
+.blk[data-type="poll"][data-type="poll"][data-pl-yr]:not([data-pl-st="line"]):not([data-pl-st="solid"]) .blk-pl-bar{top:.3rem;bottom:.3rem;left:.3rem;right:.3rem}
 .blk-pl-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 html[data-nb-glass="1"] .blk-pl-o{background:color-mix(in srgb,#ffffff 14%,transparent);-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%)}
 html[data-nb-glass="1"] .blk[data-pl-st="line"] .blk-pl-o{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -10821,6 +10934,140 @@ textarea.blk-tb-i{min-height:3rem;resize:vertical;border-radius:min(var(--tb-r),
 .blk-tb-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 html[data-nb-glass="1"] .blk-tb-i{background:color-mix(in srgb,#ffffff 14%,transparent);-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%)}
 html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+/* Text box customization: field, box and button options. Each is one data-tb-* attribute (or one --tb-* color variable) so editor, preview and published page match. */
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="soft"] .blk-tb-i{border-color:transparent;background:#fff;color:#1c1c1a;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="dark"] .blk-tb-i{border-color:transparent;background:#14161c;color:#f4f4f0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="soft"] .blk-tb-i:focus{border-color:var(--tb-c)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="soft"] .blk-tb-dd:focus-within,.blk[data-type="textbox"][data-type="textbox"][data-tb-st="soft"] .blk-tb-dd.is-open{border-color:var(--tb-c)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="dark"] .blk-tb-i:focus{border-color:var(--tb-c)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="dark"] .blk-tb-dd:focus-within,.blk[data-type="textbox"][data-type="textbox"][data-tb-st="dark"] .blk-tb-dd.is-open{border-color:var(--tb-c)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="s"] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="s"] .blk-tb-ddb{font-size:.88em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="s"] .blk-tb-i:not(.blk-tb-dd),.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="s"] .blk-tb-ddb{padding-top:.5rem;padding-bottom:.5rem}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="l"] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="l"] .blk-tb-ddb{font-size:1.12em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="l"] .blk-tb-i:not(.blk-tb-dd),.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="l"] .blk-tb-ddb{padding-top:.9rem;padding-bottom:.9rem}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="xl"] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="xl"] .blk-tb-ddb{font-size:1.3em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="xl"] .blk-tb-i:not(.blk-tb-dd),.blk[data-type="textbox"][data-type="textbox"][data-tb-iz="xl"] .blk-tb-ddb{padding-top:1.1rem;padding-bottom:1.1rem}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="sq"] .blk-tb-i{border-radius:0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="sq"] textarea.blk-tb-i{border-radius:min(0,1.25rem)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="sm"] .blk-tb-i{border-radius:6px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="sm"] textarea.blk-tb-i{border-radius:min(6px,1.25rem)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="md"] .blk-tb-i{border-radius:12px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="md"] textarea.blk-tb-i{border-radius:min(12px,1.25rem)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="lg"] .blk-tb-i{border-radius:20px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="lg"] textarea.blk-tb-i{border-radius:min(20px,1.25rem)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="pill"] .blk-tb-i{border-radius:999px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ir="pill"] textarea.blk-tb-i{border-radius:min(999px,1.25rem)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="none"] .blk-tb-i{border-width:0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="none"] .blk-tb-i:focus{box-shadow:0 0 0 2px var(--tb-fc,var(--tb-c))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="thin"] .blk-tb-i{border-width:1px;border-style:solid}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="line"][data-tb-ib="thin"] .blk-tb-i{border-width:0 0 1px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="mid"] .blk-tb-i{border-width:2px;border-style:solid}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="line"][data-tb-ib="mid"] .blk-tb-i{border-width:0 0 2px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="bold"] .blk-tb-i{border-width:3px;border-style:solid}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="line"][data-tb-ib="bold"] .blk-tb-i{border-width:0 0 3px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="dashed"] .blk-tb-i{border-width:2px;border-style:dashed}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="line"][data-tb-ib="dashed"] .blk-tb-i{border-width:0 0 2px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="dotted"] .blk-tb-i{border-width:2px;border-style:dotted}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="line"][data-tb-ib="dotted"] .blk-tb-i{border-width:0 0 2px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib="double"] .blk-tb-i{border-width:4px;border-style:double}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-st="line"][data-tb-ib="double"] .blk-tb-i{border-width:0 0 4px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ib] .blk-tb-i{border-color:var(--tb-fb,color-mix(in srgb,currentColor 30%,transparent))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-fb] .blk-tb-i{border-color:var(--tb-fb)}
+.blk[data-type="textbox"][data-type="textbox"] .blk-tb-i.blk-tb-bad{border-color:#c93a3a}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ih="none"] .blk-tb-i{box-shadow:none}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ih="soft"] .blk-tb-i{box-shadow:0 3px 10px color-mix(in srgb,var(--tb-fs,#000) 18%,transparent)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ih="inset"] .blk-tb-i{box-shadow:inset 0 2px 5px color-mix(in srgb,var(--tb-fs,#000) 22%,transparent)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ih="hard"] .blk-tb-i{box-shadow:3px 3px 0 var(--tb-fs,currentColor)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ih="glow"] .blk-tb-i{box-shadow:0 0 14px color-mix(in srgb,var(--tb-fs,var(--tb-c)) 45%,transparent)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-fi] .blk-tb-i{background:var(--tb-fi)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ft] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-ft] .blk-tb-oc{color:var(--tb-ft)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-fp] .blk-tb-i::placeholder{color:var(--tb-fp);opacity:1}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-fp] .blk-tb-dd.blk-tb-ph .blk-tb-ddb>span{color:var(--tb-fp);opacity:1}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-fc] .blk-tb-i:focus:not(.blk-tb-bad){border-color:var(--tb-fc)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-fc] .blk-tb-dd:focus-within:not(.blk-tb-bad),.blk[data-type="textbox"][data-type="textbox"][data-tb-fc] .blk-tb-dd.is-open:not(.blk-tb-bad){border-color:var(--tb-fc)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-fl] .blk-tb-fl{color:var(--tb-fl);opacity:1}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ps="i"] .blk-tb-i::placeholder{font-style:italic}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ps="b"] .blk-tb-i::placeholder{font-weight:700}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ig="b"] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-ig="b"] .blk-tb-ddb{font-weight:600}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ig="h"] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-ig="h"] .blk-tb-ddb{font-weight:800}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ia="c"] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-ia="c"] .blk-tb-ddb{text-align:center}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ia="c"] .blk-tb-ddb{justify-content:center}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ia="r"] .blk-tb-i,.blk[data-type="textbox"][data-type="textbox"][data-tb-ia="r"] .blk-tb-ddb{text-align:right}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ia="r"] .blk-tb-ddb{justify-content:flex-end}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-lw="n"] .blk-tb-fl{font-weight:400}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-lw="h"] .blk-tb-fl{font-weight:800}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-lc="1"] .blk-tb-fl{text-transform:uppercase;letter-spacing:.06em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-lz="s"] .blk-tb-fl{font-size:.74em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-lz="l"] .blk-tb-fl{font-size:1em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-tz="s"] .blk-tb-q{font-size:.98em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-tz="l"] .blk-tb-q{font-size:1.45em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-tz="xl"] .blk-tb-q{font-size:1.9em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-caps="1"] .blk-tb-q{text-transform:uppercase;letter-spacing:.05em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-qc] .blk-tb-q{color:var(--tb-qc)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ds="0"] .blk-tb-d{display:none}
+.blk[data-type="textbox"][data-type="textbox"]:is([data-tb-sf],[data-tb-bd],[data-tb-sh],[data-tb-sbg]) .blk-tb{padding:1.1rem;border-radius:var(--tb-sr,16px)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sf="white"] .blk-tb{background:#fff;color:var(--tb-tc,#1c1c1a)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sf="tint"] .blk-tb{background:color-mix(in srgb,var(--tb-c) 9%,#fff);color:var(--tb-tc,#1c1c1a)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sf="dark"] .blk-tb{background:#14161c;color:var(--tb-tc,#f4f4f0)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sbg] .blk-tb{background:var(--tb-sbg);color:var(--tb-tc,var(--tb-sbgt,inherit))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-cr="sq"]{--tb-sr:0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-cr="sm"]{--tb-sr:8px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-cr="md"]{--tb-sr:16px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-cr="lg"]{--tb-sr:28px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bd="thin"] .blk-tb{border:1px solid var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bd="bold"] .blk-tb{border:3px solid var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bd="dashed"] .blk-tb{border:2px dashed var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bd="double"] .blk-tb{border:4px double var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sh="soft"] .blk-tb{box-shadow:0 6px 22px rgba(0,0,0,.12)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sh="lift"] .blk-tb{box-shadow:0 14px 34px rgba(0,0,0,.2)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sh="hard"] .blk-tb{box-shadow:5px 5px 0 var(--tb-sc,currentColor)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-sh="glow"] .blk-tb{box-shadow:0 0 26px color-mix(in srgb,var(--tb-sc,var(--tb-c)) 45%,transparent)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-br="sq"] .blk-tb-send{border-radius:0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-br="sm"] .blk-tb-send{border-radius:6px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-br="rd"] .blk-tb-send{border-radius:12px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-br="lg"] .blk-tb-send{border-radius:20px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-br="pill"] .blk-tb-send{border-radius:999px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bz="xl"] .blk-tb-send{font-size:1.25em;padding:1rem 2rem}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bs="soft"] .blk-tb-send{background:color-mix(in srgb,var(--tb-bc) 16%,transparent);color:var(--tb-bc);border-color:transparent}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bb="none"] .blk-tb-send{border-width:0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bb="thin"] .blk-tb-send{border-width:1px;border-style:solid}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bb="mid"] .blk-tb-send{border-width:2px;border-style:solid}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bb="bold"] .blk-tb-send{border-width:3px;border-style:solid}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bb="dashed"] .blk-tb-send{border-width:2px;border-style:dashed}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bb="dotted"] .blk-tb-send{border-width:2px;border-style:dotted}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bb="double"] .blk-tb-send{border-width:4px;border-style:double}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bs="soft"][data-tb-bb] .blk-tb-send{border-color:var(--tb-bc)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bt] .blk-tb-send{color:var(--tb-bt)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bh="soft"] .blk-tb-send{box-shadow:0 4px 14px color-mix(in srgb,var(--tb-bc) 40%,transparent)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bh="lift"] .blk-tb-send{box-shadow:0 8px 22px color-mix(in srgb,var(--tb-bc) 50%,transparent)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bh="hard"] .blk-tb-send{box-shadow:4px 4px 0 color-mix(in srgb,var(--tb-bc) 55%,#000)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bh="glow"] .blk-tb-send{box-shadow:0 0 18px color-mix(in srgb,var(--tb-bc) 70%,transparent)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bw="n"] .blk-tb-send{font-weight:400}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bw="m"] .blk-tb-send{font-weight:600}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bw="h"] .blk-tb-send{font-weight:800}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bcp="1"] .blk-tb-send{text-transform:uppercase;letter-spacing:.06em}
+/* Text box choice markers and dropdown menu */
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms] .blk-tb-oc input{-webkit-appearance:none;appearance:none;box-sizing:border-box;display:inline-grid;place-content:center;border:2px solid color-mix(in srgb,currentColor 40%,transparent);background:transparent;width:1.15em;height:1.15em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms="rd"] .blk-tb-oc input{border-radius:50%}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms="sm"] .blk-tb-oc input{border-radius:.3em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms="sq"] .blk-tb-oc input{border-radius:0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms] .blk-tb-oc input:checked{border-color:var(--tb-mc,var(--tb-c));background-color:var(--tb-mc,var(--tb-c))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms] .blk-tb-oc input[type="radio"]:checked{background:radial-gradient(circle,var(--tb-mc,var(--tb-c)) 0 42%,transparent 46%)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms] .blk-tb-oc input[type="checkbox"]:checked::after{content:"";width:.3em;height:.55em;border:solid var(--tb-mon,#fff);border-width:0 2px 2px 0;transform:translateY(-8%) rotate(45deg)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-ms] .blk-tb-oc input:focus-visible{outline:2px solid var(--tb-fc,var(--tb-c));outline-offset:2px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-mz="s"] .blk-tb-oc input{width:.95em;height:.95em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-mz="l"] .blk-tb-oc input{width:1.4em;height:1.4em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-mz="xl"] .blk-tb-oc input{width:1.7em;height:1.7em}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-mc] .blk-tb-oc input{accent-color:var(--tb-mc)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-dr="sq"] .blk-tb-ddl{border-radius:0}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-dr="sm"] .blk-tb-ddl{border-radius:6px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-dr="lg"] .blk-tb-ddl{border-radius:20px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-df] .blk-tb-ddl{background:var(--tb-df)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-dt] .blk-tb-ddl{color:var(--tb-dt)}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-df] .blk-tb-ddo:hover,.blk[data-type="textbox"][data-type="textbox"][data-tb-df] .blk-tb-ddo:focus{background:color-mix(in srgb,var(--tb-c) 14%,var(--tb-df))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-df] .blk-tb-ddo.is-selected{background:color-mix(in srgb,var(--tb-c) 20%,var(--tb-df))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-dh="none"] .blk-tb-ddl{box-shadow:none}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-dh="hard"] .blk-tb-ddl{box-shadow:4px 4px 0 var(--tb-fs,currentColor)}
 .dz-tb-msg{display:flex;flex-direction:column;gap:.25rem;padding:.55rem 0 .35rem;border-bottom:1px solid #ecece6}
 .dz-tb-bar{position:sticky;top:-.25rem;z-index:3;background:#fff;margin:0 -.6rem .1rem;padding:.3rem .6rem .25rem;border-bottom:1px solid #ecece6}
 .dz-tb-bar .dz-lab{margin:0 0 .15rem}
@@ -18033,9 +18280,23 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
   }
 
   /* ---------- Button ---------- */
-  var BT_PAD = { s: '.45rem 1rem', m: '.7rem 1.5rem', l: '1rem 2.2rem' };
-  var BT_FS = { s: '.85rem', m: '1rem', l: '1.15rem' };
-  var BT_R = { sq: '6px', rd: '14px', pill: '999px' };
+  var BT_PAD = { s: '.45rem 1rem', m: '.7rem 1.5rem', l: '1rem 2.2rem', xl: '1.25rem 2.8rem' };
+  var BT_FS = { s: '.85rem', m: '1rem', l: '1.15rem', xl: '1.35rem' };
+  var BT_R = { sharp: '0', sq: '6px', sm: '9px', rd: '14px', lg: '24px', pill: '999px' };
+  var BT_SHAPES = [['sharp', 'Sharp'], ['sq', 'Square'], ['sm', 'Slight'], ['rd', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']];
+  var BT_X = ['btT', 'btB', 'btBc', 'btH', 'btW', 'btCp', 'btFf'];
+  var BT_BORD = { none: '0 solid', thin: '1px solid', mid: '2px solid', bold: '3px solid', dashed: '2px dashed', dotted: '2px dotted', double: '4px double' };
+  // Extra button finish (text color, border, shadow, weight, capitals, font). Shared by the Button block and the Payments button.
+  function btExtraUI(block) {
+    var g = function(k) { return dzGet(block, k, ''); }, gap = '<div style="height:.4rem"></div>';
+    return dzSec('Reset finish', dzChips('btReset', [['1', 'Reset button finish']], '', 1) + '<div class="dz-hint">Clears text color, border, shadow, weight, capitals and font. The button text stays.</div>') +
+      dzSec('Text color', dzSwatches('btT', g('btT')) + '<div class="dz-hint">None picks black or white for contrast. Not used by gradient buttons in Outline.</div>') +
+      dzSec('Border', dzChips('btB', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('btB'), 4) + '<div class="dz-hint">Not used by gradient buttons.</div>') +
+      dzSec('Border color', dzSwatches('btBc', g('btBc')) + '<div class="dz-hint">None uses the button color.</div>') +
+      dzSec('Shadow', dzChips('btH', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], g('btH'), 5)) +
+      dzSec('Text', dzChips('btW', [['', 'Bold'], ['n', 'Regular'], ['m', 'Semibold'], ['h', 'Heavy']], g('btW'), 4) + gap + dzChips('btCp', [['', 'As typed'], ['1', 'Capitals']], g('btCp'), 2)) +
+      dzSec('Font', dzFontChips('btFf', g('btFf'), '', 'sans'));
+  }
   var BT_J = { l: 'flex-start', c: 'center', r: 'flex-end' };
   function applyButton(block) {
     var a = block.querySelector('.blk-btn'), wrap = block.querySelector('.blk-btn-wrap');
@@ -18053,6 +18314,16 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     else if (st === 'soft') css += 'background:' + c + '26;color:' + c + ';border:2px solid transparent;';
     else css += 'background:' + c + ';color:' + (dzLum(c) < 0.6 ? '#ffffff' : '#1c1c1a') + ';border:2px solid ' + c + ';';
     a.style.cssText = css;
+    var hx = function(k) { var v = block.dataset[k] || ''; return /^#[0-9a-f]{6}$/i.test(v) ? v : ''; };
+    var xT = hx('btT'), xBc = hx('btBc'), xB = block.dataset.btB || '', xH = block.dataset.btH || '', xW = block.dataset.btW || '', hue = gp ? ink : c;
+    if (xT && !(gp && st === 'outline')) a.style.color = xT;
+    if (!gp && BT_BORD[xB]) { a.style.border = BT_BORD[xB]; a.style.borderColor = xBc || (st === 'solid' || st === 'soft' || st === 'outline' ? c : 'transparent'); }
+    else if (!gp && xBc) a.style.borderColor = xBc;
+    if (xH && /^#[0-9a-f]{6}$/i.test(hue)) a.style.boxShadow = { soft: '0 4px 14px ' + hue + '66', lift: '0 8px 22px ' + hue + '80', hard: '4px 4px 0 ' + dzShade(hue, -45), glow: '0 0 18px ' + hue + 'b3' }[xH] || '';
+    if ({ n: 1, m: 1, h: 1 }[xW]) a.style.fontWeight = { n: '400', m: '600', h: '800' }[xW];
+    if (block.dataset.btCp === '1') { a.style.textTransform = 'uppercase'; a.style.letterSpacing = '.06em'; }
+    var xF = (typeof PL_FONTS !== 'undefined' && PL_FONTS ? PL_FONTS[block.dataset.btFf || ''] : '') || '';
+    if (xF) a.style.fontFamily = xF;
     if (gp && st === 'outline') a.setAttribute('data-bt-g', '1'); else a.removeAttribute('data-bt-g');
     wrap.style.justifyContent = BT_J[dzGet(block, 'btA', 'c')] || 'center';
   }
@@ -18087,9 +18358,10 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       var h = dzTab('Style', 'Button style') + dzSec('Link', '<input type="text" class="dz-input" data-k="btLink" value="' + dzEsc(a.getAttribute('href') || '') + '" placeholder="example.com or name@mail.com" autocapitalize="off" autocorrect="off" spellcheck="false"><div class="dz-hint">Leave empty for a button that does not link anywhere.</div>');
       h += dzSec('Style', dzChips('btS', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft']], dzGet(block, 'btS', 'solid')));
       h += dzSec('Color', dzSwatches('btC', block.dataset.btC || ''));
-      h += dzTab('Layout', 'Button layout') + dzSec('Size', dzChips('btZ', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'btZ', 'm')));
-      h += dzSec('Shape', dzChips('btR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'btR', 'pill')));
+      h += dzTab('Layout', 'Button layout') + dzSec('Size', dzChips('btZ', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], dzGet(block, 'btZ', 'm'), 4));
+      h += dzSec('Shape', dzChips('btR', BT_SHAPES, dzGet(block, 'btR', 'pill'), 3));
       h += dzSec('Position', dzChips('btA', [['l', 'Left'], ['c', 'Center'], ['r', 'Right']], dzGet(block, 'btA', 'c')) + '<div style="height:.4rem"></div>' + dzChips('btFull', [['0', 'Fit text'], ['1', 'Full width']], dzGet(block, 'btFull', '0')));
+      h += dzTab('Finish', 'Button finish') + btExtraUI(block);
       h += dzTab('Effects', 'Button effects') + dzSec('Opacity', dzSlider('op', blockOpPct(block)));
       h += dzAnimSecs(block);
       return h;
@@ -18102,7 +18374,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       }
       if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; }
       if (k === 'op') { blockOpApply(block, v); return; }
-      if (k === 'btC' && v === '') delete block.dataset.btC; else block.dataset[k] = v; // None = default color
+      if (k === 'btReset') BT_X.forEach(function(x) { delete block.dataset[x]; }); else if ((k === 'btC' || BT_X.indexOf(k) >= 0) && v === '') delete block.dataset[k]; else block.dataset[k] = v; // None = default color
       applyButton(block);
     }, null, null, stCanBack(block), stBackFn).then(function(res) { var sb = res === ST_BACK; if (res !== true && !sb) { hcRevertBlock(block, before); return; } blockAnimDone(block); hcCommitBlock(block, before); if (sb) stReopen(block); });
   }
@@ -18429,9 +18701,10 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       h += dzSec('Description', dzChips('pyDesc', [['', 'Show'], ['0', 'Hide']], g('pyDesc'), 2));
     } else {
       h += dzSec('Button style', dzChips('btS', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft']], dzGet(block, 'btS', 'solid')) + '<div class="dz-hint">Banner, Poster, Aurora and Gold draw their own button. Pick a Surface to use yours.</div>');
-      h += dzSec('Size', dzChips('btZ', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'btZ', 'm')));
-      h += dzSec('Shape', dzChips('btR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'btR', 'pill')));
+      h += dzSec('Size', dzChips('btZ', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], dzGet(block, 'btZ', 'm'), 4));
+      h += dzSec('Shape', dzChips('btR', BT_SHAPES, dzGet(block, 'btR', 'pill'), 3));
       h += dzSec('Position', dzChips('btA', [['l', 'Left'], ['c', 'Center'], ['r', 'Right']], dzGet(block, 'btA', 'c')) + '<div style="height:.4rem"></div>' + dzChips('btFull', [['0', 'Fit text'], ['1', 'Full width']], dzGet(block, 'btFull', '0')));
+      h += btExtraUI(block);
     }
     return h;
   }
@@ -18630,7 +18903,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       if (k === 'pyCur') { block.dataset.pyCur = v; applyPay(block); return; }
       if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; }
       if (k === 'op') { blockOpApply(block, v); return; }
-      if (k === 'btC' && v === '') delete block.dataset.btC; else block.dataset[k] = v;
+      if (k === 'btReset') BT_X.forEach(function(x) { delete block.dataset[x]; }); else if ((k === 'btC' || BT_X.indexOf(k) >= 0) && v === '') delete block.dataset[k]; else block.dataset[k] = v;
       applyPay(block);
     }, null, null, only ? null : stCanBack(block), only ? null : stBackFn).then(function(res) { if (only) return; var sb = res === ST_BACK; if (res !== true && !sb) { hcRevertBlock(block, before); applyPay(block); return; } blockAnimDone(block); hcCommitBlock(block, before); if (sb) stReopen(block); });
   }
@@ -18689,6 +18962,10 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
   function plCfgSig(block) {
     return ['plT', 'plN', 'plMx', 'plRes', 'plChg', 'plClose'].map(function(k) { return block.dataset[k] || ''; }).join('|') + '#' + plOpts(block).map(function(o) { return o.getAttribute('data-oid') + ':' + plTxt(o); }).join('|');
   }
+  var PL_VARS = { plXi: '--pl-xi', plXc: '--pl-xc', plXs: '--pl-xs', plXt: '--pl-xt', plXa: '--pl-xa', plYc: '--pl-yc', plYk: '--pl-yk', plBt: '--pl-bt', plQc: '--pl-qc', plZc: '--pl-zc', plZg: '--pl-zg' };
+  var PL_OPT = ['plXr', 'plXb', 'plXh', 'plXz', 'plXg', 'plXi', 'plXc', 'plXs', 'plXt', 'plXa', 'plXw', 'plLk'];
+  var PL_BTN = ['plBr', 'plBb', 'plBh', 'plBt', 'plBw', 'plBcp'];
+  var PL_STY = PL_OPT.concat(PL_BTN, ['plYc', 'plYk', 'plYh', 'plYr', 'plYs', 'plBs', 'plBz', 'plQz', 'plQcaps', 'plQc', 'plQd', 'plZs', 'plZg', 'plZr', 'plZb', 'plZh', 'plZc']);
   function applyPoll(block) {
     var P = block.dataset.plAuto === '1' && window.nbPageProfile ? window.nbPageProfile() : null; // Match my page: accent, fonts and corner shape follow the page
     var c = P ? P.accent : dzGet(block, 'plC', '#5b5bd6'), r = P ? ({ s: 'sq', m: 'rd', p: 'pill' }[P.rad] || 'rd') : dzGet(block, 'plR', 'rd');
@@ -18698,6 +18975,12 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     block.style.setProperty('--pl-bc', bc);
     block.style.setProperty('--pl-bon', dzLum(bc) < 0.6 ? '#ffffff' : '#1c1c1a');
     if (tc) block.style.setProperty('--pl-tc', tc); else block.style.removeProperty('--pl-tc');
+    Object.keys(PL_VARS).forEach(function(k) { // custom option, bar, box and button colors: one CSS variable each, set only for a valid hex (fill and surface may also be transparent)
+      var v = block.dataset[k] || '';
+      if (/^#[0-9a-f]{6}$/i.test(v) || ((k === 'plXi' || k === 'plZg') && v === 'transparent')) block.style.setProperty(PL_VARS[k], v); else block.style.removeProperty(PL_VARS[k]);
+    });
+    var plSg = block.dataset.plZg || '';
+    if (/^#[0-9a-f]{6}$/i.test(plSg)) block.style.setProperty('--pl-zgt', dzLum(plSg) < 0.6 ? '#f4f4f0' : '#1c1c1a'); else block.style.removeProperty('--pl-zgt');
     block.style.setProperty('--pl-r', r === 'sq' ? '4px' : r === 'pill' ? '999px' : '12px');
     block.style.setProperty('--pl-f', P ? (P.ff || 'inherit') : (PL_FONTS[dzGet(block, 'plF', 'sans')] || 'inherit'));
     if (P && P.ffh) block.style.setProperty('--pl-fh', P.ffh); else block.style.removeProperty('--pl-fh');
@@ -18808,24 +19091,70 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
         '<label class="dz-fl">When the poll is closed</label>' + ti('plCl', dzGet(block, 'plCl', ''), 120, 'This poll is closed.', 'Closed message') +
         '<label class="dz-fl">When a vote can\u2019t be sent</label>' + ti('plEf', dzGet(block, 'plEf', ''), 160, 'Couldn\u2019t send your vote. Try again.', 'Failure message'));
       h += dzTab('Style', 'Poll style') + RF;
-      var plSb = dzSubBar('poll', [['k', 'Look'], ['t', 'Text'], ['b', 'Button']], 'k'), plK = plSb.cur === 'k', plT = plSb.cur === 't', plB = plSb.cur === 'b';
+      var plSb = dzSubBar('poll', [['k', 'Look'], ['x', 'Box'], ['o', 'Option'], ['y', 'Bars'], ['t', 'Text'], ['b', 'Button']], 'k'), sK = plSb.cur === 'k', sX = plSb.cur === 'x', sO = plSb.cur === 'o', sY = plSb.cur === 'y', sT = plSb.cur === 't', sB = plSb.cur === 'b';
+      var pg = function(k) { return dzGet(block, k, ''); }, pgap = '<div style="height:.4rem"></div>', pauto = block.dataset.plAuto === '1';
       h += plSb.html;
-      if (plK) h += dzSec('Bars', dzChips('plSt', [['fill', 'Fill'], ['line', 'Line'], ['solid', 'Solid']], dzGet(block, 'plSt', 'fill')));
-      var pauto = block.dataset.plAuto === '1';
-      if (plK) h += dzSec('Colors and fonts', dzChips('plAuto', [['1', 'Match my page'], ['0', 'Custom']], pauto ? '1' : '0') + '<div class="dz-hint">' + (pauto ? 'Accent color, font and corner shape follow your page.' : 'Pick the accent color, corners and font yourself.') + '</div>');
-      if (plK && !pauto) {
-        h += dzSec('Color', dzSwatches('plC', block.dataset.plC || ''));
-        h += dzSec('Corners', dzChips('plR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'plR', 'rd')));
-        h += dzSec('Font', dzFontChips('plF', dzGet(block, 'plF', 'sans'), 'sans', 'plain'));
+      if (sK) {
+        h += dzSec('Option look', dzChips('plLk', [['', 'Outline'], ['soft', 'Soft'], ['dark', 'Dark']], pg('plLk'), 3) + '<div class="dz-hint">A starting look. The Option tab refines it.</div>');
+        h += dzSec('Colors and fonts', dzChips('plAuto', [['1', 'Match my page'], ['0', 'Custom']], pauto ? '1' : '0') + '<div class="dz-hint">' + (pauto ? 'Accent color, font and corner shape follow your page.' : 'Pick the accent color, corners and font yourself.') + '</div>');
+        if (!pauto) {
+          h += dzSec('Color', dzSwatches('plC', block.dataset.plC || ''));
+          h += dzSec('Corners', dzChips('plR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'plR', 'rd')) + '<div class="dz-hint">The default shape for options and the button. The Option and Button tabs can override it.</div>');
+          h += dzSec('Font', dzFontChips('plF', dzGet(block, 'plF', 'sans'), 'sans', 'plain'));
+        }
+        h += dzSec('Spacing', dzChips('plGap', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'plGap', 'm')));
       }
-      if (plT) h += dzSec('Text color', dzSwatches('plTc', d.plTc || '', true) + '<div class="dz-hint">None uses your page\u2019s text color.</div>');
-      if (plT) h += dzSec('Text size', dzChips('plFs', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'plFs', 'm')));
-      if (plK) h += dzSec('Spacing', dzChips('plGap', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'plGap', 'm')));
-      if (plT) h += dzSec('Question and description', dzChips('plAl', [['l', 'Left'], ['c', 'Center'], ['r', 'Right']], dzGet(block, 'plAl', 'l')));
-      if (plB) h += dzSec('Button position', dzChips('plBa', [['l', 'Left'], ['c', 'Center'], ['r', 'Right'], ['f', 'Full width']], dzGet(block, 'plBa', 'l')));
-      if (plB) h += dzSec('Button size', dzChips('plBz', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'plBz', 'm')));
-      if (plB) h += dzSec('Button style', dzChips('plBs', [['solid', 'Solid'], ['outline', 'Outline']], dzGet(block, 'plBs', 'solid')));
-      if (plB) h += dzSec('Button color', dzSwatches('plBc', d.plBc || '', true) + '<div class="dz-hint">None uses the accent color.</div>');
+      if (sX) {
+        h += dzSec('Surface', dzChips('plZs', [['', 'None'], ['white', 'White'], ['tint', 'Tint'], ['dark', 'Dark']], pg('plZs'), 4) + '<div class="dz-hint">The card behind the whole poll.</div>');
+        h += dzSec('Surface color', dzSwatches('plZg', pg('plZg') === 'transparent' ? '' : pg('plZg')) + pgap + dzChips('plZg', [['transparent', 'Transparent']], pg('plZg'), 1) + '<div class="dz-hint">None uses the surface above.</div>');
+        h += dzSec('Box corners', dzChips('plZr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Small'], ['md', 'Rounded'], ['lg', 'Very round']], pg('plZr'), 5));
+        h += dzSec('Box border', dzChips('plZb', [['', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['double', 'Double']], pg('plZb'), 5));
+        h += dzSec('Box shadow', dzChips('plZh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], pg('plZh'), 5));
+        h += dzSec('Border and shadow color', dzSwatches('plZc', pg('plZc')) + '<div class="dz-hint">None uses the text color for borders and the accent for glow.</div>');
+      }
+      if (sO) {
+        h += dzSec('Reset options', dzChips('plReset', [['1', 'Reset option styling']], '', 1) + '<div class="dz-hint">Clears every setting on this tab. Option text stays.</div>');
+        h += dzSec('Option corners', dzChips('plXr', [['', 'Preset'], ['sq', 'Sharp'], ['sm', 'Slight'], ['md', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], pg('plXr'), 3) + '<div class="dz-hint">Not used by the Line bar style.</div>');
+        h += dzSec('Option border', dzChips('plXb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], pg('plXb'), 4));
+        h += dzSec('Option shadow', dzChips('plXh', [['', 'Preset'], ['none', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], pg('plXh'), 3));
+        h += dzSec('Option size', dzChips('plXz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], pg('plXz'), 4));
+        h += dzSec('Space between options', dzChips('plXg', [['s', 'Tight'], ['', 'Normal'], ['l', 'Roomy'], ['xl', 'Wide']], pg('plXg'), 4));
+        h += dzSec('Option fill', dzSwatches('plXi', pg('plXi') === 'transparent' ? '' : pg('plXi')) + pgap + dzChips('plXi', [['transparent', 'Transparent fill']], pg('plXi'), 1) + '<div class="dz-hint">None keeps the fill the look gives the option.</div>');
+        h += dzSec('Option border color', dzSwatches('plXc', pg('plXc')));
+        h += dzSec('Option shadow color', dzSwatches('plXs', pg('plXs')) + '<div class="dz-hint">For the Soft, Lift, Hard and Glow shadows.</div>');
+        h += dzSec('Option text color', dzSwatches('plXt', pg('plXt')));
+        h += dzSec('Selected color', dzSwatches('plXa', pg('plXa')) + '<div class="dz-hint">The border and dot of the option someone picked. None uses the accent color.</div>');
+        h += dzSec('Option text', dzChips('plXw', [['', 'Medium'], ['n', 'Regular'], ['b', 'Bold'], ['h', 'Heavy']], pg('plXw'), 4));
+      }
+      if (sY) {
+        h += dzSec('Result bars', dzChips('plSt', [['fill', 'Fill'], ['line', 'Line'], ['solid', 'Solid']], dzGet(block, 'plSt', 'fill')));
+        h += dzSec('Bar corners', dzChips('plYr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Slight'], ['md', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], pg('plYr'), 3) + '<div class="dz-hint">The shape of the result bar. On Fill it also sits the bar slightly inside the option so the corners show.</div>');
+        h += dzSec('Bar color', dzSwatches('plYc', pg('plYc')) + '<div class="dz-hint">None uses the accent color.</div>');
+        h += dzSec('Bar track color', dzSwatches('plYk', pg('plYk')) + '<div class="dz-hint">The empty part behind the bar, for Line and Solid.</div>');
+        h += dzSec('Bar thickness', dzChips('plYh', [['s', 'Thin'], ['', 'Normal'], ['l', 'Thick'], ['xl', 'Heavy']], pg('plYh'), 4) + '<div class="dz-hint">For Line and Solid.</div>');
+        h += dzSec('Choice marker', dzChips('plYs', [['', 'Default'], ['rd', 'Round'], ['sq', 'Square'], ['hide', 'Hidden']], pg('plYs'), 4));
+      }
+      if (sT) {
+        h += dzSec('Text color', dzSwatches('plTc', d.plTc || '', true) + '<div class="dz-hint">None uses your page\u2019s text color.</div>');
+        h += dzSec('Text size', dzChips('plFs', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'plFs', 'm')));
+        h += dzSec('Question size', dzChips('plQz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], pg('plQz'), 4));
+        h += dzSec('Question capitals', dzChips('plQcaps', [['', 'As typed'], ['1', 'Capitals']], pg('plQcaps'), 2));
+        h += dzSec('Question color', dzSwatches('plQc', pg('plQc')));
+        h += dzSec('Description', dzChips('plQd', [['', 'Show'], ['0', 'Hide']], pg('plQd'), 2));
+        h += dzSec('Question and description', dzChips('plAl', [['l', 'Left'], ['c', 'Center'], ['r', 'Right']], dzGet(block, 'plAl', 'l')));
+      }
+      if (sB) {
+        h += dzSec('Reset button', dzChips('plResetB', [['1', 'Reset button styling']], '', 1) + '<div class="dz-hint">Clears shape, border, shadow, text color and weight. Button text stays.</div>');
+        h += dzSec('Button style', dzChips('plBs', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft']], dzGet(block, 'plBs', 'solid')));
+        h += dzSec('Button shape', dzChips('plBr', [['', 'Follow poll'], ['sq', 'Square'], ['sm', 'Slight'], ['rd', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], pg('plBr'), 3));
+        h += dzSec('Button size', dzChips('plBz', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], dzGet(block, 'plBz', 'm'), 4));
+        h += dzSec('Button position', dzChips('plBa', [['l', 'Left'], ['c', 'Center'], ['r', 'Right'], ['f', 'Full width']], dzGet(block, 'plBa', 'l')));
+        h += dzSec('Button color', dzSwatches('plBc', d.plBc || '', true) + '<div class="dz-hint">None uses the accent color.</div>');
+        h += dzSec('Button text color', dzSwatches('plBt', pg('plBt')) + '<div class="dz-hint">None picks black or white for contrast.</div>');
+        h += dzSec('Button border', dzChips('plBb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], pg('plBb'), 4));
+        h += dzSec('Button shadow', dzChips('plBh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], pg('plBh'), 5));
+        h += dzSec('Button text', dzChips('plBw', [['', 'Bold'], ['n', 'Regular'], ['m', 'Semibold'], ['h', 'Heavy']], pg('plBw'), 4) + pgap + dzChips('plBcp', [['', 'As typed'], ['1', 'Capitals']], pg('plBcp'), 2));
+      }
       h += dzTab('Effects', 'Poll effects') + dzSec('Opacity', dzSlider('op', blockOpPct(block)));
       h += dzAnimSecs(block);
       h += dzTab('Results', 'Poll results') + RF;
@@ -18916,6 +19245,9 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       }
       else if (k === 'plCloseClear') delete block.dataset.plClose;
       else if (k === 'plC' || k === 'plTc' || k === 'plBc') { if (v === '') delete block.dataset[k]; else block.dataset[k] = v; }
+      else if (k === 'plReset') PL_OPT.forEach(function(x) { delete block.dataset[x]; });
+      else if (k === 'plResetB') PL_BTN.forEach(function(x) { delete block.dataset[x]; });
+      else if (PL_STY.indexOf(k) >= 0) { if (v === '') delete block.dataset[k]; else block.dataset[k] = v; } // empty = back to the preset
       else if (k === 'plDesc') {
         var de = block.querySelector('.blk-pl-d'), dt = plOne(v).trim().slice(0, 300), qe;
         if (!de && dt) { de = document.createElement('div'); de.className = 'blk-pl-d'; qe = block.querySelector('.blk-pl-q'); if (qe && qe.parentNode) qe.parentNode.insertBefore(de, qe.nextSibling); }
@@ -19018,6 +19350,10 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
   }
   // What the Worker reads from the published page; a change here only takes effect after the next publish.
   function tbCfgSig(block) { return ['tbM', 'tbClose'].map(function(k) { return block.dataset[k] || ''; }).join('|') + '#' + (block.getAttribute('data-tb-fields') || ''); }
+  var TB_VARS = { tbFi: '--tb-fi', tbFb: '--tb-fb', tbFt: '--tb-ft', tbFp: '--tb-fp', tbFc: '--tb-fc', tbFl: '--tb-fl', tbFs: '--tb-fs', tbBt: '--tb-bt', tbQc: '--tb-qc', tbSc: '--tb-sc', tbSbg: '--tb-sbg', tbMc: '--tb-mc', tbDf: '--tb-df', tbDt: '--tb-dt' };
+  var TB_FLD = ['tbIr', 'tbIb', 'tbIh', 'tbFi', 'tbFb', 'tbFs', 'tbFt', 'tbFp', 'tbFc', 'tbFl', 'tbPs', 'tbIg', 'tbIa', 'tbIz', 'tbLw', 'tbLc', 'tbLz', 'tbMs', 'tbMz', 'tbMc', 'tbDr', 'tbDf', 'tbDt', 'tbDh'];
+  var TB_BTN = ['tbBr', 'tbBb', 'tbBh', 'tbBt', 'tbBw', 'tbBcp'];
+  var TB_STY = TB_FLD.concat(TB_BTN, ['tbBs', 'tbBz', 'tbTz', 'tbCaps', 'tbQc', 'tbDs', 'tbSf', 'tbSbg', 'tbCr', 'tbBd', 'tbSh', 'tbSc']);
   function applyTextbox(block) {
     var P = block.dataset.tbAuto === '1' && window.nbPageProfile ? window.nbPageProfile() : null; // Match my page: accent, fonts and corner shape follow the page
     var c = P ? P.accent : dzGet(block, 'tbC', '#5b5bd6'), r = P ? ({ s: 'sq', m: 'rd', p: 'pill' }[P.rad] || 'rd') : dzGet(block, 'tbR', 'rd');
@@ -19027,6 +19363,14 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     block.style.setProperty('--tb-bc', bc);
     block.style.setProperty('--tb-bon', dzLum(bc) < 0.6 ? '#ffffff' : '#1c1c1a');
     if (tc) block.style.setProperty('--tb-tc', tc); else block.style.removeProperty('--tb-tc');
+    Object.keys(TB_VARS).forEach(function(k) { // custom field, box and button colors: one CSS variable each, set only for a valid hex (fill and surface may also be transparent)
+      var v = block.dataset[k] || '';
+      if (/^#[0-9a-f]{6}$/i.test(v) || ((k === 'tbFi' || k === 'tbSbg') && v === 'transparent')) block.style.setProperty(TB_VARS[k], v); else block.style.removeProperty(TB_VARS[k]);
+    });
+    var tbMk = /^#[0-9a-f]{6}$/i.test(block.dataset.tbMc || '') ? block.dataset.tbMc : c;
+    block.style.setProperty('--tb-mon', dzLum(tbMk) < 0.6 ? '#ffffff' : '#1c1c1a');
+    var tbSg = block.dataset.tbSbg || '';
+    if (/^#[0-9a-f]{6}$/i.test(tbSg)) block.style.setProperty('--tb-sbgt', dzLum(tbSg) < 0.6 ? '#f4f4f0' : '#1c1c1a'); else block.style.removeProperty('--tb-sbgt');
     block.style.setProperty('--tb-r', r === 'sq' ? '4px' : r === 'pill' ? '999px' : '12px');
     block.style.setProperty('--tb-f', P ? (P.ff || 'inherit') : (PL_FONTS[dzGet(block, 'tbF', 'sans')] || 'inherit'));
     if (P && P.ffh) block.style.setProperty('--tb-fh', P.ffh); else block.style.removeProperty('--tb-fh');
@@ -19176,25 +19520,72 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
         '<label class="dz-fl">When an answer isn\u2019t valid</label>' + ti('tbEi', dzGet(block, 'tbEi', ''), 160, 'Please check the highlighted field.', 'Invalid message') +
         '<label class="dz-fl">When the message can\u2019t be sent</label>' + ti('tbEf', dzGet(block, 'tbEf', ''), 160, 'Couldn\u2019t send your message. Try again.', 'Failure message'));
       h += dzTab('Style', 'Text box style') + RF;
-      var tbSb = dzSubBar('textbox', [['k', 'Look'], ['t', 'Text'], ['b', 'Button']], 'k'), tbK = tbSb.cur === 'k', tbT = tbSb.cur === 't', tbB = tbSb.cur === 'b';
-      h += tbSb.html;
-      if (tbK) h += dzSec('Fields', dzChips('tbSt', [['outline', 'Outline'], ['filled', 'Filled'], ['line', 'Line']], dzGet(block, 'tbSt', 'outline')));
-      if (tbT) h += dzSec('Labels', dzChips('tbLp', [['top', 'Above the field'], ['hide', 'Hidden']], dzGet(block, 'tbLp', 'top')) + '<div class="dz-hint">Hidden labels are still read out by screen readers. Add a hint to each field so people know what to type.</div>');
+      var tbSb = dzSubBar('textbox', [['k', 'Look'], ['x', 'Box'], ['f', 'Field'], ['t', 'Text'], ['b', 'Button']], 'k'), sK = tbSb.cur === 'k', sX = tbSb.cur === 'x', sF = tbSb.cur === 'f', sT = tbSb.cur === 't', sB = tbSb.cur === 'b';
+      var g = function(k) { return dzGet(block, k, ''); }, gap = '<div style="height:.4rem"></div>';
       var auto = d.tbAuto === '1';
-      if (tbK) h += dzSec('Colors and fonts', dzChips('tbAuto', [['1', 'Match my page'], ['0', 'Custom']], auto ? '1' : '0') + '<div class="dz-hint">' + (auto ? 'Accent color, font and corner shape follow your page.' : 'Pick the accent color, corners and font yourself.') + '</div>');
-      if (tbK && !auto) {
-        h += dzSec('Color', dzSwatches('tbC', d.tbC || ''));
-        h += dzSec('Corners', dzChips('tbR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'tbR', 'rd')));
-        h += dzSec('Font', dzFontChips('tbF', dzGet(block, 'tbF', 'sans'), 'sans', 'plain'));
+      h += tbSb.html;
+      if (sK) {
+        h += dzSec('Field look', dzChips('tbSt', [['outline', 'Outline'], ['filled', 'Filled'], ['line', 'Line'], ['soft', 'Soft'], ['dark', 'Dark']], dzGet(block, 'tbSt', 'outline'), 3) + '<div class="dz-hint">A starting look. The Field tab refines it.</div>');
+        h += dzSec('Colors and fonts', dzChips('tbAuto', [['1', 'Match my page'], ['0', 'Custom']], auto ? '1' : '0') + '<div class="dz-hint">' + (auto ? 'Accent color, font and corner shape follow your page.' : 'Pick the accent color, corners and font yourself.') + '</div>');
+        if (!auto) {
+          h += dzSec('Color', dzSwatches('tbC', d.tbC || ''));
+          h += dzSec('Corners', dzChips('tbR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'tbR', 'rd')) + '<div class="dz-hint">The default shape for fields and the button. Field and Button tabs can override it.</div>');
+          h += dzSec('Font', dzFontChips('tbF', dzGet(block, 'tbF', 'sans'), 'sans', 'plain'));
+        }
+        h += dzSec('Spacing', dzChips('tbGap', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'tbGap', 'm')));
       }
-      if (tbT) h += dzSec('Text color', dzSwatches('tbTc', d.tbTc || '', true) + '<div class="dz-hint">None uses your page\u2019s text color.</div>');
-      if (tbT) h += dzSec('Text size', dzChips('tbFs', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'tbFs', 'm')));
-      if (tbK) h += dzSec('Spacing', dzChips('tbGap', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'tbGap', 'm')));
-      if (tbT) h += dzSec('Title and description', dzChips('tbAl', [['l', 'Left'], ['c', 'Center'], ['r', 'Right']], dzGet(block, 'tbAl', 'l')));
-      if (tbB) h += dzSec('Button position', dzChips('tbBa', [['l', 'Left'], ['c', 'Center'], ['r', 'Right'], ['f', 'Full width']], dzGet(block, 'tbBa', 'l')));
-      if (tbB) h += dzSec('Button size', dzChips('tbBz', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'tbBz', 'm')));
-      if (tbB) h += dzSec('Button style', dzChips('tbBs', [['solid', 'Solid'], ['outline', 'Outline']], dzGet(block, 'tbBs', 'solid')));
-      if (tbB) h += dzSec('Button color', dzSwatches('tbBc', d.tbBc || '', true) + '<div class="dz-hint">None uses the accent color.</div>');
+      if (sX) {
+        h += dzSec('Surface', dzChips('tbSf', [['', 'None'], ['white', 'White'], ['tint', 'Tint'], ['dark', 'Dark']], g('tbSf'), 4) + '<div class="dz-hint">The card behind the whole box.</div>');
+        h += dzSec('Surface color', dzSwatches('tbSbg', g('tbSbg') === 'transparent' ? '' : g('tbSbg')) + gap + dzChips('tbSbg', [['transparent', 'Transparent']], g('tbSbg'), 1) + '<div class="dz-hint">None uses the surface above.</div>');
+        h += dzSec('Box corners', dzChips('tbCr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Small'], ['md', 'Rounded'], ['lg', 'Very round']], g('tbCr'), 5));
+        h += dzSec('Box border', dzChips('tbBd', [['', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['double', 'Double']], g('tbBd'), 5));
+        h += dzSec('Box shadow', dzChips('tbSh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], g('tbSh'), 5));
+        h += dzSec('Border and shadow color', dzSwatches('tbSc', g('tbSc')) + '<div class="dz-hint">None uses the text color for borders and the accent for glow.</div>');
+      }
+      if (sF) {
+        h += dzSec('Reset field', dzChips('tbReset', [['1', 'Reset field styling']], '', 1) + '<div class="dz-hint">Clears every setting on this tab. Labels and hints stay.</div>');
+        h += dzSec('Field corners', dzChips('tbIr', [['', 'Preset'], ['sq', 'Sharp'], ['sm', 'Slight'], ['md', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], g('tbIr'), 3));
+        h += dzSec('Field border', dzChips('tbIb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('tbIb'), 4));
+        h += dzSec('Field shadow', dzChips('tbIh', [['', 'Preset'], ['none', 'None'], ['soft', 'Soft'], ['inset', 'Inset'], ['hard', 'Hard'], ['glow', 'Glow']], g('tbIh'), 3));
+        h += dzSec('Field size', dzChips('tbIz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], g('tbIz'), 4));
+        h += dzSec('Field fill', dzSwatches('tbFi', g('tbFi') === 'transparent' ? '' : g('tbFi')) + gap + dzChips('tbFi', [['transparent', 'Transparent fill']], g('tbFi'), 1) + '<div class="dz-hint">None keeps the fill the look gives the field.</div>');
+        h += dzSec('Field border color', dzSwatches('tbFb', g('tbFb')));
+        h += dzSec('Field shadow color', dzSwatches('tbFs', g('tbFs')) + '<div class="dz-hint">For the Soft, Inset, Hard and Glow shadows.</div>');
+        h += dzSec('Field text color', dzSwatches('tbFt', g('tbFt')));
+        h += dzSec('Placeholder color', dzSwatches('tbFp', g('tbFp')));
+        h += dzSec('Focus color', dzSwatches('tbFc', g('tbFc')) + '<div class="dz-hint">The border while someone is typing.</div>');
+        h += dzSec('Label color', dzSwatches('tbFl', g('tbFl')));
+        h += dzSec('Typed text', dzChips('tbIg', [['', 'Normal'], ['b', 'Bold'], ['h', 'Heavy']], g('tbIg'), 3) + gap + dzChips('tbIa', [['', 'Left'], ['c', 'Center'], ['r', 'Right']], g('tbIa'), 3));
+        h += dzSec('Placeholder style', dzChips('tbPs', [['', 'Normal'], ['i', 'Italic'], ['b', 'Bold']], g('tbPs'), 3));
+        h += dzSec('Label style', dzChips('tbLw', [['', 'Semibold'], ['n', 'Regular'], ['h', 'Heavy']], g('tbLw'), 3) + gap + dzChips('tbLc', [['', 'As typed'], ['1', 'Capitals']], g('tbLc'), 2) + gap + dzChips('tbLz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large']], g('tbLz'), 3));
+        h += dzSec('Choice marker', dzChips('tbMs', [['', 'Native'], ['rd', 'Round'], ['sm', 'Soft square'], ['sq', 'Sharp']], g('tbMs'), 4) + gap + dzChips('tbMz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], g('tbMz'), 4) + '<div class="dz-hint">The tick boxes and dots on Yes / No, Choice and Checkbox fields.</div>');
+        h += dzSec('Marker color', dzSwatches('tbMc', g('tbMc')) + '<div class="dz-hint">None uses the accent color.</div>');
+        h += dzSec('Dropdown menu corners', dzChips('tbDr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Slight'], ['lg', 'Very round']], g('tbDr'), 4) + gap + dzChips('tbDh', [['', 'Soft'], ['none', 'No shadow'], ['hard', 'Hard']], g('tbDh'), 3));
+        h += dzSec('Dropdown menu fill', dzSwatches('tbDf', g('tbDf')) + '<div class="dz-hint">None keeps it white.</div>');
+        h += dzSec('Dropdown menu text color', dzSwatches('tbDt', g('tbDt')));
+      }
+      if (sT) {
+        h += dzSec('Labels', dzChips('tbLp', [['top', 'Above the field'], ['hide', 'Hidden']], dzGet(block, 'tbLp', 'top')) + '<div class="dz-hint">Hidden labels are still read out by screen readers. Add a hint to each field so people know what to type.</div>');
+        h += dzSec('Text color', dzSwatches('tbTc', d.tbTc || '', true) + '<div class="dz-hint">None uses your page\u2019s text color.</div>');
+        h += dzSec('Text size', dzChips('tbFs', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], dzGet(block, 'tbFs', 'm')));
+        h += dzSec('Title size', dzChips('tbTz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], g('tbTz'), 4));
+        h += dzSec('Title capitals', dzChips('tbCaps', [['', 'As typed'], ['1', 'Capitals']], g('tbCaps'), 2));
+        h += dzSec('Title color', dzSwatches('tbQc', g('tbQc')));
+        h += dzSec('Description', dzChips('tbDs', [['', 'Show'], ['0', 'Hide']], g('tbDs'), 2));
+        h += dzSec('Title and description', dzChips('tbAl', [['l', 'Left'], ['c', 'Center'], ['r', 'Right']], dzGet(block, 'tbAl', 'l')));
+      }
+      if (sB) {
+        h += dzSec('Reset button', dzChips('tbResetB', [['1', 'Reset button styling']], '', 1) + '<div class="dz-hint">Clears shape, border, shadow, text color and weight. Label text stays.</div>');
+        h += dzSec('Button style', dzChips('tbBs', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft']], dzGet(block, 'tbBs', 'solid')));
+        h += dzSec('Button shape', dzChips('tbBr', [['', 'Follow box'], ['sq', 'Square'], ['sm', 'Slight'], ['rd', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], g('tbBr'), 3));
+        h += dzSec('Button size', dzChips('tbBz', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], dzGet(block, 'tbBz', 'm'), 4));
+        h += dzSec('Button position', dzChips('tbBa', [['l', 'Left'], ['c', 'Center'], ['r', 'Right'], ['f', 'Full width']], dzGet(block, 'tbBa', 'l')));
+        h += dzSec('Button color', dzSwatches('tbBc', d.tbBc || '', true) + '<div class="dz-hint">None uses the accent color.</div>');
+        h += dzSec('Button text color', dzSwatches('tbBt', g('tbBt')) + '<div class="dz-hint">None picks black or white for contrast.</div>');
+        h += dzSec('Button border', dzChips('tbBb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('tbBb'), 4));
+        h += dzSec('Button shadow', dzChips('tbBh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], g('tbBh'), 5));
+        h += dzSec('Button text', dzChips('tbBw', [['', 'Bold'], ['n', 'Regular'], ['m', 'Semibold'], ['h', 'Heavy']], g('tbBw'), 4) + gap + dzChips('tbBcp', [['', 'As typed'], ['1', 'Capitals']], g('tbBcp'), 2));
+      }
       h += dzTab('Effects', 'Text box effects') + dzSec('Opacity', dzSlider('op', blockOpPct(block)));
       h += dzAnimSecs(block);
       h += dzTab('Messages', 'Text box messages') + RF;
@@ -19315,6 +19706,9 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       }
       else if (k === 'tbCloseClear') delete block.dataset.tbClose;
       else if (k === 'tbC' || k === 'tbTc' || k === 'tbBc') { if (v === '') delete block.dataset[k]; else block.dataset[k] = v; }
+      else if (k === 'tbReset') TB_FLD.forEach(function(x) { delete block.dataset[x]; });
+      else if (k === 'tbResetB') TB_BTN.forEach(function(x) { delete block.dataset[x]; });
+      else if (TB_STY.indexOf(k) >= 0) { if (v === '') delete block.dataset[k]; else block.dataset[k] = v; } // empty = back to the preset
       else if (k === 'tbAuto') {
         if (v === '1') block.dataset.tbAuto = '1';
         else { var P1 = window.nbPageProfile ? window.nbPageProfile() : null; delete block.dataset.tbAuto; if (P1) { block.dataset.tbC = P1.accent; block.dataset.tbR = { s: 'sq', m: 'rd', p: 'pill' }[P1.rad] || 'rd'; } block.dataset.tbF = 'sans'; } // Custom starts from what the page gave it (Default font = the page's own)
