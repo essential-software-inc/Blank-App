@@ -10580,6 +10580,8 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk[data-type="pay"][data-type="pay"][data-py-cr="lg"] .blk-py{border-radius:28px}
 .blk[data-type="pay"][data-type="pay"][data-py-bd="none"] .blk-py{border:0;outline:0}
 .blk[data-type="pay"][data-type="pay"][data-py-bd="thin"] .blk-py{border:1px solid color-mix(in srgb,var(--py-c,#5b5bd6) 55%,transparent)}
+.blk[data-type="pay"][data-type="pay"][data-py-bd="mid"] .blk-py{border:2px solid var(--py-c,#5b5bd6)}
+.blk[data-type="pay"][data-type="pay"][data-py-bd="dotted"] .blk-py{border:2px dotted var(--py-c,#5b5bd6)}
 .blk[data-type="pay"][data-type="pay"][data-py-bd="bold"] .blk-py{border:3px solid var(--py-c,#5b5bd6)}
 .blk[data-type="pay"][data-type="pay"][data-py-bd="dashed"] .blk-py{border:2px dashed var(--py-c,#5b5bd6)}
 .blk[data-type="pay"][data-type="pay"][data-py-bd="double"] .blk-py{border:4px double var(--py-c,#5b5bd6)}
@@ -10807,6 +10809,8 @@ span.blk-btn:not([role="button"]){cursor:default}
 .blk[data-type="poll"][data-type="poll"][data-pl-zr="md"]{--pl-sr:16px}
 .blk[data-type="poll"][data-type="poll"][data-pl-zr="lg"]{--pl-sr:28px}
 .blk[data-type="poll"][data-type="poll"][data-pl-zb="thin"] .blk-pl{border:1px solid var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="poll"][data-type="poll"][data-pl-zb="mid"] .blk-pl{border:2px solid var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="poll"][data-type="poll"][data-pl-zb="dotted"] .blk-pl{border:2px dotted var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
 .blk[data-type="poll"][data-type="poll"][data-pl-zb="bold"] .blk-pl{border:3px solid var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
 .blk[data-type="poll"][data-type="poll"][data-pl-zb="dashed"] .blk-pl{border:2px dashed var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
 .blk[data-type="poll"][data-type="poll"][data-pl-zb="double"] .blk-pl{border:4px double var(--pl-zc,color-mix(in srgb,currentColor 25%,transparent))}
@@ -11015,6 +11019,8 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
 .blk[data-type="textbox"][data-type="textbox"][data-tb-cr="md"]{--tb-sr:16px}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-cr="lg"]{--tb-sr:28px}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-bd="thin"] .blk-tb{border:1px solid var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bd="mid"] .blk-tb{border:2px solid var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-bd="dotted"] .blk-tb{border:2px dotted var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-bd="bold"] .blk-tb{border:3px solid var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-bd="dashed"] .blk-tb{border:2px dashed var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-bd="double"] .blk-tb{border:4px double var(--tb-sc,color-mix(in srgb,currentColor 25%,transparent))}
@@ -11061,6 +11067,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
 .blk[data-type="textbox"][data-type="textbox"][data-tb-mc] .blk-tb-oc input{accent-color:var(--tb-mc)}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-dr="sq"] .blk-tb-ddl{border-radius:0}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-dr="sm"] .blk-tb-ddl{border-radius:6px}
+.blk[data-type="textbox"][data-type="textbox"][data-tb-dr="md"] .blk-tb-ddl{border-radius:12px}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-dr="lg"] .blk-tb-ddl{border-radius:20px}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-df] .blk-tb-ddl{background:var(--tb-df)}
 .blk[data-type="textbox"][data-type="textbox"][data-tb-dt] .blk-tb-ddl{color:var(--tb-dt)}
@@ -11322,7 +11329,8 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
 .dz-sec{display:flex;flex-direction:column;gap:.55rem;margin:.2rem 0 .9rem}
 .dz-lab{font-size:.78rem;font-weight:700;color:#8f8f89;margin:0}
 .dz-fl{display:block;font-size:.75rem;font-weight:600;color:#6b6b66;margin:.15rem 0 -.2rem}
-.dz-chips{display:grid;grid-template-columns:repeat(var(--dz-cols,3),1fr);gap:.4rem}
+.dz-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem}
+.dz-chips>.dz-chip{flex:0 0 calc((100% - (var(--dz-cols,3) - 1) * .4rem) / var(--dz-cols,3) - .5px);min-width:0}
 .dz-chip{border:1px solid #e5e5e0;background:#fafaf8;color:#2c2c29;border-radius:10px;padding:.55rem .25rem;font-family:inherit;font-size:.82rem;font-weight:600;text-align:center;cursor:pointer;transition:border-color .12s,background .12s,color .12s}
 .dz-chip:hover,.dz-chip:active{border-color:#c9c9f5;background:#f5f5fd}
 .dz-chip.dz-on{border-color:#5b5bd6;background:#f3f3fd;color:#5b5bd6}
@@ -17526,7 +17534,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     if (st.bg) h += dzSec('Fill color', dzSwatches('bxBg', st.bg)) + dzSec('Fill opacity', dzSlider('bxBgOp', st.bgOp));
     h += dzSec('Border', dzRange('bxBw', st.bw, 0, 12, 'px', 'Border size'));
     if (parseFloat(st.bw) > 0) h += dzSec('Border color', dzSwatches('bxBc', st.bc)) + dzSec('Border opacity', dzSlider('bxBcOp', st.bcOp));
-    h += dzSec('Corners', dzChips('bxRad', [['', 'Default'], ['sq', 'Square'], ['sm', 'Soft'], ['md', 'Round'], ['lg', 'Large']], st.rad));
+    h += dzSec('Corners', dzChips('bxRad', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Soft'], ['md', 'Round'], ['lg', 'Large']], st.rad));
     h += dzSec('Padding', dzChips('bxPad', [['', 'Default'], ['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], st.pad));
     h += dzSec('Shadow', dzChips('bxSh', [['0', 'None'], ['1', 'Soft'], ['2', 'Strong']], st.sh));
     h += dzSec('Text color', dzChips('bxInkOn', [['0', 'Default'], ['1', 'Color']], st.ink ? '1' : '0'));
@@ -17936,7 +17944,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       h += dzTab('Layout', 'Panel layout') + dzSec('Height', dzChips('pnH', [['auto', 'Fit text'], ['sm', 'S'], ['md', 'M'], ['lg', 'L'], ['xl', 'XL'], ['screen', 'Tall']], dzGet(block, 'pnH', 'md')));
       h += dzSec('Text position', dzChips('pnHa', [['l', 'Left'], ['c', 'Center'], ['r', 'Right']], dzGet(block, 'pnHa', 'l')) + '<div style="height:.4rem"></div>' + dzChips('pnVa', [['t', 'Top'], ['m', 'Middle'], ['b', 'Bottom']], dzGet(block, 'pnVa', 'm')));
       h += dzSec('Text color', dzChips('pnInk', [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']], dzGet(block, 'pnInk', 'auto')));
-      h += dzTab('Style', 'Panel style') + dzSec('Shape', dzChips('pnRad', [['sq', 'Square'], ['sm', 'Soft'], ['md', 'Round'], ['lg', 'Rounder'], ['pill', 'Pill'], ['circle', 'Circle']], dzGet(block, 'pnRad', 'md')));
+      h += dzTab('Style', 'Panel style') + dzSec('Shape', dzChips('pnRad', [['sq', 'Sharp'], ['sm', 'Soft'], ['md', 'Round'], ['lg', 'Rounder'], ['pill', 'Pill'], ['circle', 'Circle']], dzGet(block, 'pnRad', 'md')));
       h += dzSec('Border', dzRange('pnBw', dzGet(block, 'pnBw', '0'), 0, 12, 'px', 'Border size'));
       if (parseFloat(dzGet(block, 'pnBw', '0')) > 0) h += dzSec('Border color', dzSwatches('pnBc', dzGet(block, 'pnBc', '')));
       h += dzSec('Shadow', dzChips('pnSh', [['0', 'None'], ['1', 'Soft'], ['2', 'Strong']], dzGet(block, 'pnSh', '0')));
@@ -18682,9 +18690,9 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       h += dzSec('Surface', dzChips('pySf', [['', 'Layout'], ['none', 'None'], ['white', 'White'], ['tint', 'Tint'], ['dark', 'Dark'], ['accent', 'Accent']], g('pySf'), 3) + '<div class="dz-hint">The card behind everything. Layout keeps the one the layout was drawn with.</div>');
     } else if (sb.cur === 's') {
       h += dzSec('Corners', dzChips('pyCr', PYO_Z, g('pyCr'), 5));
-      h += dzSec('Border', dzChips('pyBd', [['', 'Layout'], ['none', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['double', 'Double']], g('pyBd'), 3));
+      h += dzSec('Border', dzChips('pyBd', [['', 'Layout'], ['none', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('pyBd'), 4));
       h += dzSec('Shadow', dzChips('pySh', [['', 'Layout'], ['none', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], g('pySh'), 3));
-      h += dzSec('Spacing', dzChips('pySp', [['tight', 'Tight'], ['', 'Normal'], ['airy', 'Airy']], g('pySp'), 3));
+      h += dzSec('Spacing', dzChips('pySp', [['tight', 'Tight'], ['', 'Normal'], ['airy', 'Roomy']], g('pySp'), 3));
     } else if (sb.cur === 'a') {
       if (!card) h += dzSec('Amounts', '<div class="dz-hint">Amounts only appear when people pay inside this page. Switch How people pay on the Content tab.</div>');
       else {
@@ -19079,7 +19087,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       }
       h += dzSec('Show results', dzChips('plRes', [['after', 'After voting'], ['always', 'Always'], ['hidden', 'Hidden']], dzGet(block, 'plRes', 'after')) +
         '<div class="dz-hint">Hidden results are only visible to you in the Results tab.</div>');
-      h += dzSec('Allow changing vote', dzChips('plChg', [['0', 'No'], ['1', 'Yes']], dzGet(block, 'plChg', '0')));
+      h += dzSec('Allow changing vote', dzChips('plChg', [['1', 'Yes'], ['0', 'No']], dzGet(block, 'plChg', '0')));
       h += dzSec('Close date', '<input type="date" class="dz-input" data-k="plClose" value="' + dzEsc(closeMs ? plDayStr(closeMs) : '') + '" aria-label="Close date">' +
         (closeMs ? '<div class="dz-mq-add"><button type="button" class="dz-action" data-k="plCloseClear" data-v="1">Remove close date</button></div>' : '') +
         '<div class="dz-hint">The poll closes at the end of that day and shows results only.</div>');
@@ -19099,7 +19107,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
         h += dzSec('Colors and fonts', dzChips('plAuto', [['1', 'Match my page'], ['0', 'Custom']], pauto ? '1' : '0') + '<div class="dz-hint">' + (pauto ? 'Accent color, font and corner shape follow your page.' : 'Pick the accent color, corners and font yourself.') + '</div>');
         if (!pauto) {
           h += dzSec('Color', dzSwatches('plC', block.dataset.plC || ''));
-          h += dzSec('Corners', dzChips('plR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'plR', 'rd')) + '<div class="dz-hint">The default shape for options and the button. The Option and Button tabs can override it.</div>');
+          h += dzSec('Corners', dzChips('plR', [['sq', 'Sharp'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'plR', 'rd')) + '<div class="dz-hint">The default shape for options and the button. The Option and Button tabs can override it.</div>');
           h += dzSec('Font', dzFontChips('plF', dzGet(block, 'plF', 'sans'), 'sans', 'plain'));
         }
         h += dzSec('Spacing', dzChips('plGap', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'plGap', 'm')));
@@ -19107,8 +19115,8 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       if (sX) {
         h += dzSec('Surface', dzChips('plZs', [['', 'None'], ['white', 'White'], ['tint', 'Tint'], ['dark', 'Dark']], pg('plZs'), 4) + '<div class="dz-hint">The card behind the whole poll.</div>');
         h += dzSec('Surface color', dzSwatches('plZg', pg('plZg') === 'transparent' ? '' : pg('plZg')) + pgap + dzChips('plZg', [['transparent', 'Transparent']], pg('plZg'), 1) + '<div class="dz-hint">None uses the surface above.</div>');
-        h += dzSec('Box corners', dzChips('plZr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Small'], ['md', 'Rounded'], ['lg', 'Very round']], pg('plZr'), 5));
-        h += dzSec('Box border', dzChips('plZb', [['', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['double', 'Double']], pg('plZb'), 5));
+        h += dzSec('Box corners', dzChips('plZr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Slight'], ['md', 'Rounded'], ['lg', 'Very round']], pg('plZr'), 5));
+        h += dzSec('Box border', dzChips('plZb', [['', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], pg('plZb'), 4));
         h += dzSec('Box shadow', dzChips('plZh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], pg('plZh'), 5));
         h += dzSec('Border and shadow color', dzSwatches('plZc', pg('plZc')) + '<div class="dz-hint">None uses the text color for borders and the accent for glow.</div>');
       }
@@ -19146,12 +19154,12 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       if (sB) {
         h += dzSec('Reset button', dzChips('plResetB', [['1', 'Reset button styling']], '', 1) + '<div class="dz-hint">Clears shape, border, shadow, text color and weight. Button text stays.</div>');
         h += dzSec('Button style', dzChips('plBs', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft']], dzGet(block, 'plBs', 'solid')));
-        h += dzSec('Button shape', dzChips('plBr', [['', 'Follow poll'], ['sq', 'Square'], ['sm', 'Slight'], ['rd', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], pg('plBr'), 3));
+        h += dzSec('Button shape', dzChips('plBr', [['', 'Follow poll'], ['sq', 'Sharp'], ['sm', 'Slight'], ['rd', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], pg('plBr'), 3));
         h += dzSec('Button size', dzChips('plBz', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], dzGet(block, 'plBz', 'm'), 4));
         h += dzSec('Button position', dzChips('plBa', [['l', 'Left'], ['c', 'Center'], ['r', 'Right'], ['f', 'Full width']], dzGet(block, 'plBa', 'l')));
         h += dzSec('Button color', dzSwatches('plBc', d.plBc || '', true) + '<div class="dz-hint">None uses the accent color.</div>');
         h += dzSec('Button text color', dzSwatches('plBt', pg('plBt')) + '<div class="dz-hint">None picks black or white for contrast.</div>');
-        h += dzSec('Button border', dzChips('plBb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], pg('plBb'), 4));
+        h += dzSec('Button border', dzChips('plBb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], pg('plBb'), 4));
         h += dzSec('Button shadow', dzChips('plBh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], pg('plBh'), 5));
         h += dzSec('Button text', dzChips('plBw', [['', 'Bold'], ['n', 'Regular'], ['m', 'Semibold'], ['h', 'Heavy']], pg('plBw'), 4) + pgap + dzChips('plBcp', [['', 'As typed'], ['1', 'Capitals']], pg('plBcp'), 2));
       }
@@ -19529,7 +19537,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
         h += dzSec('Colors and fonts', dzChips('tbAuto', [['1', 'Match my page'], ['0', 'Custom']], auto ? '1' : '0') + '<div class="dz-hint">' + (auto ? 'Accent color, font and corner shape follow your page.' : 'Pick the accent color, corners and font yourself.') + '</div>');
         if (!auto) {
           h += dzSec('Color', dzSwatches('tbC', d.tbC || ''));
-          h += dzSec('Corners', dzChips('tbR', [['sq', 'Square'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'tbR', 'rd')) + '<div class="dz-hint">The default shape for fields and the button. Field and Button tabs can override it.</div>');
+          h += dzSec('Corners', dzChips('tbR', [['sq', 'Sharp'], ['rd', 'Rounded'], ['pill', 'Pill']], dzGet(block, 'tbR', 'rd')) + '<div class="dz-hint">The default shape for fields and the button. Field and Button tabs can override it.</div>');
           h += dzSec('Font', dzFontChips('tbF', dzGet(block, 'tbF', 'sans'), 'sans', 'plain'));
         }
         h += dzSec('Spacing', dzChips('tbGap', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'tbGap', 'm')));
@@ -19537,8 +19545,8 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       if (sX) {
         h += dzSec('Surface', dzChips('tbSf', [['', 'None'], ['white', 'White'], ['tint', 'Tint'], ['dark', 'Dark']], g('tbSf'), 4) + '<div class="dz-hint">The card behind the whole box.</div>');
         h += dzSec('Surface color', dzSwatches('tbSbg', g('tbSbg') === 'transparent' ? '' : g('tbSbg')) + gap + dzChips('tbSbg', [['transparent', 'Transparent']], g('tbSbg'), 1) + '<div class="dz-hint">None uses the surface above.</div>');
-        h += dzSec('Box corners', dzChips('tbCr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Small'], ['md', 'Rounded'], ['lg', 'Very round']], g('tbCr'), 5));
-        h += dzSec('Box border', dzChips('tbBd', [['', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['double', 'Double']], g('tbBd'), 5));
+        h += dzSec('Box corners', dzChips('tbCr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Slight'], ['md', 'Rounded'], ['lg', 'Very round']], g('tbCr'), 5));
+        h += dzSec('Box border', dzChips('tbBd', [['', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('tbBd'), 4));
         h += dzSec('Box shadow', dzChips('tbSh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], g('tbSh'), 5));
         h += dzSec('Border and shadow color', dzSwatches('tbSc', g('tbSc')) + '<div class="dz-hint">None uses the text color for borders and the accent for glow.</div>');
       }
@@ -19557,10 +19565,10 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
         h += dzSec('Label color', dzSwatches('tbFl', g('tbFl')));
         h += dzSec('Typed text', dzChips('tbIg', [['', 'Normal'], ['b', 'Bold'], ['h', 'Heavy']], g('tbIg'), 3) + gap + dzChips('tbIa', [['', 'Left'], ['c', 'Center'], ['r', 'Right']], g('tbIa'), 3));
         h += dzSec('Placeholder style', dzChips('tbPs', [['', 'Normal'], ['i', 'Italic'], ['b', 'Bold']], g('tbPs'), 3));
-        h += dzSec('Label style', dzChips('tbLw', [['', 'Semibold'], ['n', 'Regular'], ['h', 'Heavy']], g('tbLw'), 3) + gap + dzChips('tbLc', [['', 'As typed'], ['1', 'Capitals']], g('tbLc'), 2) + gap + dzChips('tbLz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large']], g('tbLz'), 3));
+        h += dzSec('Label style', dzChips('tbLw', [['n', 'Regular'], ['', 'Semibold'], ['h', 'Heavy']], g('tbLw'), 3) + gap + dzChips('tbLc', [['', 'As typed'], ['1', 'Capitals']], g('tbLc'), 2) + gap + dzChips('tbLz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large']], g('tbLz'), 3));
         h += dzSec('Choice marker', dzChips('tbMs', [['', 'Native'], ['rd', 'Round'], ['sm', 'Soft square'], ['sq', 'Sharp']], g('tbMs'), 4) + gap + dzChips('tbMz', [['s', 'Small'], ['', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], g('tbMz'), 4) + '<div class="dz-hint">The tick boxes and dots on Yes / No, Choice and Checkbox fields.</div>');
         h += dzSec('Marker color', dzSwatches('tbMc', g('tbMc')) + '<div class="dz-hint">None uses the accent color.</div>');
-        h += dzSec('Dropdown menu corners', dzChips('tbDr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Slight'], ['lg', 'Very round']], g('tbDr'), 4) + gap + dzChips('tbDh', [['', 'Soft'], ['none', 'No shadow'], ['hard', 'Hard']], g('tbDh'), 3));
+        h += dzSec('Dropdown menu corners', dzChips('tbDr', [['', 'Default'], ['sq', 'Sharp'], ['sm', 'Slight'], ['md', 'Rounded'], ['lg', 'Very round']], g('tbDr'), 5) + gap + dzChips('tbDh', [['', 'Soft'], ['none', 'No shadow'], ['hard', 'Hard']], g('tbDh'), 3));
         h += dzSec('Dropdown menu fill', dzSwatches('tbDf', g('tbDf')) + '<div class="dz-hint">None keeps it white.</div>');
         h += dzSec('Dropdown menu text color', dzSwatches('tbDt', g('tbDt')));
       }
@@ -19577,12 +19585,12 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       if (sB) {
         h += dzSec('Reset button', dzChips('tbResetB', [['1', 'Reset button styling']], '', 1) + '<div class="dz-hint">Clears shape, border, shadow, text color and weight. Label text stays.</div>');
         h += dzSec('Button style', dzChips('tbBs', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft']], dzGet(block, 'tbBs', 'solid')));
-        h += dzSec('Button shape', dzChips('tbBr', [['', 'Follow box'], ['sq', 'Square'], ['sm', 'Slight'], ['rd', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], g('tbBr'), 3));
+        h += dzSec('Button shape', dzChips('tbBr', [['', 'Follow box'], ['sq', 'Sharp'], ['sm', 'Slight'], ['rd', 'Rounded'], ['lg', 'Very round'], ['pill', 'Pill']], g('tbBr'), 3));
         h += dzSec('Button size', dzChips('tbBz', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], dzGet(block, 'tbBz', 'm'), 4));
         h += dzSec('Button position', dzChips('tbBa', [['l', 'Left'], ['c', 'Center'], ['r', 'Right'], ['f', 'Full width']], dzGet(block, 'tbBa', 'l')));
         h += dzSec('Button color', dzSwatches('tbBc', d.tbBc || '', true) + '<div class="dz-hint">None uses the accent color.</div>');
         h += dzSec('Button text color', dzSwatches('tbBt', g('tbBt')) + '<div class="dz-hint">None picks black or white for contrast.</div>');
-        h += dzSec('Button border', dzChips('tbBb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('tbBb'), 4));
+        h += dzSec('Button border', dzChips('tbBb', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('tbBb'), 4));
         h += dzSec('Button shadow', dzChips('tbBh', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], g('tbBh'), 5));
         h += dzSec('Button text', dzChips('tbBw', [['', 'Bold'], ['n', 'Regular'], ['m', 'Semibold'], ['h', 'Heavy']], g('tbBw'), 4) + gap + dzChips('tbBcp', [['', 'As typed'], ['1', 'Capitals']], g('tbBcp'), 2));
       }
@@ -20486,8 +20494,8 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     if (!block) return Promise.resolve();
     var before = hcBeginBlock(block);
     function render() {
-      return dzTab('Spacing', 'Text spacing') + dzSec('Letter spacing', dzChips('tracking', [['', 'Normal'], ['tight', 'Tight'], ['wide', 'Wide'], ['wider', 'Wider']], block.dataset.tracking || '')) +
-        dzSec('Line height', dzChips('leading', [['', 'Normal'], ['tight', 'Tight'], ['loose', 'Roomy']], block.dataset.leading || '')) +
+      return dzTab('Spacing', 'Text spacing') + dzSec('Letter spacing', dzChips('tracking', [['tight', 'Tight'], ['', 'Normal'], ['wide', 'Wide'], ['wider', 'Wider']], block.dataset.tracking || '')) +
+        dzSec('Line height', dzChips('leading', [['tight', 'Tight'], ['', 'Normal'], ['loose', 'Roomy']], block.dataset.leading || '')) +
         dzSec('Capitals', dzChips('caps', [['', 'As typed'], ['1', 'ALL CAPS']], block.dataset.caps || '')) +
         dzTab('Effects', 'Text effects') + dzSec('Opacity', dzSlider('op', blockOpPct(block))) + dzAnimSecs(block);
     }
@@ -22643,7 +22651,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       }
       if (stT === 'l') {
         h += dzSec('Height', dzChips('nvZ', [['s', 'Compact'], ['m', 'Regular'], ['l', 'Roomy']], dzGet(block, 'nvZ', 'm')));
-        h += dzSec('Width', dzChips('edge', [['1', 'Edge to edge'], ['0', 'Inset']], dzGet(block, 'edge', '1')));
+        h += dzSec('Width', dzChips('edge', [['0', 'Inset'], ['1', 'Edge to edge']], dzGet(block, 'edge', '1')));
         h += dzSec('Link icons', dzChips('nvIcons', [['0', 'Hidden'], ['1', 'Shown']], dzGet(block, 'nvIcons', '0')));
         h += dzSec('Stay on top', dzChips('nvPin', [['0', 'Off'], ['1', 'On']], dzGet(block, 'nvStick', '0') !== '1' ? '0' : '1') + '<div class="dz-hint">Keeps the bar fixed to the top of the screen while visitors scroll the published page.</div>');
       }
@@ -22699,8 +22707,8 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
               h += dzSec('Counter bar surface', dzChips('nvSff', [['', 'Clean'], ['glass', 'Glass'], ['solid', 'Solid'], ['outline', 'Outline']], dzGet(block, 'nvSff', '')));
               h += xOpts('fb', function(n) { return block.getAttribute('data-nv-fx' + n) || ''; }, 'Counter bar buttons');
             }
-            if (dzGet(block, 'nvSin', 'nav') === 'all') h += dzSec('Page and link results', dzChips('nvSpl', [['', 'Hide'], ['1', 'Show']], dzGet(block, 'nvSpl', '')) + '<div class="dz-hint">Show lists matching page names, links and dialogs in the results while typing.</div>');
-            h += dzSec('Text matches in results', dzChips('nvStl', [['', 'Hide'], ['1', 'Show']], dzGet(block, 'nvStl', '')) + '<div class="dz-hint">Hide: just type, the text is highlighted on the page and the floating bar steps through it. Show: also list each page with a text match in the results.</div>');
+            if (dzGet(block, 'nvSin', 'nav') === 'all') h += dzSec('Page and link results', dzChips('nvSpl', [['1', 'Show'], ['', 'Hide']], dzGet(block, 'nvSpl', '')) + '<div class="dz-hint">Show lists matching page names, links and dialogs in the results while typing.</div>');
+            h += dzSec('Text matches in results', dzChips('nvStl', [['1', 'Show'], ['', 'Hide']], dzGet(block, 'nvStl', '')) + '<div class="dz-hint">Hide: just type, the text is highlighted on the page and the floating bar steps through it. Show: also list each page with a text match in the results.</div>');
             h += dzSec('Highlight color', dzSwatches('nvShl', dzGet(block, 'nvShl', ''), true) + '<div class="dz-hint">Color of the matches painted on the page. None keeps the default yellow.</div>');
           }
           h += dzSec('Search style', dzChips('nvSs', [['', 'Design'], ['pill', 'Pill'], ['box', 'Box'], ['line', 'Line'], ['block', 'Block'], ['ghost', 'Ghost']], dzGet(block, 'nvSs', '')));
