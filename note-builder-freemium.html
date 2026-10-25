@@ -10398,7 +10398,7 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk-py-amts{display:flex;flex-wrap:wrap;gap:.4rem}
 .blk[data-type="pay"][data-bt-a="c"] .blk-py-amts,.blk[data-type="pay"][data-bt-a="c"] .blk-py-cust{justify-content:center}
 .blk[data-type="pay"][data-bt-a="r"] .blk-py-amts,.blk[data-type="pay"][data-bt-a="r"] .blk-py-cust{justify-content:flex-end}
-.blk-py-a{font:inherit;font-weight:700;min-width:3.4em;padding:.45em .85em;border-radius:999px;border:2px solid var(--py-c,#5b5bd6);background:transparent;color:var(--py-c,#5b5bd6);cursor:pointer;line-height:1.2}
+.blk-py-a{font:inherit;font-weight:700;min-width:3.4em;overflow-wrap:anywhere;padding:.45em .85em;border-radius:999px;border:2px solid var(--py-c,#5b5bd6);background:transparent;color:var(--py-c,#5b5bd6);cursor:pointer;line-height:1.2}
 .blk-py-a[aria-checked="true"]{background:var(--py-c,#5b5bd6);color:var(--py-ink,#fff)}
 .blk-py-a:disabled,.blk-py-ci:disabled{opacity:.55;cursor:default}
 .blk-py-cust{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
@@ -10470,8 +10470,8 @@ a.blk-btn:hover{filter:brightness(.95)}
 .blk[data-type="pay"][data-py-l="list"] .blk-py-a[aria-checked="true"]::before{background:var(--py-c,#5b5bd6);box-shadow:inset 0 0 0 3px #fff}
 .blk[data-type="pay"][data-py-l="stack"] .blk-py-amts{flex-direction:column;gap:.5rem}
 .blk[data-type="pay"][data-py-l="stack"] .blk-py-a{width:100%;padding:.8em 1em;font-size:1.1em;border-radius:999px}
-.blk[data-type="pay"][data-py-l="segmented"] .blk-py-amts{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;border:2px solid var(--py-c,#5b5bd6);border-radius:999px;overflow:hidden}
-.blk[data-type="pay"][data-py-l="segmented"] .blk-py-a{min-width:0;border:0;border-radius:0;padding:.7em .2em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blk[data-type="pay"][data-py-l="segmented"] .blk-py-amts{display:flex;flex-wrap:wrap;gap:0;border:2px solid var(--py-c,#5b5bd6);border-radius:999px;overflow:hidden}
+.blk[data-type="pay"][data-py-l="segmented"] .blk-py-a{flex:1 1 0;min-width:max-content;border:0;border-radius:0;padding:.7em .5em;white-space:nowrap}
 .blk[data-type="pay"][data-py-l="segmented"] .blk-py-a+.blk-py-a{border-left:2px solid var(--py-c,#5b5bd6)}
 .blk[data-type="pay"][data-py-l="elegant"] .blk-py{padding:1.6rem 1.4rem;background:#fffdf8;color:#2b2a26;border:1px solid #d8d2c2;outline:1px solid #d8d2c2;outline-offset:-8px;border-radius:2px;font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;text-align:center}
 .blk[data-type="pay"][data-py-l="elegant"] .blk-py-q{font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:1.05em}
@@ -11331,7 +11331,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
 .dz-fl{display:block;font-size:.75rem;font-weight:600;color:#6b6b66;margin:.15rem 0 -.2rem}
 .dz-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem}
 .dz-chips>.dz-chip{flex:0 0 calc((100% - (var(--dz-cols,3) - 1) * .4rem) / var(--dz-cols,3) - .5px);min-width:0}
-.dz-chip{border:1px solid #e5e5e0;background:#fafaf8;color:#2c2c29;border-radius:10px;padding:.55rem .25rem;font-family:inherit;font-size:.82rem;font-weight:600;text-align:center;cursor:pointer;transition:border-color .12s,background .12s,color .12s}
+.dz-chip{border:1px solid #e5e5e0;background:#fafaf8;color:#2c2c29;border-radius:10px;padding:.55rem .25rem;font-family:inherit;font-size:.82rem;font-weight:600;text-align:center;overflow-wrap:anywhere;cursor:pointer;transition:border-color .12s,background .12s,color .12s}
 .dz-chip:hover,.dz-chip:active{border-color:#c9c9f5;background:#f5f5fd}
 .dz-chip.dz-on{border-color:#5b5bd6;background:#f3f3fd;color:#5b5bd6}
 .dz-pair{display:flex;align-items:center;gap:1.4rem}
@@ -17411,7 +17411,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
   function variantAnimRow(edit) {
     if (!(edit && edit.anim)) return '';
     function chips(k, opts, cur) {
-      return '<div class="dz-chips" style="--dz-cols:' + (opts.length <= 5 ? opts.length : 3) + '">' + opts.map(function(o) {
+      return '<div class="dz-chips" style="--dz-cols:' + dzChipCols(opts) + '">' + opts.map(function(o) {
         return '<button type="button" class="dz-chip' + (String(o[0]) === String(cur) ? ' dz-on' : '') + '" data-ak="' + k + '" data-av="' + o[0] + '">' + o[1] + '</button>';
       }).join('') + '</div>';
     }
@@ -17590,8 +17590,24 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
     });
   }
   function dzSec(label, inner) { return '<div class="dz-sec"><div class="dz-lab">' + label + '</div>' + inner + '</div>'; }
-  function dzChips(k, opts, cur, cols, ctr) {
+  // Column count for a chip grid. Starts from the caller's cols (or one per option up to 5, else 3), then drops columns until the widest word in any
+  // label fits its cell. The labels are measured in the chip font against the sheet's inner width (360px max, 1rem side padding), so a long label
+  // such as "A$ Australian" gets fewer, wider columns instead of spilling out of its chip. Every chip grid builds its columns through here.
+  var dzChipCtx = null;
+  function dzChipCols(opts, cols) {
     cols = cols || (opts.length <= 5 ? opts.length : 3);
+    try {
+      if (!dzChipCtx) dzChipCtx = document.createElement('canvas').getContext('2d');
+      var rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, w = 0, avail, gap = rem * .4;
+      dzChipCtx.font = '600 ' + (rem * .82) + 'px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+      opts.forEach(function(o) { String(o[1]).replace(/<[^>]*>/g, '').split(/\s+/).forEach(function(s) { w = Math.max(w, dzChipCtx.measureText(s).width); }); });
+      avail = Math.min(window.innerWidth || 360, 360) - rem * 2;
+      while (cols > 1 && (avail - (cols - 1) * gap) / cols - .5 - rem * .5 - 2 < w + 1) cols--;
+    } catch (e) {}
+    return cols;
+  }
+  function dzChips(k, opts, cur, cols, ctr) {
+    cols = dzChipCols(opts, cols);
     return '<div class="dz-chips' + (ctr ? ' py-ctr' : '') + '" style="--dz-cols:' + cols + '">' + opts.map(function(o) {
       return '<button type="button" class="dz-chip' + (String(o[0]) === String(cur) ? ' dz-on' : '') + '" data-k="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>';
     }).join('') + '</div>';
@@ -18791,7 +18807,7 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
       } else {
         h += pyStripeSec();
         h += dzSec('Amounts', pyNum('pyAmts', '5, 10, 25', 'Preset amounts') + '<div class="dz-hint">Up to 6 whole amounts separated by commas, from 1 to 10000.</div>');
-        h += dzSec('Currency', dzChips('pyCur', PY_CURS, block.dataset.pyCur || 'usd'));
+        h += dzSec('Currency', dzChips('pyCur', PY_CURS, block.dataset.pyCur || 'usd', 3));
         h += dzSec('Other amount', dzChips('pyCustom', [['1', 'Visitors can type one'], ['0', 'Presets only']], block.dataset.pyCustom === '0' ? '0' : '1') +
           (block.dataset.pyCustom === '0' ? '' : '<div style="height:.4rem"></div>' + pyNum('pyMin', 'Smallest', 'Smallest amount') + '<div style="height:.4rem"></div>' + pyNum('pyMax', 'Largest', 'Largest amount') + '<div class="dz-hint">The smallest and largest amount someone can type.</div>'));
       }
