@@ -1796,7 +1796,7 @@ body.pink .bn-item.active {
 #edit-dfooter {
   background: #fafcff;
   border-top: 1px solid #f0f5ff;
-  padding: .45rem .75rem;
+  padding: .45rem .75rem calc(.45rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
   gap: .4rem;
@@ -1904,7 +1904,7 @@ body.pink .bn-item.active {
 #backup-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
@@ -1944,13 +1944,13 @@ body.pink .bn-item.active {
      (395px) — that view scrolls here rather than growing the box, since
      buying ad credits is a deeper, less common action than checking on a
      published note. See .is-live below for the Published value. */
-  height: min(336px, 80vh);
+  height: min(calc(336px + env(safe-area-inset-bottom, 0px)), 80vh);
   display: flex;
   flex-direction: column;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
   overflow: hidden
 }
-#publish-sheet.is-live { height: min(302px, 80vh) } /* 264 + one more switch row (Allow new comments) */
+#publish-sheet.is-live { height: min(calc(302px + env(safe-area-inset-bottom, 0px)), 80vh) } /* 264 + one more switch row (Allow new comments) */
 #publish-hdr {
   display: flex;
   align-items: center;
@@ -2014,7 +2014,7 @@ body:not(.night):not(.pink) #pub-tm-head .bkp-help { color: rgba(32,33,34,.65) }
 #publish-sheet.is-teams #pub-footer-live,
 #publish-sheet.is-teams #pub-footer-ad-new,
 #publish-sheet.is-teams #pub-footer-ad-live { display: none !important }
-#publish-sheet.is-teams { height: min(480px, 85vh) }
+#publish-sheet.is-teams { height: min(calc(480px + env(safe-area-inset-bottom, 0px)), 85vh) }
 #publish-sheet.is-editor #pub-tabs,
 #publish-sheet.is-editor .pub-opts,
 #publish-sheet.is-editor #pub-unpublish-btn { display: none !important }
@@ -2023,6 +2023,9 @@ body:not(.night):not(.pink) #pub-tm-head .bkp-help { color: rgba(32,33,34,.65) }
 #pub-tm-head, #pub-tm-owner { display: contents }
 #pub-teams-body .bkp-help { margin-top: .8rem }
 #pub-tm-load:empty, #pub-tm-status:empty { display: none }
+/* Status/error lines have min-height, so as flex items of the scrolling body they could shrink to one line and spill under the sticky Editors header. Never shrink; always grow to fit the text. Same fix as in the glass sheet below, repeated here so it also holds with Glass mode off. */
+#pub-teams-body > *, #pub-tm-head > *, #pub-tm-owner > * { flex-shrink: 0 }
+#pub-tm-status, #pub-tm-load { flex: none; height: auto; min-height: 0; overflow: visible; overflow-wrap: anywhere }
 #publish-sheet.is-hist #pub-tm-owner > .bkp-help, #publish-sheet.is-hist .pub-tm-add, #publish-sheet.is-hist #pub-tm-status { display: none }
 /* Teams layout: the invite box scrolls with the list, the "Editors" header sticks to the top once it gets there, and Version history / Leave team stay pinned at the bottom, so they never get buried under a long list. */
 #pub-tm-sec { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; position: sticky; top: 0; z-index: 2; margin: 0 -1rem; padding: .4rem 1rem .45rem; background: #fafcff; border-bottom: 1px solid #d2daf0 }
@@ -2034,7 +2037,7 @@ body.night #pub-tm-sec-title, body.night #pub-tm-count { color: #9a9a9a }
 body.pink #pub-tm-sec-title, body.pink #pub-tm-count { color: #875068 }
 #pub-tm-sec-title { font-size: .84rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: rgba(32,33,34,.65) }
 #pub-tm-count { font-size: .84rem; color: rgba(32,33,34,.65) }
-#pub-tm-foot { display: none; flex: none; gap: .6rem; padding: .6rem 1rem 1rem }
+#pub-tm-foot { display: none; flex: none; gap: .6rem; padding: .6rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px)) }
 #pub-tm-foot > button { flex: 1 1 0; min-width: 0 }
 .pub-tm-add { display: flex; gap: .5rem; align-items: stretch }
 .pub-tm-add .com-field { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: .06em }
@@ -2079,7 +2082,7 @@ body.pink .pub-tm-chip.pending { color: #875068 }
 #pub-footer-ad-live {
   background: #fafcff;
   border-top: 1px solid #f0f5ff;
-  padding: .45rem .75rem;
+  padding: .45rem .75rem calc(.45rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
   gap: .4rem;
@@ -2401,7 +2404,7 @@ body.pink #pub-slug-prefix { color: rgba(26, 10, 18, .5) }
 #account-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
   background: #fafcff
 }
 
