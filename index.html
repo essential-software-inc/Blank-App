@@ -960,6 +960,25 @@ body.pink .alert-md-task.on { background: #bd2856; border-color: #bd2856 }
 #story-viewer-sub-btn.is-subscribed {
   color: #3366cc
 }
+/* Looking at an earlier version of a team note (see _nbOpenVersionView): Restore replaces the Like and Follow buttons. */
+#story-viewer-restore-btn {
+  position: absolute;
+  right: 6.4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #202122;
+  padding: .3rem
+}
+#story-viewer-overlay.sv-version #story-viewer-restore-btn { display: flex }
+#story-viewer-overlay.sv-version #story-viewer-like-btn,
+#story-viewer-overlay.sv-version #story-viewer-sub-btn { display: none }
+#story-viewer-overlay.sv-version #story-viewer-title { margin-right: calc(6.4px + .6rem + 22px) }
+body.sv-version-on #delete-overlay { z-index: 1000 } /* the confirm dialog has to sit above the viewer */
 /* Like (heart) button — sits just left of the Subscribe button and shares its
    look. Separate from Favorites (a private, on-device bookmark): this is a
    public per-account like on the published note. Turns red when liked. */
@@ -1086,7 +1105,7 @@ body.night .nb-story-ring.seen { background: #333d4d }
 body.night #story-viewer-overlay { background: #111111 }
 body.night #story-viewer-header { border-bottom-color: #282828; color: #fff }
 body.night #story-viewer-back { color: #fff }
-body.night #story-viewer-sub-btn { color: #fff }
+body.night #story-viewer-sub-btn, body.night #story-viewer-restore-btn { color: #fff }
 body.night #story-viewer-sub-btn.is-subscribed { color: #999999 }
 body.night #story-viewer-like-btn { color: #fff }
 body.pink #nb-stories-strip .nb-story-label { color: #875068 }
@@ -1095,13 +1114,14 @@ body.pink .nb-story-ring.seen { background: #f3cddc }
 body.pink #story-viewer-overlay { background: #fff8fb }
 body.pink #story-viewer-header { border-bottom-color: #f5c5d8; color: #1a0a12 }
 body.pink #story-viewer-back { color: #1a0a12 }
-body.pink #story-viewer-sub-btn { color: #1a0a12 }
+body.pink #story-viewer-sub-btn, body.pink #story-viewer-restore-btn { color: #1a0a12 }
 body.pink #story-viewer-sub-btn.is-subscribed { color: #e1306c }
 body.pink #story-viewer-like-btn { color: #1a0a12 }
 /* Blue matches the main header's icon buttons (#back-btn/.hdr-btn) in
    light mode — story viewer used the plain text color here before. */
 body:not(.night):not(.pink) #story-viewer-back,
 body:not(.night):not(.pink) #story-viewer-sub-btn,
+body:not(.night):not(.pink) #story-viewer-restore-btn,
 body:not(.night):not(.pink) #story-viewer-like-btn {
   color: #3366cc
 }
@@ -1934,15 +1954,20 @@ body.pink .bn-item.active {
 #publish-hdr {
   display: flex;
   align-items: center;
-  padding: .65rem 1rem;
+  gap: .5rem;
+  padding: .4rem .8rem .4rem 1rem;
   border-bottom: 1px solid #f0f5ff;
   flex-shrink: 0
 }
 #publish-hdr-title { font-size: .9rem; font-weight: bold; color: #202122; flex: 1 }
 #publish-close, #publish-back, #publish-teams {
   background: none; border: none; cursor: pointer; color: #54595d;
-  padding: .2rem .4rem; border-radius: 4px; font-size: 1.1rem; line-height: 1
+  width: 36px; height: 36px; padding: 0; border-radius: 50%; font-size: 1.1rem; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center
 }
+#publish-close svg, #publish-back svg, #publish-teams svg { display: block }
+#publish-back { margin-left: -.4rem } /* 1rem header padding - .4rem, the same inset the close button has on the right */
+#publish-close:active, #publish-back:active, #publish-teams:active { background: rgba(127,127,127,.18) }
 #publish-body,
 #pub-teams-body {
   /* #publish-sheet has a fixed height per state (see .is-live) — this
@@ -1981,7 +2006,6 @@ body:not(.night):not(.pink) #pub-tm-head .bkp-help { color: rgba(32,33,34,.65) }
 #pub-tm-head .bkp-help { margin-bottom: 0 }
 /* Teams view of the publish sheet: replaces the tabs, body and footers while it is open (see _pubTeamsOpen). Editors (a shared note that is not theirs) get Save Changes only. */
 #publish-back[hidden], #publish-teams[hidden] { display: none !important }
-#publish-back, #publish-teams { display: inline-flex; align-items: center; justify-content: center }
 #pub-teams { display: none; flex: 1; flex-direction: column; min-height: 0 }
 #publish-sheet.is-teams #pub-teams { display: flex }
 #publish-sheet.is-teams #pub-tabs,
@@ -1994,13 +2018,22 @@ body:not(.night):not(.pink) #pub-tm-head .bkp-help { color: rgba(32,33,34,.65) }
 #publish-sheet.is-editor #pub-tabs,
 #publish-sheet.is-editor .pub-opts,
 #publish-sheet.is-editor #pub-unpublish-btn { display: none !important }
-#pub-teams-body { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: .6rem }
-#pub-tm-owner, #pub-tm-editor { display: flex; flex-direction: column; gap: .6rem }
-/* Teams layout: the invite box and the "Editors" header stay fixed at the top, only the list scrolls, and Version history / Leave team stay pinned at the bottom, so neither ever gets buried under a long list. */
-#pub-tm-head { flex: none; display: flex; flex-direction: column; gap: .6rem; padding: 1rem 1rem 0 }
-#pub-tm-sec { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; padding: .3rem 0 .45rem; border-bottom: 1px solid #d2daf0 }
-#pub-tm-sec-title { font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: rgba(32,33,34,.65) }
-#pub-tm-count { font-size: .78rem; color: rgba(32,33,34,.65) }
+#pub-teams-body { flex: 1; overflow-y: auto; padding: 0 1rem .7rem; display: flex; flex-direction: column; gap: .6rem }
+#pub-tm-editor { display: flex; flex-direction: column; gap: .6rem }
+#pub-tm-head, #pub-tm-owner { display: contents }
+#pub-teams-body .bkp-help { margin-top: .8rem }
+#pub-tm-load:empty, #pub-tm-status:empty { display: none }
+#publish-sheet.is-hist #pub-tm-owner > .bkp-help, #publish-sheet.is-hist .pub-tm-add, #publish-sheet.is-hist #pub-tm-status { display: none }
+/* Teams layout: the invite box scrolls with the list, the "Editors" header sticks to the top once it gets there, and Version history / Leave team stay pinned at the bottom, so they never get buried under a long list. */
+#pub-tm-sec { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; position: sticky; top: 0; z-index: 2; margin: 0 -1rem; padding: .4rem 1rem .45rem; background: #fafcff; border-bottom: 1px solid #d2daf0 }
+#pub-tm-sec::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 10px; pointer-events: none; background: linear-gradient(to bottom, rgba(20,30,50,.08), transparent) }
+body.night #pub-tm-sec { background: #080808; border-bottom-color: #282828 }
+body.night #pub-tm-sec::after { background: linear-gradient(to bottom, rgba(0,0,0,.45), transparent) }
+body.pink #pub-tm-sec { background: #fff8fb; border-bottom-color: #f5c5d8 }
+body.night #pub-tm-sec-title, body.night #pub-tm-count { color: #9a9a9a }
+body.pink #pub-tm-sec-title, body.pink #pub-tm-count { color: #875068 }
+#pub-tm-sec-title { font-size: .84rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: rgba(32,33,34,.65) }
+#pub-tm-count { font-size: .84rem; color: rgba(32,33,34,.65) }
 #pub-tm-foot { display: none; flex: none; gap: .6rem; padding: .6rem 1rem 1rem }
 #pub-tm-foot > button { flex: 1 1 0; min-width: 0 }
 .pub-tm-add { display: flex; gap: .5rem; align-items: stretch }
@@ -2009,19 +2042,37 @@ body:not(.night):not(.pink) #pub-tm-head .bkp-help { color: rgba(32,33,34,.65) }
 .pub-tm-list { display: flex; flex-direction: column; gap: .45rem }
 .pub-tm-row { display: flex; align-items: center; gap: .6rem; padding: .55rem .7rem; background: #fff; border: 1px solid #d2daf0; border-radius: 10px; color: #202122 }
 .pub-tm-who { flex: 1; min-width: 0 }
-.pub-tm-name { font-size: .9rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.pub-tm-sub { font-size: .74rem; color: rgba(32,33,34,.6) }
-.pub-tm-chip { flex: none; font-size: .7rem; font-weight: 700; padding: .18rem .55rem; border-radius: 999px; background: #e8f0ff; color: #3366cc }
-.pub-tm-chip.pending { background: #eef0f4; color: #54595d }
+/* Editor cards: the person (picture, name, dates) on top, status and the remove / cancel button in a footer strip underneath. */
+.pub-tm-card { flex-direction: column; align-items: stretch; gap: 0; padding: 0 }
+.pub-tm-main { display: flex; align-items: flex-start; gap: .6rem; padding: .65rem .7rem .55rem }
+.pub-tm-rf.end { justify-content: flex-end }
+.pub-tm-rf { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .1rem .7rem .1rem; border-top: 1px solid #e4e9f6 }
+body.night .pub-tm-rf { border-top-color: #2e2e2e }
+body.pink .pub-tm-rf { border-top-color: #f3c9da }
+.pub-tm-name { font-size: .95rem; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere } /* names always show in full: they wrap instead of being cut off */
+.pub-tm-sub { text-wrap: balance; font-size: .82rem; color: rgba(32,33,34,.6) }
+.pub-tm-chip { flex: none; display: inline-flex; align-items: center; gap: .35rem; font-size: .82rem; font-weight: 600; padding: 0; background: none; border: none; border-radius: 0; color: #3366cc }
+.pub-tm-chip::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: currentColor; box-sizing: border-box }
+.pub-tm-chip.pending { color: #54595d }
+.pub-tm-chip.pending::before { background: none; border: 1.5px solid currentColor }
 .pub-tm-x { flex: none; padding: .35rem .7rem; font-size: .78rem }
+.pub-tm-av { flex: none; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; font-size: .95rem; font-weight: 700; background: #e8f0ff; color: #3366cc }
+.pub-tm-av-img { width: 100%; height: 100%; object-fit: cover; display: block }
+body.night .pub-tm-av { background: #2a2a2a; color: #e0e0e0 }
+body.pink .pub-tm-av { background: #ffe0ec; color: #bd2856 }
+.pub-tm-ic { flex: none; width: 36px; height: 36px; margin-right: -.35rem; padding: 0; border: none; border-radius: 50%; background: none; cursor: pointer; color: #54595d; display: inline-flex; align-items: center; justify-content: center; transition: background .15s }
+.pub-tm-ic:active:not(:disabled) { background: rgba(127,127,127,.18) }
+.pub-tm-ic svg { display: block }
+body.night .pub-tm-ic { color: #9a9a9a }
+body.pink .pub-tm-ic { color: #875068 }
 body.night .pub-tm-row { background: #1c1c1c; border-color: #383838; color: #f0f0f0 }
 body.night .pub-tm-sub { color: #9a9a9a }
-body.night .pub-tm-chip { background: #2a2a2a; color: #e0e0e0 }
-body.night .pub-tm-chip.pending { background: #222222; color: #9a9a9a }
+body.night .pub-tm-chip { color: #e0e0e0 }
+body.night .pub-tm-chip.pending { color: #9a9a9a }
 body.pink .pub-tm-row { background: #fff2f7; border-color: #e8a0bc; color: #1a0a12 }
 body.pink .pub-tm-sub { color: #875068 }
-body.pink .pub-tm-chip { background: #ffe0ec; color: #bd2856 }
-body.pink .pub-tm-chip.pending { background: #f7e9ee; color: #875068 }
+body.pink .pub-tm-chip { color: #bd2856 }
+body.pink .pub-tm-chip.pending { color: #875068 }
 #pub-footer-new,
 #pub-footer-live,
 #pub-footer-ad-new,
@@ -4600,7 +4651,7 @@ body.pink #markup-iframe-loadmask-bar-fill {
 
 /* Simplified single-panel backup sheet (Notes export/import only) */
 #backup-hdr-title::after { content: ""; }
-.bkp-help { font-size: .78rem; color: #ffffff; line-height: 1.5; margin: 0 0 .9rem; }
+.bkp-help { font-size: .88rem; color: #ffffff; line-height: 1.45; margin: 0 0 .9rem; }
 body.night .bkp-help { color: #787878; }
 body.pink .bkp-help { color: #875068; }
 /* .step-chk/.chk-svg — real classes from the original app (used for
@@ -6194,8 +6245,20 @@ body.night #publish-sheet .pub-url {background:rgba(0,0,0,.3);border-color:rgba(
 body.pink #publish-sheet .pub-url {background:rgba(255,242,247,.55);border-color:rgba(200,54,94,.18)}
 /* Teams view, glass: rows, chips and the taller sheet follow the same tokens as the rest of the sheet. */
 #publish-sheet.is-teams {height:min(calc(580px + env(safe-area-inset-bottom,0px)),88vh)}
-#pub-tm-head {padding:1.1rem 1.2rem 0}
-#pub-teams-body {padding-top:.7rem;padding-bottom:.7rem}
+#pub-tm-head {padding:.2rem 1.2rem 0}
+#account-close svg, #edit-close svg, #backup-close svg, #publish-close svg, #publish-back svg, #publish-teams svg {display:block}
+#publish-back {margin-left:-.4rem} /* 1.2rem header padding - .4rem = .8rem, the same inset as the close button */
+/* Scroll behaviour: the title bar and the Version history / Leave team buttons stay put. Everything between them scrolls: first the help text, invite box and status slide away, then the "Editors" (or "Earlier versions") header sticks at the top while the list moves under it. */
+#pub-teams-body {padding-top:0;padding-bottom:.7rem}
+#pub-teams-body .bkp-help {margin-top:.2rem} /* the body has no top padding so the sticky header sits flush with the title bar */
+#pub-tm-head, #pub-tm-owner {display:contents}
+#pub-tm-sec {position:sticky;top:0;z-index:2;margin:0 -1.2rem;padding:.4rem 1.2rem .45rem;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+#publish-sheet #pub-tm-sec {background:color-mix(in srgb,var(--sh-bg) 18%,transparent);border-bottom-color:var(--sh-div)}
+#pub-tm-load:empty, #pub-tm-status:empty {display:none}
+/* Status/error lines (red 'taken' toast) have min-height, so as flex items of the scrolling body they could shrink to one line and let a second line spill under the sticky Editors header. Never shrink; always grow to fit the text. */
+#pub-teams-body > *, #pub-tm-head > *, #pub-tm-owner > * {flex-shrink:0}
+#pub-tm-status, #pub-tm-load {flex:none;height:auto;min-height:0;overflow:visible;overflow-wrap:anywhere}
+#pub-tm-sec::after {content:"";position:absolute;left:0;right:0;top:100%;height:10px;pointer-events:none;background:linear-gradient(to bottom,var(--sh-div),transparent)} /* soft edge, so rows sliding under the stuck header fade out instead of butting against the divider */
 #pub-teams-body .bkp-help,
 #pub-tm-head .bkp-help {color:var(--sh-sub)}
 #pub-tm-sec {border-bottom-color:var(--sh-div)}
@@ -6207,8 +6270,11 @@ body.pink #publish-sheet .pub-url {background:rgba(255,242,247,.55);border-color
 body.night #publish-sheet .pub-tm-row {background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.07)}
 body.pink #publish-sheet .pub-tm-row {background:rgba(255,242,247,.55);border-color:rgba(200,54,94,.18)}
 #publish-sheet .pub-tm-sub {color:var(--sh-sub)}
-#publish-sheet .pub-tm-chip {background:var(--sh-secbg);color:var(--sh-secf);border:1px solid var(--sh-secb)}
+#publish-sheet .pub-tm-rf {border-top-color:var(--sh-div)}
+#publish-sheet .pub-tm-chip {background:none;color:var(--sh-secf);border:none}
 #publish-sheet .pub-tm-chip.pending {color:var(--sh-sub)}
+#publish-sheet .pub-tm-ic {color:var(--sh-sub)}
+#publish-sheet .pub-tm-av {background:var(--sh-secbg);color:var(--sh-secf);box-shadow:inset 0 0 0 1px var(--sh-secb)}
 #publish-sheet .pub-tm-add .ebtn-pri {height:auto;border-radius:12px;padding:0 1.1rem;font-size:.9rem;font-weight:700}
 #edit-dfooter,
 #pub-footer-new,
@@ -6674,7 +6740,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button class="acct-sync-btn" id="account-sync-btn" onclick="nbSyncNow()" aria-label="Sync now" title="Sync now">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/><polyline points="23 4 23 10 17 10"/></svg>
       </button>
-      <button id="account-close" onclick="closeLogoutConfirm()" aria-label="Close">✕</button>
+      <button id="account-close" onclick="closeLogoutConfirm()" aria-label="Close"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
     </div>
     <div id="account-body">
       <div id="logout-avatar-row">
@@ -6726,6 +6792,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
     <span id="story-viewer-title"><span class="hdr-title-inner" id="story-viewer-title-text"></span></span>
     <button id="story-viewer-like-btn" onclick="nbToggleStoryLike()" aria-label="Like"></button>
     <button id="story-viewer-sub-btn" onclick="nbToggleStorySubscribe()" aria-label="Subscribe"></button>
+    <button id="story-viewer-restore-btn" type="button" onclick="_pubTeamsPrevRestore(this)" aria-label="Restore this version" title="Restore this version"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
   </div>
   <iframe id="story-viewer-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
   <div id="story-viewer-loading" aria-hidden="true"></div>
@@ -6788,7 +6855,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>Payments are never part of the published page itself. If the payments block is taken off the page, the page is unpublished or taken down, or its author's account is deleted, the block stops working and we keep its settings for about 30 days (our clean-up runs nightly), then delete them. We keep the small payment records (the amount, currency, time and reference numbers) after that, because they're the author's payment history and they don't hold your name, email address or card details. The block's title and words are part of the page, so "Using published pages and comments" above covers them. Payment records aren't part of that.</p>
       <h3>Sharing a note with editors (Teams)</h3>
       <p>An author can let other people edit a page they've published. They invite someone by that person's invite code, and the person gets an alert that says who invited them and lets them accept or decline. If they accept, the app copies the published page onto their device as a note they can edit, and saving it updates the published page for everyone on the team. We save the page's address, the author's account, the invited account, whether the invitation is pending or accepted, when it was sent, accepted and last used to edit, and a scrambled (hashed) copy of the editor's own edit key. Invitations expire after 7 days, and a page can have up to 5 editors, counting people who've been invited but haven't answered yet. An invitation nobody answers is deleted 30 days after it expires, unless the author cancels it first.</p>
-      <p>Each time an editor or the author saves a page that has a team, we keep the version it replaces, up to the last 10, so the author can go back to one. Editors can't change a page's payments, remove its polls or forms, or change a poll's options. The author can remove an editor at any time, and an editor can leave. Unpublishing the page, or deleting the author's account, ends the team and deletes the saved versions. If the last editor leaves or is removed, the saved versions stay so the author can still go back to one, until the page is unpublished. Deleting an editor's account removes them from every team. If you decline an invitation, the author isn't told. If you also choose to block the person, we save that choice so they can't invite you again, and any other invitations from them that you haven't answered are withdrawn. The "Invitations to edit" setting lets you stop all invitations (we save that choice too). In Settings, under Privacy, you can see the people you've blocked. Each one shows their display name and picture if they have them, and the date you blocked them. If they have no name, you'll see "Someone". You can unblock people one at a time. Switching it from Nobody back to Everyone lets you clear the whole list at once. Team alerts, such as an invitation, or someone joining, leaving or editing, are kept like your other alerts. Invitations and these alerts show people's display names, or "Someone" if they have none or comment as Anonymous. Invitations and team lists also show each person's author ID. Our admins can see who is on a page's team and can remove an editor, or cancel an invitation, if the rules require it. If the author or an admin removes you as an editor, you get an alert (an admin's alert gives the reason). If an invitation is cancelled or declined, its alert is deleted. Admins see your display name even if you comment as Anonymous. The author's PIN or password for App Lock, which is asked for when adding or removing editors or restoring an earlier version, stays on their device and never reaches us.</p>
+      <p>Each time an editor or the author saves a page that has a team, we keep the version it replaces, up to the last 10, so the author can go back to one. We also write down which account made each save, and when, so the author can see who saved what. If someone comments as Anonymous, we don't show their name. Editors can't change a page's payments, remove its polls or forms, or change a poll's options. The author can remove an editor at any time, and an editor can leave. Unpublishing the page, or deleting the author's account, ends the team and deletes the saved versions. If the last editor leaves or is removed, the saved versions stay so the author can still go back to one, until the page is unpublished. Deleting an editor's account removes them from every team, and their name comes off the versions they saved too. If you decline an invitation, the author isn't told. If you also choose to block the person, we save that choice so they can't invite you again, and any other invitations from them that you haven't answered are withdrawn. The "Invitations to edit" setting lets you stop all invitations (we save that choice too). In Settings, under Privacy, you can see the people you've blocked. Each one shows their display name and picture if they have them, and the date you blocked them. If they have no name, you'll see "Someone". You can unblock people one at a time. Switching it from Nobody back to Everyone lets you clear the whole list at once. Team alerts, such as an invitation, or someone joining, leaving or editing, are kept like your other alerts. Invitations and these alerts show people's display names, or "Someone" if they have none or comment as Anonymous. Invitations and team lists also show each person's author ID. Our admins can see who is on a page's team and can remove an editor, or cancel an invitation, if the rules require it. If the author or an admin removes you as an editor, you get an alert (an admin's alert gives the reason). If an invitation is cancelled or declined, its alert is deleted. Admins see your display name even if you comment as Anonymous. The author's PIN or password for App Lock, which is asked for when adding or removing editors or restoring an earlier version, stays on their device and never reaches us.</p>
       <h3>Publishing as an ad</h3>
       <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a full-screen ad before a note they open, whether it's from the stories strip, Subscribed, Liked, Media or Go to note. It isn't just for people who have the page's link, like a regular published page. Everyone sees ads, including people who've bought Pro, but never before their own notes. So that ads don't come too often, the app keeps a small count of the notes you've opened and the time of your last ad. It stays on your device and we never see it. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save a device ID, a random number that each device makes, keeps, and sends whenever it asks for an ad or a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. We also use it to see how long we've known a device, and to make sure one device isn't shown too many ads in an hour. We keep a small count for that, and our nightly clean-up wipes it. Each ad we show comes with a random one-time code. A view only counts if the app sends that code back, which stops scripts from faking views. The code isn't linked to you or your device. We delete it when it's used, or after about six hours if it never is. When the app asks for an ad, we also briefly count requests from your IP address to stop spam, the same way we do when you publish. See "Analytics" below too. When you unpublish an ad, it stops being shown right away, though someone whose phone already loaded it might still see it once. Any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device. Polls can't be used in ads either, because ads can't collect votes.</p>
       <h3>Making sure ad views are real (Android)</h3>
@@ -7059,7 +7126,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
   <div id="edit-dialog">
     <div id="edit-dhdr">
       <span id="edit-dhdr-title">Save note</span>
-      <button id="edit-close" onclick="nbCloseSaveDialog()" aria-label="Close">✕</button>
+      <button id="edit-close" onclick="nbCloseSaveDialog()" aria-label="Close"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
     </div>
     <div id="nb-save-lock-note" style="display:none;padding:.4rem .9rem 0;font-size:.74rem;opacity:.75">The author sets this note’s title, description, category and tags.</div>
     <div class="markup-meta-fields show" id="nb-save-meta">
@@ -7083,7 +7150,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
   <div id="backup-sheet">
     <div id="backup-hdr">
       <span id="backup-hdr-title">Backup &amp; Restore</span>
-      <button id="backup-close" onclick="closeBackupSheet()" aria-label="Close">✕</button>
+      <button id="backup-close" onclick="closeBackupSheet()" aria-label="Close"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
     </div>
     <div id="backup-body">
       <div class="bkp-panel">
@@ -7101,10 +7168,10 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 <div id="publish-overlay" onclick="if(event.target===this)_pubUserClose()">
   <div id="publish-sheet">
     <div id="publish-hdr">
-      <button id="publish-back" type="button" onclick="_pubTeamsBack()" aria-label="Back" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button id="publish-back" type="button" onclick="_pubTeamsBack()" aria-label="Back" hidden><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15.5 5 8.5 12 15.5 19"/></svg></button>
       <span id="publish-hdr-title">Online Publishing</span>
-      <button id="publish-teams" type="button" onclick="_pubTeamsOpen()" aria-label="Teams" hidden><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
-      <button id="publish-close" onclick="_pubUserClose()" aria-label="Close">✕</button>
+      <button id="publish-teams" type="button" onclick="_pubTeamsOpen()" aria-label="Teams" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
+      <button id="publish-close" onclick="_pubUserClose()" aria-label="Close"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
     </div>
     <div id="pub-tabs" style="display:flex;gap:.4rem;padding:.6rem .9rem 0">
       <button id="pub-tab-web" class="pub-tab-btn is-active" onclick="_pubShowTab('web')" style="flex:1;padding:.5rem 0;border-width:0 0 2px 0;border-style:solid;background:none;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish to Web</button>
@@ -7183,28 +7250,29 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       </div>
     </div>
     <div id="pub-teams">
-      <div id="pub-tm-head">
-        <div id="pub-tm-load" class="pub-status"></div>
-        <div id="pub-tm-owner" style="display:none">
-          <p class="bkp-help">Ask a friend for their invite code and add it below. They get an alert and can say yes or no. You can remove them any time.</p>
-          <div class="pub-tm-add">
-            <input id="pub-tm-code" class="com-field" placeholder="Their invite code" maxlength="24" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();_pubTeamsInvite()}">
-            <button id="pub-tm-invite" type="button" class="ebtn-pri" onclick="_pubTeamsInvite()">Invite</button>
-          </div>
-          <div id="pub-tm-status" class="pub-status"></div>
-          <div id="pub-tm-sec"><span id="pub-tm-sec-title">Editors</span><span id="pub-tm-count"></span></div>
-        </div>
-        <div id="pub-tm-editor" style="display:none">
-          <p id="pub-tm-editor-txt" class="bkp-help"></p>
-        </div>
-      </div>
       <div id="pub-teams-body">
+        <div id="pub-tm-head">
+          <div id="pub-tm-load" class="pub-status"></div>
+          <div id="pub-tm-owner" style="display:none">
+            <p class="bkp-help">Ask a friend for their invite code and add it below. They get an alert and can say yes or no. You can remove them any time.</p>
+            <div class="pub-tm-add">
+              <input id="pub-tm-code" class="com-field" placeholder="Their invite code" maxlength="24" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();_pubTeamsInvite()}">
+              <button id="pub-tm-invite" type="button" class="ebtn-pri" onclick="_pubTeamsInvite()">Invite</button>
+            </div>
+            <div id="pub-tm-status" class="pub-status"></div>
+            <div id="pub-tm-sec"><span id="pub-tm-sec-title">Editors</span><span id="pub-tm-count"></span></div>
+          </div>
+          <div id="pub-tm-editor" style="display:none">
+            <p id="pub-tm-editor-txt" class="bkp-help"></p>
+          </div>
+        </div>
         <div id="pub-tm-list" class="pub-tm-list"></div>
         <div id="pub-tm-hist-list" class="pub-tm-list" style="display:none"></div>
       </div>
       <div id="pub-tm-foot">
         <button id="pub-tm-hist" type="button" class="ebtn-sec" onclick="_pubTeamsHistory()">Version history</button>
         <button id="pub-tm-leave" type="button" class="ebtn-sec" onclick="_pubTeamsLeave()">Leave team</button>
+
       </div>
     </div>
     <div id="pub-footer-new">
@@ -31937,7 +32005,10 @@ function _pubTeamsOpen() {
   document.getElementById('publish-hdr-title').textContent = 'Teams';
   _pubTeamsLoad();
 }
-function _pubTeamsBack() { if (_nbBusyBtnCount > 0) return; _pubTeamsExit(); }
+function _pubTeamsBack() {
+  if (_nbBusyBtnCount > 0) return;
+  _pubTeamsExit();
+}
 function _pubTeamsExit() {
   if (!_pubTeamsOn) return;
   _pubTeamsOn = false; _pubTeamsSeq++;
@@ -31989,15 +32060,17 @@ function _pubTeamsRender(note, d) {
   document.getElementById('pub-tm-count').textContent = used + ' of ' + d.max + ' editors';
   _nbTeamsOwnedSet(note.publishedSlug, used > 0); // keeps the Library's Teams category in step
   ms.forEach(m => {
-    const row = _pubTeamsEl('div', 'pub-tm-row'), who = _pubTeamsEl('div', 'pub-tm-who');
+    const row = _pubTeamsEl('div', 'pub-tm-row pub-tm-card'), main = _pubTeamsEl('div', 'pub-tm-main'), who = _pubTeamsEl('div', 'pub-tm-who'), rf = _pubTeamsEl('div', 'pub-tm-rf');
+    main.appendChild(_pubTeamsAvatar(m));
     who.appendChild(_pubTeamsEl('div', 'pub-tm-name', m.name || 'Invited person'));
     who.appendChild(_pubTeamsEl('div', 'pub-tm-sub', m.status === 'active' ? 'Joined ' + _pubTeamsDate(m.joinedAt) + (m.lastEditAt ? ' \u00b7 edited ' + _pubTeamsDate(m.lastEditAt) : '') : m.status === 'expired' ? 'Invitation expired' : 'Invited ' + _pubTeamsDate(m.invitedAt)));
-    row.appendChild(who);
-    row.appendChild(_pubTeamsEl('span', 'pub-tm-chip' + (m.status === 'active' ? '' : ' pending'), m.status === 'active' ? 'Active' : m.status === 'expired' ? 'Expired' : 'Pending'));
-    const x = _pubTeamsEl('button', 'ebtn-sec pub-tm-x', m.status === 'active' ? 'Revoke' : 'Cancel');
-    x.type = 'button';
+    main.appendChild(who);
+    row.appendChild(main);
+    rf.appendChild(_pubTeamsEl('span', 'pub-tm-chip' + (m.status === 'active' ? '' : ' pending'), m.status === 'active' ? 'Active' : m.status === 'expired' ? 'Expired' : 'Pending'));
+    const x = _pubTeamsIconBtn(m.status === 'active' ? 'minus' : 'x', m.status === 'active' ? 'Remove editor' : 'Cancel invitation');
     x.onclick = () => _pubTeamsRevoke(m, x);
-    row.appendChild(x);
+    rf.appendChild(x);
+    row.appendChild(rf);
     list.appendChild(row);
   });
   if (!ms.length) list.appendChild(_pubTeamsEl('div', 'pub-status', 'No editors yet. Add a friend\u2019s invite code above to get started.'));
@@ -32040,6 +32113,39 @@ async function _pubTeamsInvite() {
     _nbLog('team invite', e); { const m = 'Couldn\u2019t send the invitation' + _nbFailureReason(e); st.textContent = m; showToast(m); }
   } finally { _pubSetBtnLoading(btn, false); }
 }
+// A round picture for each person: their profile picture (the same /account/profile-image/<author id> the stories use), or the first letter of their name until it loads or if they have none.
+function _pubTeamsAvatar(m) {
+  const av = _pubTeamsEl('span', 'pub-tm-av');
+  const nm = String((m && m.name) || '').trim();
+  av.textContent = (Array.from(nm)[0] || '?').toUpperCase();
+  const sub = m && (m.authorId || m.authorSub || m.sub);
+  if (sub) {
+    const img = new Image();
+    img.alt = ''; img.className = 'pub-tm-av-img'; img.decoding = 'async';
+    img.onload = () => { av.textContent = ''; av.appendChild(img); };
+    img.src = NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(sub) + '?v=' + (typeof _nbProfileImageVersion !== 'undefined' ? _nbProfileImageVersion : 0);
+  }
+  return av;
+}
+// Round icon buttons for the rows (remove editor, cancel invitation, restore a version). Same stroke weight as the header icons.
+const _PUB_TM_ICONS = {
+  minus: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  undo: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>'
+};
+function _pubTeamsIconBtn(kind, label) {
+  const b = _pubTeamsEl('button', 'pub-tm-ic'); b.type = 'button';
+  b.setAttribute('aria-label', label); b.title = label;
+  b.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + _PUB_TM_ICONS[kind] + '</svg>';
+  return b;
+}
+// _pubSetBtnLoading swaps in text, which would lose the icon, so the icon buttons show just the spinner. Counts as busy like the other buttons (the back button waits for it).
+function _pubTeamsIconBusy(btn, on) {
+  if (!btn) return;
+  if (on) { btn._icHtml = btn.innerHTML; btn.innerHTML = '<span class="com-spinner"></span>'; btn.disabled = true; _nbBusyBtnCount++; }
+  else if (btn._icHtml != null) { btn.innerHTML = btn._icHtml; btn._icHtml = null; btn.disabled = false; _nbBusyBtnCount = Math.max(0, _nbBusyBtnCount - 1); }
+}
 async function _pubTeamsRevoke(m, btn) {
   const note = _pubFindNote(_pubNoteId);
   if (!note || _pubOfflineGuard()) return;
@@ -32047,7 +32153,7 @@ async function _pubTeamsRevoke(m, btn) {
   const ok = await _nbAskConfirm(active ? 'Remove this editor?' : 'Cancel this invitation?', active ? (m.name || 'This person') + ' will no longer be able to edit this note. Their copy stays on their device, but it stops updating the page.' : 'They won\u2019t be able to accept it anymore.', active ? 'Remove' : 'Cancel invitation', 'Keep');
   if (!ok) return;
   if (!(await _pubTeamsGate())) return;
-  _pubSetBtnLoading(btn, true, 'Removing\u2026');
+  _pubTeamsIconBusy(btn, true);
   try {
     const res = await _pubTeamsReq('/teams/note/' + encodeURIComponent(note.publishedSlug) + '/members/' + encodeURIComponent(m.id), 'DELETE');
     if (!res.ok) throw new Error(await _pubTeamsErr(res, 'failed'));
@@ -32055,7 +32161,7 @@ async function _pubTeamsRevoke(m, btn) {
     _pubTeamsLoad();
   } catch (e) {
     _nbLog('team revoke', e); showToast('Couldn\u2019t remove them' + _nbFailureReason(e));
-  } finally { _pubSetBtnLoading(btn, false); }
+  } finally { _pubTeamsIconBusy(btn, false); }
 }
 async function _pubTeamsLeave() {
   const note = _pubFindNote(_pubNoteId);
@@ -32077,12 +32183,54 @@ function _pubTeamsHistView(open) {
   const box = document.getElementById('pub-tm-hist-list'), list = document.getElementById('pub-tm-list'), btn = document.getElementById('pub-tm-hist');
   const t = document.getElementById('pub-tm-sec-title'), c = document.getElementById('pub-tm-count'), body = document.getElementById('pub-teams-body');
   if (!box || !list) return;
+  const sh = document.getElementById('publish-sheet'); if (sh) sh.classList.toggle('is-hist', !!open); // hides the invite box while the version list is showing
   box.dataset.open = open ? '1' : ''; box.style.display = open ? '' : 'none'; list.style.display = open ? 'none' : '';
   if (btn) btn.textContent = open ? 'Back to editors' : 'Version history';
   if (t) t.textContent = open ? 'Earlier versions' : 'Editors';
   if (c) c.style.display = open ? 'none' : '';
   if (body) body.scrollTop = 0;
 }
+// Look at an earlier version before restoring it: the page opens full screen in the story viewer, with Restore in its header.
+// The frame has no same-origin right and the page gets a policy that blocks every network call, so an old page's scripts can run (carousels, tabs) but can't reach the app or send anything out.
+let _pubTeamsPrevV = null;
+const _PUB_TM_PREV_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src * data: blob:; font-src data:; media-src data: blob:; frame-src https://www.youtube.com https://www.instagram.com https://open.spotify.com https://platform.twitter.com https://streamable.com; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
+const _NB_SV_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox';
+function _pubTeamsVerWhen(v) { try { return new Date(v.savedAt || v.ts).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } }
+async function _pubTeamsPreview(v, btn) {
+  const note = _pubFindNote(_pubNoteId);
+  if (!note || _pubOfflineGuard()) return;
+  _pubTeamsIconBusy(btn, true);
+  try {
+    const res = await _pubTeamsReq('/teams/note/' + encodeURIComponent(note.publishedSlug) + '/history/' + encodeURIComponent(v.ts));
+    if (!res.ok) throw new Error(await _pubTeamsErr(res, 'failed'));
+    const d = await res.json();
+    _nbOpenVersionView(v, (d && d.html) || '');
+  } catch (e) {
+    _nbLog('team preview', e); showToast('Couldn\u2019t load that version' + _nbFailureReason(e));
+  } finally { _pubTeamsIconBusy(btn, false); }
+}
+function _nbOpenVersionView(v, html) {
+  const ov = document.getElementById('story-viewer-overlay'), fr = document.getElementById('story-viewer-frame'), hdr = document.getElementById('story-viewer-header');
+  const titleEl = document.getElementById('story-viewer-title'), inner = document.getElementById('story-viewer-title-text');
+  _nbStoryAdReset(); _nbStoryRetryStop();
+  _nbStoryCommentsOpen = false; _nbStoryBackStack = []; _nbCurrentStorySlug = null; _nbCurrentStoryAuthorSub = null; // no slug: the comments / like / follow hooks all stay idle
+  _pubTeamsPrevV = v;
+  inner.textContent = _pubTeamsVerWhen(v); nbUpdateTitleMarquee(titleEl, inner, true);
+  hdr.classList.remove('has-actions', 'like-only');
+  fr.setAttribute('sandbox', 'allow-scripts');
+  fr.srcdoc = '<!doctype html><meta http-equiv="Content-Security-Policy" content="' + _PUB_TM_PREV_CSP + '">' + html;
+  ov.classList.remove('over-media'); ov.classList.add('sv-version', 'open');
+  document.body.classList.add('sv-version-on');
+  lockScroll();
+}
+function _nbVersionViewEnd() {
+  const ov = document.getElementById('story-viewer-overlay'), fr = document.getElementById('story-viewer-frame');
+  if (!ov || !ov.classList.contains('sv-version')) return;
+  ov.classList.remove('sv-version'); document.body.classList.remove('sv-version-on');
+  fr.removeAttribute('srcdoc'); fr.setAttribute('sandbox', _NB_SV_SANDBOX);
+  _pubTeamsPrevV = null;
+}
+function _pubTeamsPrevRestore(btn) { if (_pubTeamsPrevV) _pubTeamsRestore(_pubTeamsPrevV, btn); }
 // Version history (author only): each save on a shared note keeps the page as it was.
 async function _pubTeamsHistory() {
   const note = _pubFindNote(_pubNoteId), box = document.getElementById('pub-tm-hist-list');
@@ -32097,13 +32245,19 @@ async function _pubTeamsHistory() {
     box.textContent = '';
     if (!vs.length) { box.appendChild(_pubTeamsEl('div', 'pub-status', 'No earlier versions yet. One is kept each time someone saves.')); return; }
     vs.forEach(v => {
-      const row = _pubTeamsEl('div', 'pub-tm-row'), who = _pubTeamsEl('div', 'pub-tm-who');
-      let when = ''; try { when = new Date(v.ts).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }); } catch (e) {}
-      who.appendChild(_pubTeamsEl('div', 'pub-tm-name', when));
-      row.appendChild(who);
-      const b = _pubTeamsEl('button', 'ebtn-sec pub-tm-x', 'Restore'); b.type = 'button';
+      const row = _pubTeamsEl('div', 'pub-tm-row pub-tm-card'), main = _pubTeamsEl('div', 'pub-tm-main'), who = _pubTeamsEl('div', 'pub-tm-who'), rf = _pubTeamsEl('div', 'pub-tm-rf end');
+      main.appendChild(_pubTeamsAvatar({ name: v.name || 'Editor', authorId: v.authorId }));
+      who.appendChild(_pubTeamsEl('div', 'pub-tm-name', v.name || 'Editor'));
+      who.appendChild(_pubTeamsEl('div', 'pub-tm-sub', _pubTeamsVerWhen(v)));
+      main.appendChild(who);
+      row.appendChild(main);
+      const pv = _pubTeamsIconBtn('eye', 'Preview this version');
+      pv.onclick = () => _pubTeamsPreview(v, pv);
+      rf.appendChild(pv);
+      const b = _pubTeamsIconBtn('undo', 'Restore this version');
       b.onclick = () => _pubTeamsRestore(v, b);
-      row.appendChild(b);
+      rf.appendChild(b);
+      row.appendChild(rf);
       box.appendChild(row);
     });
   } catch (e) {
@@ -32116,17 +32270,19 @@ async function _pubTeamsRestore(v, btn) {
   const ok = await _nbAskConfirm('Restore this version?', 'The published page goes back to how it was on that date, and this note here is replaced with it. The current page is kept in the history.', 'Restore', 'Cancel');
   if (!ok) return;
   if (!(await _pubTeamsGate())) return;
-  _pubSetBtnLoading(btn, true, 'Restoring\u2026');
+  const icon = btn.classList.contains('pub-tm-ic') || btn.id === 'story-viewer-restore-btn', busy = on => icon ? _pubTeamsIconBusy(btn, on) : _pubSetBtnLoading(btn, on);
+  busy(true);
   try {
     const res = await _pubTeamsReq('/teams/note/' + encodeURIComponent(note.publishedSlug) + '/history/' + encodeURIComponent(v.ts) + '/restore', 'POST');
     if (!res.ok) throw new Error(await _pubTeamsErr(res, 'failed'));
     const d = await res.json();
     await _nbTeamsPullPublished(note, d && d.updatedAt);
     showToast('Version restored');
+    if (_pubTeamsPrevV) nbCloseStory(); // restored from the preview: back to the list
     _pubTeamsHistView(false);
   } catch (e) {
     _nbLog('team restore', e); showToast('Couldn\u2019t restore that version' + _nbFailureReason(e));
-  } finally { _pubSetBtnLoading(btn, false); }
+  } finally { busy(false); }
 }
 // The published page becomes this note's content (Take theirs, a restored version).
 async function _nbTeamsPullPublished(note, version) {
@@ -33554,6 +33710,7 @@ function nbStoryBack() {
   nbCloseStory();
 }
 function nbCloseStory() {
+  _nbVersionViewEnd();
   _nbStoryBackStack = [];
   _nbStoryAdReset();
   const _ov = document.getElementById('story-viewer-overlay');
