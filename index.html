@@ -31930,6 +31930,15 @@ function _nbAskConfirmNow(title, body, okLabel, cancelLabel, neverLabel, lockBac
  * their own edit token. Saves send publishedVersion (the server's updatedAt this device last saw) so two people's edits can't silently
  * overwrite each other: on a 409 the person picks Keep mine / Take theirs. Editors save content only; unpublish becomes Leave. */
 let _pubTeamsOn = false, _pubTeamsSeq = 0, _nbTeamsRetry = false, _nbTeamsMineBusy = false;
+// A request that never got an answer (offline, dropped, timed out) must read as a plain sentence, never the browser's "Failed to fetch".
+// The load flags below arm the reconnect jobs at the bottom of the file, which re-run the load on 'online' and then on a 3s-to-30s backoff.
+let _pubTeamsLoadFailed = false, _pubTeamsHistFailed = false, _nbTeamsMineFailed = false;
+function _pubTeamsNetFail(e) { return _nbIsNetworkFailure(e) || /failed to fetch|networkerror|load failed|network request failed/i.test((e && e.message) || ''); }
+function _pubTeamsMsg(e, fallback) {
+  if (_pubTeamsNetFail(e)) return 'No connection. Trying again when you\u2019re back online.';
+  const m = e && e.message;
+  return (typeof m === 'string' && m && m.length < 200 && !/^\w*Error\b/.test(m)) ? m : fallback;
+}
 // The Teams category in the Library. Like Favorites it is worked out from the notes themselves, so nothing is created or deleted by hand:
 // it shows while at least one note uses Teams (you edit it for someone, or someone edits yours) and goes away with the last one.
 // Your own notes with editors are remembered by their page address (kept per account, refreshed from the server by _nbTeamsSyncOwned).
@@ -32029,7 +32038,8 @@ async function _pubTeamsLoad() {
   document.getElementById('pub-tm-foot').style.display = 'none';
   _pubTeamsHistView(false);
   ld.className = 'pub-status'; ld.textContent = 'Loading\u2026';
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) { ld.textContent = 'You\u2019re offline. Teams needs a connection.'; showToast('You\u2019re offline. Teams needs a connection.'); return; }
+  _pubTeamsLoadFailed = false;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) { _pubTeamsLoadFailed = true; ld.textContent = 'You\u2019re offline. Teams will load when you\u2019re back online.'; showToast('You\u2019re offline. Teams needs a connection.'); return; }
   try {
     const res = await _pubTeamsReq('/teams/note/' + encodeURIComponent(note.publishedSlug));
     if (seq !== _pubTeamsSeq) return;
@@ -32040,7 +32050,8 @@ async function _pubTeamsLoad() {
     _pubTeamsRender(note, d);
   } catch (e) {
     if (seq !== _pubTeamsSeq) return;
-    ld.className = 'pub-status taken'; ld.textContent = (e && e.message) || 'Couldn\u2019t load the team.';
+    _pubTeamsLoadFailed = _pubTeamsNetFail(e);
+    ld.className = _pubTeamsLoadFailed ? 'pub-status' : 'pub-status taken'; ld.textContent = _pubTeamsMsg(e, 'Couldn\u2019t load the team.');
   }
 }
 function _pubTeamsDate(ts) { try { return new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }
@@ -32239,7 +32250,7 @@ async function _pubTeamsHistory() {
   const note = _pubFindNote(_pubNoteId), box = document.getElementById('pub-tm-hist-list');
   if (!note) return;
   if (box.dataset.open === '1') { _pubTeamsHistView(false); return; }
-  box.textContent = ''; _pubTeamsHistView(true);
+  box.textContent = ''; _pubTeamsHistView(true); _pubTeamsHistFailed = false;
   box.appendChild(_pubTeamsEl('div', 'pub-status', 'Loading\u2026'));
   try {
     const res = await _pubTeamsReq('/teams/note/' + encodeURIComponent(note.publishedSlug) + '/history');
@@ -32264,7 +32275,8 @@ async function _pubTeamsHistory() {
       box.appendChild(row);
     });
   } catch (e) {
-    box.textContent = ''; box.appendChild(_pubTeamsEl('div', 'pub-status taken', (e && e.message) || 'Couldn\u2019t load the history.'));
+    _pubTeamsHistFailed = _pubTeamsNetFail(e);
+    box.textContent = ''; box.appendChild(_pubTeamsEl('div', _pubTeamsHistFailed ? 'pub-status' : 'pub-status taken', _pubTeamsMsg(e, 'Couldn\u2019t load the history.')));
   }
 }
 async function _pubTeamsRestore(v, btn) {
@@ -32348,7 +32360,7 @@ async function _nbTeamsAddNote(info) {
 // Notes this account edits for someone else but has no copy of here (accepted on another device, or the copy step failed).
 async function _nbTeamsSyncMine() {
   if (_nbTeamsMineBusy || !nbIsSignedIn()) return;
-  _nbTeamsMineBusy = true;
+  _nbTeamsMineBusy = true; _nbTeamsMineFailed = false;
   try {
     const res = await _pubTeamsReq('/teams/mine');
     if (!res.ok) { if (res.status !== 401) showToast('Couldn\u2019t check for notes shared with you. Try again later.'); return; }
@@ -32363,7 +32375,10 @@ async function _nbTeamsSyncMine() {
       showToast('Added \u201c' + (d.title || t.title || 'Untitled note') + '\u201d to your notes');
     }
     if (_fail) showToast('Couldn\u2019t add ' + _fail + ' shared note' + (_fail > 1 ? 's' : '') + ' to this device. Try again later.');
-  } catch (e) { _nbLog('team sync mine', e); showToast('Couldn\u2019t load your shared notes' + _nbFailureReason(e)); }
+  } catch (e) {
+    _nbLog('team sync mine', e); _nbTeamsMineFailed = _pubTeamsNetFail(e);
+    if (!window._nbInReconnect) showToast(_nbTeamsMineFailed ? 'No connection. Your shared notes will load when you\u2019re back online.' : 'Couldn\u2019t load your shared notes' + _nbFailureReason(e)); // quiet during automatic retries
+  }
   finally { _nbTeamsMineBusy = false; }
 }
 // Tapping a team invitation alert: accept or decline.
@@ -32410,13 +32425,13 @@ async function _nbTeamsOpenInviteInner(inviteId) {
   } catch (e) { _nbLog('team invite answer', e); showToast('Something went wrong' + _nbFailureReason(e)); }
 }
 // Settings > Privacy: who can invite this account to edit.
-let _nbTeamInvAllow = null, _nbTeamInvLoading = false, _nbTeamInvBlocked = 0, _nbTeamInvWarned = false;
+let _nbTeamInvAllow = null, _nbTeamInvLoading = false, _nbTeamInvBlocked = 0, _nbTeamInvWarned = false, _nbTeamInvFailed = false;
 function _nbTeamInvWarn() { if (_nbTeamInvWarned) return; _nbTeamInvWarned = true; showToast('Couldn\u2019t load your invitation setting, so it may not show your real choice.'); }
 function _nbTeamInvGet() {
   if (_nbTeamInvAllow === null) {
     if (!_nbTeamInvLoading && nbIsSignedIn()) {
       _nbTeamInvLoading = true;
-      _pubTeamsReq('/teams/prefs').then(r => r.ok ? r.json() : null).then(d => { if (!d) _nbTeamInvWarn(); if (d && typeof d.allow === 'boolean') { _nbTeamInvAllow = d.allow; _nbTeamInvBlocked = d.blocked || 0; try { window._nbStRefresh && window._nbStRefresh(); } catch (e) {} } }).catch(() => { _nbTeamInvWarn(); }).finally(() => { _nbTeamInvLoading = false; });
+      _pubTeamsReq('/teams/prefs').then(r => r.ok ? r.json() : null).then(d => { _nbTeamInvFailed = !d; if (!d) _nbTeamInvWarn(); if (d && typeof d.allow === 'boolean') { _nbTeamInvAllow = d.allow; _nbTeamInvBlocked = d.blocked || 0; try { window._nbStRefresh && window._nbStRefresh(); } catch (e) {} } }).catch(() => { _nbTeamInvFailed = true; _nbTeamInvWarn(); }).finally(() => { _nbTeamInvLoading = false; });
     }
     return 'all';
   }
@@ -35132,7 +35147,7 @@ async function _nbCommentsBridge(e) {
     else throw new Error('Unknown action');
     reply(true, out);
     if (m.op === 'post' || m.op === 'del') setTimeout(() => { try { _nbPollLikeCounts(); } catch (err) {} }, 400);
-  } catch (err) { reply(false, null, (err && err.message) || 'Something went wrong'); }
+  } catch (err) { reply(false, null, _pubTeamsNetFail(err) ? 'No connection. Try again once you\u2019re back online.' : _pubTeamsMsg(err, 'Something went wrong')); }
 }
 function nbAlertsEmptySub() { return nbEmptyLead() + 'Announcements from us and messages about your account will show up here.'; }
 // ---- Alerts: unread highlight, hold-to-select, select all / none and delete FABs ----
@@ -36345,6 +36360,16 @@ nbAddReconnectJob(
 nbAddReconnectJob(
   () => { const t = document.getElementById('pub-ad-tab'); return _pubAdOfflinePending && _nbElOpen('publish-overlay') && !!t && t.style.display !== 'none'; },
   () => _pubRefreshAdTab());
+// Teams view: the team, or the version list, that couldn't load. Closing the sheet or leaving the view ends the retries.
+nbAddReconnectJob(
+  () => _pubTeamsOn && _pubTeamsLoadFailed && _nbElOpen('publish-overlay'),
+  () => _pubTeamsLoad());
+nbAddReconnectJob(
+  () => { const b = document.getElementById('pub-tm-hist-list'); return _pubTeamsOn && _pubTeamsHistFailed && !!b && b.dataset.open === '1' && _nbElOpen('publish-overlay'); },
+  () => { document.getElementById('pub-tm-hist-list').dataset.open = ''; return _pubTeamsHistory(); });
+// Notes shared with you that couldn't be fetched, and the invitation setting in Settings.
+nbAddReconnectJob(() => _nbTeamsMineFailed && nbIsSignedIn(), () => _nbTeamsSyncMine());
+nbAddReconnectJob(() => _nbTeamInvAllow === null && _nbTeamInvFailed && !_nbTeamInvLoading && nbIsSignedIn(), () => _nbTeamInvGet());
 // Single letter shown in the Log Out dialog avatar until (or unless) an
 // actual picture loads: the cached display name's initial if there is
 // one, else the account email's.
