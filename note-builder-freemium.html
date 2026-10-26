@@ -32037,6 +32037,7 @@ async function _pubTeamsLoad() {
   document.getElementById('pub-tm-editor').style.display = 'none';
   document.getElementById('pub-tm-foot').style.display = 'none';
   _pubTeamsHistView(false);
+  document.getElementById('pub-tm-list').textContent = ''; document.getElementById('pub-tm-hist-list').textContent = ''; // the lists sit outside the owner block, so a stale or empty one would show under the load/offline message
   ld.className = 'pub-status'; ld.textContent = 'Loading\u2026';
   _pubTeamsLoadFailed = false;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) { _pubTeamsLoadFailed = true; ld.textContent = 'You\u2019re offline. Teams will load when you\u2019re back online.'; showToast('You\u2019re offline. Teams needs a connection.'); return; }
@@ -32250,12 +32251,15 @@ async function _pubTeamsHistory() {
   const note = _pubFindNote(_pubNoteId), box = document.getElementById('pub-tm-hist-list');
   if (!note) return;
   if (box.dataset.open === '1') { _pubTeamsHistView(false); return; }
+  const seq = _pubTeamsSeq, hseq = box._hseq = (box._hseq || 0) + 1, stale = () => seq !== _pubTeamsSeq || hseq !== box._hseq || box.dataset.open !== '1'; // left the view, reloaded, or toggled back/forward meanwhile
   box.textContent = ''; _pubTeamsHistView(true); _pubTeamsHistFailed = false;
   box.appendChild(_pubTeamsEl('div', 'pub-status', 'Loading\u2026'));
   try {
     const res = await _pubTeamsReq('/teams/note/' + encodeURIComponent(note.publishedSlug) + '/history');
+    if (stale()) return;
     if (!res.ok) throw new Error(await _pubTeamsErr(res, 'Couldn\u2019t load the history.'));
     const vs = ((await res.json()) || {}).versions || [];
+    if (stale()) return;
     box.textContent = '';
     if (!vs.length) { box.appendChild(_pubTeamsEl('div', 'pub-status', 'No earlier versions yet. One is kept each time someone saves.')); return; }
     vs.forEach(v => {
@@ -32275,6 +32279,7 @@ async function _pubTeamsHistory() {
       box.appendChild(row);
     });
   } catch (e) {
+    if (stale()) return;
     _pubTeamsHistFailed = _pubTeamsNetFail(e);
     box.textContent = ''; box.appendChild(_pubTeamsEl('div', _pubTeamsHistFailed ? 'pub-status' : 'pub-status taken', _pubTeamsMsg(e, 'Couldn\u2019t load the history.')));
   }
