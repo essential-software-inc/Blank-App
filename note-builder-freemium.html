@@ -38475,6 +38475,8 @@ function _nbCatOrderSaveFromBar(bar) {
     if (!el.isConnected || b._nbCatDrag) { st = null; return; }
     st.active = true; b._nbCatDrag = true;
     b.classList.add('is-reordering'); el.classList.add('cat-lift');
+    // The press squash (_nbButtonFx) shrinks the tab under the finger while it is held: undo it, so the held tab keeps its full size inside the lifted capsule.
+    try { (el.classList.contains('cat-pill') ? [el] : Array.from(el.querySelectorAll('.cat-pill'))).forEach(p => p.getAnimations().forEach(a => a.cancel())); } catch (e) {}
     measure();
     const r = b.getBoundingClientRect();
     st.grab = (st.x - r.left + b.scrollLeft) - st.lefts[st.di]; // where on the pill it is being held
