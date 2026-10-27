@@ -739,8 +739,8 @@ body .cat-pill.active, body .md-chip.on, body .md-srcb.on, body .st-chip.on, bod
   display: flex;
   gap: .4rem;
   overflow-x: auto;
-  padding: .5rem .9rem .05rem;
-  margin: 0 -.9rem;
+  padding: .5rem .9rem .35rem; /* room under the pills so their edges (and the press / settle overshoot) aren't cut by the bar's clip line; */
+  margin: 0 -.9rem -.3rem;     /* the negative bottom margin takes it back, so nothing around the bar moves */
   scrollbar-width: none;
   -ms-overflow-style: none
 }
@@ -789,18 +789,35 @@ body.pink #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active
 /* Hold a pill to pick it up and slide it along the bar (see _nbCatReorder). While it is held the bar is positioned (so the
    pills' offsets are measured from it), never snaps or pans on its own, and the lifted pill gets a ring and a soft shadow. */
 #feed-cats .cat-pill { -webkit-touch-callout: none }
-#feed-cats.is-reordering { position: relative; touch-action: none; scroll-behavior: auto; scroll-snap-type: none; -webkit-user-select: none; user-select: none;
-  /* the bar clips whatever sticks out of it (overflow-x:auto makes it clip vertically too): give the lifted pill's ring and shadow room
-     below, and take the same amount back off the bottom margin so nothing around the bar moves */
-  padding-bottom: .95rem; margin-bottom: -.9rem }
+#feed-cats.is-reordering { position: relative; touch-action: none; scroll-behavior: auto; scroll-snap-type: none; -webkit-user-select: none; user-select: none }
+/* the bar clips whatever sticks out of it (overflow-x:auto makes it clip vertically too): give the lifted pill's shadow room
+   below, and take the same amount back off the bottom margin so nothing around the bar moves */
+#feed-cats.is-reordering { padding-bottom: .95rem; margin-bottom: -.6rem }
 /* Glass mode: the idle pills are a 35% tint of the page colour, which would let the row (and the note list scrolling under it) show
    through the lifted pill. Lay the same tint over a solid page-colour base, so it looks the same but is opaque. (Selected pills are already solid.) */
 body.glass:not(.reader-mode) #feed-cats .cat-pill.cat-lift:not(.active),
 body.glass:not(.reader-mode) #feed-cats .cat-lift .cat-pill:not(.active) { background-color: var(--nb-bg, #fff); background-image: linear-gradient(var(--nb-fill), var(--nb-fill)) }
-#feed-cats .cat-lift { position: relative; z-index: 6; cursor: grabbing; transition: none !important; box-shadow: 0 0 0 2px rgba(51,102,204,.38), 0 3px 9px rgba(20,30,60,.28) }
-#feed-cats .cat-capsule.cat-lift { border-radius: 99px }
-body.night #feed-cats .cat-lift { box-shadow: 0 0 0 2px rgba(255,255,255,.3), 0 3px 9px rgba(0,0,0,.65) } /* grey like the dark theme's selected pill, not blue */
-body.pink #feed-cats .cat-lift { box-shadow: 0 0 0 2px rgba(224,86,140,.4), 0 3px 9px rgba(120,30,70,.28) }
+/* The raised / renaming ring is a thin line drawn on the inside of the pill (--cat-ring; --cat-ring-on on a selected pill, whose fill would swallow it). */
+#feed-cats { --cat-ring: rgba(51,102,204,.6); --cat-ring-on: rgba(255,255,255,.75); --cat-drop: rgba(20,30,60,.28) }
+body.night #feed-cats { --cat-ring: rgba(255,255,255,.4); --cat-ring-on: rgba(255,255,255,.5); --cat-drop: rgba(0,0,0,.65) } /* grey like the dark theme's selected pill, not blue */
+body.pink #feed-cats { --cat-ring: rgba(224,86,140,.65); --cat-ring-on: rgba(255,255,255,.75); --cat-drop: rgba(120,30,70,.28) }
+#feed-cats .cat-lift { position: relative; z-index: 6; cursor: grabbing; transition: none !important; box-shadow: inset 0 0 0 1px var(--cat-ring), 0 3px 9px var(--cat-drop) }
+#feed-cats .cat-lift.active { box-shadow: inset 0 0 0 1px var(--cat-ring-on), 0 3px 9px var(--cat-drop) }
+/* a lifted capsule: the drop shadow is on the capsule, the ring on its two tabs (open at the seam between them) */
+#feed-cats .cat-capsule.cat-lift { border-radius: 99px; box-shadow: 0 3px 9px var(--cat-drop) }
+#feed-cats .cat-capsule.cat-lift .cat-pill:first-child { box-shadow: inset 1px 0 0 0 var(--cat-ring), inset 0 1px 0 0 var(--cat-ring), inset 0 -1px 0 0 var(--cat-ring) }
+#feed-cats .cat-capsule.cat-lift .cat-pill:last-child { box-shadow: inset -1px 0 0 0 var(--cat-ring), inset 0 1px 0 0 var(--cat-ring), inset 0 -1px 0 0 var(--cat-ring) }
+#feed-cats .cat-capsule.cat-lift .cat-pill.active:first-child { box-shadow: inset 1px 0 0 0 var(--cat-ring-on), inset 0 1px 0 0 var(--cat-ring-on), inset 0 -1px 0 0 var(--cat-ring-on) }
+#feed-cats .cat-capsule.cat-lift .cat-pill.active:last-child { box-shadow: inset -1px 0 0 0 var(--cat-ring-on), inset 0 1px 0 0 var(--cat-ring-on), inset 0 -1px 0 0 var(--cat-ring-on) }
+/* Double-click (double-tap) a custom pill to rename it in place (see _nbCatRename): the pill keeps its size, border and colours, and its
+   label turns into a text field. The hidden ::after copy of the text sizes the field, so the pill grows and shrinks as you type. */
+#feed-cats .cat-pill.cat-editing { cursor: text; line-height: normal; -webkit-user-select: text; user-select: text }
+#feed-cats .cat-pill.cat-editing, #feed-cats .cat-pill.cat-settling { box-shadow: inset 0 0 0 1px var(--cat-ring) } /* cat-settling: the ring is held for a moment after the field closes */
+#feed-cats .cat-pill.cat-editing.active, #feed-cats .cat-pill.cat-settling.active { box-shadow: inset 0 0 0 1px var(--cat-ring-on) }
+.cat-edit { display: inline-grid; vertical-align: top }
+.cat-edit::after, .cat-edit input { grid-area: 1 / 1; font: inherit; letter-spacing: inherit; white-space: pre; padding: 0; margin: 0; border: 0 }
+.cat-edit::after { content: attr(data-v) ' '; visibility: hidden }
+.cat-edit input { min-width: 0; width: 100%; box-sizing: border-box; background: transparent; color: inherit; outline: 0; border-radius: 0; -webkit-appearance: none; appearance: none; caret-color: currentColor; text-align: left; -webkit-user-select: text; user-select: text }
 .cat-badge { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; flex-shrink: 0; min-width: 1.5em; height: 1.5em; margin-left: .3rem; padding: 0 .38em; border-radius: 99px; background: #d33; color: #fff; font-size: .62rem; font-weight: bold; line-height: 1; text-align: center; vertical-align: 1px }
 /* Alerts: read-only cards (no open action) — message, time-ago, delete. */
 .alert-card { cursor: default; --alert-md-bleed: .9rem }
@@ -38505,12 +38522,21 @@ function _nbCatOrderSaveFromBar(bar) {
     let off = false; try { off = _nbMotionOff(); } catch (e) {}
     if (off) { done(); return; }
     const a = el.animate([{ transform: 'translateX(' + dx + 'px) scale(1.06)' }, { transform: 'none' }], { duration: 200, easing: 'cubic-bezier(.2,.8,.2,1)' });
-    a.onfinish = a.oncancel = done;
+    // The bar keeps its room below (is-reordering) until everything on the pill has settled: the release spring-back from _nbButtonFx runs
+    // longer than the slide (it overshoots), so closing the room when the slide ends clipped the pill's bottom edge for a moment.
+    const t0 = performance.now(), HOLD = 420; // longer than the release spring (380ms), so the ring never drops out mid-settle
+    const settle = () => {
+      let all = []; try { all = el.getAnimations({ subtree: true }); } catch (e) {}
+      const wait = () => setTimeout(done, Math.max(0, HOLD - (performance.now() - t0)));
+      if (!all.length) { wait(); return; }
+      Promise.all(all.map(x => x.finished.catch(() => {}))).then(wait);
+    };
+    a.onfinish = a.oncancel = settle;
   }
   document.addEventListener('pointerdown', e => {
     if (st || !e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
     const el = unitAt(e.target);
-    if (!el || !el.hasAttribute('data-cat-key') || el.hasAttribute('data-cat-pin') || el.parentNode.id !== 'feed-cats' || el.parentNode._nbCatDrag) return;
+    if (!el || !el.hasAttribute('data-cat-key') || el.hasAttribute('data-cat-pin') || el.parentNode.id !== 'feed-cats' || el.parentNode._nbCatDrag || el.parentNode._nbCatEdit) return;
     st = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, el, bar: el.parentNode, active: false, acc: 0, raf: 0, timer: 0 };
     st.timer = setTimeout(pickUp, HOLD_MS);
   });
@@ -38533,10 +38559,121 @@ function _nbCatOrderSaveFromBar(bar) {
   }, true);
   document.addEventListener('visibilitychange', () => { if (document.hidden && st) { if (st.active) drop(); else { clearTimeout(st.timer); st = null; } } });
 })();
+// Double-click (or double-tap) one of your own category pills to rename it right there: the pill keeps its look and shape and its label
+// becomes a text field. Enter or tapping away saves, Escape cancels. A category is only the name carried by its notes, so renaming
+// rewrites that name on each of them (and syncs / updates published pages like any other edit to a note's details).
+(function _nbCatRename() {
+  const DBL_MS = 380, SLOP = 12, MAXLEN = 60;
+  let last = null, armed = null, ed = null;
+  const pillAt = t => (t && t.closest) ? t.closest('#feed-cats .cat-pill[data-cat-custom]') : null;
+  const lc = v => String(v || '').trim().toLowerCase();
+  function rename(from, to) {
+    const lowFrom = lc(from), lowTo = lc(to);
+    const taken = NB_BASE_CATS.map(lc).concat([lc(NB_TEAMS_CAT), 'alerts', 'subscribed', 'liked', 'published', 'stories']);
+    if (taken.includes(lowTo)) return { msg: '\u201c' + to + '\u201d is already a tab. Try another name.' };
+    const visible = nbVisibleNotes();
+    if (lowTo !== lowFrom && visible.some(n => lc(n.category) === lowTo)) return { msg: 'You already have a category called \u201c' + to + '\u201d.' };
+    const mine = visible.filter(n => lc(n.category) === lowFrom);
+    if (!mine.length) return { msg: 'Couldn\u2019t find that category. It may have changed on another device.' };
+    if (mine.some(n => n.teamRole === 'editor')) return { msg: 'Some notes in this category belong to a team you edit, so it can\u2019t be renamed here.' };
+    const ids = new Set(mine.map(n => n.id)), now = Date.now(), changed = [];
+    const out = nbLoadNotes().map(n => {
+      if (!n || !ids.has(n.id)) return n;
+      const m = Object.assign({}, n, { category: to, updatedAt: now });
+      if (m.seedProvisional) m.seedEdited = true; // same as any edit of a reseeded demo note
+      changed.push(m);
+      return m;
+    });
+    if (!nbSaveNotesArr(out)) return { msg: '' }; // storage full: nbSaveNotesArr already said so, nothing changed
+    // The pill keeps the place it was moved to under its new name.
+    try {
+      const ord = _nbCatOrderLoad(), i = ord.indexOf(lowFrom);
+      if (i !== -1 && lowTo !== lowFrom) { ord[i] = lowTo; _nbCatOrderSave(ord.filter((k, j) => ord.indexOf(k) === j)); }
+    } catch (e) {}
+    if (lc(_nbActiveCat) === lowFrom) { _nbActiveCat = to; try { _nbRsSave({ c: to, t: '' }); } catch (e) {} }
+    try { if (typeof _nbNoteSelCat !== 'undefined' && lc(_nbNoteSelCat) === lowFrom) _nbNoteSelCat = to; } catch (e) {}
+    try { nbSyncPullThenPush(); } catch (e) {}
+    changed.forEach(n => { try { _nbPushPublishedDetails(n); } catch (e) {} });
+    return { ok: true };
+  }
+  function finish(commit, viaEnter) {
+    const e = ed; if (!e) return;
+    const next = e.inp.value.replace(/\s+/g, ' ').trim().slice(0, MAXLEN);
+    let renamed = false;
+    if (commit && next && next !== e.name) {
+      const r = rename(e.name, next);
+      if (r.ok) renamed = true;
+      else {
+        if (r.msg) showToast(r.msg);
+        if (viaEnter) { e.inp.focus(); return; } // Enter on a name that can't be used: stay in the field so it can be fixed
+      }
+    }
+    ed = null;
+    e.host.remove(); e.pill.style.display = '';
+    e.bar._nbCatEdit = false;
+    const dirty = e.bar._nbCatDirty; e.bar._nbCatDirty = false;
+    if (renamed) { showToast('Category renamed'); buildCatBar(); nbRenderNotesScreen(); }
+    else if (dirty) buildCatBar();
+    // Hold the ring while the keyboard closes and the pill settles, then let go.
+    const bar = e.bar, key = renamed ? _nbCatKey(next) : e.pill.getAttribute('data-cat-key');
+    const live = Array.from(bar.querySelectorAll('.cat-pill')).find(p => p.getAttribute('data-cat-key') === key);
+    if (live) live.classList.add('cat-settling');
+    bar._nbCatHold = (bar._nbCatHold || 0) + 1;
+    setTimeout(() => {
+      if (--bar._nbCatHold > 0) return;
+      bar.querySelectorAll('.cat-settling').forEach(p => p.classList.remove('cat-settling'));
+    }, 450);
+  }
+  function start(pill) {
+    const bar = pill && pill.parentNode;
+    if (ed || !bar || bar.id !== 'feed-cats' || bar._nbCatDrag || !pill.hasAttribute('data-cat-custom')) return;
+    const name = pill.getAttribute('data-cat-name') || '';
+    const host = document.createElement('span');
+    host.className = pill.className + ' cat-editing';
+    const wrap = document.createElement('span');
+    wrap.className = 'cat-edit'; wrap.setAttribute('data-v', name);
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.value = name; inp.maxLength = MAXLEN; inp.spellcheck = false;
+    inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocapitalize', 'sentences'); inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-label', 'Category name');
+    wrap.appendChild(inp); host.appendChild(wrap);
+    const cnt = pill.querySelector('.cat-count');
+    if (cnt) host.appendChild(cnt.cloneNode(true)); // the count stays, just not editable
+    bar.insertBefore(host, pill); pill.style.display = 'none';
+    bar._nbCatEdit = true;
+    ed = { bar, pill, host, inp, name };
+    inp.addEventListener('input', () => wrap.setAttribute('data-v', inp.value));
+    inp.addEventListener('keydown', ev => {
+      ev.stopPropagation();
+      if (ev.key === 'Enter') { ev.preventDefault(); finish(true, true); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); finish(false); }
+    });
+    inp.addEventListener('keyup', ev => ev.stopPropagation());
+    inp.addEventListener('blur', () => finish(true, false));
+    inp.focus(); inp.select();
+  }
+  // Two quick taps / clicks on the same pill arm the edit; it starts on the click that follows (a click is what lets phones open the keyboard).
+  document.addEventListener('pointerup', e => {
+    if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const pill = pillAt(e.target);
+    if (!pill || pill.parentNode._nbCatDrag || pill.parentNode._nbCatEdit) { last = null; return; }
+    const key = pill.getAttribute('data-cat-key'), now = Date.now();
+    if (last && last.key === key && now - last.t < DBL_MS && Math.hypot(e.clientX - last.x, e.clientY - last.y) < SLOP) { last = null; armed = { key, until: now + 700 }; }
+    else last = { key, t: now, x: e.clientX, y: e.clientY };
+  }, true);
+  document.addEventListener('click', e => {
+    if (!armed) return;
+    const a = armed; armed = null;
+    const pill = pillAt(e.target);
+    if (!pill || Date.now() > a.until || pill.getAttribute('data-cat-key') !== a.key) return;
+    e.preventDefault(); e.stopPropagation(); // the second tap must not select the category all over again
+    start(pill);
+  }, true);
+  document.addEventListener('dblclick', e => { const pill = pillAt(e.target); if (pill && !ed) { e.preventDefault(); start(pill); } }); // mouse, if the timing above missed
+})();
 function buildCatBar() {
   const bar = document.getElementById('feed-cats');
   if (!bar) return;
-  if (bar._nbCatDrag) { bar._nbCatDirty = true; return; } // a pill is being dragged: the bar is redrawn when it lands
+  if (bar._nbCatDrag || bar._nbCatEdit) { bar._nbCatDirty = true; return; } // a pill is being dragged or renamed: the bar is redrawn when it lands / closes
   if (_nbActiveCat !== 'Alerts') _nbAlertUiReset(); // another category is open: no selection, no unread highlights
   if (typeof _nbNoteSel !== 'undefined' && _nbNoteSel && _nbNoteSel.size && _nbNoteSelCat !== _nbActiveCat) _nbNoteUiReset(); // selection belongs to the category it started in
   const notes = nbVisibleNotes();
@@ -38584,7 +38721,8 @@ function buildCatBar() {
         : nbCatCountHtml('Alerts', notes);
       return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('Alerts')" data-cat-key="alerts">Alerts${tail}</button>`;
     }
-    return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')" data-cat-key="${esc(_nbCatKey(c))}"${c === NB_BASE_CATS[0] ? ' data-cat-pin="1"' : ''}>${esc(c)}${nbCatCountHtml(c, notes)}</button>`;
+    const _custom = !NB_BASE_CATS.includes(c) && c !== NB_TEAMS_CAT; // your own categories: double-click to rename (see _nbCatRename)
+    return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')" data-cat-key="${esc(_nbCatKey(c))}"${c === NB_BASE_CATS[0] ? ' data-cat-pin="1"' : ''}${_custom ? ` data-cat-custom="1" data-cat-name="${esc(c)}"` : ''}>${esc(c)}${nbCatCountHtml(c, notes)}</button>`;
   }).join('');
   // Only the highlighted pill changed (a tap): flip the classes on the existing buttons so the CSS colour
   // transitions run on live elements. Tearing the bar down and redrawing it restarted every pill's
