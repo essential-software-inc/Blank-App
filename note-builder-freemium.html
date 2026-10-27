@@ -786,6 +786,21 @@ body.night #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.activ
 body.pink #feed-cats .cat-capsule .cat-pill:not(.active) + .cat-pill:not(.active) { border-left-color: #f5b8cf }
 
 .cat-count { font-style: normal; font-weight: normal; opacity: .7; margin-left: .3rem; font-size: .88em }
+/* Hold a pill to pick it up and slide it along the bar (see _nbCatReorder). While it is held the bar is positioned (so the
+   pills' offsets are measured from it), never snaps or pans on its own, and the lifted pill gets a ring and a soft shadow. */
+#feed-cats .cat-pill { -webkit-touch-callout: none }
+#feed-cats.is-reordering { position: relative; touch-action: none; scroll-behavior: auto; scroll-snap-type: none; -webkit-user-select: none; user-select: none;
+  /* the bar clips whatever sticks out of it (overflow-x:auto makes it clip vertically too): give the lifted pill's ring and shadow room
+     below, and take the same amount back off the bottom margin so nothing around the bar moves */
+  padding-bottom: .95rem; margin-bottom: -.9rem }
+/* Glass mode: the idle pills are a 35% tint of the page colour, which would let the row (and the note list scrolling under it) show
+   through the lifted pill. Lay the same tint over a solid page-colour base, so it looks the same but is opaque. (Selected pills are already solid.) */
+body.glass:not(.reader-mode) #feed-cats .cat-pill.cat-lift:not(.active),
+body.glass:not(.reader-mode) #feed-cats .cat-lift .cat-pill:not(.active) { background-color: var(--nb-bg, #fff); background-image: linear-gradient(var(--nb-fill), var(--nb-fill)) }
+#feed-cats .cat-lift { position: relative; z-index: 6; cursor: grabbing; transition: none !important; box-shadow: 0 0 0 2px rgba(51,102,204,.38), 0 3px 9px rgba(20,30,60,.28) }
+#feed-cats .cat-capsule.cat-lift { border-radius: 99px }
+body.night #feed-cats .cat-lift { box-shadow: 0 0 0 2px rgba(255,255,255,.3), 0 3px 9px rgba(0,0,0,.65) } /* grey like the dark theme's selected pill, not blue */
+body.pink #feed-cats .cat-lift { box-shadow: 0 0 0 2px rgba(224,86,140,.4), 0 3px 9px rgba(120,30,70,.28) }
 .cat-badge { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; flex-shrink: 0; min-width: 1.5em; height: 1.5em; margin-left: .3rem; padding: 0 .38em; border-radius: 99px; background: #d33; color: #fff; font-size: .62rem; font-weight: bold; line-height: 1; text-align: center; vertical-align: 1px }
 /* Alerts: read-only cards (no open action) — message, time-ago, delete. */
 .alert-card { cursor: default; --alert-md-bleed: .9rem }
@@ -2027,6 +2042,10 @@ body:not(.night):not(.pink) #pub-tm-head .bkp-help { color: rgba(32,33,34,.65) }
 #pub-teams-body > *, #pub-tm-head > *, #pub-tm-owner > * { flex-shrink: 0 }
 #pub-tm-status, #pub-tm-load { flex: none; height: auto; min-height: 0; overflow: visible; overflow-wrap: anywhere }
 #publish-sheet.is-hist #pub-tm-owner > .bkp-help, #publish-sheet.is-hist .pub-tm-add, #publish-sheet.is-hist #pub-tm-status { display: none }
+/* Settings > Privacy > Blocked from inviting you reuses this Teams view (same sheet, sticky header, cards and themes): only the invite box and its help text give way to the blocked-list help. */
+#pub-bl-help { display: none }
+#publish-sheet.is-blocks #pub-bl-help { display: block }
+#publish-sheet.is-blocks #pub-tm-owner > .bkp-help:not(#pub-bl-help), #publish-sheet.is-blocks .pub-tm-add, #publish-sheet.is-blocks #pub-tm-status { display: none }
 /* Teams layout: the invite box scrolls with the list, the "Editors" header sticks to the top once it gets there, and Version history / Leave team stay pinned at the bottom, so they never get buried under a long list. */
 #pub-tm-sec { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; position: sticky; top: 0; z-index: 2; margin: 0 -1rem; padding: .4rem 1rem .45rem; background: #fafcff; border-bottom: 1px solid #d2daf0 }
 #pub-tm-sec::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 10px; pointer-events: none; background: linear-gradient(to bottom, rgba(20,30,50,.08), transparent) }
@@ -5136,7 +5155,9 @@ document.body.dataset.lockScrollY = window.scrollY;
     var style = document.createElement('style');
     style.setAttribute('data-flash', '1');
     var splashRule = 'html, body { background-color: ' + splashColor + ' !important; }';
-    if (m === 'dark' || m === 'pink') {
+    var nbGlassOn = true; // glass mode (default-on): the splash keeps its photo in every theme, so no flat-colour override
+    try { nbGlassOn = JSON.parse(localStorage.getItem('nb_settings_v1') || '{}').glassMode !== false; } catch (e) {}
+    if ((m === 'dark' || m === 'pink') && !nbGlassOn) {
       splashRule += ' #splash { background: ' + splashColor + ' !important; }';
     }
     style.textContent = splashRule;
@@ -5161,6 +5182,9 @@ document.body.dataset.lockScrollY = window.scrollY;
 
 <!-- sign-in + onboarding glass: kept ahead of #splash so the launch sign-in is glass from first paint, not after the whole file parses -->
 <style id="nb-glass-css" data-nb-glass media="not all">
+/* ===== Splash + sign-in: the photo background shows in every theme while glass mode is on (classic mode keeps the flat Night/Pink colours) ===== */
+body.night #splash,body.night #account-screen,body.pink #splash,body.pink #account-screen{background-color:#3366cc;background-image:var(--splash-img,var(--splash-img-0))}
+body.pink #splash::after,body.pink #account-screen::after{display:block}
 /* ===== Sign-in screen: clear glass (translucent, edge-lit, no blur, no darkening) ===== */
 #account-screen{font-family:"Inter Variable",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
 #account-screen-name{font-size:1.85rem;font-weight:800;letter-spacing:-.02em}
@@ -5412,6 +5436,21 @@ body.pink .nb-carousel-dot{background:#d796b0}
 
 </div>
 
+<style id="pub-tm-list-css">
+/* Teams: the author's "Editors can see the team" switch, the editor's team list and the Author badge. Every theme; Night uses no blue. */
+#publish-sheet.is-hist #pub-tm-listrow, #publish-sheet.is-blocks #pub-tm-listrow { display: none }
+#pub-tm-listrow { margin: .1rem 0 .2rem }
+#pub-tm-listrow .bkp-help { margin: -.1rem 0 .2rem }
+#pub-tm-esec { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; margin-top: .3rem }
+#pub-tm-esec-title { font-size: .84rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: rgba(32,33,34,.65) }
+#pub-tm-ecount { font-size: .84rem; color: rgba(32,33,34,.65) }
+body.night #pub-tm-esec-title, body.night #pub-tm-ecount { color: #9a9a9a }
+body.pink #pub-tm-esec-title, body.pink #pub-tm-ecount { color: #875068 }
+.pub-tm-badge { display: inline-flex; align-items: center; gap: .25rem; margin-left: .45rem; padding: .1rem .55rem .1rem .42rem; border-radius: 999px; font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; line-height: 1.3; vertical-align: .08em; white-space: nowrap; background: #3366cc; color: #fff }
+.pub-tm-badge svg { width: 10px; height: 10px; display: block; flex: none }
+body.night .pub-tm-badge { background: #e0e0e0; color: #111 }
+body.pink .pub-tm-badge { background: #bd2856; color: #fff }
+</style>
 <style id="st-css">
 #screen-settings{--st-bg:#f4f6fb;--st-card:#fff;--st-line:rgba(20,30,50,.1);--st-fg:#202122;--st-sub:#6b7280;--st-acc:#3366cc;--st-on:#fff;background:var(--st-bg);color:var(--st-fg)}
 body.night #screen-settings{--st-bg:#080808;--st-card:#111;--st-line:#282828;--st-fg:#f0f0f0;--st-sub:#b8bfc8;--st-acc:#e0e0e0;--st-on:#111}
@@ -6255,8 +6294,8 @@ body.pink #publish-sheet .pub-url {background:rgba(255,242,247,.55);border-color
 #pub-teams-body {padding-top:0;padding-bottom:.7rem}
 #pub-teams-body .bkp-help {margin-top:.2rem} /* the body has no top padding so the sticky header sits flush with the title bar */
 #pub-tm-head, #pub-tm-owner {display:contents}
-#pub-tm-sec {position:sticky;top:0;z-index:2;margin:0 -1.2rem;padding:.4rem 1.2rem .45rem;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-#publish-sheet #pub-tm-sec {background:color-mix(in srgb,var(--sh-bg) 18%,transparent);border-bottom-color:var(--sh-div)}
+#pub-tm-sec {position:sticky;top:0;z-index:2;margin:0 -1.2rem;padding:.4rem 1.2rem .45rem}
+#publish-sheet #pub-tm-sec {background:var(--nb-bg,#fafcff);border-bottom-color:var(--sh-div)} /* solid, so rows don't show through the stuck header */
 #pub-tm-load:empty, #pub-tm-status:empty {display:none}
 /* Status/error lines (red 'taken' toast) have min-height, so as flex items of the scrolling body they could shrink to one line and let a second line spill under the sticky Editors header. Never shrink; always grow to fit the text. */
 #pub-teams-body > *, #pub-tm-head > *, #pub-tm-owner > * {flex-shrink:0}
@@ -6813,7 +6852,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="privacy-closebtn" onclick="closePrivacy()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="privacy-body">
-      <p><em>Effective 26 October 2026</em></p>
+      <p><em>Effective 27 October 2026</em></p>
       <p><strong>Bluebook</strong> is published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, and &ldquo;our&rdquo; in this policy), and we're glad you're here. This page explains in plain language what the app stores, where it lives, and what leaves your device.</p>
       <h3>On-device storage</h3>
       <p>Your pages, drafts, images, favourites, playlists, preferences and app settings all stay on your device. There's one exception: when you're signed in, we keep track of which stories you've opened on our servers, under your account (see "Stories, subscriptions &amp; likes" below). For each account signed in on the device, the app also keeps a copy of which notes you've liked and which accounts you subscribe to (signing out clears the subscription copy). It keeps a short queue of any likes or subscriptions you tapped while offline that haven't been sent yet. It also keeps a small number that tells it how far your device's clock is off from our servers, so those taps get the right time. If you sign in with Google, your notes, along with your favourites, playlists, theme choice and your "All my notes" switches from Settings, are also backed up to our servers (see below). Those switches are kept on your device separately for each account, so one account's choices never touch another account's pages, even on a shared phone.</p>
@@ -6858,7 +6897,8 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>Payments are never part of the published page itself. If the payments block is taken off the page, the page is unpublished or taken down, or its author's account is deleted, the block stops working and we keep its settings for about 30 days (our clean-up runs nightly), then delete them. We keep the small payment records (the amount, currency, time and reference numbers) after that, because they're the author's payment history and they don't hold your name, email address or card details. The block's title and words are part of the page, so "Using published pages and comments" above covers them. Payment records aren't part of that.</p>
       <h3>Sharing a note with editors (Teams)</h3>
       <p>An author can let other people edit a page they've published. They invite someone by that person's invite code, and the person gets an alert that says who invited them and lets them accept or decline. If they accept, the app copies the published page onto their device as a note they can edit, and saving it updates the published page for everyone on the team. We save the page's address, the author's account, the invited account, whether the invitation is pending or accepted, when it was sent, accepted and last used to edit, and a scrambled (hashed) copy of the editor's own edit key. Invitations expire after 7 days, and a page can have up to 5 editors, counting people who've been invited but haven't answered yet. An invitation nobody answers is deleted 30 days after it expires, unless the author cancels it first.</p>
-      <p>Each time an editor or the author saves a page that has a team, we keep the version it replaces, up to the last 10, so the author can go back to one. We also write down which account made each save, and when, so the author can see who saved what. If someone comments as Anonymous, we don't show their name. Editors can't change a page's payments, remove its polls or forms, or change a poll's options. The author can remove an editor at any time, and an editor can leave. Unpublishing the page, or deleting the author's account, ends the team and deletes the saved versions. If the last editor leaves or is removed, the saved versions stay so the author can still go back to one, until the page is unpublished. Deleting an editor's account removes them from every team, and their name comes off the versions they saved too. If you decline an invitation, the author isn't told. If you also choose to block the person, we save that choice so they can't invite you again, and any other invitations from them that you haven't answered are withdrawn. The "Invitations to edit" setting lets you stop all invitations (we save that choice too). In Settings, under Privacy, you can see the people you've blocked. Each one shows their display name and picture if they have them, and the date you blocked them. If they have no name, you'll see "Someone". You can unblock people one at a time. Switching it from Nobody back to Everyone lets you clear the whole list at once. Team alerts, such as an invitation, or someone joining, leaving or editing, are kept like your other alerts. Invitations and these alerts show people's display names, or "Someone" if they have none or comment as Anonymous. Invitations and team lists also show each person's author ID. Our admins can see who is on a page's team and can remove an editor, or cancel an invitation, if the rules require it. If the author or an admin removes you as an editor, you get an alert (an admin's alert gives the reason). If an invitation is cancelled or declined, its alert is deleted. Admins see your display name even if you comment as Anonymous. The author's PIN or password for App Lock, which is asked for when adding or removing editors or restoring an earlier version, stays on their device and never reaches us.</p>
+      <p>Each time an editor or the author saves a page that has a team, we keep the version it replaces, up to the last 10, so the author can go back to one. We also write down which account made each save, and when, so the author can see who saved what. If someone comments as Anonymous, we don't show their name. Editors can't change a page's payments, remove its polls or forms, or change a poll's options. The author can remove an editor at any time, and an editor can leave. Unpublishing the page, or deleting the author's account, ends the team and deletes the saved versions and the choice about who can see the team. If the last editor leaves or is removed, the saved versions stay so the author can still go back to one, until the page is unpublished. Deleting an editor's account removes them from every team, and their name comes off the versions they saved too. If you decline an invitation, the author isn't told. If you also choose to block the person, we save that choice so they can't invite you again, and any other invitations from them that you haven't answered are withdrawn. The "Invitations to edit" setting lets you stop all invitations (we save that choice too). In Settings, under Privacy, you can see the people you've blocked. Each one shows their display name and picture if they have them, and the date you blocked them. If they have no name, you'll see "Someone". You can unblock people one at a time. Switching it from Nobody back to Everyone lets you clear the whole list at once. Team alerts, such as an invitation, someone joining, leaving or editing, or the author changing who can see the team, are kept like your other alerts. Invitations and these alerts show people's display names, or "Someone" if they have none or comment as Anonymous. Invitations and team lists also show each person's author ID. Our admins can see who is on a page's team and can remove an editor, or cancel an invitation, if the rules require it. If the author or an admin removes you as an editor, you get an alert (an admin's alert gives the reason). If an invitation is cancelled or declined, its alert is deleted. Admins see your display name even if you comment as Anonymous. The author's PIN or password for App Lock, which is asked for when adding or removing editors or restoring an earlier version, stays on their device and never reaches us.</p>
+      <p><strong>Who can see the team.</strong> Normally, an editor can only see who the author is. The author can choose to let editors see the whole team. If they do, every editor can see the name and profile picture of the author and of each editor who has said yes (people who haven't answered yet aren't shown). The author is marked as Author. If someone comments as Anonymous, their name and picture stay hidden. We save the author's choice with the page, send every editor an alert whenever it changes, and delete it when the page is unpublished.</p>
       <h3>Publishing as an ad</h3>
       <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a full-screen ad before a note they open, whether it's from the stories strip, Subscribed, Liked, Media or Go to note. It isn't just for people who have the page's link, like a regular published page. Everyone sees ads, including people who've bought Pro, but never before their own notes. So that ads don't come too often, the app keeps a small count of the notes you've opened and the time of your last ad. It stays on your device and we never see it. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save a device ID, a random number that each device makes, keeps, and sends whenever it asks for an ad or a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. We also use it to see how long we've known a device, and to make sure one device isn't shown too many ads in an hour. We keep a small count for that, and our nightly clean-up wipes it. Each ad we show comes with a random one-time code. A view only counts if the app sends that code back, which stops scripts from faking views. The code isn't linked to you or your device. We delete it when it's used, or after about six hours if it never is. When the app asks for an ad, we also briefly count requests from your IP address to stop spam, the same way we do when you publish. See "Analytics" below too. When you unpublish an ad, it stops being shown right away, though someone whose phone already loaded it might still see it once. Any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device. Polls can't be used in ads either, because ads can't collect votes.</p>
       <h3>Making sure ad views are real (Android)</h3>
@@ -6999,7 +7039,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="cterms-closebtn" onclick="closeConsumerTerms()" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 26 October 2026</em></p>
+      <p><em>Effective 27 October 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language.</p>
       <h3>Who Can Use Bluebook</h3>
       <p>You need to be at least 13 to use Bluebook, or older if the rules where you live say so. If you're under 18, please read these terms with a parent or guardian and make sure they're OK with you using the app.</p>
@@ -7014,7 +7054,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>Reports, Alerts &amp; Suspension</h3>
       <p>Anyone can report a published page. We may send you an automatic message with the reason when one of your pages is reported, when we remove or pause something of yours (a profile picture, display name, page, story or ad), or when we change the status of your account. That way you know what happened and why. These messages show up under Alerts in your library. We may also use Alerts to share announcements and updates about the app, like new features, maintenance, or changes to these terms. A profile picture that looks like it's pretending to be someone else may be removed. <strong>To keep the app safe for everyone, lots of reports about your content, or repeated rule-breaking, can lead to your account being suspended. When we remove or pause pages, stories, ads, profile pictures or display names, and when we suspend accounts, those count as strikes on your account for 60 days (unless we excuse one). Strikes affect which ad packages you can start (see Ad Access &amp; Invites below).</strong> A suspended account is signed out everywhere and can't sign in. Alerts are for your information, and you can delete them from your own list. We keep a record of the alerts we've sent to an account, including deleted ones, for up to a year, so we can run the service and keep it safe.</p>
       <h3>Teams (shared editing)</h3>
-      <p>You can invite other Bluebook users to edit a page you've published. Only invite people you trust: an editor can change everything on the page except its payments, and can't remove its polls or forms or change a poll's options, and what they save goes live straight away. You stay responsible for the page, including what editors add to it. You can remove an editor, or go back to an earlier version, at any time. If you accept an invitation to edit someone else's page, you agree not to add anything that breaks these terms, and you can leave whenever you like. Anything you add to a page you edit belongs to its author's page, and ends up deleted if they unpublish it. We may remove a team, or an editor, for the same reasons we may remove a page.</p>
+      <p>You can invite other Bluebook users to edit a page you've published. Only invite people you trust: an editor can change everything on the page except its payments, and can't remove its polls or forms or change a poll's options, and what they save goes live straight away. You stay responsible for the page, including what editors add to it. You can remove an editor, or go back to an earlier version, at any time. If you accept an invitation to edit someone else's page, you agree not to add anything that breaks these terms, and you can leave whenever you like. If the author lets editors see the team, the other editors will see your display name and profile picture (unless you comment as Anonymous), so think about that before you say yes. Anything you add to a page you edit belongs to its author's page, and ends up deleted if they unpublish it. We may remove a team, or an editor, for the same reasons we may remove a page.</p>
       <h3>Advertising (Publish as Ad)</h3>
       <p>You can turn a page you've already published into an ad, and buy a set number of views through Google Play Billing (handled for us by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be allowed as an ad, a page has to follow these rules. It must have no added text or captions beyond blank lines, and keep the required attribution notice in place, unedited, and easy to see at its original size. It can have no more than two images, and they must be linked directly from Wikipedia or Wikimedia Commons (no images uploaded from your device). It can't have voice notes (those are recorded on your device) or polls (ads can't collect votes). A page can also have video, audio, and social-post embeds added with the editor's own tools. YouTube, Spotify, Instagram, X and Streamable are the allowed sources, with one embed per platform at most. Embeds added any other way aren't allowed. Ads still follow the Responsible Use section above. They also can't contain sexual or adult content, or use images, embeds, attribution or branding to pretend to be a person, brand or organisation, or to mislead viewers about who or what the ad is from. We check these rules automatically before an ad can go live or be updated. We may refuse or take down an ad that no longer follows them, or that breaks these terms. An ad and its page are the same thing, so reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app, full-screen, before a note they open. It isn't only for people who have its link. Everyone sees ads, including people who've bought Pro, but not before every note, because the app spaces them out. People can skip an ad once a short countdown finishes, or go back at any time. We can't promise an ad will get any particular number of views in a given time, that the ad service will always be available, or any particular result from an ad being shown.</p>
@@ -7035,7 +7075,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>You can pick up to 6 preset amounts, and choose whether visitors can type their own amount within limits you set. A single payment can be up to 10,000 in the currency you pick: US dollars, euros, pounds, Canadian dollars or Australian dollars. You can pause payments and turn them back on whenever you like. The list in the app is built from notices Stripe sends us. It's there to help you and isn't your official record. A payment might show up late, or in rare cases not at all, so check your Stripe account for the real numbers. We can't promise payments will always work, or that anyone will pay. If you unpublish the page, the block stops working and its settings are deleted after about 30 days. We keep small payment records (the amount, currency, time and reference numbers), as the Privacy Policy explains. We can't take down a payments block on its own, only the page it's on, so we may take down that whole page if it breaks these terms. See the Privacy Policy's "Payments" section for what's recorded when someone pays.</p>
       <p>If you're the one paying, you're paying the page's author, not us. Only pay people you trust, and ask them about refunds. We don't promise what they'll do with the money.</p>
       <h3>Stories, Subscriptions &amp; Likes</h3>
-      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags and preview images. It also lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description and tags, just like anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. Your display name and profile picture are optional. If you add them, they show on your stories, on your comments and on text box messages you send as yourself (unless you comment as Anonymous), and to your subscribers. If you invite someone to edit a page and they block you, your name and picture show in their blocked list too. Your "Comment as" and "Story picture" choices still apply. In Settings, "Story picture" lets you choose whether your story ring shows your profile picture, the first image in your note, or never your picture. That choice is saved with your account. They don't have to be your real name or profile picture, but they can't pretend to be another person, account or brand, or mislead viewers about who's posting.</p>
+      <p>Turning on "Show in stories" for a published note shows it to other people using the app as a story, along with its title, description, tags and preview images. It also lets them subscribe to your account, whether or not they have the note's link. You're responsible for what you show in your stories, including a note's title, description and tags, just like anything else you publish, and the Responsible Use section above applies. We may remove a note from stories, or suspend your ability to use stories or subscriptions, for the same reasons we can act on any other published content. Your display name and profile picture are optional. If you add them, they show on your stories, on your comments and on text box messages you send as yourself (unless you comment as Anonymous), and to your subscribers. If a page's author lets editors see the team, they also show to the other editors of that page. If you invite someone to edit a page and they block you, your name and picture show in their blocked list too. Your "Comment as" and "Story picture" choices still apply. In Settings, "Story picture" lets you choose whether your story ring shows your profile picture, the first image in your note, or never your picture. That choice is saved with your account. They don't have to be your real name or profile picture, but they can't pretend to be another person, account or brand, or mislead viewers about who's posting.</p>
       <p>A signed-in account can also like a published note. Likes are a simple way to say thanks. As its author, you can see each note's own like count on its card in your Published and Stories tabs, and anyone who sees the note in their Subscribed feed or Liked tab can see it too. Nobody sees who liked it. Likes on a note are removed if it's unpublished or its author's account is deleted. Please don't misuse likes, like using multiple accounts or automated tools to push a note's count up or down. We may remove likes, or suspend your ability to like, for the same reasons we can act on any other use of the app that breaks these terms. See the Privacy Policy's "Stories, subscriptions &amp; likes" section for what's recorded about likes.</p>
       <h3>All My Notes (Settings)</h3>
       <p>In Settings, "All my notes" gives you four shortcuts that change all your published pages at once: "Always show in stories", "Always show comments", "Hide comments on all pages" and "Disable comments on all pages". They only work when you're signed in. Turning one on changes every page you've already published and every page you publish after that. Turning one off just stops it from changing pages. It doesn't undo anything, so your pages keep their current settings until you change them. "Always show comments" and "Hide comments on all pages" are opposites, so turning one on turns the other off. If you change one page's own switches in its Publish sheet later, that page's choice wins.</p>
@@ -7257,16 +7297,28 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
         <div id="pub-tm-head">
           <div id="pub-tm-load" class="pub-status"></div>
           <div id="pub-tm-owner" style="display:none">
+            <p id="pub-bl-help" class="bkp-help">These people can&rsquo;t invite you to edit their notes. Unblock someone to let them invite you again.</p>
             <p class="bkp-help">Ask a friend for their invite code and add it below. They get an alert and can say yes or no. You can remove them any time.</p>
             <div class="pub-tm-add">
               <input id="pub-tm-code" class="com-field" placeholder="Their invite code" maxlength="24" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();_pubTeamsInvite()}">
               <button id="pub-tm-invite" type="button" class="ebtn-pri" onclick="_pubTeamsInvite()">Invite</button>
             </div>
             <div id="pub-tm-status" class="pub-status"></div>
+            <div class="pub-opts" id="pub-tm-listrow">
+              <label class="nb-switch-wrap" for="pub-tm-list-switch">
+                <span class="nb-switch-label">Editors can see the team</span>
+                <span class="nb-switch">
+                  <input type="checkbox" id="pub-tm-list-switch" class="nb-switch-input" onchange="_pubTeamsOnListToggle(this.checked)">
+                  <span class="nb-switch-track"><span class="nb-switch-thumb"></span></span>
+                </span>
+              </label>
+              <p class="bkp-help">When on, every editor sees who else is on this note, with you marked as Author. Anyone who comments as Anonymous stays unnamed. Editors are told when you change this.</p>
+            </div>
             <div id="pub-tm-sec"><span id="pub-tm-sec-title">Editors</span><span id="pub-tm-count"></span></div>
           </div>
           <div id="pub-tm-editor" style="display:none">
             <p id="pub-tm-editor-txt" class="bkp-help"></p>
+            <div id="pub-tm-esec" style="display:none"><span id="pub-tm-esec-title">Team</span><span id="pub-tm-ecount"></span></div>
           </div>
         </div>
         <div id="pub-tm-list" class="pub-tm-list"></div>
@@ -8893,10 +8945,18 @@ function nbPollKit() {
   function load(b) {
     var S = b._plS, L = b._plL, bad = 'Couldn\u2019t load the poll. Check your connection and reload.';
     post(L, '/poll/state', { slug: L.slug, poll: b.getAttribute('data-pl-id'), t: token() }).then(function(r) {
-      if (r.status === 200 && r.data && r.data.ok) { S.msg = ''; S.kind = ''; applyState(b, r.data); draw(b); }
+      if (r.status === 200 && r.data && r.data.ok) { S.failed = false; S.msg = ''; S.kind = ''; applyState(b, r.data); draw(b); }
       else if (r.status === 404) { S.loading = false; S.locked = true; note(b, 'This poll isn\u2019t available right now.', 'err', true); }
-      else { S.loading = false; note(b, bad, 'err', true); }
-    }, function() { S.loading = false; note(b, bad, 'err', true); });
+      else { S.loading = false; note(b, bad, 'err', true); retry(b); }
+    }, function() { S.loading = false; note(b, bad, 'err', true); retry(b); });
+  }
+  // A load that failed tries again on its own (2s, 4s, 6s, 8s, 10s) and as soon as the connection is back; the message clears when one works.
+  function retry(b) {
+    var S = b._plS;
+    S.failed = true; S.tries = (S.tries || 0) + 1;
+    if (S.tries > 5) return;
+    clearTimeout(S.rt);
+    S.rt = setTimeout(function() { if (b.isConnected && S.failed) load(b); }, Math.min(2000 * S.tries, 10000));
   }
   // After a vote was counted: the thank-you (toast and under the poll), then the author's choice (stay, replace the poll, open a link)
   function done(b, changed) {
@@ -8960,6 +9020,7 @@ function nbPollKit() {
           if (cached && cached.length) { S.voted = cached; S.sel = cached.slice(); S.view = 'res'; }
           S.loading = true;
           setTimeout(function() { load(b); }, 0);
+          window.addEventListener('online', function() { if (S.failed && b.isConnected) { S.tries = 0; load(b); } });
         }
       }
     }
@@ -9164,10 +9225,19 @@ function nbTextboxKit() {
     var S = b._tbS, L = b._tbL;
     post(L, '/textbox/state', { slug: L.slug, box: b.getAttribute('data-tb-id') }).then(function(r) {
       S.loading = false;
-      if (r.status === 200 && r.data && r.data.ok) { S.closed = !!r.data.closed; S.full = !!r.data.full; }
+      if (r.status === 200 && r.data && r.data.ok) { S.failed = false; S.closed = !!r.data.closed; S.full = !!r.data.full; }
       else if (r.status === 404) { S.locked = true; say(b, 'This box isn\u2019t available right now.', 'err', true); }
+      else retry(b);
       draw(b);
-    }, function() { S.loading = false; draw(b); });
+    }, function() { S.loading = false; retry(b); draw(b); });
+  }
+  // A load that failed tries again on its own (2s, 4s, 6s, 8s, 10s) and as soon as the connection is back.
+  function retry(b) {
+    var S = b._tbS;
+    S.failed = true; S.tries = (S.tries || 0) + 1;
+    if (S.tries > 5) return;
+    clearTimeout(S.rt);
+    S.rt = setTimeout(function() { if (b.isConnected && S.failed) load(b); }, Math.min(2000 * S.tries, 10000));
   }
   function valOf(f, t) {
     var c = cOf(f), x;
@@ -9303,7 +9373,7 @@ function nbTextboxKit() {
       b.addEventListener('change', touched);
       if (!editor) {
         if (!live || !live.slug) { S.locked = true; S.msg = 'Sending works on the published page.'; S.kind = ''; }
-        else { S.loading = true; setTimeout(function() { load(b); hello(b); helloWatch(b); }, 0); }
+        else { S.loading = true; setTimeout(function() { load(b); hello(b); helloWatch(b); }, 0); window.addEventListener('online', function() { if (S.failed && b.isConnected) { S.tries = 0; load(b); } }); }
       }
     }
     draw(b);
@@ -9475,11 +9545,21 @@ function nbPayKit() {
       var d = r && r.data;
       S.loading = false;
       if (r.status === 200 && d && d.ok) {
+        S.failed = false;
         S.srv = { cur: String(d.cur || ''), amts: Array.isArray(d.amts) ? d.amts.filter(function(n) { return typeof n === 'number'; }) : [], custom: d.custom !== false, min: d.min >= 1 ? d.min : 1, max: d.max >= 1 ? d.max : 500 };
         if (!d.open) { S.locked = true; S.lockMsg = d.why === 'closed' ? 'This page isn\u2019t taking payments right now.' : d.why === 'soon' ? 'Paying inside this page isn\u2019t available yet.' : 'Payments aren\u2019t available on this page right now.'; }
       } else if (r.status === 404) { S.locked = true; S.lockMsg = 'Payments aren\u2019t available on this page right now.'; }
+      else retry(b);
       draw(b);
-    }, function() { S.loading = false; draw(b); });
+    }, function() { S.loading = false; retry(b); draw(b); });
+  }
+  // A load that failed tries again on its own (2s, 4s, 6s, 8s, 10s) and as soon as the connection is back.
+  function retry(b) {
+    var S = b._pyS;
+    S.failed = true; S.tries = (S.tries || 0) + 1;
+    if (S.tries > 5) return;
+    clearTimeout(S.rt);
+    S.rt = setTimeout(function() { if (b.isConnected && S.failed) load(b); }, Math.min(2000 * S.tries, 10000));
   }
   function bind(b, live, editor) {
     var S;
@@ -9507,7 +9587,7 @@ function nbPayKit() {
       });
       if (!editor) {
         if (!live || !live.slug) { S.locked = true; S.lockMsg = 'Payments work on the published page.'; }
-        else { S.loading = true; setTimeout(function() { load(b); }, 0); }
+        else { S.loading = true; setTimeout(function() { load(b); }, 0); window.addEventListener('online', function() { if (S.failed && b.isConnected) { S.tries = 0; load(b); } }); }
       }
     }
     draw(b);
@@ -15527,13 +15607,19 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   // be followed with fetch), but Spotify's oEmbed API accepts it and
   // returns the embed iframe for whatever it points at. Both documented
   // bases are tried; the failure reasons are joined into the console warning.
-  function _spotifyOembed(base, url) {
+  function _spotifyOembed(base, url, n) {
+    n = n || 0;
     return fetch(base + '/oembed?url=' + encodeURIComponent(url))
       .then(function(r) { if (!r.ok) throw new Error(base.split('//')[1] + ' HTTP ' + r.status); return r.json(); })
       .then(function(j) {
         var parsed = parseSpotifyUrl(j && j.html);
         if (!parsed) throw new Error(base.split('//')[1] + ' returned no embed');
         return parsed;
+      })
+      .catch(function(e) {
+        // fetch() rejects with a TypeError when the connection dropped: try again twice before giving up
+        if (e && e.name === 'TypeError' && n < 2) return new Promise(function(r) { setTimeout(r, 1200 * (n + 1)); }).then(function() { return _spotifyOembed(base, url, n + 1); });
+        throw e;
       });
   }
   function _resolveSpotifyShort(url) {
@@ -27258,18 +27344,20 @@ function _nbLegalApply(kind) {
   if (be && be > ce) { el.innerHTML = _nbLegalBundled[kind]; return; }
   try { el.innerHTML = _nbLegalClean(c.html); } catch (e) { el.innerHTML = _nbLegalBundled[kind]; _nbLog('legal apply', e); }
 }
+let _nbLegalFail = {}, _nbLegalTries = 0; // kinds that couldn't load; retried by the reconnect job below (6 times at most)
 async function nbLegalSync(kind) {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/legal/' + kind);
-    if (!res.ok) return;
+    if (!res.ok) { if (res.status >= 500) _nbLegalFail[kind] = 1; return; }
+    delete _nbLegalFail[kind];
     const j = await res.json();
     const cur = _nbLegalCached(kind);
     // version 0 = nothing published yet: keep the built-in copy.
     if (!j || !(j.version > 0) || typeof j.html !== 'string' || (cur && cur.v >= j.version)) return;
     try { localStorage.setItem(_nbLegalKey(kind), JSON.stringify({ v: j.version, html: j.html, at: j.updatedAt || 0 })); } catch (e) { return; }
     _nbLegalApply(kind);
-  } catch (e) { _nbLog('legal sync', e); }
+  } catch (e) { _nbLog('legal sync', e); if (_nbIsNetworkFailure(e)) _nbLegalFail[kind] = 1; }
 }
 function nbLegalSyncAll() { Object.keys(NB_LEGAL).forEach(nbLegalSync); }
 setTimeout(nbLegalSyncAll, 6000);
@@ -31180,13 +31268,19 @@ function _pubDefaultSlug(note) {
 function _pubUrlFor(slug) { return NB_PUBLISH_API.replace(/\/$/, '') + '/@' + slug; }
 // Called from the editor iframes (parent.nbResolveShortLink): the worker follows
 // Instagram / X share-link redirects, which browsers can't read (CORS).
-function nbResolveShortLink(url) {
+function nbResolveShortLink(url, n) {
+  n = n || 0;
   return fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/resolve-link?u=' + encodeURIComponent(url))
     .then(function(r) {
       return r.json().catch(function() { return {}; }).then(function(j) {
         if (!r.ok || !j.id) throw new Error((j && j.error) || ('HTTP ' + r.status));
         return j;
       });
+    })
+    .catch(function(e) {
+      // a dropped connection (fetch rejects with a TypeError): try again twice before the caller reports it
+      if (e && e.name === 'TypeError' && n < 2) return new Promise(function(r) { setTimeout(r, 1200 * (n + 1)); }).then(function() { return nbResolveShortLink(url, n + 1); });
+      throw e;
     });
 }
 // Swaps a button (or link) between its normal label and a spinner +
@@ -31594,6 +31688,7 @@ function _pubUserClose() {
 }
 function closePublishSheet() {
   _pubTeamsExit();
+  _nbBlocksExit();
   document.getElementById('publish-overlay').classList.remove('open');
   unlockScroll();
   clearTimeout(_pubSlugCheckTimer);
@@ -31890,7 +31985,7 @@ function _nbAskResurfaceStories() {
 // (its promise left unresolved, which would leave callers such as the invitation tap stuck).
 let _nbAskChain = Promise.resolve();
 function _nbAskConfirm(...a) { const run = _nbAskChain.then(() => _nbAskConfirmNow(...a)); _nbAskChain = run.catch(() => {}); return run; }
-function _nbAskConfirmNow(title, body, okLabel, cancelLabel, neverLabel, lockBackdrop) {
+function _nbAskConfirmNow(title, body, okLabel, cancelLabel, neverLabel, lockBackdrop, neutral) { // neutral: the confirm button takes the theme's blue/pink instead of the destructive red
   return new Promise(resolve => {
     const ov = document.getElementById('delete-overlay');
     const titleEl = document.querySelector('#delete-dialog .rdlg-title');
@@ -31903,6 +31998,7 @@ function _nbAskConfirmNow(title, body, okLabel, cancelLabel, neverLabel, lockBac
     cancelBtn.textContent = cancelLabel || 'Cancel';
     confirmBtn.textContent = okLabel;
     confirmBtn.disabled = false;
+    confirmBtn.classList.toggle('rdlg-ok--blue', !!neutral);
     // Optional third choice: resolves 'never' (truthy, so only pass neverLabel from callers that check for it).
     // With the third choice, the two dismissals sit together on the first row and the confirm drops to a row below.
     const row1 = document.getElementById('delete-dialog-row1'), row2 = document.getElementById('delete-dialog-row2');
@@ -31914,7 +32010,7 @@ function _nbAskConfirmNow(title, body, okLabel, cancelLabel, neverLabel, lockBac
     const done = (val) => {
       window._nbAskConfirmLocked = false;
       ov.classList.remove('open'); cancelBtn.textContent = 'Cancel'; neverBtn.style.display = 'none';
-      confirmBtn.style.marginTop = ''; row1.appendChild(confirmBtn);
+      confirmBtn.style.marginTop = ''; confirmBtn.classList.remove('rdlg-ok--blue'); row1.appendChild(confirmBtn);
       resolve(val);
     };
     cancelBtn.onclick = () => done(false);
@@ -32035,6 +32131,7 @@ async function _pubTeamsLoad() {
   const ld = document.getElementById('pub-tm-load');
   document.getElementById('pub-tm-owner').style.display = 'none';
   document.getElementById('pub-tm-editor').style.display = 'none';
+  document.getElementById('pub-tm-esec').style.display = 'none';
   document.getElementById('pub-tm-foot').style.display = 'none';
   _pubTeamsHistView(false);
   document.getElementById('pub-tm-list').textContent = ''; document.getElementById('pub-tm-hist-list').textContent = ''; // the lists sit outside the owner block, so a stale or empty one would show under the load/offline message
@@ -32055,6 +32152,46 @@ async function _pubTeamsLoad() {
     ld.className = _pubTeamsLoadFailed ? 'pub-status' : 'pub-status taken'; ld.textContent = _pubTeamsMsg(e, 'Couldn\u2019t load the team.');
   }
 }
+// An editor's view of the team, shown only when the author allows it: the author first with an "Author" badge, then the other active editors.
+function _pubTeamsEditorList(d) {
+  const esec = document.getElementById('pub-tm-esec'), list = document.getElementById('pub-tm-list');
+  const team = d.listShared && Array.isArray(d.team) ? d.team : null;
+  esec.style.display = team ? '' : 'none';
+  if (!team) return;
+  document.getElementById('pub-tm-ecount').textContent = team.length + (team.length === 1 ? ' person' : ' people');
+  team.forEach(m => {
+    const row = _pubTeamsEl('div', 'pub-tm-row pub-tm-card'), main = _pubTeamsEl('div', 'pub-tm-main'), who = _pubTeamsEl('div', 'pub-tm-who');
+    main.appendChild(_pubTeamsAvatar({ name: m.name || (m.author ? 'Author' : 'Anonymous'), authorId: m.authorId }));
+    const nm = _pubTeamsEl('div', 'pub-tm-name', (m.name || 'Anonymous') + (m.me ? ' (you)' : ''));
+    if (m.author) {
+      const b = _pubTeamsEl('span', 'pub-tm-badge');
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.2 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
+      b.appendChild(document.createTextNode('Author'));
+      nm.appendChild(b);
+    }
+    who.appendChild(nm);
+    who.appendChild(_pubTeamsEl('div', 'pub-tm-sub', m.author ? 'Owns this note' : (m.joinedAt ? 'Joined ' + _pubTeamsDate(m.joinedAt) : 'Editor')));
+    main.appendChild(who);
+    row.appendChild(main);
+    list.appendChild(row);
+  });
+}
+// The author's switch: editors see everyone on the team, or only the author. Saved on the server at once; the switch goes back if that fails.
+let _pubTeamsListBusy = false;
+async function _pubTeamsOnListToggle(checked) {
+  const note = _pubFindNote(_pubNoteId), sw = document.getElementById('pub-tm-list-switch');
+  if (!note || !note.publishedSlug || !sw) return;
+  if (_pubTeamsListBusy || _pubOfflineGuard()) { sw.checked = !checked; return; }
+  _pubTeamsListBusy = true; sw.disabled = true;
+  try {
+    const res = await _pubTeamsReq('/teams/note/' + encodeURIComponent(note.publishedSlug) + '/list', 'PUT', { shared: !!checked });
+    if (!res.ok) throw new Error(await _pubTeamsErr(res, 'Couldn\u2019t change this.'));
+    showToast(checked ? 'Editors can now see the team' : 'Editors can no longer see the team');
+  } catch (e) {
+    _nbLog('team list', e); sw.checked = !checked;
+    showToast(_pubTeamsMsg(e, 'Couldn\u2019t change this'));
+  } finally { _pubTeamsListBusy = false; sw.disabled = false; }
+}
 function _pubTeamsDate(ts) { try { return new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }
 function _pubTeamsRender(note, d) {
   const owner = d.role === 'owner';
@@ -32063,8 +32200,11 @@ function _pubTeamsRender(note, d) {
   document.getElementById('pub-tm-hist').style.display = owner ? '' : 'none';
   document.getElementById('pub-tm-leave').style.display = owner ? 'none' : '';
   document.getElementById('pub-tm-foot').style.display = 'flex';
+  { const sw = document.getElementById('pub-tm-list-switch'); if (sw) { sw.checked = !!d.listShared; sw.disabled = false; } }
+  document.getElementById('pub-tm-esec').style.display = 'none';
   if (!owner) {
     document.getElementById('pub-tm-list').textContent = '';
+    _pubTeamsEditorList(d);
     document.getElementById('pub-tm-editor-txt').textContent = 'You can edit this note' + (d.ownerName ? ' with ' + d.ownerName : '') + '. Only the author can unpublish it, change who has access, change payments, remove polls or forms, or change poll options.';
     return;
   }
@@ -32134,20 +32274,30 @@ function _pubTeamsAvatar(m) {
   const nm = String((m && m.name) || '').trim();
   av.textContent = (Array.from(nm)[0] || '?').toUpperCase();
   const sub = m && (m.authorId || m.authorSub || m.sub);
-  if (sub) {
-    const img = new Image();
-    img.alt = ''; img.className = 'pub-tm-av-img'; img.decoding = 'async';
-    img.onload = () => { av.textContent = ''; av.appendChild(img); };
-    img.src = NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(sub) + '?v=' + (typeof _nbProfileImageVersion !== 'undefined' ? _nbProfileImageVersion : 0);
-  }
+  if (sub) _pubTeamsAvLoad(av, sub);
   return av;
+}
+// A picture that failed on a dropped connection is queued here and retried by the reconnect job below; a missing picture (404) keeps the letter.
+let _pubTeamsAvFail = [];
+function _pubTeamsAvLoad(av, sub) {
+  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(sub) + '?v=' + (typeof _nbProfileImageVersion !== 'undefined' ? _nbProfileImageVersion : 0))
+    .then(r => r.ok ? r.blob() : Promise.reject(new Error('no picture')))
+    .then(blob => {
+      const u = URL.createObjectURL(blob), img = new Image();
+      img.alt = ''; img.className = 'pub-tm-av-img'; img.decoding = 'async';
+      img.onload = () => { av.textContent = ''; av.appendChild(img); URL.revokeObjectURL(u); };
+      img.onerror = () => URL.revokeObjectURL(u);
+      img.src = u;
+    })
+    .catch(e => { if (_pubTeamsNetFail(e)) _pubTeamsAvFail.push({ av, sub }); });
 }
 // Round icon buttons for the rows (remove editor, cancel invitation, restore a version). Same stroke weight as the header icons.
 const _PUB_TM_ICONS = {
   minus: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
-  undo: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>'
+  undo: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+  unblock: '<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>'
 };
 function _pubTeamsIconBtn(kind, label) {
   const b = _pubTeamsEl('button', 'pub-tm-ic'); b.type = 'button';
@@ -32469,115 +32619,137 @@ async function _nbTeamBlocksPage(cursor) {
   const d = await res.json();
   return { list: d.blocked || [], next: d.nextCursor || null };
 }
-let _nbTeamBlocksBusy = false;
+let _nbBlocksSess = null;
+// Leaves the blocked-people view and puts the shared Teams sheet back the way a note's Online Publishing sheet expects it.
+function _nbBlocksExit() {
+  const sess = _nbBlocksSess; if (!sess) return;
+  _nbBlocksSess = null; sess.open = false;
+  for (const u of sess.blobUrls) { try { URL.revokeObjectURL(u); } catch (e) {} }
+  const g = id => document.getElementById(id);
+  g('publish-sheet').classList.remove('is-teams', 'is-blocks');
+  g('pub-tm-list').textContent = ''; g('pub-tm-load').textContent = '';
+  g('pub-tm-owner').style.display = 'none';
+  g('publish-hdr-title').textContent = 'Online Publishing';
+  g('pub-tm-sec-title').textContent = 'Editors'; g('pub-tm-count').textContent = '';
+  _pubTeamsSheetState(_pubFindNote(_pubNoteId));
+}
 async function _nbTeamBlocksOpen() {
-  if (!nbIsSignedIn() || _pubOfflineGuard() || _nbTeamBlocksBusy) return; // a second tap while the list is loading does nothing
-  _nbTeamBlocksBusy = true;
-  let page;
-  try { page = await _nbTeamBlocksPage(null); }
-  catch (e) { _nbLog('team blocks', e); showToast('Couldn\u2019t load the list' + _nbFailureReason(e)); return; }
-  finally { _nbTeamBlocksBusy = false; }
-  if (!page.list.length) { _nbTeamInvBlocked = 0; try { window._nbStRefresh && window._nbStRefresh(); } catch (e) {} showToast('You haven\u2019t blocked anyone'); return; }
-  const ov = document.getElementById('delete-overlay');
-  const titleEl = document.querySelector('#delete-dialog .rdlg-title');
-  const bodyEl = document.querySelector('#delete-dialog .rdlg-body');
-  const cancelBtn = document.getElementById('delete-dialog-cancel');
-  const confirmBtn = document.getElementById('delete-dialog-confirm');
-  const neverBtn = document.getElementById('delete-dialog-never');
-  titleEl.textContent = 'Blocked from inviting you';
-  bodyEl.textContent = '';
-  confirmBtn.style.display = 'none'; neverBtn.style.display = 'none';
-  cancelBtn.textContent = 'Close';
-  // Title and Close stay put; only the names scroll.
-  const dlg = document.getElementById('delete-dialog');
-  dlg.style.maxHeight = '78vh'; dlg.style.display = 'flex'; dlg.style.flexDirection = 'column';
-  bodyEl.style.overflowX = 'hidden'; bodyEl.style.overflowY = 'auto'; bodyEl.style.flex = '1 1 auto'; bodyEl.style.minHeight = '0'; bodyEl.style.overscrollBehavior = 'contain';
-  const blobUrls = []; let open = true, cursor = page.next, moreBtn = null, loadingMore = false;
-  const close = () => {
-    open = false;
-    for (const u of blobUrls) { try { URL.revokeObjectURL(u); } catch (e) {} }
-    ov.classList.remove('open'); cancelBtn.textContent = 'Cancel'; confirmBtn.style.display = ''; bodyEl.textContent = '';
-    dlg.style.maxHeight = ''; dlg.style.display = ''; dlg.style.flexDirection = '';
-    bodyEl.style.overflowX = ''; bodyEl.style.overflowY = ''; bodyEl.style.flex = ''; bodyEl.style.minHeight = ''; bodyEl.style.overscrollBehavior = '';
+  if (!nbIsSignedIn()) return;
+  const g = id => document.getElementById(id);
+  if (g('publish-overlay').classList.contains('open')) return; // a second tap (or another sheet being up) does nothing
+  // Same sheet as Teams (sticky "Blocked" header, editor-style cards, every theme), so nothing here is styled by hand.
+  _pubTeamsHistView(false);
+  g('publish-sheet').classList.add('is-teams', 'is-blocks');
+  g('publish-back').hidden = true; g('publish-teams').hidden = true;
+  g('publish-hdr-title').textContent = 'Blocked from inviting you';
+  g('pub-tm-editor').style.display = 'none'; g('pub-tm-owner').style.display = ''; g('pub-tm-foot').style.display = 'none';
+  g('pub-tm-sec-title').textContent = 'Blocked';
+  const list = g('pub-tm-list'), countEl = g('pub-tm-count'), ld = g('pub-tm-load');
+  list.textContent = ''; countEl.textContent = ''; ld.className = 'pub-status'; ld.textContent = ''; g('pub-teams-body').scrollTop = 0;
+  const sess = _nbBlocksSess = { open: true, blobUrls: [], failed: false, moreFailed: false, picFail: [], retry: null, retryMore: null };
+  let cursor = null, moreBtn = null, loadingMore = false, loading = false;
+  const rowCount = () => list.querySelectorAll('[data-blk-row]').length;
+  // Picture for one person. A dropped connection queues it for the reconnect job; a missing picture (404) just keeps the letter.
+  const loadPic = (p, av, row) => {
+    fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(p.id) + '?v=' + Date.now(), { cache: 'no-store', headers: { 'Authorization': 'Bearer ' + nbSessionToken() } })
+      .then(r => r.ok ? r.blob() : Promise.reject(new Error('no picture')))
+      .then(blob => {
+        if (!sess.open || !row.isConnected) return;
+        const u = URL.createObjectURL(blob); sess.blobUrls.push(u);
+        const im = document.createElement('img');
+        im.alt = ''; im.className = 'pub-tm-av-img';
+        im.onload = () => { av.textContent = ''; av.appendChild(im); };
+        im.src = u;
+      }).catch(e => { if (sess.open && row.isConnected && _pubTeamsNetFail(e)) sess.picFail.push(() => loadPic(p, av, row)); });
   };
-  cancelBtn.onclick = close;
-  ov.onclick = (e) => { if (e.target === ov) close(); };
-  const rowCount = () => bodyEl.querySelectorAll('[data-blk-row]').length;
-  const addRows = (list) => {
-    if (moreBtn) moreBtn.remove();
-    for (const p of list) {
-      const row = document.createElement('div');
+  const setCount = () => { const n = Math.max(_nbTeamInvBlocked, rowCount()); countEl.textContent = n + (n === 1 ? ' person' : ' people'); };
+  const addRows = (rows) => {
+    if (moreBtn) { moreBtn.remove(); moreBtn = null; }
+    for (const p of rows) {
+      const row = _pubTeamsEl('div', 'pub-tm-row pub-tm-card'), main = _pubTeamsEl('div', 'pub-tm-main'), who = _pubTeamsEl('div', 'pub-tm-who'), rf = _pubTeamsEl('div', 'pub-tm-rf end');
       row.setAttribute('data-blk-row', '1');
-      row.style.cssText = 'display:flex;align-items:center;gap:.6rem;padding:.45rem 0;border-bottom:1px solid rgba(128,128,128,.2);min-width:0';
-      const av = document.createElement('div');
-      av.style.cssText = 'position:relative;flex:0 0 auto;width:34px;height:34px;border-radius:50%;overflow:hidden;background:rgba(128,128,128,.25);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:.85rem';
       const nameTxt = (p.name || '').trim();
-      av.textContent = nameTxt ? Array.from(nameTxt)[0].toUpperCase() : '?';
-      if (p.hasPicture && p.id) {
-        fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(p.id) + '?v=' + Date.now(), { cache: 'no-store', headers: { 'Authorization': 'Bearer ' + nbSessionToken() } })
-          .then(r => r.ok ? r.blob() : Promise.reject(new Error('no picture')))
-          .then(blob => {
-            if (!open || !row.isConnected) return;
-            const u = URL.createObjectURL(blob); blobUrls.push(u);
-            const im = document.createElement('img');
-            im.alt = ''; im.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
-            im.onload = () => { av.textContent = ''; av.appendChild(im); };
-            im.src = u;
-          }).catch(() => {});
-      }
-      const mid = document.createElement('div');
-      mid.style.cssText = 'flex:1 1 auto;min-width:0';
-      const nm = document.createElement('div');
-      nm.textContent = nameTxt || 'Someone';
-      nm.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600';
-      mid.appendChild(nm);
-      if (p.blockedAt) {
-        const dt = document.createElement('div');
-        dt.textContent = 'Blocked ' + new Date(p.blockedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-        dt.style.cssText = 'font-size:.74rem;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-        mid.appendChild(dt);
-      }
-      const btn = document.createElement('button');
-      btn.className = 'rdlg-cancel'; btn.textContent = 'Unblock'; btn.style.cssText = 'flex:0 0 auto;width:auto;margin:0;padding:.4rem .7rem';
+      const av = _pubTeamsEl('span', 'pub-tm-av', nameTxt ? Array.from(nameTxt)[0].toUpperCase() : '?');
+      if (p.hasPicture && p.id) loadPic(p, av, row);
+      main.appendChild(av);
+      who.appendChild(_pubTeamsEl('div', 'pub-tm-name', nameTxt || 'Someone'));
+      if (p.blockedAt) who.appendChild(_pubTeamsEl('div', 'pub-tm-sub', 'Blocked ' + new Date(p.blockedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })));
+      main.appendChild(who); row.appendChild(main);
+      const btn = _pubTeamsIconBtn('unblock', 'Unblock');
       btn.onclick = async () => {
         if (!p.id) { showToast('Couldn\u2019t unblock this person right now. Try again later.'); return; }
-        btn.disabled = true;
+        const who2 = nameTxt || 'this person';
+        const sure = await _nbAskConfirm('Unblock ' + who2 + '?', (nameTxt || 'They') + ' will be able to invite you to edit their notes again.', 'Unblock', 'Cancel', undefined, undefined, true);
+        if (sure !== true || !sess.open) return;
+        _pubTeamsIconBusy(btn, true);
         try {
           const res = await _pubTeamsReq('/teams/blocks/' + encodeURIComponent(p.id), 'DELETE');
           if (!res.ok) throw new Error('unblock ' + res.status);
+          if (!sess.open) return;
           row.remove();
           _nbTeamInvBlocked = Math.max(0, _nbTeamInvBlocked - 1);
           try { window._nbStRefresh && window._nbStRefresh(); } catch (e) {}
-          if (!rowCount()) { if (cursor) loadMore(); else close(); }
-        } catch (e) { _nbLog('team unblock', e); btn.disabled = false; showToast('Couldn\u2019t unblock' + _nbFailureReason(e)); }
+          setCount();
+          if (!rowCount()) { if (cursor) loadMore(); else closePublishSheet(); }
+        } catch (e) { _nbLog('team unblock', e); showToast('Couldn\u2019t unblock' + _nbFailureReason(e)); }
+        finally { _pubTeamsIconBusy(btn, false); } // always releases the busy count, or the sheet couldn't be closed afterwards
       };
-      row.appendChild(av); row.appendChild(mid); row.appendChild(btn); bodyEl.appendChild(row);
+      rf.appendChild(btn); row.appendChild(rf); list.appendChild(row);
     }
     if (cursor) {
-      moreBtn = document.createElement('button');
-      moreBtn.className = 'rdlg-cancel'; moreBtn.textContent = 'Load more people';
-      moreBtn.style.cssText = 'display:block;width:100%;margin:.6rem 0 0';
+      moreBtn = _pubTeamsEl('button', 'ebtn-sec', 'Load more people');
+      moreBtn.type = 'button'; moreBtn.style.cssText = 'display:block;width:100%;flex:none';
       moreBtn.onclick = () => loadMore();
-      bodyEl.appendChild(moreBtn);
+      list.appendChild(moreBtn);
     }
+    setCount();
   };
-  const loadMore = async () => {
+  // Next 20 people. A dropped connection arms the reconnect job at the bottom of the file (auto = that retry, so no repeat toast).
+  const loadMore = async (auto) => {
     if (loadingMore || !cursor) return;
-    loadingMore = true;
+    loadingMore = true; sess.moreFailed = false;
     if (moreBtn) { moreBtn.disabled = true; moreBtn.textContent = 'Loading\u2026'; }
     try {
       const pg = await _nbTeamBlocksPage(cursor);
-      if (!open) return;
+      if (!sess.open) return;
       cursor = pg.next; addRows(pg.list);
-      if (!rowCount() && !cursor) close();
+      if (!rowCount() && !cursor) closePublishSheet();
     } catch (e) {
       _nbLog('team blocks more', e);
+      if (!sess.open) return;
+      sess.moreFailed = _pubTeamsNetFail(e);
       if (moreBtn) { moreBtn.disabled = false; moreBtn.textContent = 'Load more people'; }
-      showToast('Couldn\u2019t load more' + _nbFailureReason(e));
+      if (auto !== true) showToast(sess.moreFailed ? _pubTeamsMsg(e, '') : 'Couldn\u2019t load more' + _nbFailureReason(e));
     } finally { loadingMore = false; }
   };
-  addRows(page.list);
-  ov.classList.add('open');
+  // First 20, shown inside the sheet like Teams does: offline or a failed load reads as a plain line, and coming back online retries it.
+  const load = async (auto) => {
+    if (loading || !sess.open) return;
+    loading = true; sess.failed = false;
+    ld.className = 'pub-status'; ld.textContent = 'Loading\u2026';
+    try {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        sess.failed = true; ld.textContent = 'You\u2019re offline. The list will load when you\u2019re back online.';
+        if (auto !== true) showToast('You\u2019re offline. This needs a connection.');
+        return;
+      }
+      const page = await _nbTeamBlocksPage(null);
+      if (!sess.open) return;
+      ld.textContent = '';
+      if (!page.list.length) { _nbTeamInvBlocked = 0; try { window._nbStRefresh && window._nbStRefresh(); } catch (e) {} showToast('You haven\u2019t blocked anyone'); closePublishSheet(); return; }
+      cursor = page.next; addRows(page.list);
+    } catch (e) {
+      _nbLog('team blocks', e);
+      if (!sess.open) return;
+      sess.failed = _pubTeamsNetFail(e);
+      ld.className = sess.failed ? 'pub-status' : 'pub-status taken'; ld.textContent = _pubTeamsMsg(e, 'Couldn\u2019t load the list.');
+    } finally { loading = false; }
+  };
+  sess.retry = () => load(true); sess.retryMore = () => loadMore(true);
+  sess.retryPics = () => { const q = sess.picFail.splice(0); q.forEach(f => f()); };
+  g('publish-overlay').classList.add('open');
+  lockScroll();
+  load();
 }
 async function nbUpdatePublishedNote() {
   const _retrying = _nbTeamsRetry; _nbTeamsRetry = false; // a retry after "Keep mine" doesn't ask about stories again; an early return below mustn't leave the flag set
@@ -32747,13 +32919,15 @@ function _pubOnAllowCommentsToggle(checked) {
   showToast(checked ? 'New comments allowed' : 'New comments disabled');
   _pubQueueCommentFlags(id, { allowComments: checked }, { allowComments: wasAllow }, 'Couldn’t ' + (checked ? 'allow' : 'disable') + ' new comments');
 }
+let _pubCommentsSyncFail = null; // note id whose comments setting couldn't be read; retried by the reconnect job below
 async function _pubSyncCommentsFlag(id) {
   const note = _pubFindNote(id);
   if (!note || !note.publishedSlug || _pubCommentsPending || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/comments/' + encodeURIComponent(note.publishedSlug), { cache: 'no-store' });
-    if (!res.ok) return;
+    if (!res.ok) { if (res.status >= 500 || res.status === 429) _pubCommentsSyncFail = id; return; }
     const d = await res.json();
+    if (_pubCommentsSyncFail === id) _pubCommentsSyncFail = null;
     if (!d || typeof d.enabled !== 'boolean' || _pubCommentsPending) return;
     const cur = _pubFindNote(id);
     if (!cur) return;
@@ -32764,7 +32938,7 @@ async function _pubSyncCommentsFlag(id) {
     _pubSaveNoteFields(id, fields);
     const now = _pubFindNote(id);
     if (now && _pubNoteId === id) _pubPaintCommentSwitches(now);
-  } catch (e) { _nbLog('comments flag sync', e); }
+  } catch (e) { _nbLog('comments flag sync', e); if (_nbIsNetworkFailure(e)) _pubCommentsSyncFail = id; }
 }
 // ---- Settings > All my notes ----
 // Four rules that apply to every published page at once and to each page published afterwards (this device). Turning a rule on
@@ -36372,9 +36546,36 @@ nbAddReconnectJob(
 nbAddReconnectJob(
   () => { const b = document.getElementById('pub-tm-hist-list'); return _pubTeamsOn && _pubTeamsHistFailed && !!b && b.dataset.open === '1' && _nbElOpen('publish-overlay'); },
   () => { document.getElementById('pub-tm-hist-list').dataset.open = ''; return _pubTeamsHistory(); });
+// Teams and version-history avatars that couldn't load. Rows that have since gone away are dropped.
+nbAddReconnectJob(() => _pubTeamsAvFail.length > 0 && _nbElOpen('publish-overlay'), () => { _pubTeamsAvFail.splice(0).forEach(x => { if (x.av.isConnected) _pubTeamsAvLoad(x.av, x.sub); }); });
+// Settings > Blocked from inviting you: the list (or its next page) that couldn't load. Closing the sheet ends the retries.
+nbAddReconnectJob(() => !!_nbBlocksSess && _nbBlocksSess.failed && _nbElOpen('publish-overlay'), () => _nbBlocksSess && _nbBlocksSess.retry());
+nbAddReconnectJob(() => !!_nbBlocksSess && _nbBlocksSess.moreFailed && _nbElOpen('publish-overlay'), () => _nbBlocksSess && _nbBlocksSess.retryMore());
+nbAddReconnectJob(() => !!_nbBlocksSess && _nbBlocksSess.picFail.length > 0 && _nbElOpen('publish-overlay'), () => _nbBlocksSess && _nbBlocksSess.retryPics());
 // Notes shared with you that couldn't be fetched, and the invitation setting in Settings.
 nbAddReconnectJob(() => _nbTeamsMineFailed && nbIsSignedIn(), () => _nbTeamsSyncMine());
 nbAddReconnectJob(() => _nbTeamInvAllow === null && _nbTeamInvFailed && !_nbTeamInvLoading && nbIsSignedIn(), () => _nbTeamInvGet());
+// Settings > Ads & invites: the ad level, and the package prices, that couldn't load. Leaving Settings ends the retries.
+nbAddReconnectJob(() => _nbStAdsFailed && nbIsSignedIn() && !!document.getElementById('st-ads-standing'), () => _nbSettingsAdsFetch());
+nbAddReconnectJob(() => _nbStFundFailed && nbIsSignedIn() && !!document.getElementById('st-fund'), () => _nbSettingsFundRender());
+// Publish sheet: the comments on/off setting that couldn't be read.
+nbAddReconnectJob(() => !!_pubCommentsSyncFail && _nbElOpen('publish-overlay') && _pubNoteId === _pubCommentsSyncFail, () => _pubSyncCommentsFlag(_pubCommentsSyncFail));
+// A cancelled Unpublish whose outcome couldn't be checked: ask again until the page is known to be live or down.
+nbAddReconnectJob(() => _pubUnpubRecheck.length > 0, async () => {
+  const list = _pubUnpubRecheck.splice(0);
+  for (const x of list) {
+    const cur = _pubFindNote(x.id);
+    if (!cur || !cur.publishedSlug) continue;
+    const st = await _pubSettleCancelledUnpublishOnce(cur, true);
+    if (st === 'unknown') { if (x.k < 8) _pubUnpubRecheck.push({ id: x.id, k: x.k + 1 }); continue; }
+    if (st === 'down') {
+      if (_pubNoteId === x.id) { try { closePublishSheet(); } catch (e) {} }
+      try { nbRenderNotesScreen(); } catch (e) {}
+    }
+  }
+});
+// Privacy / Terms text that couldn't be refreshed (the built-in copy shows meanwhile).
+nbAddReconnectJob(() => Object.keys(_nbLegalFail).length > 0 && _nbLegalTries < 6, () => { _nbLegalTries++; Object.keys(_nbLegalFail).forEach(k => { delete _nbLegalFail[k]; nbLegalSync(k); }); });
 // Single letter shown in the Log Out dialog avatar until (or unless) an
 // actual picture loads: the cached display name's initial if there is
 // one, else the account email's.
@@ -36500,8 +36701,15 @@ async function _pubUnpublish(note, signal) {
 // Cancel aborts the unpublish request, but the server may already have taken the page down. Ask it before saying what happened;
 // if the page is gone, finish the unpublish here as well, so the note never keeps showing "published" for a page that no longer
 // exists. Returns 'down' (finished here), 'live' (cancelled in time) or 'unknown' (couldn't tell).
+// When the check can't tell (connection dropped), it is asked again by the reconnect job below, up to 8 times.
+let _pubUnpubRecheck = [];
 async function _pubSettleCancelledUnpublish(note) {
-  await new Promise(r => setTimeout(r, 1200)); // a request that was already on its way gets the time to land
+  const st = await _pubSettleCancelledUnpublishOnce(note, false);
+  if (st === 'unknown' && !_pubUnpubRecheck.some(x => x.id === note.id)) _pubUnpubRecheck.push({ id: note.id, k: 0 });
+  return st;
+}
+async function _pubSettleCancelledUnpublishOnce(note, again) {
+  if (!again) await new Promise(r => setTimeout(r, 1200)); // a request that was already on its way gets the time to land
   try {
     const res = await fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/meta/' + encodeURIComponent(note.publishedSlug), { cache: 'no-store' });
     let down = res.status === 404;
@@ -36895,6 +37103,7 @@ function _nbSettingsAdsMount() {
   _nbSettingsAdsPaint();
   if (Date.now() - _nbStAdsAt > 20000) _nbSettingsAdsFetch();
 }
+let _nbStAdsFailed = false; // the last load failed: the reconnect job below retries it while Settings is showing
 async function _nbSettingsAdsFetch() {
   if (!nbIsSignedIn() || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
   const seq = ++_nbStAdsSeq;
@@ -36906,8 +37115,9 @@ async function _nbSettingsAdsFetch() {
     _nbStAds = d.standing || null;
     _nbStBal = Math.max(0, Math.floor(Number(d.creditBalance) || 0)); // unspent views (refunds, invite gifts)
     _nbStAdsAt = Date.now();
+    _nbStAdsFailed = false;
     _nbSettingsAdsPaint();
-  } catch (e) { _nbLog('settings ads', e); }
+  } catch (e) { _nbLog('settings ads', e); if (seq === _nbStAdsSeq) _nbStAdsFailed = true; }
 }
 // Settings > Account rows: display name, subscribers, likes, following and when the account was made. The
 // numbers come from /account/subscriber-count and are cached per account, so the rows show the last known
@@ -38177,9 +38387,154 @@ function nbUpdateCatCounts() {
     if (el.textContent !== t) el.textContent = t;
   });
 }
+// ---- Category pill order -------------------------------------------------------------------------------------------
+// The person's own order is kept on this device as a list of pill keys (the lower-cased name; the Published | Stories and
+// Subscribed | Liked capsules move as one, under 'published' and 'subscribed'). "All" is never in it: it always comes first.
+function _nbCatOrderKey() { return 'nb_cat_order_v1'; }
+function _nbCatKey(c) { return String(c).toLowerCase(); }
+function _nbCatOrderLoad() {
+  try { const a = JSON.parse(localStorage.getItem(_nbCatOrderKey()) || '[]'); return Array.isArray(a) ? a.filter(x => typeof x === 'string') : []; } catch (e) { return []; }
+}
+function _nbCatOrderSave(keys) { try { localStorage.setItem(_nbCatOrderKey(), JSON.stringify(keys)); } catch (e) {} }
+// cats = the pills that exist right now, in their default order (cats[0] is "All"). Saved places win; a pill with no saved place
+// yet (a new category, a feed that just appeared) keeps its default place: right after the pill that precedes it.
+function _nbCatApplyOrder(cats) {
+  const saved = _nbCatOrderLoad();
+  if (!saved.length || cats.length < 3) return cats;
+  const head = cats[0], rest = cats.slice(1), byKey = new Map(rest.map(c => [_nbCatKey(c), c])), placed = [];
+  saved.forEach(k => { const c = byKey.get(k); if (c !== undefined && !placed.includes(c)) placed.push(c); });
+  rest.forEach((c, i) => {
+    if (placed.includes(c)) return;
+    const before = i === 0 ? head : rest[i - 1];
+    placed.splice(before === head ? 0 : placed.indexOf(before) + 1, 0, c);
+  });
+  return [head, ...placed];
+}
+// Saves the bar's current order. Pills that aren't showing right now (no alerts yet, no Teams notes) keep the place they had.
+function _nbCatOrderSaveFromBar(bar) {
+  const now = Array.from(bar.children).map(el => el.getAttribute('data-cat-key')).filter(k => k && k !== 'all');
+  const out = now.slice();
+  let prev = null;
+  _nbCatOrderLoad().forEach(k => {
+    if (now.includes(k)) { prev = k; return; }
+    if (out.includes(k)) return;
+    out.splice(prev === null ? 0 : out.indexOf(prev) + 1, 0, k);
+    prev = k;
+  });
+  _nbCatOrderSave(out.slice(0, 200));
+}
+// Hold a pill to pick it up, slide it along the bar and let go to drop it there. While a finger (or the mouse) is near either
+// edge the bar scrolls by itself, so a pill can travel past what's on screen. The other pills glide out of the way; nothing in
+// the DOM moves until the drop, so the gesture is never cut off by a redraw (those wait until the pill has landed).
+(function _nbCatReorder() {
+  const HOLD_MS = 380, SLOP = 9, EDGE = 64, MAX_STEP = 18;
+  let st = null, noClickUntil = 0;
+  function unitAt(t) {
+    const pill = t && t.closest ? t.closest('#feed-cats .cat-pill') : null;
+    return pill ? (pill.closest('.cat-capsule') || pill) : null;
+  }
+  function measure() {
+    const b = st.bar, items = Array.from(b.children), cs = getComputedStyle(b);
+    st.items = items; st.di = items.indexOf(st.el);
+    st.lefts = items.map(x => x.offsetLeft); st.widths = items.map(x => x.offsetWidth);
+    st.gap = parseFloat(cs.columnGap || cs.gap) || 6;
+    st.pinned = items[0] && items[0].hasAttribute('data-cat-pin');
+    const last = items.length - 1, dw = st.widths[st.di];
+    st.minLeft = st.pinned ? st.lefts[0] + st.widths[0] + st.gap : 0;
+    st.maxLeft = Math.max(st.minLeft, st.lefts[last] + st.widths[last] - dw);
+  }
+  function update() {
+    const b = st.bar, r = b.getBoundingClientRect(), dw = st.widths[st.di];
+    const left = Math.max(st.minLeft, Math.min(st.maxLeft, (st.x - r.left + b.scrollLeft) - st.grab)), mid = left + dw / 2;
+    let t = 0;
+    st.items.forEach((x, i) => { if (i !== st.di && st.lefts[i] + st.widths[i] / 2 < mid) t++; });
+    t = Math.max(st.pinned ? 1 : 0, t);
+    st.t = t;
+    const step = dw + st.gap;
+    st.items.forEach((x, i) => {
+      if (i === st.di) return;
+      const sh = (t > st.di && i > st.di && i <= t) ? -step : (t < st.di && i >= t && i < st.di) ? step : 0;
+      if (x._nbSh !== sh) { x._nbSh = sh; x.style.transform = sh ? 'translateX(' + sh + 'px)' : ''; }
+    });
+    st.el.style.transform = 'translateX(' + (left - st.lefts[st.di]) + 'px) scale(1.06)';
+  }
+  function loop() {
+    if (!st || !st.active) return;
+    const b = st.bar, r = b.getBoundingClientRect();
+    let v = 0;
+    if (st.x < r.left + EDGE) v = -MAX_STEP * Math.pow(Math.min(1, (r.left + EDGE - st.x) / EDGE), 1.5);
+    else if (st.x > r.right - EDGE) v = MAX_STEP * Math.pow(Math.min(1, (st.x - (r.right - EDGE)) / EDGE), 1.5);
+    if (v) { st.acc += v; const whole = Math.trunc(st.acc); if (whole) { st.acc -= whole; b.scrollLeft += whole; } } // some webviews round scrollLeft: carry the remainder
+    update(); // every frame, so the lifted pill keeps up with the finger while the bar scrolls underneath it
+    st.raf = requestAnimationFrame(loop);
+  }
+  function pickUp() {
+    if (!st) return;
+    st.timer = 0;
+    const el = st.el, b = st.bar;
+    if (!el.isConnected || b._nbCatDrag) { st = null; return; }
+    st.active = true; b._nbCatDrag = true;
+    b.classList.add('is-reordering'); el.classList.add('cat-lift');
+    measure();
+    const r = b.getBoundingClientRect();
+    st.grab = (st.x - r.left + b.scrollLeft) - st.lefts[st.di]; // where on the pill it is being held
+    st.items.forEach(x => { x._nbSh = 0; if (x !== el) x.style.transition = 'transform .18s ease'; });
+    try { if (navigator.vibrate) navigator.vibrate(14); } catch (e) {}
+    try { if (!_nbMotionOff()) el.animate([{ scale: '.94' }, { scale: '1.04', offset: .6 }, { scale: '1' }], { duration: 200, easing: 'ease-out' }); } catch (e) {}
+    update();
+    st.raf = requestAnimationFrame(loop);
+  }
+  function drop() {
+    const s = st; st = null;
+    cancelAnimationFrame(s.raf);
+    noClickUntil = Date.now() + 450; // the release would otherwise count as a tap on the pill and open it
+    const b = s.bar, el = s.el, moved = s.t !== s.di;
+    const r0 = el.getBoundingClientRect();
+    s.items.forEach(x => { x.style.transition = ''; x.style.transform = ''; x._nbSh = 0; }); // the shifted pills already sit where the new order puts them
+    if (moved) b.insertBefore(el, s.items.filter(x => x !== el)[s.t] || null);
+    const r1 = el.getBoundingClientRect();
+    const dx = (r0.left + r0.width / 2) - (r1.left + r1.width / 2);
+    const done = () => {
+      el.classList.remove('cat-lift'); b.classList.remove('is-reordering'); b._nbCatDrag = false;
+      const dirty = b._nbCatDirty; b._nbCatDirty = false;
+      if (moved) { _nbCatOrderSaveFromBar(b); buildCatBar(); } // redraw from the saved order so the bar's signature matches it
+      else if (dirty) buildCatBar();
+    };
+    let off = false; try { off = _nbMotionOff(); } catch (e) {}
+    if (off) { done(); return; }
+    const a = el.animate([{ transform: 'translateX(' + dx + 'px) scale(1.06)' }, { transform: 'none' }], { duration: 200, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    a.onfinish = a.oncancel = done;
+  }
+  document.addEventListener('pointerdown', e => {
+    if (st || !e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const el = unitAt(e.target);
+    if (!el || !el.hasAttribute('data-cat-key') || el.hasAttribute('data-cat-pin') || el.parentNode.id !== 'feed-cats' || el.parentNode._nbCatDrag) return;
+    st = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, el, bar: el.parentNode, active: false, acc: 0, raf: 0, timer: 0 };
+    st.timer = setTimeout(pickUp, HOLD_MS);
+  });
+  document.addEventListener('pointermove', e => {
+    if (!st || e.pointerId !== st.id) return;
+    st.x = e.clientX; st.y = e.clientY;
+    if (!st.active && Math.hypot(st.x - st.x0, st.y - st.y0) > SLOP) { clearTimeout(st.timer); st = null; } // moved before the hold: it's a scroll, not a pick-up
+  });
+  function release(e) {
+    if (!st || e.pointerId !== st.id) return;
+    if (st.active) drop(); else { clearTimeout(st.timer); st = null; }
+  }
+  document.addEventListener('pointerup', release);
+  document.addEventListener('pointercancel', release);
+  // A held pill owns the gesture: no native pan, no pull-to-refresh or edge swipe reacting to the same finger.
+  window.addEventListener('touchmove', e => { if (st && st.active) { if (e.cancelable) e.preventDefault(); e.stopPropagation(); } }, { capture: true, passive: false });
+  window.addEventListener('contextmenu', e => { if (st) e.preventDefault(); }, true);
+  window.addEventListener('click', e => {
+    if (Date.now() < noClickUntil && e.target && e.target.closest && e.target.closest('#feed-cats')) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+  document.addEventListener('visibilitychange', () => { if (document.hidden && st) { if (st.active) drop(); else { clearTimeout(st.timer); st = null; } } });
+})();
 function buildCatBar() {
   const bar = document.getElementById('feed-cats');
   if (!bar) return;
+  if (bar._nbCatDrag) { bar._nbCatDirty = true; return; } // a pill is being dragged: the bar is redrawn when it lands
   if (_nbActiveCat !== 'Alerts') _nbAlertUiReset(); // another category is open: no selection, no unread highlights
   if (typeof _nbNoteSel !== 'undefined' && _nbNoteSel && _nbNoteSel.size && _nbNoteSelCat !== _nbActiveCat) _nbNoteUiReset(); // selection belongs to the category it started in
   const notes = nbVisibleNotes();
@@ -38196,26 +38551,27 @@ function buildCatBar() {
   _nbPublishedShown = _nbShowPublishedCat();
   _nbAlertsShown = _nbShowAlertsCat();
   _nbTeamsShown = notes.some(nbNoteInTeamsCat);
-  // Order: All, Favorites, [Alerts], [Published | Stories], [Subscribed | Liked], [Teams], Uncategorized, custom... (bracketed ones only once they have something)
+  // Default order: All, Favorites, [Teams], [Alerts], [Published | Stories], [Subscribed | Liked], Uncategorized, custom... (bracketed ones only
+  // once they have something). A pill the person has moved (hold and drag) keeps the place they gave it; "All" always stays first.
   const withFeeds = [
     NB_BASE_CATS[0], NB_BASE_CATS[1],
+    ...(_nbTeamsShown ? [NB_TEAMS_CAT] : []),
     ...(_nbAlertsShown ? ['Alerts'] : []),
     ...(_nbPublishedShown ? ['Published'] : []),
     ...(_nbCapsuleShown ? ['Subscribed'] : []),
-    ...(_nbTeamsShown ? [NB_TEAMS_CAT] : []),
     ...NB_BASE_CATS.slice(2)
   ];
-  const allCats = [...withFeeds, ...customCats.values()];
+  const allCats = _nbCatApplyOrder([...withFeeds, ...customCats.values()]);
   const _catHtml = allCats.map(c => {
     if (c === 'Subscribed') {
       const on = _nbActiveCat === 'Subscribed';
-      return `<span class="cat-capsule" role="group" aria-label="Subscribed and Liked">`
+      return `<span class="cat-capsule" data-cat-key="subscribed" role="group" aria-label="Subscribed and Liked">`
         + `<button class="cat-pill${on && _nbSubTab === 'feed' ? ' active' : ''}" onclick="selectCat('Subscribed','feed')">Subscribed${nbCatCountHtml('Subscribed', notes)}</button>`
         + `<button class="cat-pill${on && _nbSubTab === 'liked' ? ' active' : ''}" onclick="selectCat('Subscribed','liked')">Liked${nbCatCountHtml('Liked', notes)}</button></span>`;
     }
     if (c === 'Published') {
       const on = _nbActiveCat === 'Published';
-      return `<span class="cat-capsule" role="group" aria-label="Published and Stories">`
+      return `<span class="cat-capsule" data-cat-key="published" role="group" aria-label="Published and Stories">`
         + `<button class="cat-pill${on && _nbPubTab === 'published' ? ' active' : ''}" onclick="selectCat('Published','published')">Published${nbCatCountHtml('Published', notes)}</button>`
         + `<button class="cat-pill${on && _nbPubTab === 'stories' ? ' active' : ''}" onclick="selectCat('Published','stories')">Stories${nbCatCountHtml('Stories', notes)}</button></span>`;
     }
@@ -38224,9 +38580,9 @@ function buildCatBar() {
       const tail = _nbAlertUnread > 0 && _nbActiveCat !== 'Alerts'
         ? `<span class="cat-badge" aria-label="${_nbAlertUnread} unread">${_nbAlertUnread > 9 ? '9+' : _nbAlertUnread}</span>`
         : nbCatCountHtml('Alerts', notes);
-      return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('Alerts')">Alerts${tail}</button>`;
+      return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('Alerts')" data-cat-key="alerts">Alerts${tail}</button>`;
     }
-    return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')">${esc(c)}${nbCatCountHtml(c, notes)}</button>`;
+    return `<button class="cat-pill${c === _nbActiveCat ? ' active' : ''}" onclick="selectCat('${escJs(c)}')" data-cat-key="${esc(_nbCatKey(c))}"${c === NB_BASE_CATS[0] ? ' data-cat-pin="1"' : ''}>${esc(c)}${nbCatCountHtml(c, notes)}</button>`;
   }).join('');
   // Only the highlighted pill changed (a tap): flip the classes on the existing buttons so the CSS colour
   // transitions run on live elements. Tearing the bar down and redrawing it restarted every pill's
