@@ -5821,6 +5821,9 @@ body.pink #chat-overlay{--ch-div:rgba(200,54,94,.16)}
 #ch-emojis,#ch-rxl-tabs{border-bottom-color:var(--ch-div)}
 #ch-rxl-list .pub-tm-row{border:none;border-radius:12px;background:none;color:var(--ch-txt)}
 #ch-rxl-list .pub-tm-main{padding:.6rem;gap:.8rem} /* the .ch-act inset and icon gap, so avatars line up with the action icons */
+/* Name and emoji sit centred against the 36px avatar. When the name wraps (or shows 'Tap to remove') the text block grows taller than the avatar, and the avatar stays at the top, like the Editors list. */
+#ch-rxl-list .pub-tm-who{min-height:36px;display:flex;flex-direction:column;justify-content:center}
+#ch-rxl-list .ch-rl-e{align-self:flex-start;display:flex;align-items:center;height:36px;line-height:1}
 #ch-rxl-list .pub-tm-sub{color:var(--ch-mut)}
 #ch-rxl-list .pub-tm-av{background:color-mix(in srgb,var(--al-acc) 18%,transparent);color:var(--al-acc)}
 #ch-sbar{border-bottom-color:var(--ch-div)}
@@ -19671,22 +19674,32 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   }
   function ttQueue() { if (_ttRaf) return; _ttRaf = requestAnimationFrame(function() { _ttRaf = 0; ttPlaceAll(); }); }
   function ttVisQueue() { if (_ttVisRaf) return; _ttVisRaf = requestAnimationFrame(function() { _ttVisRaf = 0; ttVis(); }); }
+  // Bound once per canvas document, keyed on the live .cv-page element, not on window: "New canvas" rewrites the editor iframe with document.open()/write(),
+  // which keeps the same window (and may drop its listeners), so a window flag stayed true and the new canvas never got its scroll/resize/class listeners.
   function ttBind() {
-    if (window._nbTtBound) return;
-    window._nbTtBound = true;
+    var pg = document.querySelector('.cv-page'), cv = document.getElementById('cv-canvas');
+    if (!pg || pg._nbTtBound) return;
+    if (window._nbTtUnbind) { try { window._nbTtUnbind(); } catch (x) {} window._nbTtUnbind = null; }
+    pg._nbTtBound = true;
     window._nbTtPlaceAll = ttPlaceAll;
-    window.addEventListener('scroll', function(e) {
+    var onScroll = function(e) {
       var t = e.target;
       if (t !== document && t !== window && !(t && t.id === 'cv-canvas-scroll')) return;
       if (_ttPos) ttQueue(); else if (_ttSh) ttVisQueue();
-    }, { passive: true, capture: true });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
     window.addEventListener('resize', ttQueue);
-    var pg = document.querySelector('.cv-page'), cv = document.getElementById('cv-canvas');
+    var mo = null;
     if (window.MutationObserver) {
-      var mo = new window.MutationObserver(ttQueue);
-      if (pg) mo.observe(pg, { attributes: true, attributeFilter: ['class'] });
+      mo = new window.MutationObserver(ttQueue);
+      mo.observe(pg, { attributes: true, attributeFilter: ['class'] });
       if (cv) mo.observe(cv, { childList: true });
     }
+    window._nbTtUnbind = function() {
+      window.removeEventListener('scroll', onScroll, { capture: true });
+      window.removeEventListener('resize', ttQueue);
+      if (mo) mo.disconnect();
+    };
   }
   function applyToTop(block) {
     var b = block.querySelector('.blk-tt-btn');
