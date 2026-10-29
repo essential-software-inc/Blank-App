@@ -8822,9 +8822,10 @@ function nbNavKit(doc, getCtx) {
   doc.addEventListener('click', function(e) {
     var t = e.target;
     if (t && t.closest && !t.closest('.blk-nv-it[data-sub-open]')) closeSubs();
+    if (t && t.closest && t.isConnected) { var om = doc.querySelectorAll('.blk[data-nv-open]'); for (var q = 0; q < om.length; q++) if (!om[q].contains(t)) toggleMenu(om[q], false); }
     if (t && t.closest && !t.closest('.blk-nv-search') && (sOpen || doc.querySelector('.blk[data-nv-sopen]'))) closeSearch();
   }, false);
-  doc.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeSubs(); closeSearch(); } });
+  doc.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeSubs(); closeSearch(); var om = doc.querySelectorAll('.blk[data-nv-open]'); for (var q = 0; q < om.length; q++) toggleMenu(om[q], false); } });
   // The field itself: focusing or typing opens the search; arrows, Enter and Escape drive the results.
   function fieldOf(e) { var t = e.target; return t && t.classList && t.classList.contains('blk-nv-sq') ? t : null; }
   doc.addEventListener('focusin', function(e) {
@@ -23019,19 +23020,23 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   function pgSwitch(pid) {
     pid = pid || 'home';
     var scr = document.getElementById('cv-canvas-scroll');
-    if (pid === pgCur()) { if (scr) scr.scrollTop = 0; return; }
+    if (pid === pgCur()) { if (scr) scr.scrollTop = 0; window.scrollTo(0, 0); return; }
     if (pid !== 'home' && !pgBox(pid)) return;
     try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (e) {}
     var cur = pgCur();
-    if (scr) pgScroll[cur] = { t: scr.scrollTop, l: scr.scrollLeft };
+    pgScroll[cur] = { t: scr ? scr.scrollTop : 0, l: scr ? scr.scrollLeft : 0, w: window.pageYOffset || document.documentElement.scrollTop || 0 };
     pgMoveBlocks(canvas, pgBox(cur) || pgMake(cur, cur === 'home' ? 'Home' : 'Page'));
     pgMoveBlocks(pgBox(pid) || pgMake(pid, 'Home'), canvas);
     canvas.setAttribute('data-nb-page', pid);
     histNotifyParent();
     nvRefreshAll();
     layoutClassicCanvas();
-    if (scr) { var sv = pgScroll[pid]; scr.scrollTop = sv ? sv.t : 0; scr.scrollLeft = sv ? sv.l : 0;
-      if (sv && sv.t) requestAnimationFrame(function() { if (pgCur() === pid && Math.abs(scr.scrollTop - sv.t) > 1) scr.scrollTop = sv.t; }); }
+    var sv = pgScroll[pid];
+    if (scr) { scr.scrollTop = sv ? sv.t : 0; scr.scrollLeft = sv ? sv.l : 0; }
+    window.scrollTo(0, sv ? sv.w || 0 : 0);
+    if (sv) requestAnimationFrame(function() { if (pgCur() !== pid) return;
+      if (scr && sv.t && Math.abs(scr.scrollTop - sv.t) > 1) scr.scrollTop = sv.t;
+      if (sv.w && Math.abs((window.pageYOffset || 0) - sv.w) > 1) window.scrollTo(0, sv.w); });
     pgRefreshStrip();
   }
   function pgRename(pid, title) {
@@ -23645,7 +23650,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   }
   function nvGo(pid) { pgSwitch(pid); }
   // Everything the nav code needs from the editor, built fresh on every call (clicks and keyboard focus alike).
-  function nvCtx() { return { editor: true, goPage: nvGo, pages: pgPages(), toTop: function() { var s = document.getElementById('cv-canvas-scroll'); if (s) s.scrollTop = 0; } }; }
+  function nvCtx() { return { editor: true, goPage: nvGo, pages: pgPages(), toTop: function() { var s = document.getElementById('cv-canvas-scroll'), rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, b = rm ? 'auto' : 'smooth'; if (s && s.scrollTop > 0) { try { s.scrollTo({ top: 0, behavior: b }); } catch (x) { s.scrollTop = 0; } } if ((window.pageYOffset || 0) > 0) { try { window.scrollTo({ top: 0, behavior: b }); } catch (x) { window.scrollTo(0, 0); } } } }; }
   canvas.addEventListener('click', function(e) {
     var t = e.target;
     if (!(t && t.closest)) return;
@@ -42169,6 +42174,8 @@ async function _chImSend(p) {
 (function () {
   const T = window._nbTour = { on: false, leaving: false };
   const API = NB_PUBLISH_API.replace(/\/$/, '');
+  const DEMO_AUTHOR = 'tour-demo'; // the demo story's author id: its avatar is a drawn portrait of its own (DEMO_WHO), passed inline because the story ring loads it with a plain <img>
+  const DEMO_WHO = { name: 'Elena Marsh', skin: '#a8704a', hair: '#2a1a12', style: 'long', shirt: '#3f5fcf', bg: '#e0e7fb' };
   const DEMO_SLUG = 'snow-leopard-field-guide'; // the built-in demo note, shown in the stories strip during the tour
   const ME_SUB = 'tour-user', ME_ID = 'tour-u0';
   const MIN = 6e4, HR = 36e5, DAY = 864e5;
@@ -43003,8 +43010,8 @@ async function _chImSend(p) {
     if (p[0] === 'account' && p[1] === 'subscriber-count') return J({ count: 128, likes: 342, following: 24, createdAt: Date.now() - 200 * DAY, mlOptOut: false });
     if (p[0] === 'account' && p[1] === 'profile-name') return J({ profileName: PEOPLE.me.name, authorId: ME_ID });
     if (p[0] === 'stories' && p.length === 1 && method === 'GET') {
-      const who = PEOPLE.meilin;
-      return J({ stories: T.demoUrl ? [{ slug: DEMO_SLUG, title: T.demoTitle, authorSub: who.id, authorProfileName: who.name, avatarMode: 'picture', createdAt: Date.now() - 3 * HR, seen: false, imageUrl: null }] : [] });
+      const who = DEMO_WHO;
+      return J({ stories: T.demoUrl ? [{ slug: DEMO_SLUG, title: T.demoTitle, authorSub: DEMO_AUTHOR, authorProfileName: who.name, avatarMode: 'note', createdAt: Date.now() - 3 * HR, seen: false, imageUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(portrait(who)) }] : [] });
     }
     if (p[0] === 'stories' && p[2] === 'seen') return J({ ok: true });
     if (p[0] === 'ads' && p[1] === 'mine') return J({ standing: null, creditBalance: 0 });
