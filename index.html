@@ -6277,7 +6277,7 @@ html body:not(.reader-mode){background:transparent!important}
 html:has(body:not(.reader-mode)){background:#fff}
 html:has(body.night:not(.reader-mode)){background:#080808}
 html:has(body.pink:not(.reader-mode)){background:#fff8fb}
-body:not(.reader-mode) #nb-app #site-header,body:not(.reader-mode) #nb-app #feed-search-wrap,body:not(.reader-mode) #nb-app #st-search-wrap,body:not(.reader-mode) #nb-app #msg-search-wrap{background:color-mix(in srgb,var(--nb-bg) 60%,transparent)!important;-webkit-backdrop-filter:blur(22px) saturate(180%)!important;backdrop-filter:blur(22px) saturate(180%)!important;transition:background-color .1s,box-shadow .1s,border-color .1s,gap .3s cubic-bezier(.4,0,.2,1),padding .3s cubic-bezier(.4,0,.2,1)}
+body:not(.reader-mode) #nb-app #site-header,body:not(.reader-mode) #nb-app #feed-search-wrap,body:not(.reader-mode) #nb-app #st-search-wrap,body:not(.reader-mode) #nb-app #msg-search-wrap{background:color-mix(in srgb,var(--nb-bg) 60%,transparent)!important;-webkit-backdrop-filter:blur(22px) saturate(180%)!important;backdrop-filter:blur(22px) saturate(180%)!important;will-change:backdrop-filter,background-color;transition:background-color 0s,box-shadow 0s,border-color 0s,gap .3s cubic-bezier(.4,0,.2,1),padding .3s cubic-bezier(.4,0,.2,1)}
 body:not(.reader-mode) #nb-app #site-header{border-bottom:1px solid var(--nb-hbd)!important;box-shadow:var(--nb-hsh)!important}
 /* Note cards are lightly tinted glass: the fixed wash behind the page (strong at the top, fading to the page colour toward the
    bottom) shows through them (35% page-colour tint keeps text contrast and body), so each card is a patch of the same surface and gets whiter as it nears the bottom
@@ -6314,7 +6314,7 @@ body:not(.reader-mode) #nb-app #screen-settings #st-signedout-invite,body:not(.r
 #nb-app:has(#feed-search-wrap:not([style*="display: none"])) #site-header,#nb-app:has(#screen-settings.active) #site-header,#nb-app:has(#screen-messages.active) #site-header{border-bottom-color:transparent!important;box-shadow:none!important}
 body.nb-scrolled #nb-app:has(#feed-search-wrap:not([style*="display: none"])) #feed-search-wrap,body.nb-scrolled #nb-app:has(#screen-settings.active) #st-search-wrap,body.nb-scrolled #nb-app:has(#screen-messages.active) #msg-search-wrap{border-bottom-color:var(--nb-hbd)!important}
 body:not(.reader-mode) #nb-app #feed-search-wrap,body:not(.reader-mode) #nb-app #st-search-wrap,body:not(.reader-mode) #nb-app #msg-search-wrap{border-bottom:1px solid var(--nb-stbd)!important;box-shadow:none!important}
-body:not(.reader-mode):not(.nb-scrolled) #nb-app #site-header,body:not(.reader-mode):not(.nb-scrolled) #nb-app #feed-search-wrap,body:not(.reader-mode):not(.nb-scrolled) #nb-app #st-search-wrap,body:not(.reader-mode):not(.nb-scrolled) #nb-app #msg-search-wrap{background:transparent!important;border-bottom-color:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:blur(1px)!important;backdrop-filter:blur(1px)!important}
+body:not(.reader-mode):not(.nb-scrolled) #nb-app #site-header,body:not(.reader-mode):not(.nb-scrolled) #nb-app #feed-search-wrap,body:not(.reader-mode):not(.nb-scrolled) #nb-app #st-search-wrap,body:not(.reader-mode):not(.nb-scrolled) #nb-app #msg-search-wrap{background:transparent!important;border-bottom-color:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:blur(1px)!important;backdrop-filter:blur(1px)!important;transition:background-color .15s,box-shadow .15s,border-color .15s,gap .3s cubic-bezier(.4,0,.2,1),padding .3s cubic-bezier(.4,0,.2,1)}
 body.pink:not(.reader-mode) #nb-app #header-title,body.pink:not(.reader-mode) #nb-app #header-title .hdr-title-inner,body.pink:not(.reader-mode) #nb-app .hdr-btn,body.pink:not(.reader-mode) #nb-app #back-btn,body.pink:not(.reader-mode) #nb-app .hdr-dashes{color:var(--nb-hdr-fg)}
 body.pink:not(.reader-mode) #nb-app #back-btn svg{stroke:var(--nb-hdr-fg)}
 body:not(.reader-mode) #nb-app #screen-settings{background:transparent}
@@ -6379,6 +6379,8 @@ body:not(.reader-mode) #nb-alert-fabs #al-fab-del{background:color-mix(in srgb,#
   window._nbHdrScroll = sync;
   window.addEventListener('scroll', sync, { passive: true });
   window.addEventListener('touchmove', sync, { passive: true });
+  window.addEventListener('wheel', sync, { passive: true });
+  window.addEventListener('scrollend', sync);
   window.addEventListener('pageshow', sync);
   document.addEventListener('DOMContentLoaded', sync);
   sync();
@@ -7659,6 +7661,8 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>In the Content tab, choose how people pay. A link to a payment page (Stripe, PayPal, Ko-fi and more) sends them to that site. A Stripe Buy Button puts Stripe's own pay button on your page: make a payment link in your Stripe account, choose Buy button, and paste the embed code here. Visitors pay on Stripe and the money goes straight to your Stripe account, but this app can't show you those payments, so check them in Stripe. Pay inside this page is coming soon and can't be used yet. Stripe is a company that handles online payments.</p>
       <p>Payments only work on a published page. While you're editing, nothing is charged. Publish your note, then open the Payments tab to see the amounts and dates of what comes in, or to pause payments for a while. If you change your block later, publish the note again so visitors see the changes.</p>
       <p>Good to know: people don't need to sign in to pay, and you won't see who paid in the app. Stripe may show you more in your own account. Refunds happen in Stripe. The list in the app is just a guide, so check Stripe for the real numbers.</p>
+      <h3>Add a scroll to top button</h3>
+      <p>Tap To top in the bar to add a round button. It sits in a corner of your page, and when someone taps it, they go straight back to the top. Tap the sliders icon on the button to change how it looks: its colour, icon, size and shape. You can also pick which corner it sits in, how far it is from the edge, and whether it shows on just this page or on every page. While you edit, it always shows so you can see it. On your published page, it only pops up once people have scrolled down a bit.</p>
       <h3>Change a photo, video, or post</h3>
       <p>Tap the pencil in its top-right corner, then paste a new link or pick a new photo from your phone. On a carousel, it changes the slide you're looking at.</p>
       <h3>Add a caption</h3>
@@ -7678,12 +7682,12 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <span id="edit-dhdr-title">Save note</span>
       <button id="edit-close" onclick="nbCloseSaveDialog()" aria-label="Close"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
     </div>
-    <div id="nb-save-lock-note" style="display:none;padding:.4rem .9rem 0;font-size:.74rem;opacity:.75">The author sets this note’s title, description, category and tags.</div>
+    <div id="nb-save-lock-note" style="display:none;padding:.1rem 1.2rem .3rem;font-size:.74rem;line-height:1.4;opacity:.75">The author sets this note’s title, description, category and tags.</div>
     <div class="markup-meta-fields show" id="nb-save-meta">
       <input id="nb-save-title" class="com-field" placeholder="Page title" maxlength="100" autocomplete="off" oninput="_nbUpdateSaveDialogDirtyState()">
       <input id="nb-save-desc" class="com-field" placeholder="Short description (optional)" maxlength="160" autocomplete="off" oninput="_nbUpdateSaveDialogDirtyState()">
     </div>
-    <div id="edit-meta-row" style="display:flex;gap:.5rem;padding:.38rem .9rem .5rem;flex-shrink:0">
+    <div id="edit-meta-row" style="display:flex;gap:.5rem;padding:.38rem 1.2rem .5rem;flex-shrink:0">
       <input id="nb-save-cat" class="com-field" placeholder="Category" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem" oninput="_nbUpdateSaveDialogDirtyState()">
       <input id="nb-save-tags" class="com-field" placeholder="Tags (use comma)" autocomplete="off" style="flex:1;font-size:.8rem;padding:.3rem .55rem" oninput="_nbUpdateSaveDialogDirtyState()">
     </div>
@@ -7723,7 +7727,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button id="publish-teams" type="button" onclick="_pubTeamsOpen()" aria-label="Teams" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
       <button id="publish-close" onclick="_pubUserClose()" aria-label="Close"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
     </div>
-    <div id="pub-tabs" style="display:flex;gap:.4rem;padding:.6rem .9rem 0">
+    <div id="pub-tabs" style="display:flex;gap:.4rem;padding:.6rem 1.2rem 0">
       <button id="pub-tab-web" class="pub-tab-btn is-active" onclick="_pubShowTab('web')" style="flex:1;padding:.5rem 0;border-width:0 0 2px 0;border-style:solid;background:none;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish to Web</button>
       <button id="pub-tab-ad" class="pub-tab-btn" onclick="_pubShowTab('ad')" style="flex:1;padding:.5rem 0;border-width:0 0 2px 0;border-style:solid;background:none;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer">Publish as Ad</button>
     </div>
@@ -8025,6 +8029,7 @@ const _NB_NOTE_UI_STATE_SCRIPT = `<script data-noteinfra="1">(function(){
       // Editor-only spacing that keeps table delete-X buttons clear of the block controls; it depends on screen width, so it is recomputed on load instead of saved.
       clone.querySelectorAll('.blk-table-wrap').forEach(function(n){ n.style.paddingTop = ''; if (!n.getAttribute('style')) n.removeAttribute('style'); });
       clone.querySelectorAll('.blk-chrome').forEach(function(n){ n.classList.remove('blk-chrome'); if (!n.getAttribute('class')) n.removeAttribute('class'); });
+      clone.querySelectorAll('.blk[data-type="totop"]').forEach(function(n){ ['--tt-js', '--tt-l', '--tt-tp', '--tt-s', '--tt-hide'].forEach(function(k){ n.style.removeProperty(k); }); if (!n.getAttribute('style')) n.removeAttribute('style'); });
       var html = clone.innerHTML;
       if (html.length <= FULL_SNAPSHOT_MAX_CHARS) {
         st.full = html; st.imgRefs = Object.keys(images);
@@ -8072,7 +8077,7 @@ const _NB_NOTE_UI_STATE_SCRIPT = `<script data-noteinfra="1">(function(){
   new MutationObserver(function(muts){
     for (var i = 0; i < muts.length; i++) {
       var t = muts[i].target;
-      if (t && t.closest && t.closest('#cv-fab,#cv-bg-fab,.blk-aud-live,.blk-nv-sres,.nb-dlg.nb-live')) continue;
+      if (t && t.closest && t.closest('#cv-fab,#cv-bg-fab,#nb-tt-ghosts,.blk-aud-live,.blk-nv-sres,.nb-dlg.nb-live')) continue;
       if (muts[i].type === 'childList') { var _ns = [].slice.call(muts[i].addedNodes).concat([].slice.call(muts[i].removedNodes)); if (_ns.length && _ns.every(function(n){ return n.nodeType === 1 && n.classList.contains('nb-dlg') && n.classList.contains('nb-live'); })) continue; }
       // .blk-chrome is the block's temporary 'icons showing' look (never saved): toggling it is not an edit.
       if (muts[i].type === 'attributes' && muts[i].attributeName === 'class' && t && t.classList) {
@@ -8925,6 +8930,56 @@ function _nbPubFrag(doc, cv) {
   });
   return cv.innerHTML + tail;
 }
+// Scroll to top (published page): every "scroll to top" block is moved out of the page layout and pinned to the screen at its chosen spot. It shows once the visitor has scrolled
+// far enough, only on its own page unless it is set to every page, and a tap scrolls back to the top. Sent to the page as text with toString(), so it uses nothing from the editor.
+function nbToTopKit(doc) {
+  var win = doc.defaultView || window, GAP = { s: 12, m: 24, l: 36 }, items = [], raf = 0;
+  var blocks = doc.querySelectorAll('.blk[data-type="totop"]');
+  if (!blocks.length) return;
+  function curPage() { var c = doc.querySelector('.cv-canvas[data-nb-page]:not([hidden])'); return c ? c.getAttribute('data-nb-page') : ''; }
+  function sync() {
+    raf = 0;
+    var y = win.pageYOffset || doc.documentElement.scrollTop || 0, cp = curPage();
+    items.forEach(function(it) {
+      var on = (it.all || !it.page || it.page === cp) && y >= it.after;
+      if (on) { it.el.removeAttribute('data-tt-off'); it.el.removeAttribute('aria-hidden'); } else { it.el.setAttribute('data-tt-off', '1'); it.el.setAttribute('aria-hidden', 'true'); }
+      if (it.btn) it.btn.tabIndex = on ? 0 : -1;
+    });
+  }
+  function queue() { if (!raf) raf = win.requestAnimationFrame(sync); }
+  [].forEach.call(blocks, function(b) {
+    var c = b.closest ? b.closest('.cv-canvas[data-nb-page]') : null, page = c ? c.getAttribute('data-nb-page') : '';
+    var g = GAP[b.getAttribute('data-tt-g')] || 24, lift = parseInt(b.getAttribute('data-tt-y'), 10) || 0, after = parseInt(b.getAttribute('data-tt-sh'), 10);
+    if (isNaN(after)) after = 200;
+    [].forEach.call(b.querySelectorAll('.blk-ctrl,.blk-tt-hint'), function(x) { x.remove(); });
+    ['top', 'left', 'right', 'bottom', 'width', 'height', 'position', 'transform', '--tt-js', '--tt-l', '--tt-tp', '--tt-s', '--tt-hide'].forEach(function(k) { b.style.removeProperty(k); });
+    b.classList.add('nb-tt-fixed');
+    b.setAttribute('data-tt-off', '1');
+    b.style.setProperty('--tt-g', g + 'px');
+    b.style.setProperty('--tt-y', lift + 'px');
+    var btn = b.querySelector('.blk-tt-btn');
+    if (btn) btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var rm = win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      win.scrollTo({ top: 0, behavior: rm ? 'auto' : 'smooth' });
+    });
+    doc.body.appendChild(b);
+    items.push({ el: b, btn: btn, page: page, all: b.getAttribute('data-tt-all') === '1', after: after });
+  });
+  win.addEventListener('scroll', queue, { passive: true });
+  win.addEventListener('resize', queue);
+  win.addEventListener('hashchange', queue);
+  win.addEventListener('popstate', queue);
+  if (win.MutationObserver) {
+    var mo = new win.MutationObserver(queue);
+    [].forEach.call(doc.querySelectorAll('.cv-canvas[data-nb-page]'), function(cv) { mo.observe(cv, { attributes: true, attributeFilter: ['hidden'] }); });
+  }
+  sync();
+}
+function _nbToTopScript(html) {
+  if (!/data-type="totop"/.test(html || '')) return '';
+  return '<script>\n(function() {\n  (' + nbToTopKit.toString() + ')(document);\n})();\n<\/script>';
+}
 // The published page's own script: shows one page at a time (address bar /@note/page-name, or #/page-name on older links and off the publish host; back button works), keeps the nav bars' current
 // item lit, runs the menu and dialogs, and keeps a "stay on top" bar pinned.
 function _nbSiteScript(hasPages) {
@@ -8965,11 +9020,13 @@ function _nbSiteScript(hasPages) {
     '    nav.markActive(document, id);\n' +
     '    var pt = next.getAttribute("data-ptitle");\n' +
     '    document.title = id === "home" || !pt ? siteTitle : pt + " \\u00b7 " + siteTitle;\n' +
-    '    window.scrollTo(0, keep && saved[id] ? saved[id] : 0);\n' +
+    '    var want = keep && saved[id] ? saved[id] : 0;\n' +
+    '    window.scrollTo(0, want);\n' +
+    '    if (want) requestAnimationFrame(function() { if (cur === id && Math.abs((window.pageYOffset || 0) - want) > 1) window.scrollTo(0, want); });\n' +
     '    stick();\n' +
     '  }\n' +
     '  function go(id) {\n' +
-    '    show(id);\n' +
+    '    show(id, true);\n' +
     '    try {\n' +
     '      var b = pathBase(), sl = slugOf(id), t = b ? (sl ? b + "/" + sl : b) : "#/" + sl;\n' +
     '      if (b ? (location.pathname !== t || location.hash) : location.hash !== t) history.pushState(null, "", t);\n' +
@@ -9218,7 +9275,7 @@ function nbClassicLayoutKit(canvas, fillScreen) {
         if (hidR > 0.5) { b.style.setProperty('--ox-r', hidR + 'px'); anyHidden = true; } else b.style.removeProperty('--ox-r');
         b.style.left = bLeft + 'px';
         b.style.width = bWidth + 'px';
-        rowH = Math.max(rowH, b.offsetHeight);
+        rowH = Math.max(rowH, b.dataset.type === 'totop' ? 0 : b.offsetHeight);
       });
       if (ovRaw !== null && bands.length) {
         var pb = bands[bands.length - 1];
@@ -12306,6 +12363,37 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
 .dz-st-prev i,.dz-st-prev b{display:block;box-sizing:border-box}
 /* ===== Pages, Nav bar and dialogs: parked pages are hidden; the page strip is editor-only; each nav design reads the --nv-* tokens set by applyNavbar ===== */
 .nb-pg{display:none!important}
+/* Scroll to top: a round button styled like a Button. In the editor it sits in the page like any block; on a published page the kit moves it out and it floats at the chosen spot. */
+.blk-tt-wrap{display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.5rem 0}
+.blk-tt-btn{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;padding:0;margin:0;cursor:pointer;font:inherit;line-height:1;position:relative;-webkit-tap-highlight-color:transparent}
+.blk-tt-btn svg{width:46%;height:46%;display:block;pointer-events:none}
+.blk-tt-btn[data-bt-g]::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;padding:var(--ring-w,2px);background:var(--ring-bg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.blk-tt-btn:focus-visible{outline:3px solid #5b5bd6;outline-offset:3px}
+.blk-tt-hint{font-size:.72rem;line-height:1.3;opacity:.6;text-align:center;pointer-events:none}
+.blk[data-type="totop"].nb-tt-fixed{position:fixed!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;width:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;transform:none!important;z-index:90!important;display:block;transition:opacity .2s,translate .2s,visibility .2s}
+.blk[data-type="totop"].nb-tt-fixed::after{display:none!important}
+.blk[data-type="totop"].nb-tt-fixed .blk-tt-wrap{padding:0}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p^="b"]{bottom:calc(var(--tt-g,24px) + var(--tt-y,0px) + env(safe-area-inset-bottom,0px))!important}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p^="t"]{top:calc(var(--tt-g,24px) + var(--tt-y,0px) + env(safe-area-inset-top,0px))!important}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p$="l"]{left:calc(var(--tt-g,24px) + env(safe-area-inset-left,0px))!important}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p$="r"]{right:calc(var(--tt-g,24px) + env(safe-area-inset-right,0px))!important}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p$="c"]{left:50%!important;transform:translateX(-50%)!important}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-off]{opacity:0!important;visibility:hidden;pointer-events:none;translate:0 10px}
+@media (prefers-reduced-motion:reduce){.blk[data-type="totop"].nb-tt-fixed{transition:none}}
+/* Scroll to top, editor: the button floats at its chosen corner the moment it is added (default bottom right), clear of the editor's own corner buttons. The published page keeps using .nb-tt-fixed above. */
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed){position:fixed!important;top:auto!important;left:auto!important;width:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:transparent!important;box-shadow:none!important;transform:none!important;z-index:500!important;pointer-events:auto;bottom:calc(var(--tt-g,24px) + var(--tt-y,0px) + 3.4rem + env(safe-area-inset-bottom,0px))!important;right:calc(var(--tt-g,24px) + env(safe-area-inset-right,0px))!important}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed)[data-tt-p^="t"]{bottom:auto!important;top:calc(var(--tt-g,24px) + var(--tt-y,0px) + 3rem + env(safe-area-inset-top,0px))!important}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed)[data-tt-p$="l"]{right:auto!important;left:calc(var(--tt-g,24px) + env(safe-area-inset-left,0px))!important}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed)[data-tt-p$="c"]{right:auto!important;left:50%!important;transform:translateX(-50%)!important}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed)[style*="--tt-js"]{left:var(--tt-l,0px)!important;top:var(--tt-tp,0px)!important;right:auto!important;bottom:auto!important;transform:scale(var(--tt-s,1))!important;transform-origin:0 0!important;transition:none!important}
+.cv-page.cv-preview .blk[data-type="totop"]:not(.nb-tt-fixed)[style*="--tt-hide"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+.nb-tt-ghost{position:fixed;margin:0;padding:0;z-index:500;transition:opacity .2s,visibility .2s}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed) .blk-tt-wrap{padding:0}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed) .blk-tt-hint,.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed) .blk-handle{display:none}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed) .blk-ctrl{top:auto;bottom:calc(100% + .35rem);right:0;left:auto;max-width:none;flex-wrap:nowrap}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed)[data-tt-p^="t"] .blk-ctrl{bottom:auto;top:calc(100% + .35rem)}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed)[data-tt-p$="l"] .blk-ctrl{right:auto;left:0}
+.cv-page .blk[data-type="totop"]:not(.nb-tt-fixed)[data-tt-p$="c"] .blk-ctrl{right:50%;transform:translateX(50%)}
 .cv-canvas[hidden]{display:none!important}
 .cv-pagestrip{position:sticky;top:0;z-index:19;display:flex;align-items:center;gap:.4rem;overflow-x:auto;padding:.45rem .7rem;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border-bottom:1px solid #e4e4e0;scrollbar-width:none}
 .cv-pagestrip[hidden]{display:none}
@@ -13342,6 +13430,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
     <button class="cv-add" type="button" data-type="poll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Poll</button>
     <button class="cv-add" type="button" data-type="textbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4"/></svg>Text box</button>
     <button class="cv-add" type="button" data-type="pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Payments</button>
+    <button class="cv-add" type="button" data-type="totop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16V8M8.5 11.5L12 8l3.5 3.5"/></svg>To top</button>
     <button class="cv-add" type="button" id="cv-starters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>Starters</button>
     <button class="cv-add" type="button" data-rp="1" data-rp-only="1" data-rp-plat="instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>Instagram</button>
     <button class="cv-add" type="button" data-rp="1" data-rp-only="1" data-rp-plat="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11 16h5L9 4z"/><path d="M4 20l6.5-7M13.5 11L20 4"/></svg>X</button>
@@ -13457,6 +13546,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
 <template id="tpl-blk-button"><div class="blk" data-type="button" data-bt-s="solid" data-bt-c="#5b5bd6" data-bt-z="m" data-bt-r="pill" data-bt-a="c"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-btn-wrap"><a class="blk-btn"><span class="blk-btn-label" contenteditable="true">Button</span></a></div></div></template>
 
 <template id="tpl-blk-pay"><div class="blk" data-type="pay" data-bt-s="solid" data-bt-c="#2f855a" data-bt-z="m" data-bt-r="pill" data-bt-a="c" data-py-p="other"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-py"><div class="blk-py-q" contenteditable="true">Support my work</div><div class="blk-py-d" contenteditable="true">Every bit helps. Thank you!</div><div class="blk-btn-wrap"><a class="blk-btn"><span class="blk-btn-label" contenteditable="true">Support</span></a></div><div class="blk-py-n"></div></div></div></template>
+<template id="tpl-blk-totop"><div class="blk" data-type="totop" data-bt-s="solid" data-bt-c="#5b5bd6" data-bt-z="m" data-bt-r="pill" data-tt-p="br" data-tt-g="m" data-tt-y="0" data-tt-sh="200" data-tt-i="arrow" data-tt-all="0"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-tt-wrap"><button class="blk-tt-btn" type="button" aria-label="Scroll to top"></button></div></div></template>
 <template id="tpl-blk-icon"><div class="blk" data-type="icon" data-ic-name="star" data-ic-size="m" data-ic-color="#5b5bd6" data-ic-a="c"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-icon-wrap"><span class="blk-icon"></span></div></div></template>
 
 <template id="tpl-blk-marquee"><div class="blk" data-type="marquee" data-mq-d="text" data-mq-st="soft" data-mq-c="#5b5bd6" data-mq-dir="l" data-mq-spd="m" data-mq-gap="m" data-mq-sz="m" data-mq-pause="1" data-mq-fade="1"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-mq-row"><span class="blk-mq-lbl"></span><div class="blk-mq"><div class="blk-mq-track"><div class="blk-mq-set"><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item one</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item two</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item three</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item four</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item five</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item six</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div></div></div></div></div></div></template>
@@ -15531,6 +15621,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
 
   // Copy button: sits just left of Delete and adds an exact copy of this block (current state) on its own row directly under the original's row.
   function wireDuplicate(block) {
+    if (block.dataset.type === 'totop') return;
     var host = block.querySelector('.blk-ctrl');
     if (!host) return;
     var btn = host.querySelector('.blk-dup');
@@ -19449,6 +19540,212 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
     }, null, null, stCanBack(block), stBackFn).then(function(res) { var sb = res === ST_BACK; if (res !== true && !sb) { hcRevertBlock(block, before); return; } blockAnimDone(block); hcCommitBlock(block, before); if (sb) stReopen(block); });
   }
 
+  /* ---------- Scroll to top ---------- */
+  // A round button, styled like a Button (same Style / Colour / Size / Shape / Finish), that floats at a chosen spot on the published page and scrolls back to the top.
+  // In the editor it is a normal block you can drag and design; the published page's kit (nbToTopKit) moves it out of the layout and pins it to the screen.
+  var TT_SIZE = { s: 44, m: 56, l: 66, xl: 78 };
+  var TT_POS = [['tl', 'Top left'], ['tc', 'Top centre'], ['tr', 'Top right'], ['bl', 'Bottom left'], ['bc', 'Bottom centre'], ['br', 'Bottom right']];
+  var TT_ICONS = { arrow: '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/>', chevron: '<path d="M6 15l6-6 6 6"/>', double: '<path d="M6 11l6-6 6 6M6 19l6-6 6 6"/>', top: '<path d="M5 4.5h14M12 20V8M6.5 13.5L12 8l5.5 5.5"/>' };
+  function ttSvg(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (TT_ICONS[name] || TT_ICONS.arrow) + '</svg>'; }
+  // Editor only. position:fixed is measured from the screen, which is right at 100% zoom in the phone view. When the canvas is pinch-zoomed it is measured from the scaled canvas instead, and in the desktop-width view the
+  // note sits in a smaller frame, so the button is placed from the visible frame and un-scaled to its natural size (CSS vars read by the [style*="--tt-js"] rule). In preview the button also follows
+  // "Show after" and "Every page" like the published page does. Scrolling does as little as possible: scroll events from anything but the page or the note's scroller are ignored, and the full placement
+  // only re-runs on scroll when the button is positioned by script; otherwise only show/hide is checked.
+  var TT_VARS = ['--tt-js', '--tt-l', '--tt-tp', '--tt-s'];
+  var _ttPos = false, _ttSh = false, _ttBusy = false, _ttRaf = 0, _ttVisRaf = 0, _ttGhosts = [];
+  function ttScrollTop(from) {
+    var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, beh = rm ? 'auto' : 'smooth';
+    function up(el) { if (!el || !(el.scrollTop > 0)) return; try { el.scrollTo({ top: 0, behavior: beh }); } catch (x) { el.scrollTop = 0; } }
+    for (var n = from; n && n.nodeType === 1; n = n.parentElement) up(n);
+    up(document.getElementById('cv-canvas-scroll'));
+    up(document.scrollingElement || document.documentElement);
+    if ((window.pageYOffset || 0) > 0) { try { window.scrollTo({ top: 0, behavior: beh }); } catch (x) { window.scrollTo(0, 0); } }
+  }
+  function ttScrollY() { var sc = document.getElementById('cv-canvas-scroll'); return Math.max(window.pageYOffset || 0, sc ? sc.scrollTop : 0); }
+  function ttAfter(b) { var n = parseInt(b.getAttribute('data-tt-sh'), 10); return isNaN(n) ? 200 : n; }
+  function ttSet(el, k, v) {
+    if (v === null) { if (el.style.getPropertyValue(k) !== '') el.style.removeProperty(k); }
+    else if (el.style.getPropertyValue(k) !== v) el.style.setProperty(k, v);
+  }
+  function ttFrame(desktop) {
+    var vw = window.innerWidth, vh = window.innerHeight, f = { l: 0, t: 0, r: vw, b: vh };
+    var sc = document.getElementById('cv-canvas-scroll'), tb = document.querySelector('.cv-toolbar');
+    if (desktop && sc) { var sr = sc.getBoundingClientRect(); f.l = Math.max(0, sr.left); f.t = Math.max(0, sr.top); f.r = Math.min(vw, sr.right); f.b = Math.min(vh, sr.bottom); }
+    if (tb) f.t = Math.max(f.t, tb.getBoundingClientRect().bottom);
+    if (f.b >= vh - 2) f.b -= 54;
+    return f;
+  }
+  function ttSpot(b, w, h, f) {
+    var p = b.getAttribute('data-tt-p') || 'br', g = ({ s: 12, m: 24, l: 36 })[b.getAttribute('data-tt-g')] || 24, y = parseInt(b.getAttribute('data-tt-y'), 10) || 0;
+    return {
+      x: p.charAt(1) === 'l' ? f.l + g : (p.charAt(1) === 'c' ? (f.l + f.r - w) / 2 : f.r - g - w),
+      y: p.charAt(0) === 't' ? f.t + g + y : f.b - g - y - h
+    };
+  }
+  function ttGhostShow(it, yNow) {
+    var hide = yNow < ttAfter(it.src);
+    var o = hide ? '0' : '1', v = hide ? 'hidden' : 'visible';
+    if (it.el.style.opacity !== o) it.el.style.opacity = o;
+    if (it.el.style.visibility !== v) it.el.style.visibility = v;
+  }
+  function ttPlaceAll() {
+    if (_ttBusy) return;
+    var pg = document.querySelector('.cv-page');
+    if (!pg) return;
+    var desktop = pg.classList.contains('cv-force-desktop'), preview = pg.classList.contains('cv-preview'), yNow = ttScrollY(), f = null, pos = false, sh = false;
+    [].forEach.call(pg.querySelectorAll('.blk[data-type="totop"]'), function(b) {
+      var cv = b.parentElement;
+      if (!cv || b.closest('.nb-pg')) return;
+      var hide = preview && yNow < ttAfter(b);
+      ttSet(b, '--tt-hide', hide ? '1' : null);
+      if (preview && ttAfter(b) > 0) sh = true;
+      var cr = cv.getBoundingClientRect(), z = cv.offsetWidth ? cr.width / cv.offsetWidth : 1;
+      if (!isFinite(z) || z <= 0) z = 1;
+      var zoomed = Math.abs(z - 1) > 0.001;
+      if (!desktop && !zoomed) { TT_VARS.forEach(function(k) { ttSet(b, k, null); }); return; }
+      pos = true;
+      if (!f) f = ttFrame(desktop);
+      var spot = ttSpot(b, b.offsetWidth, b.offsetHeight, f), ox = zoomed ? cr.left : 0, oy = zoomed ? cr.top : 0;
+      ttSet(b, '--tt-js', '1');
+      ttSet(b, '--tt-l', ((spot.x - ox) / z) + 'px');
+      ttSet(b, '--tt-tp', ((spot.y - oy) / z) + 'px');
+      ttSet(b, '--tt-s', String(zoomed ? 1 / z : 1));
+    });
+    // "Every page", in preview: a button that lives on another page is drawn here as a stand-in (outside the note, never saved).
+    var want = preview ? [].slice.call(pg.querySelectorAll('.nb-pg .blk[data-type="totop"][data-tt-all="1"]')) : [];
+    var host = document.getElementById('nb-tt-ghosts');
+    if (!want.length) { if (host) host.remove(); _ttGhosts = []; }
+    else {
+      if (!host) { host = document.createElement('div'); host.id = 'nb-tt-ghosts'; host.setAttribute('data-noteinfra', '1'); document.body.appendChild(host); }
+      _ttBusy = true;
+      want.forEach(function(b) { var bt = b.querySelector('.blk-tt-btn'); if (bt && !bt.firstChild) applyToTop(b); });
+      _ttBusy = false;
+      var sig = want.map(function(b) { var bt = b.querySelector('.blk-tt-btn'); return bt ? bt.outerHTML : ''; }).join('|');
+      if (host._ttSig !== sig) {
+        host.textContent = '';
+        _ttGhosts = [];
+        want.forEach(function(b) {
+          var bt = b.querySelector('.blk-tt-btn');
+          if (!bt) return;
+          var g = document.createElement('div'), c = bt.cloneNode(true);
+          g.className = 'nb-tt-ghost';
+          c.addEventListener('click', function(e) { e.preventDefault(); ttScrollTop(c); });
+          g.appendChild(c);
+          host.appendChild(g);
+          _ttGhosts.push({ el: g, src: b, btn: c });
+        });
+        host._ttSig = sig;
+      }
+      if (!f) f = ttFrame(desktop);
+      _ttGhosts.forEach(function(it) {
+        var w = parseFloat(it.btn.style.width) || 56, h = parseFloat(it.btn.style.height) || 56, spot = ttSpot(it.src, w, h, f);
+        it.el.style.left = spot.x + 'px';
+        it.el.style.top = spot.y + 'px';
+        ttGhostShow(it, yNow);
+        if (ttAfter(it.src) > 0) sh = true;
+      });
+    }
+    _ttPos = pos;
+    _ttSh = sh;
+  }
+  function ttVis() {
+    var pg = document.querySelector('.cv-page');
+    if (!pg || !pg.classList.contains('cv-preview')) return;
+    var yNow = ttScrollY();
+    [].forEach.call(pg.querySelectorAll('.blk[data-type="totop"]'), function(b) { if (!b.closest('.nb-pg')) ttSet(b, '--tt-hide', yNow < ttAfter(b) ? '1' : null); });
+    _ttGhosts.forEach(function(it) { ttGhostShow(it, yNow); });
+  }
+  function ttQueue() { if (_ttRaf) return; _ttRaf = requestAnimationFrame(function() { _ttRaf = 0; ttPlaceAll(); }); }
+  function ttVisQueue() { if (_ttVisRaf) return; _ttVisRaf = requestAnimationFrame(function() { _ttVisRaf = 0; ttVis(); }); }
+  function ttBind() {
+    if (window._nbTtBound) return;
+    window._nbTtBound = true;
+    window._nbTtPlaceAll = ttPlaceAll;
+    window.addEventListener('scroll', function(e) {
+      var t = e.target;
+      if (t !== document && t !== window && !(t && t.id === 'cv-canvas-scroll')) return;
+      if (_ttPos) ttQueue(); else if (_ttSh) ttVisQueue();
+    }, { passive: true, capture: true });
+    window.addEventListener('resize', ttQueue);
+    var pg = document.querySelector('.cv-page'), cv = document.getElementById('cv-canvas');
+    if (window.MutationObserver) {
+      var mo = new window.MutationObserver(ttQueue);
+      if (pg) mo.observe(pg, { attributes: true, attributeFilter: ['class'] });
+      if (cv) mo.observe(cv, { childList: true });
+    }
+  }
+  function applyToTop(block) {
+    var b = block.querySelector('.blk-tt-btn');
+    if (!b) return;
+    // Borrow the Button look: run applyButton on a throw-away copy of the button settings, then take its CSS.
+    var shim = document.createElement('div');
+    [].forEach.call(block.attributes, function(at) { if (at.name.indexOf('data-bt-') === 0) shim.setAttribute(at.name, at.value); });
+    shim.innerHTML = '<div class="blk-btn-wrap"><a class="blk-btn"></a></div>';
+    applyButton(shim);
+    var s = shim.querySelector('.blk-btn');
+    b.style.cssText = s.style.cssText;
+    if (s.hasAttribute('data-bt-g')) b.setAttribute('data-bt-g', '1'); else b.removeAttribute('data-bt-g');
+    block.style.setProperty('--tt-g', (({ s: 12, m: 24, l: 36 })[dzGet(block, 'ttG', 'm')] || 24) + 'px');
+    block.style.setProperty('--tt-y', (parseInt(dzGet(block, 'ttY', '0'), 10) || 0) + 'px');
+    var px = TT_SIZE[dzGet(block, 'btZ', 'm')] || 56, r = dzGet(block, 'btR', 'pill');
+    b.style.padding = '0'; b.style.width = px + 'px'; b.style.height = px + 'px'; b.style.maxWidth = 'none';
+    b.style.borderRadius = r === 'pill' ? '50%' : (BT_R[r] || '14px');
+    var ic = dzGet(block, 'ttI', 'arrow');
+    if (b.getAttribute('data-ic') !== ic) { b.innerHTML = ttSvg(ic); b.setAttribute('data-ic', ic); }
+    var h = block.querySelector('.blk-tt-hint');
+    if (!h) { h = document.createElement('div'); h.className = 'blk-tt-hint'; h.setAttribute('data-noteinfra', '1'); b.parentNode.appendChild(h); }
+    var nm = ''; TT_POS.forEach(function(x) { if (x[0] === dzGet(block, 'ttP', 'br')) nm = x[1].toLowerCase(); });
+    h.textContent = (dzGet(block, 'ttAll', '0') === '1' ? 'On every page. ' : '') + 'Floats at the ' + nm + ' of the page';
+    ttPlaceAll();
+  }
+  function wireToTop(block) {
+    if (block.dataset.type !== 'totop') return;
+    ttBind();
+    applyToTop(block);
+    ttQueue();
+    var btn = block.querySelector('.blk-tt-btn');
+    if (btn && !btn._ttWired) {
+      btn._ttWired = true;
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var pg = document.querySelector('.cv-page');
+        if (pg && pg.classList.contains('cv-preview')) ttScrollTop(btn);
+      });
+    }
+    var d = block.querySelector('.blk-design');
+    if (d && !d._dzWired) { d._dzWired = true; d.addEventListener('click', function() { openToTopDesign(block); }); }
+  }
+  function openToTopDesign(block) {
+    var before = hcBeginBlock(block);
+    function render() {
+      var g = function(k) { return dzGet(block, k, ''); };
+      var h = dzTab('Style', 'Scroll to top style') + dzSec('Style', dzChips('btS', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft']], dzGet(block, 'btS', 'solid')));
+      h += dzSec('Colour', dzSwatches('btC', block.dataset.btC || ''));
+      h += dzSec('Icon', dzChips('ttI', [['arrow', 'Arrow'], ['chevron', 'Chevron'], ['double', 'Double'], ['top', 'To top']], dzGet(block, 'ttI', 'arrow'), 4));
+      h += dzTab('Layout', 'Scroll to top layout') + dzSec('Size', dzChips('btZ', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large'], ['xl', 'Huge']], dzGet(block, 'btZ', 'm'), 4));
+      h += dzSec('Shape', dzChips('btR', BT_SHAPES, dzGet(block, 'btR', 'pill'), 3));
+      h += dzSec('Position', dzChips('ttP', TT_POS, dzGet(block, 'ttP', 'br'), 3) + '<div class="dz-hint">It stays in this spot on the screen as people scroll. While you edit, it always shows so you can change it. On your published page, it only appears once people have scrolled a bit.</div>');
+      h += dzSec('Edge spacing', dzChips('ttG', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'ttG', 'm')));
+      h += dzSec('Lift', dzChips('ttY', [['0', 'None'], ['24', 'Small'], ['48', 'Medium'], ['72', 'Large'], ['96', 'Huge']], dzGet(block, 'ttY', '0'), 5) + '<div class="dz-hint">Moves it further from the edge, so it doesn't sit on top of things like a menu bar.</div>');
+      h += dzSec('Show this button on', dzChips('ttAll', [['0', 'This page'], ['1', 'Every page']], dzGet(block, 'ttAll', '0')));
+      h += dzSec('Show after', dzChips('ttSh', [['0', 'Immediately'], ['200', 'A little'], ['600', 'A lot']], dzGet(block, 'ttSh', '200'), 3) + '<div class="dz-hint">How far people scroll down before the button shows up.</div>');
+      h += dzTab('Finish', 'Scroll to top finish') + dzSec('Reset finish', dzChips('btReset', [['1', 'Reset button finish']], '', 1) + '<div class="dz-hint">Puts the icon colour, border and shadow back how they started.</div>');
+      h += dzSec('Icon colour', dzSwatches('btT', g('btT')) + '<div class="dz-hint">If you pick None, we choose black or white so the icon is easy to see.</div>');
+      h += dzSec('Border', dzChips('btB', [['', 'Preset'], ['none', 'None'], ['thin', 'Thin'], ['mid', 'Medium'], ['bold', 'Bold'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['double', 'Double']], g('btB'), 4) + '<div class="dz-hint">Buttons with a gradient look don't use this.</div>');
+      h += dzSec('Border colour', dzSwatches('btBc', g('btBc')) + '<div class="dz-hint">If you pick None, the border matches the button.</div>');
+      h += dzSec('Shadow', dzChips('btH', [['', 'None'], ['soft', 'Soft'], ['lift', 'Lift'], ['hard', 'Hard'], ['glow', 'Glow']], g('btH'), 5));
+      h += dzTab('Effects', 'Scroll to top effects') + dzSec('Opacity', dzSlider('op', blockOpPct(block)));
+      h += dzAnimSecs(block);
+      return h;
+    }
+    dzSheet('Scroll to top design', render, function(k, v) {
+      if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; }
+      if (k === 'op') { blockOpApply(block, v); return; }
+      if (k === 'btReset') BT_X.forEach(function(x) { delete block.dataset[x]; }); else if ((k === 'btC' || BT_X.indexOf(k) >= 0) && v === '') delete block.dataset[k]; else block.dataset[k] = v;
+      applyToTop(block);
+    }, null, null, stCanBack(block), stBackFn).then(function(res) { var sb = res === ST_BACK; if (res !== true && !sb) { hcRevertBlock(block, before); return; } blockAnimDone(block); hcCommitBlock(block, before); if (sb) stReopen(block); });
+  }
+
   /* ---------- Payments ---------- */
   // Link mode (default): the author pastes their own payment page (Stripe Payment Link, PayPal.me, Ko-fi...) and visitors pay there.
   // In-page mode is further down (pyKit).
@@ -22521,6 +22818,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
     wirePoll(block);
     wireTextbox(block);
     wirePay(block);
+    wireToTop(block);
     wireIcon(block);
     wireMarquee(block);
     wireSpacer(block);
@@ -22705,7 +23003,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
     histNotifyParent();
     nvRefreshAll();
     layoutClassicCanvas();
-    if (scr) { var sv = pgScroll[pid]; scr.scrollTop = sv ? sv.t : 0; scr.scrollLeft = sv ? sv.l : 0; }
+    if (scr) { var sv = pgScroll[pid]; scr.scrollTop = sv ? sv.t : 0; scr.scrollLeft = sv ? sv.l : 0;
+      if (sv && sv.t) requestAnimationFrame(function() { if (pgCur() === pid && Math.abs(scr.scrollTop - sv.t) > 1) scr.scrollTop = sv.t; }); }
     pgRefreshStrip();
   }
   function pgRename(pid, title) {
@@ -25640,6 +25939,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   }
 
   function duplicateBlock(src) {
+    if (src && src.dataset && src.dataset.type === 'totop') return null;
     try { window.parent.postMessage({ type: 'markup-block-inserted', noteId: window.__noteId }, '*'); } catch (e) {}
     var tmp = document.createElement('div');
     tmp.innerHTML = src.outerHTML;
@@ -25982,6 +26282,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       canvasZoomWrap.style.height = rect.height + 'px';
     }
     if (window._nbNavStick) window._nbNavStick();
+    if (window._nbTtPlaceAll) window._nbTtPlaceAll();
   }
   // Writes to whichever of canvasZoom/mobileZoom is currently active and
   // clamps it to that view's own range, then repaints.
@@ -28066,6 +28367,8 @@ const EINFO_REPOST_HTML = `<p>Found something worth sharing on Instagram, X, or 
         <li>Press and hold the six dots in a piece's top-right corner, then slide it where you want it.</li>
         <li>Tap the X to delete it.</li>
       </ul>
+      <h3>Add a scroll to top button</h3>
+      <p>Tap To top in the bar to add a round button. It sits in a corner of your page, and when someone taps it, they go straight back to the top. Tap the sliders icon on the button to change how it looks: its colour, icon, size and shape. You can also pick which corner it sits in, how far it is from the edge, and whether it shows on just this page or on every page. While you edit, it always shows so you can see it. On your published page, it only pops up once people have scrolled down a bit.</p>
       <h3>Change a photo, video, or post</h3>
       <p>Tap the pencil in its top-right corner, then paste a new link or pick a new photo from your phone.</p>
       <h3>Add a caption</h3>
@@ -31757,6 +32060,7 @@ ${animHead}
 </head>
 <body class="cv-page cv-preview${desktopClass}"${bgAttr}${bgStyle}>
   ${_nbCanvases}
+  ${_nbToTopScript(cleanContent0)}
   ${sameScript}
   <script>
   // #cv-canvas gets its height from an inline style the live editor's
