@@ -42799,10 +42799,14 @@ async function _chImSend(p) {
     const e = c.echo[c.echoI++ % c.echo.length], md = MEDIA_ECHO[kind];
     if (c.vEcho) { // a chat where everyone talks by voice answers with a spoken clip
       c.msgs.push(Object.assign({ id: 'tm-' + uid(), by: e[0], at: Date.now(), body: 'Voice message', rx: {}, reply: Math.random() < .5 ? to : undefined }, vnClip(c.vEcho[(c.echoI - 1) % c.vEcho.length])));
+      refreshBadge();
       return;
     }
     c.msgs.push({ id: 'tm-' + uid(), by: e[0], at: Date.now(), body: md ? md[(c.echoI - 1) % md.length] : e[1], rx: {}, reply: Math.random() < .5 ? to : undefined });
+    refreshBadge();
   }
+  // The reply is a new unread message: update the Messages badge now, wherever the person is, instead of at the next background poll.
+  function refreshBadge() { try { _nbMsgFetchChats(true); } catch (e) {} }
   function teamDetail(c) {
     const now = Date.now();
     if (c.owner === 'me') {
@@ -43009,7 +43013,10 @@ async function _chImSend(p) {
     const clamp = y => Math.max(70, Math.min(window.innerHeight - 140, y));
     b.addEventListener('pointerdown', e => { down = true; moved = false; sy = e.clientY; st0 = b.getBoundingClientRect().top; try { b.setPointerCapture(e.pointerId); } catch (x) {} });
     b.addEventListener('pointermove', e => { if (!down) return; if (Math.abs(e.clientY - sy) > 6) moved = true; if (moved) { b.style.top = clamp(st0 + e.clientY - sy) + 'px'; } });
-    b.addEventListener('pointerup', () => { if (!down) return; down = false; if (!moved) window.nbTourExit(); });
+    // A tap exits on click, not on pointerup: on touch the browser fires a click at the same spot right after pointerup, and with the
+    // dialog already open that click hit its backdrop (tap outside = Stay) whenever the pill sat outside the dialog card.
+    b.addEventListener('pointerup', () => { down = false; });
+    b.addEventListener('click', () => { if (moved) { moved = false; return; } window.nbTourExit(); });
     b.addEventListener('pointercancel', () => { down = false; });
   }
 
