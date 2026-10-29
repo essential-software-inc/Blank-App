@@ -5582,8 +5582,8 @@ body.pink #chat-overlay { --ch-bg: #fff8fb; --ch-me: #ffd9e6; --ch-them: #fff0f5
 .ch-quote b { display: block; color: var(--al-acc); font-size: .74rem }
 .ch-quote span { display: block; color: var(--ch-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .ch-rx { display: flex; flex-wrap: wrap; gap: .25rem; margin: -.2rem .3rem 0; position: relative; z-index: 1 }
-.ch-rx button { display: inline-flex; align-items: center; gap: .2rem; padding: .05rem .4rem; border-radius: 999px; border: 1px solid var(--ch-bd); background: var(--ch-bar); color: var(--ch-txt); font: inherit; font-size: .74rem; cursor: pointer; line-height: 1.5 }
-.ch-rx button.mine { border-color: var(--al-acc); background: color-mix(in srgb, var(--al-acc) 14%, var(--ch-bar)) }
+.ch-rx button, #ch-rxl-tabs button { display: inline-flex; align-items: center; gap: .2rem; padding: .05rem .4rem; border-radius: 999px; border: 1px solid var(--ch-bd); background: var(--ch-bar); color: var(--ch-txt); font: inherit; font-size: .74rem; cursor: pointer; line-height: 1.5 }
+.ch-rx button.mine, #ch-rxl-tabs button.on { border-color: var(--al-acc); background: color-mix(in srgb, var(--al-acc) 14%, var(--ch-bar)) }
 .ch-state { margin: auto; text-align: center; color: var(--ch-mut); font-size: .86rem; line-height: 1.5; padding: 1.5rem }
 .ch-state button { margin-top: .7rem; padding: .45rem 1rem; border: none; border-radius: 12px; background: var(--al-acc); color: var(--al-on); font: inherit; font-weight: 700; cursor: pointer }
 #ch-foot { position: relative; flex: none; background: var(--ch-bar); border-top: 1px solid var(--ch-bd); padding: .45rem .6rem calc(.45rem + env(safe-area-inset-bottom, 0px)) }
@@ -5640,6 +5640,22 @@ body.pink #chat-overlay { --ch-bg: #fff8fb; --ch-me: #ffd9e6; --ch-them: #fff0f5
 #ch-emojis { display: flex; justify-content: space-between; gap: .2rem; padding: .2rem .3rem .6rem; border-bottom: 1px solid var(--ch-bd); margin-bottom: .3rem }
 #ch-emojis button { flex: 1; height: 46px; border: none; border-radius: 14px; background: none; font-size: 1.5rem; cursor: pointer; padding: 0 }
 #ch-emojis button.mine { background: color-mix(in srgb, var(--al-acc) 18%, transparent) }
+#ch-rxl { display: none }
+#ch-sheet.rxl #ch-emojis, #ch-sheet.rxl #ch-acts { display: none }
+#ch-sheet.rxl #ch-rxl { display: block }
+#ch-rxl-tabs { display: flex; flex-wrap: wrap; gap: .35rem; padding: .2rem .3rem .6rem; border-bottom: 1px solid var(--ch-bd); margin-bottom: .3rem }
+#ch-rxl-tabs button { font-size: .86rem; padding: .15rem .6rem }
+#ch-rxl-list { max-height: 50vh; overflow-y: auto; overscroll-behavior: contain }
+.ch-rl-row { display: flex; align-items: center; gap: .8rem; padding: .6rem; color: var(--ch-txt); font-size: .94rem }
+.ch-rl-row .ch-av { width: 32px; height: 32px }
+.ch-rl-col { min-width: 0 }
+.ch-rl-row.me { cursor: pointer; border-radius: 12px }
+.ch-rl-row.me:active { background: var(--ch-them) }
+.ch-rl-sub { font-size: .74rem; color: var(--ch-mut) }
+.ch-rl-nm { display: flex; align-items: center; gap: .35rem; min-width: 0; font-weight: 600 }
+.ch-rl-nm span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.ch-rl-e { margin-left: auto; font-size: 1.35rem; line-height: 1 }
+.ch-rl-note { padding: 1rem .6rem; text-align: center; color: var(--ch-mut); font-size: .88rem }
 .ch-act { display: flex; align-items: center; gap: .8rem; width: 100%; padding: .75rem .6rem; border: none; background: none; color: var(--ch-txt); font: inherit; font-size: .94rem; text-align: left; border-radius: 12px; cursor: pointer }
 .ch-act:active { background: var(--ch-them) }
 .ch-act svg { width: 20px; height: 20px; flex: none; color: var(--ch-mut) }
@@ -5808,7 +5824,7 @@ body.pink #tsum-dialog .rdlg-cancel{background:rgba(255,224,236,.6);color:#c8365
 #chat-overlay{--ch-div:rgba(20,30,50,.1)}
 body.night #chat-overlay{--ch-div:rgba(255,255,255,.07)}
 body.pink #chat-overlay{--ch-div:rgba(200,54,94,.16)}
-#ch-emojis{border-bottom-color:var(--ch-div)}
+#ch-emojis,#ch-rxl-tabs{border-bottom-color:var(--ch-div)}
 #ch-sbar{border-bottom-color:var(--ch-div)}
 #ch-foot{border-top-color:var(--ch-div)}
 #ch-rec{background:color-mix(in srgb,var(--ch-in) 60%,transparent)}
@@ -7117,7 +7133,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
     </div>
     <div id="ch-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg></div>
   </div>
-  <div id="ch-sheet"><div id="ch-sheet-box"><div id="ch-emojis"></div><div id="ch-acts"></div></div></div>
+  <div id="ch-sheet"><div id="ch-sheet-box"><div id="ch-emojis"></div><div id="ch-acts"></div><div id="ch-rxl"><div id="ch-rxl-tabs"></div><div id="ch-rxl-list"></div></div></div></div>
 </div>
 
 <script>
@@ -33176,7 +33192,7 @@ function _pubTeamsEditorList(d) {
   document.getElementById('pub-tm-ecount').textContent = team.length + (team.length === 1 ? ' person' : ' people');
   team.forEach(m => {
     const row = _pubTeamsEl('div', 'pub-tm-row pub-tm-card'), main = _pubTeamsEl('div', 'pub-tm-main'), who = _pubTeamsEl('div', 'pub-tm-who');
-    main.appendChild(_pubTeamsAvatar({ name: m.name || (m.author ? 'Author' : 'Anonymous'), authorId: m.authorId }));
+    main.appendChild(_pubTeamsAvatar({ name: m.name || (m.author ? 'Author' : 'Anonymous'), authorId: m.authorId, pv: m.pv }));
     const nm = _pubTeamsEl('div', 'pub-tm-name', (m.name || 'Anonymous') + (m.me ? ' (you)' : ''));
     if (m.author) {
       const b = _pubTeamsEl('span', 'pub-tm-badge');
@@ -33289,13 +33305,13 @@ function _pubTeamsAvatar(m) {
   const nm = String((m && m.name) || '').trim();
   av.textContent = (Array.from(nm)[0] || '?').toUpperCase();
   const sub = m && (m.authorId || m.authorSub || m.sub);
-  if (sub) _pubTeamsAvLoad(av, sub);
+  if (sub) _pubTeamsAvLoad(av, sub, m.pv);
   return av;
 }
 // A picture that failed on a dropped connection is queued here and retried by the reconnect job below; a missing picture (404) keeps the letter.
 let _pubTeamsAvFail = [];
-function _pubTeamsAvLoad(av, sub) {
-  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(sub) + '?v=' + (typeof _nbProfileImageVersion !== 'undefined' ? _nbProfileImageVersion : 0), nbIsSignedIn() ? { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } } : undefined)
+function _pubTeamsAvLoad(av, sub, pv) {
+  fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(sub) + '?v=' + (pv || 0) + '-' + (typeof _nbProfileImageVersion !== 'undefined' ? _nbProfileImageVersion : 0), nbIsSignedIn() ? { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } } : undefined)
     .then(r => r.ok ? r.blob() : Promise.reject(new Error('no picture')))
     .then(blob => {
       const u = URL.createObjectURL(blob), img = new Image();
@@ -33304,7 +33320,7 @@ function _pubTeamsAvLoad(av, sub) {
       img.onerror = () => URL.revokeObjectURL(u);
       img.src = u;
     })
-    .catch(e => { if (_pubTeamsNetFail(e)) _pubTeamsAvFail.push({ av, sub }); });
+    .catch(e => { if (_pubTeamsNetFail(e)) _pubTeamsAvFail.push({ av, sub, pv }); });
 }
 // Round icon buttons for the rows (remove editor, cancel invitation, restore a version). Same stroke weight as the header icons.
 const _PUB_TM_ICONS = {
@@ -33429,7 +33445,7 @@ async function _pubTeamsHistory() {
     if (!vs.length) { box.appendChild(_pubTeamsEl('div', 'pub-status', 'No earlier versions yet. One is kept each time someone saves.')); return; }
     vs.forEach(v => {
       const row = _pubTeamsEl('div', 'pub-tm-row pub-tm-card'), main = _pubTeamsEl('div', 'pub-tm-main'), who = _pubTeamsEl('div', 'pub-tm-who'), rf = _pubTeamsEl('div', 'pub-tm-rf end');
-      main.appendChild(_pubTeamsAvatar({ name: v.name || 'Editor', authorId: v.authorId }));
+      main.appendChild(_pubTeamsAvatar({ name: v.name || 'Editor', authorId: v.authorId, pv: v.pv }));
       who.appendChild(_pubTeamsEl('div', 'pub-tm-name', v.name || 'Editor'));
       who.appendChild(_pubTeamsEl('div', 'pub-tm-sub', _pubTeamsVerWhen(v)));
       main.appendChild(who);
@@ -37577,7 +37593,7 @@ nbAddReconnectJob(
   () => { const b = document.getElementById('pub-tm-hist-list'); return _pubTeamsOn && _pubTeamsHistFailed && !!b && b.dataset.open === '1' && _nbElOpen('publish-overlay'); },
   () => { document.getElementById('pub-tm-hist-list').dataset.open = ''; return _pubTeamsHistory(); });
 // Teams and version-history avatars that couldn't load. Rows that have since gone away are dropped.
-nbAddReconnectJob(() => _pubTeamsAvFail.length > 0 && _nbElOpen('publish-overlay'), () => { _pubTeamsAvFail.splice(0).forEach(x => { if (x.av.isConnected) _pubTeamsAvLoad(x.av, x.sub); }); });
+nbAddReconnectJob(() => _pubTeamsAvFail.length > 0 && _nbElOpen('publish-overlay'), () => { _pubTeamsAvFail.splice(0).forEach(x => { if (x.av.isConnected) _pubTeamsAvLoad(x.av, x.sub, x.pv); }); });
 // Settings > Blocked from inviting you: the list (or its next page) that couldn't load. Closing the sheet ends the retries.
 nbAddReconnectJob(() => !!_nbBlocksSess && _nbBlocksSess.failed && _nbElOpen('publish-overlay'), () => _nbBlocksSess && _nbBlocksSess.retry());
 nbAddReconnectJob(() => !!_nbBlocksSess && _nbBlocksSess.moreFailed && _nbElOpen('publish-overlay'), () => _nbBlocksSess && _nbBlocksSess.retryMore());
@@ -40859,11 +40875,16 @@ function _chDay(ts) {
 }
 function _chTime(ts) { try { return new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } }
 function _chEl(tag, cls, text) { const el = document.createElement(tag); if (cls) el.className = cls; if (text != null) el.textContent = text; return el; }
-function _chSig() { return JSON.stringify(_ch.msgs.map(m => [m.id, m.deleted, m.reactions])); }
+function _chSig() { return JSON.stringify(_ch.msgs.map(m => [m.id, m.deleted, m.reactions, m.name, m.authorId, m.pv, m.replyTo && m.replyTo.name])); } // names and pictures count: a rename redraws the chat
 function _chMerge(page) {
   const by = new Map(_ch.msgs.map(m => [m.id, m]));
   page.forEach(m => { const p = _ch.rx && _ch.rx.get(m.id); if (p && !m.deleted) m.reactions = p.rx; by.set(m.id, m); }); // a reaction still in flight wins over the poll's older copy
   _ch.msgs = [...by.values()].sort((a, b) => a.createdAt - b.createdAt);
+  // The poll brings each person's current name and picture version. Apply them to every message from that person (older pages, quotes, reactors), matched by their chat code.
+  const cur = new Map();
+  page.forEach(m => { if (!m.gone && m.who) cur.set(m.who, m); (m.reactions || []).forEach(r => (r.users || []).forEach(u => { if (u.who) cur.set(u.who, u); })); });
+  const upd = x => { const c = x && x.who && cur.get(x.who); if (c && c !== x) { x.name = c.name; if ('authorId' in c) x.authorId = c.authorId; if ('pv' in c) x.pv = c.pv; } };
+  _ch.msgs.forEach(m => { upd(m); if (m.replyTo && !m.replyTo.gone) { const c = m.replyTo.who && cur.get(m.replyTo.who); if (c) m.replyTo.name = c.name; } (m.reactions || []).forEach(r => (r.users || []).forEach(upd)); });
 }
 function _chHead() { _chE('ch-sub').textContent = _ch.members > 1 ? _ch.members + ' members' : ((_ch.loaded || _ch.members === 1) ? 'Just you so far' : ''); }
 function _chSendState() {
@@ -40884,16 +40905,24 @@ function _chAutosize() {
   _chSendState();
 }
 function _chAvatar(el, m) {
-  el.textContent = (_chName(m).trim().charAt(0) || '?').toUpperCase();
+  const letter = (_chName(m).trim().charAt(0) || '?').toUpperCase();
+  el.textContent = letter;
   if (!m.authorId || !nbIsSignedIn()) return;
-  const put = u => { if (!u || !el.isConnected) return; const im = document.createElement('img'); im.alt = ''; im.onload = () => { el.textContent = ''; el.appendChild(im); }; im.src = u; };
-  const c = _ch.av.get(m.authorId);
-  if (typeof c === 'string') { const im = document.createElement('img'); im.alt = ''; im.src = c; el.textContent = ''; el.appendChild(im); return; } // cached picture: in place at once, so a redraw never flashes the letter
+  const key = m.authorId + ':' + (m.pv || 0); // a new picture version is a new key, so a changed picture is fetched again
+  const show = u => { const im = document.createElement('img'); im.alt = ''; im.src = u; el.textContent = ''; el.appendChild(im); };
+  const put = u => { if (!el.isConnected) return; if (!u) { el.textContent = letter; return; } const im = document.createElement('img'); im.alt = ''; im.onload = () => { el.textContent = ''; el.appendChild(im); }; im.src = u; };
+  const c = _ch.av.get(key);
+  if (typeof c === 'string') { show(c); return; } // cached picture: in place at once, so a redraw never flashes the letter
   if (c === null) return; // no picture
+  if (c === undefined) for (const [k, v] of _ch.av) if (typeof v === 'string' && k.startsWith(m.authorId + ':')) { show(v); break; } // the old picture stays until the new one is in
   if (c) { c.then(put); return; }
-  const p = fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(m.authorId), { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } })
-    .then(r => r.ok ? r.blob() : null).then(b => { const u = b ? URL.createObjectURL(b) : null; _ch.av.set(m.authorId, u); return u; }).catch(() => { _ch.av.delete(m.authorId); return null; });
-  _ch.av.set(m.authorId, p); p.then(put);
+  const p = fetch(NB_PUBLISH_API.replace(/\/$/, '') + '/account/profile-image/' + encodeURIComponent(m.authorId) + '?v=' + (m.pv || 0), { headers: { 'Authorization': 'Bearer ' + nbSessionToken() } })
+    .then(r => r.ok ? r.blob() : null).then(b => {
+      const u = b ? URL.createObjectURL(b) : null; _ch.av.set(key, u);
+      for (const [k, v] of Array.from(_ch.av)) if (k !== key && k.startsWith(m.authorId + ':')) { if (typeof v === 'string') URL.revokeObjectURL(v); _ch.av.delete(k); }
+      return u;
+    }).catch(() => { _ch.av.delete(key); return null; });
+  _ch.av.set(key, p); p.then(put);
 }
 function _chRow(m, prev, grouped) {
   const row = _chEl('div', 'ch-row ' + (m.me ? 'me' : 'them') + (grouped ? '' : ' gap')); row.dataset.id = m.id;
@@ -40968,7 +40997,7 @@ function _chRow(m, prev, grouped) {
   col.appendChild(bub);
   if (m.reactions && m.reactions.length) {
     const rx = _chEl('div', 'ch-rx');
-    m.reactions.forEach(r => { const b = _chEl('button', r.mine ? 'mine' : '', r.emoji + (r.count > 1 ? ' ' + r.count : '')); b.type = 'button'; b.onclick = () => _chReact(m, r.emoji); rx.appendChild(b); });
+    m.reactions.forEach(r => { const b = _chEl('button', r.mine ? 'mine' : '', r.emoji + (r.count > 1 ? ' ' + r.count : '')); b.type = 'button'; b.onclick = e => { e.stopPropagation(); _chRxOpen(m); }; rx.appendChild(b); });
     col.appendChild(rx);
   }
   row.appendChild(col);
@@ -40977,6 +41006,7 @@ function _chRow(m, prev, grouped) {
 // mode: 'first' (scroll to the first unread, else the end), 'bottom', 'prepend' (older messages added above: stay put), else stay unless already at the end
 let _chMoreIO = null;
 function _chRender(mode) {
+  if (_ch.rxl) _chRxRender();
   const box = _chE('ch-msgs'), prevH = box.scrollHeight, prevT = box.scrollTop, atEnd = prevH - prevT - box.clientHeight < 90;
   if (_chImIO) _chImIO.disconnect();
   if (_chMoreIO) { _chMoreIO.disconnect(); _chMoreIO = null; }
@@ -41303,9 +41333,9 @@ async function _chSend() {
   finally { _ch.sending = false; _chSendState(); _chFlyStop(); }
 }
 function _chRxLocal(m, emoji) {
-  const rs = (m.reactions || []).map(r => Object.assign({}, r)), mine = rs.find(r => r.mine); let same = false;
-  if (mine) { mine.count--; mine.mine = false; same = mine.emoji === emoji; }
-  if (!same) { const t = rs.find(r => r.emoji === emoji); if (t) { t.count++; t.mine = true; } else rs.push({ emoji, count: 1, mine: true }); }
+  const rs = (m.reactions || []).map(r => Object.assign({}, r, { users: (r.users || []).slice() })), mine = rs.find(r => r.mine); let same = false;
+  if (mine) { mine.count--; mine.mine = false; mine.users = mine.users.filter(u => !u.me); same = mine.emoji === emoji; }
+  if (!same) { const me = { name: 'You', me: true }, t = rs.find(r => r.emoji === emoji); if (t) { t.count++; t.mine = true; t.users.push(me); } else rs.push({ emoji, count: 1, mine: true, users: [me] }); }
   return rs.filter(r => r.count > 0).sort((a, b) => b.count - a.count);
 }
 async function _chReact(m0, emoji) {
@@ -41339,7 +41369,36 @@ async function _chDelete(m) {
     live.deleted = true; live.body = ''; live.reactions = []; _chVnDrop(m.id); _chImDrop(m.id); if (_chImV.open && _chImV.id === m.id) _chImClose(); _chRender();
   } catch (e) { if (seq === _ch.seq) showToast('Couldn\u2019t delete that message'); }
 }
-function _chSheetClose() { const s = _chE('ch-sheet'); if (s) s.classList.remove('open'); _ch.sheetMsg = null; }
+function _chSheetClose() { const s = _chE('ch-sheet'); if (s) s.classList.remove('open', 'rxl'); _ch.sheetMsg = null; _ch.rxl = null; }
+// Reactions list: the same sheet, showing who reacted with what (All, or one emoji). Rows reuse the chat avatar and Author badge.
+function _chRxOpen(m) {
+  if (m.deleted || !(m.reactions || []).length) return;
+  _ch.rxl = { id: m.id, sel: '' }; _ch.sheetMsg = m;
+  _chE('ch-sheet').classList.add('open', 'rxl');
+  _chRxRender();
+}
+function _chRxRender() {
+  const st = _ch.rxl; if (!st) return;
+  const m = _ch.msgs.find(x => x.id === st.id), rs = (m && m.reactions) || [];
+  const tabs = _chE('ch-rxl-tabs'), list = _chE('ch-rxl-list'), total = rs.reduce((a, r) => a + r.count, 0);
+  tabs.textContent = ''; list.textContent = '';
+  if (st.sel && !rs.some(r => r.emoji === st.sel)) st.sel = ''; // that emoji just went away
+  const tab = (key, label) => { const b = _chEl('button', st.sel === key ? 'on' : '', label); b.type = 'button'; b.onclick = () => { st.sel = key; _chRxRender(); }; tabs.appendChild(b); };
+  tab('', 'All ' + total);
+  rs.forEach(r => tab(r.emoji, r.emoji + ' ' + r.count));
+  const rows = [];
+  rs.filter(r => !st.sel || r.emoji === st.sel).forEach(r => (r.users || []).forEach(u => rows.push([r, u])));
+  rows.sort((a, b) => (b[1].me ? 1 : 0) - (a[1].me ? 1 : 0)); // you first (stable: everyone else keeps the order they reacted in)
+  rows.forEach(([r, u]) => {
+    const row = _chEl('div', 'ch-rl-row' + (u.me ? ' me' : '')), av = _chEl('div', 'ch-av'), col = _chEl('div', 'ch-rl-col'), nm = _chEl('div', 'ch-rl-nm');
+    _chAvatar(av, u);
+    nm.appendChild(_chEl('span', null, u.me ? 'You' : _chName(u))); if (u.author) nm.appendChild(_chEl('span', 'ch-badge', 'Author'));
+    col.appendChild(nm);
+    if (u.me && m) { col.appendChild(_chEl('div', 'ch-rl-sub', 'Tap to remove')); row.onclick = () => _chReact(m, r.emoji); } // undo from here; the list and the pill update at once
+    row.appendChild(av); row.appendChild(col); row.appendChild(_chEl('span', 'ch-rl-e', r.emoji)); list.appendChild(row);
+  });
+  if (!rs.length) _chSheetClose(); // the last reaction was removed while the list was open
+}
 function _chSheetOpen(m) {
   if (m.deleted) return;
   _ch.sheetMsg = m;
@@ -42668,10 +42727,10 @@ async function _chImSend(p) {
       ['chidi', 1430, 'Perfect, thank you Sofia.', { reply: 'tm-lagos--1' }],
       ['tomas', 900, 'The projector is confirmed. I\u2019ll bring a spare HDMI cable and a clicker.', { rx: { '\u{1F44D}': ['chidi', 'me', 'sofia'] } }],
       ['me', 880, 'I\u2019ll cover the slides and the welcome talk.'],
-      ['anon2', 600, 'Any chance of vegetarian options for the snacks?'],
+      ['anon2', 600, 'Any chance of vegetarian options for the snacks?', { rx: { '\u{1F44D}': ['sofia', 'tomas'], '\u{1F64F}': ['anon2', 'chidi'], '\u2764\uFE0F': ['me'] } }],
       ['chidi', 580, 'Yes, I\u2019m ordering a mix. I\u2019ll add it to the doc.', { reply: 'tm-lagos--5' }],
       ['chidi', 575, 'Added the catering list and the speaker order.', { kind: 'summary' }],
-      ['me', 190, 'Thanks! The speaker order looks right to me.'],
+      ['me', 190, 'Thanks! The speaker order looks right to me.', { rx: { '\u{1F44D}': ['chidi', 'sofia', 'tomas', 'anon2'], '\u{1F62E}': ['me'] } }],
       ['tomas', 50, 'I\u2019m running a quick sound check on Wednesday at 4. Is anyone free to join?'],
       ['tomas', 800, 'Stage is set up. Mic and monitor are in place for Thursday.', { kind: 'image', scene: 'stage', img: { w: 400, h: 220 } }]
     ]);
@@ -42784,8 +42843,9 @@ async function _chImSend(p) {
   let CH = {}, OWNED = [], PUBS = [];
   const J = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers: { 'Content-Type': 'application/json' } });
   const nm = k => (PEOPLE[k] && PEOPLE[k].name) || null;
-  function reactionsOf(m) {
-    return Object.keys(m.rx).map(e => ({ emoji: e, count: m.rx[e].length, mine: m.rx[e].indexOf('me') > -1 })).filter(r => r.count > 0).sort((a, b) => b.count - a.count);
+  function userOf(c, k) { const pp = PEOPLE[k], named = !!(pp && pp.name); return { name: named ? pp.name : null, authorId: named ? pp.id : null, author: k === c.owner, me: k === 'me', who: hex8(c.slug + ':' + k), pv: 0 }; }
+  function reactionsOf(m, c) {
+    return Object.keys(m.rx).map(e => ({ emoji: e, count: m.rx[e].length, mine: m.rx[e].indexOf('me') > -1, users: m.rx[e].map(k => userOf(c, k)) })).filter(r => r.count > 0).sort((a, b) => b.count - a.count);
   }
   function shape(c, m) {
     const k = m.by, p = PEOPLE[k], named = !!(p && p.name);
@@ -42794,7 +42854,7 @@ async function _chImSend(p) {
     return { id: m.id, kind: m.kind || 'text', body: m.del ? '' : m.body, deleted: !!m.del, createdAt: m.at, version: null,
       ...(m.kind === 'image' && !m.del ? { img: { w: m.img.w, h: m.img.h, link: m.img.link || null } } : {}),
       ...(m.kind === 'voice' && !m.del ? { dur: m.dur, peaks: m.peaks || '' } : {}),
-      name: named ? p.name : null, authorId: named ? p.id : null, author: k === c.owner, me: k === 'me', gone: false, who: hex8(c.slug + ':' + k), replyTo: q, reactions: m.del ? [] : reactionsOf(m) };
+      name: named ? p.name : null, authorId: named ? p.id : null, author: k === c.owner, me: k === 'me', gone: false, who: hex8(c.slug + ':' + k), pv: 0, replyTo: q, reactions: m.del ? [] : reactionsOf(m, c) };
   }
   function unreadOf(c) { return c.msgs.filter(m => m.by !== 'me' && !m.del && m.at > c.readAt).length; }
   function people(c) { const s = new Set(['me', c.owner].concat(c.members)); return Array.from(s); }
@@ -42914,7 +42974,7 @@ async function _chImSend(p) {
         const want = body && typeof body.on === 'boolean' ? body.on : had !== emoji; // explicit on/off like the real server; no flag toggles
         if (had && (!want || had !== emoji)) { m.rx[had] = m.rx[had].filter(x => x !== 'me'); if (!m.rx[had].length) delete m.rx[had]; }
         if (want && had !== emoji) (m.rx[emoji] = m.rx[emoji] || []).push('me');
-        return J({ ok: true, reactions: reactionsOf(m) });
+        return J({ ok: true, reactions: reactionsOf(m, c) });
       }
     }
     if (p[0] === 'account' && p[1] === 'counts') return J({ published: PUBS.length, stories: 0, liked: 0, unread: 0 });
