@@ -2098,7 +2098,7 @@ body.pink .pub-tm-rf { border-top-color: #f3c9da }
 .pub-tm-chip.pending::before { opacity: .55 } /* a solid, softer dot: a hollow ring read as the letter O or a zero next to the label */
 .pub-tm-x { flex: none; padding: .35rem .7rem; font-size: .78rem }
 .pub-tm-av { flex: none; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; font-size: .95rem; font-weight: 700; background: #e8f0ff; color: #3366cc }
-.pub-tm-av-img { width: 100%; height: 100%; object-fit: cover; display: block }
+.pub-tm-av-img, .pub-tm-av img { width: 100%; height: 100%; object-fit: cover; display: block }
 body.night .pub-tm-av { background: #2a2a2a; color: #e0e0e0 }
 body.pink .pub-tm-av { background: #ffe0ec; color: #bd2856 }
 .pub-tm-ic { flex: none; width: 36px; height: 36px; margin-right: -.35rem; padding: 0; border: none; border-radius: 50%; background: none; cursor: pointer; color: #54595d; display: inline-flex; align-items: center; justify-content: center; transition: background .15s }
@@ -5644,18 +5644,12 @@ body.pink #chat-overlay { --ch-bg: #fff8fb; --ch-me: #ffd9e6; --ch-them: #fff0f5
 #ch-sheet.rxl #ch-emojis, #ch-sheet.rxl #ch-acts { display: none }
 #ch-sheet.rxl #ch-rxl { display: block }
 #ch-rxl-tabs { display: flex; flex-wrap: wrap; gap: .35rem; padding: .2rem .3rem .6rem; border-bottom: 1px solid var(--ch-bd); margin-bottom: .3rem }
-#ch-rxl-tabs button { font-size: .86rem; padding: .15rem .6rem }
-#ch-rxl-list { max-height: 50vh; overflow-y: auto; overscroll-behavior: contain }
-.ch-rl-row { display: flex; align-items: center; gap: .8rem; padding: .6rem; color: var(--ch-txt); font-size: .94rem }
-.ch-rl-row .ch-av { width: 32px; height: 32px }
-.ch-rl-col { min-width: 0 }
-.ch-rl-row.me { cursor: pointer; border-radius: 12px }
-.ch-rl-row.me:active { background: var(--ch-them) }
-.ch-rl-sub { font-size: .74rem; color: var(--ch-mut) }
-.ch-rl-nm { display: flex; align-items: center; gap: .35rem; min-width: 0; font-weight: 600 }
-.ch-rl-nm span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.ch-rl-e { margin-left: auto; font-size: 1.35rem; line-height: 1 }
-.ch-rl-note { padding: 1rem .6rem; text-align: center; color: var(--ch-mut); font-size: .88rem }
+#ch-rxl-tabs button { font-size: .86rem; padding: .15rem .6rem; background: color-mix(in srgb, var(--ch-them) 60%, transparent); border-color: var(--ch-div) } /* see-through on the glass sheet, like the day chips */
+#ch-rxl-tabs button.on { background: color-mix(in srgb, var(--al-acc) 18%, transparent); border-color: var(--al-acc) } /* same tint as the picked emoji above */
+#ch-rxl-list { max-height: 50vh; overflow-y: auto; overscroll-behavior: contain; gap: 0 } /* rows touch, like the action rows (.ch-act) */
+.ch-rl-tap { cursor: pointer }
+.ch-rl-tap:active { background: var(--ch-them) }
+.ch-rl-e { flex: none; align-self: flex-start; font-size: 1.35rem; line-height: 1.3 }
 .ch-act { display: flex; align-items: center; gap: .8rem; width: 100%; padding: .75rem .6rem; border: none; background: none; color: var(--ch-txt); font: inherit; font-size: .94rem; text-align: left; border-radius: 12px; cursor: pointer }
 .ch-act:active { background: var(--ch-them) }
 .ch-act svg { width: 20px; height: 20px; flex: none; color: var(--ch-mut) }
@@ -5825,6 +5819,10 @@ body.pink #tsum-dialog .rdlg-cancel{background:rgba(255,224,236,.6);color:#c8365
 body.night #chat-overlay{--ch-div:rgba(255,255,255,.07)}
 body.pink #chat-overlay{--ch-div:rgba(200,54,94,.16)}
 #ch-emojis,#ch-rxl-tabs{border-bottom-color:var(--ch-div)}
+#ch-rxl-list .pub-tm-row{border:none;border-radius:12px;background:none;color:var(--ch-txt)}
+#ch-rxl-list .pub-tm-main{padding:.6rem;gap:.8rem} /* the .ch-act inset and icon gap, so avatars line up with the action icons */
+#ch-rxl-list .pub-tm-sub{color:var(--ch-mut)}
+#ch-rxl-list .pub-tm-av{background:color-mix(in srgb,var(--al-acc) 18%,transparent);color:var(--al-acc)}
 #ch-sbar{border-bottom-color:var(--ch-div)}
 #ch-foot{border-top-color:var(--ch-div)}
 #ch-rec{background:color-mix(in srgb,var(--ch-in) 60%,transparent)}
@@ -7133,7 +7131,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
     </div>
     <div id="ch-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg></div>
   </div>
-  <div id="ch-sheet"><div id="ch-sheet-box"><div id="ch-emojis"></div><div id="ch-acts"></div><div id="ch-rxl"><div id="ch-rxl-tabs"></div><div id="ch-rxl-list"></div></div></div></div>
+  <div id="ch-sheet"><div id="ch-sheet-box"><div id="ch-emojis"></div><div id="ch-acts"></div><div id="ch-rxl"><div id="ch-rxl-tabs"></div><div id="ch-rxl-list" class="pub-tm-list"></div></div></div></div>
 </div>
 
 <script>
@@ -41390,12 +41388,14 @@ function _chRxRender() {
   rs.filter(r => !st.sel || r.emoji === st.sel).forEach(r => (r.users || []).forEach(u => rows.push([r, u])));
   rows.sort((a, b) => (b[1].me ? 1 : 0) - (a[1].me ? 1 : 0)); // you first (stable: everyone else keeps the order they reacted in)
   rows.forEach(([r, u]) => {
-    const row = _chEl('div', 'ch-rl-row' + (u.me ? ' me' : '')), av = _chEl('div', 'ch-av'), col = _chEl('div', 'ch-rl-col'), nm = _chEl('div', 'ch-rl-nm');
+    const row = _chEl('div', 'pub-tm-row pub-tm-card' + (u.me && m ? ' ch-rl-tap' : '')), main = _chEl('div', 'pub-tm-main'), who = _chEl('div', 'pub-tm-who'), av = _chEl('span', 'pub-tm-av');
     _chAvatar(av, u);
-    nm.appendChild(_chEl('span', null, u.me ? 'You' : _chName(u))); if (u.author) nm.appendChild(_chEl('span', 'ch-badge', 'Author'));
-    col.appendChild(nm);
-    if (u.me && m) { col.appendChild(_chEl('div', 'ch-rl-sub', 'Tap to remove')); row.onclick = () => _chReact(m, r.emoji); } // undo from here; the list and the pill update at once
-    row.appendChild(av); row.appendChild(col); row.appendChild(_chEl('span', 'ch-rl-e', r.emoji)); list.appendChild(row);
+    const nm = _chEl('div', 'pub-tm-name', u.me ? (u.name && u.name !== 'You' ? u.name + ' (you)' : 'You') : _chName(u));
+    if (u.author) { const bd = _chEl('span', 'pub-tm-badge'); bd.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.2 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>'; bd.appendChild(document.createTextNode('Author')); nm.appendChild(bd); }
+    who.appendChild(nm);
+    if (u.me && m) { who.appendChild(_chEl('div', 'pub-tm-sub', 'Tap to remove')); row.onclick = () => _chReact(m, r.emoji); } // undo from here; the list and the pill update at once
+    main.appendChild(av); main.appendChild(who); main.appendChild(_chEl('span', 'ch-rl-e', r.emoji));
+    row.appendChild(main); list.appendChild(row);
   });
   if (!rs.length) _chSheetClose(); // the last reaction was removed while the list was open
 }
@@ -43670,7 +43670,8 @@ function closeBackupSheet() {
     { overlayId: 'backup-overlay', sheetId: 'backup-sheet', close: closeBackupSheet },
     { overlayId: 'edit-overlay', sheetId: 'edit-dialog', close: nbCloseSaveDialog },
     { overlayId: 'publish-overlay', sheetId: 'publish-sheet', close: () => { if (_pubTeamsOn) _pubTeamsBack(); else closePublishSheet(); } },
-    { overlayId: 'account-overlay', sheetId: 'account-dialog', close: closeLogoutConfirm }
+    { overlayId: 'account-overlay', sheetId: 'account-dialog', close: closeLogoutConfirm },
+    { overlayId: 'ch-sheet', sheetId: 'ch-sheet-box', close: () => _chSheetClose() } // the chat's message / reactions sheet
   ];
   let startY = 0, _drag = null;
   function isScrollable(el) {
