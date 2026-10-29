@@ -40236,7 +40236,12 @@ function _nbCarouselTuckSoon() {
     try {
       new MutationObserver(_nbCarouselTuckSoon).observe(c, { attributes: true, attributeFilter: ['style'] });
       new MutationObserver(_nbCarouselTuckSoon).observe(grid, { childList: true, attributes: true, attributeFilter: ['style'] });
-      if (typeof ResizeObserver !== 'undefined') { const ro = new ResizeObserver(_nbCarouselTuckSoon); ro.observe(grid); ro.observe(c); }
+      if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(_nbCarouselTuckSoon); ro.observe(grid); ro.observe(c);
+        // Anything above or below the card that changes height moves it against the carousel without scrolling and without resizing
+        // the grid itself (the stories strip loading in or switching on and off, the category bar, search bar, header, bottom bar).
+        ['site-header', 'feed-search-wrap', 'feed-cats', 'nb-stories-strip', 'notes-empty-state', 'bottom-nav'].forEach(id => { const el = document.getElementById(id); if (el) ro.observe(el); });
+      }
     } catch (e) {}
     window.addEventListener('scroll', _nbCarouselTuckSoon, { passive: true, capture: true });
     window.addEventListener('resize', _nbCarouselTuckSoon);
@@ -43766,6 +43771,8 @@ function closeBackupSheet() {
   document.addEventListener('touchstart', function (e) {
     dragging = false;
     if (refreshing || scrollLocked() || !notesScreenActive() || !atTop()) { pulling = false; return; }
+    // A touch that starts on the Exit tour pill is a drag of the pill, never a pull of the page.
+    if (e.target && e.target.closest && e.target.closest('#nb-tour-pill')) { pulling = false; return; }
     startY = e.touches[0].clientY;
     startX = e.touches[0].clientX;
     pulling = true;
