@@ -28811,7 +28811,8 @@ function _nbCopyLinkFallback(url) {
 function _nbPublishedNoteSlug(url) {
   let u, base;
   try { u = new URL(String(url || '').trim()); base = new URL(NB_PUBLISH_API); } catch (e) { return ''; }
-  if (!/^https?:$/.test(u.protocol) || u.host.toLowerCase() !== base.host.toLowerCase()) return '';
+  const _h = u.host.toLowerCase();
+  if (!/^https?:$/.test(u.protocol) || (_h !== base.host.toLowerCase() && NB_LEGACY_PUBLISH_HOSTS.indexOf(_h) < 0)) return '';
   const m = u.pathname.match(/^\/@([a-z0-9-]+)(?:\/[^\/]*)?\/?$/i); // /@note or /@note/page-name: both open the note
   if (!m) return '';
   const slug = m[1].toLowerCase();
@@ -32253,7 +32254,9 @@ function _nbDownloadHtmlBlob(blob, fileName, reason) {
 }
 
 /* ===================== Publish to Web ===================== */
-const NB_PUBLISH_API = 'https://note-publish.joelisaacumoh.workers.dev';
+const NB_PUBLISH_API = 'https://my-site.name';
+// Older published links and pages still use the worker's original address, so note links on it keep opening in the app.
+const NB_LEGACY_PUBLISH_HOSTS = ['note-publish.joelisaacumoh.workers.dev'];
 let _pubNoteId = null;
 let _pubSlugCheckTimer = null;
 let _pubSlugCheckSeq = 0;
