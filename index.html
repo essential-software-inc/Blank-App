@@ -7752,7 +7752,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <div id="pub-web-tab">
         <div id="pub-state-new" class="bkp-panel">
           <p class="bkp-help">Publish this note as a live page anyone can open with a link. Choose an address below using letters, numbers, and dashes.</p>
-          <p id="pub-slug-example" class="bkp-help">E.g. example.com/@untitled-note</p>
+          <p id="pub-slug-example" class="bkp-help">E.g. my-site.name/@untitled-note</p>
           <div id="pub-slug-wrap" class="com-field"><span id="pub-slug-prefix">/@</span><input id="pub-slug-input" placeholder="your-page-name" maxlength="48" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="_pubOnSlugInput(this.value)"></div>
           <div id="pub-slug-status" class="pub-status"></div>
         </div>
@@ -32793,7 +32793,7 @@ function _pubOnSlugInput(raw) {
   const slug = raw.toLowerCase();
   const statusEl = document.getElementById('pub-slug-status');
   const btn = document.getElementById('pub-publish-btn');
-  document.getElementById('pub-slug-example').textContent = 'E.g. example.com/@' + (slug || 'untitled-note');
+  document.getElementById('pub-slug-example').textContent = 'E.g. my-site.name/@' + (slug || 'untitled-note');
   _pubSlugAvailable = false;
   _pubSlugUse = null;
   btn.disabled = true;
