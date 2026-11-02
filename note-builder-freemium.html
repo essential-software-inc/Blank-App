@@ -21671,7 +21671,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       var rows = '', its = items();
       its.forEach(function(a, i) {
         var p = a.getAttribute('data-sl-p'), d = SL_P[p] || SL_P.link;
-        var ph = p === 'email' ? 'name@mail.com' : p === 'phone' ? '+1 555 123 4567' : d.b ? d.n + ' username/link' : d.n + ' link';
+        var ph = p === 'email' ? 'name@mail.com' : p === 'phone' ? '+1 555 123 4567' : d.b ? d.n + ' handle/link' : d.n + ' link';
         rows += '<div class="dz-mq-row"><span class="dz-ico" aria-hidden="true">' + slSvg(p, 22) + '</span><input type="text" class="dz-input" maxlength="300" data-k="slLink' + i + '" value="' + dzEsc(a.getAttribute('href') || '') + '" placeholder="' + dzEsc(ph) + '" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" aria-label="' + d.n + ' link">' +
           '<button type="button" class="dz-action" data-k="slUp" data-v="' + i + '" aria-label="Move ' + d.n + ' up">' + dzArrow('up', 16) + '</button>' +
           '<button type="button" class="dz-action" data-k="slDn" data-v="' + i + '" aria-label="Move ' + d.n + ' down">' + dzArrow('dn', 16) + '</button>' +
