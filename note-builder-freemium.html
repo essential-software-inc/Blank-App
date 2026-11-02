@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- [2026-11-02 00:19 | session-guide] AI, DO THIS FIRST: (1) run grep -n "DESIGN PARITY CHECKLIST\|WORK LOG GUIDE\|SESSION LOG" on this file and read those three blocks; (2) get the real time (WAT) before stamping; (3) add a SESSION LOG entry when you finish. (4) before writing a design sheet, open the nearest existing sheet and copy its parts; before presenting, compare side by side (checklist items 11 and 12). The next line has the full note. READFIRST.md (uploaded beside this file) repeats it. -->
 <!-- [2026-11-01 13:50 | session-guide] READ FIRST, before editing any code: search this file for DESIGN PARITY CHECKLIST, WORK LOG GUIDE and SESSION LOG (all in one comment block, about line 18100). Read the checklist and the newest SESSION LOG entries, then work. The Worker (index.js) follows the same notes. Essentials: stamp every block [YYYY-MM-DD HH:MM | topic] in WAT (Africa/Lagos). Add a SESSION LOG entry in the app file when you finish. Make small, targeted edits and work from the newest file. Colours follow the app themes (Light, Night, Pink; Night has no blue): app UI uses var(--al-acc) and var(--al-on); pages the Worker serves use prefers-color-scheme. LEGAL_DEFAULTS in index.js and the Privacy and Terms text in the app must stay word for word the same. -->
 <html lang="en">
 <head>
@@ -7503,6 +7504,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
         <li><strong>Layout:</strong> dividers, spacers, panels (coloured boxes you can type in), buttons and icons</li>
         <li><strong>Navigation:</strong> nav bars that link to other pages in your note, to links, or to pop-up messages</li>
         <li><strong>Marquees:</strong> rows that glide sideways like scrolling headlines</li>
+        <li><strong>Social links:</strong> a row of logos that link to your profiles, email or phone, great for a contact footer</li>
         <li><strong>Starters:</strong> ready-made layouts such as banners, highlight cards and pricing tables</li>
       </ul>
       <p>Drag blocks anywhere, resize them, tilt them, and duplicate them. Change colours, gradients, fonts, borders, opacity and entrance animations. Style selected text with bold, italic, underline, highlight, links and more. Use the eye button to preview your note as visitors will see it.</p>
@@ -13446,6 +13448,15 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
 .nv-thumb{pointer-events:none;display:block;margin-bottom:.3rem;border-radius:6px;background:#fff;border:1px solid #efefea}
 .nv-dn{font-size:.82rem;font-weight:700;color:#2c2c29}
 .nv-dd{font-size:.68rem;color:#8f8f89;line-height:1.3;margin-top:.1rem}
+/* [2026-11-02 00:09 | social-links] Social links block: a wrapping row of logo buttons. Size, colour and shape are set inline by applySocialLinks, so a published page keeps them. */
+.blk-sl-wrap{padding:.3rem 0}
+.blk-sl-list{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px}
+.blk-sl-it{display:inline-flex;align-items:center;justify-content:center;flex:none;box-sizing:border-box;text-decoration:none;transition:transform .15s,opacity .15s}
+.blk-sl-it[href]:hover{transform:translateY(-2px)}
+.blk-sl-it:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.blk-sl-it svg{display:block}
+.blk-sl-empty{opacity:.4;outline:2px dashed currentColor;outline-offset:2px}
+.dz-mq-row span.dz-ico{cursor:default;pointer-events:none} /* [2026-11-02 00:30 | social-links] changed: the sheet uses the shared option rows; the logo in a row is not a button */
 
 </style>
 
@@ -13471,6 +13482,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
     <button class="cv-add" type="button" data-type="panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h10M7 14h6"/></svg>Panel</button>
     <button class="cv-add" type="button" data-type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/><path d="M9 12h6"/></svg>Button</button>
     <button class="cv-add" type="button" data-type="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 14.8 9 21 9.6 16.3 13.8 17.7 20 12 16.8 6.3 20 7.7 13.8 3 9.6 9.2 9"/></svg>Icon</button>
+    <!-- [2026-11-02 00:09 | social-links] add button for the Social links block -->
+    <button class="cv-add" type="button" data-type="sociallinks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></svg>Social links</button>
     <button class="cv-add" type="button" data-type="marquee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="8" height="8" rx="2"/><rect x="13" y="8" width="9" height="8" rx="2"/><path d="M5 20h12M14 18l3 2-3 2"/></svg>Marquee</button>
     <button class="cv-add" type="button" data-type="navbar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="6" rx="2"/><path d="M7 8h2M12 8h2M16 8h1"/><path d="M5 16h14M5 19.5h9"/></svg>Nav bar</button>
     <button class="cv-add" type="button" data-type="poll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Poll</button>
@@ -13594,6 +13607,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
 <template id="tpl-blk-pay"><div class="blk" data-type="pay" data-bt-s="solid" data-bt-c="#2f855a" data-bt-z="m" data-bt-r="pill" data-bt-a="c" data-py-p="other"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-py"><div class="blk-py-q" contenteditable="true">Support my work</div><div class="blk-py-d" contenteditable="true">Every bit helps. Thank you!</div><div class="blk-btn-wrap"><a class="blk-btn"><span class="blk-btn-label" contenteditable="true">Support</span></a></div><div class="blk-py-n"></div></div></div></template>
 <template id="tpl-blk-totop"><div class="blk" data-type="totop" data-bt-s="solid" data-bt-c="#5b5bd6" data-bt-z="m" data-bt-r="pill" data-tt-p="br" data-tt-g="m" data-tt-y="0" data-tt-sh="200" data-tt-i="arrow" data-tt-all="0"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-tt-wrap"><button class="blk-tt-btn" type="button" aria-label="Scroll to top"></button></div></div></template>
 <template id="tpl-blk-icon"><div class="blk" data-type="icon" data-ic-name="star" data-ic-size="m" data-ic-color="#5b5bd6" data-ic-a="c"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-icon-wrap"><span class="blk-icon"></span></div></div></template>
+<!-- [2026-11-02 00:09 | social-links] Social links block: three starter logos, all with no link yet -->
+<template id="tpl-blk-sociallinks"><div class="blk" data-type="sociallinks" data-sl-z="m" data-sl-s="solid" data-sl-r="circle" data-sl-g="m" data-sl-a="c"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-sl-wrap"><div class="blk-sl-list"><a class="blk-sl-it" data-sl-p="instagram"></a><a class="blk-sl-it" data-sl-p="facebook"></a><a class="blk-sl-it" data-sl-p="x"></a></div></div></div></template>
 
 <template id="tpl-blk-marquee"><div class="blk" data-type="marquee" data-mq-d="text" data-mq-st="soft" data-mq-c="#5b5bd6" data-mq-dir="l" data-mq-spd="m" data-mq-gap="m" data-mq-sz="m" data-mq-pause="1" data-mq-fade="1"><div class="blk-ctrl"><button class="blk-design" type="button" aria-label="Design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button class="blk-handle" type="button" aria-label="Drag to reorder"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button><button class="blk-del" type="button" aria-label="Delete block"><svg width="0.7em" height="0.7em" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg></button></div><div class="blk-mq-row"><span class="blk-mq-lbl"></span><div class="blk-mq"><div class="blk-mq-track"><div class="blk-mq-set"><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item one</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item two</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item three</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item four</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item five</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div><div class="blk-mq-item"><span class="blk-mq-ic"></span><img class="blk-mq-img" alt="" hidden><span class="blk-mq-stars" aria-hidden="true">★★★★★</span><span class="blk-mq-tx"><span class="blk-mq-t">Item six</span><span class="blk-mq-s"></span></span><span class="blk-mq-by"><img class="blk-mq-av" alt="" hidden><span class="blk-mq-ini"></span><span class="blk-mq-nm"><span class="blk-mq-n"></span><span class="blk-mq-h"></span></span><span class="blk-mq-pf"></span></span><span class="blk-mq-m"></span></div></div></div></div></div></div></template>
 
@@ -18120,6 +18135,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   /* =====================================================================
      DESIGN PARITY CHECKLIST (new components)   [search: DESIGN PARITY]
      [2026-10-31 ??:?? | design-parity-note] Reviewed against the code. Follow this when adding a block, so it styles and behaves like the rest.
+     [2026-11-02 00:09 | design-parity-note] changed: Social links added to the reference blocks (1), the decorative blocks (3) and the no-kit example (6).
+     [2026-11-02 00:33 | design-parity-note] changed: new items 11 (sheet parts to copy) and 12 (side by side check); do both for every new block or sheet.
      Session records and the stamp rules are in WORK LOG GUIDE, right below.
 
      0. WHERE THIS RUNS
@@ -18131,7 +18148,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
 
      1. REFERENCE CODE (search the quoted text)
         Visual blocks:  "---------- Panel" (openPanelDesign), "---------- Marquee" (openMarqueeDesign), "---------- Button" (openButtonDesign),
-                        "---------- Icon" (openIconDesign), Scroll to top (openToTopDesign).
+                        "---------- Icon" (openIconDesign), Scroll to top (openToTopDesign), "---------- Social links" (openSocialLinksDesign:
+                        Items, Style, Layout, Effects; its items are child links, so it needs no published-page script). [2026-11-02 00:09 | social-links]
         Blocks that take input or act on the live page:  "---------- Poll", "---------- Text box", "---------- Payments" (newest of the three,
                         it has Layouts and a Button sub-tab).
         Nav bar and dialogs: openNavbarDesign and "Match my page".  Backgrounds and borders for any block and for the page: openBgDesign.
@@ -18166,7 +18184,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         in (Poll, Text box, Payments, Nav bar, dialogs). They default to Match my page: read window.nbPageProfile() (accent, ff, ffh, rad,
         dark) and re-apply from nvRefreshAuto so the block follows page changes (see nbRefreshPolls). Custom offers accent colour, corners and
         Font, and switching to Custom starts from the page's current look (nvFfKey picks the nearest font); it never resets it.
-        Decorative blocks (Panel, Button, Icon, Marquee, Scroll to top) have their own colour, fill and border controls instead and do not
+        Decorative blocks (Panel, Button, Icon, Marquee, Scroll to top, Social links) have their own colour, fill and border controls instead and do not
         use Match my page. Decide on purpose which kind a new block is.
 
      4. SETTINGS AND OUTPUT
@@ -18194,7 +18212,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
      6. PUBLISHING
         A published page runs no editor script. Its CSS is the editor stylesheet inside NB_PRISTINE_TEMPLATE, and
         _nbGetPristineCanvasStyle keeps only the font faces the markup uses, so the markup must name its font. A block that only displays
-        must already be complete in the markup.
+        must already be complete in the markup (Social links does this: every logo carries its own inline style and link).
         A block that acts on the live page (vote, send, pay) ships a kit: a plain function (nbPollKit, nbTextboxKit, nbPayKit) that the editor
         and the export both run. It is sent as text with toString(), so it must not use names that only exist in the editor. The export adds
         its script only when the markup needs it (pollScript, textboxScript, payScript; the others are animScript, checkScript, carScript
@@ -18227,6 +18245,21 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         Pink #fbe1ec; badge or ring edges: #fff, #111111, #fff8fb). Write the Light rule, then body.night and body.pink rules beside it.
         SVG: set fill and stroke from CSS classes with var(), not as colour attributes. Pages the Worker serves know no app theme: use
         prefers-color-scheme with the Night greys. Check all three themes before presenting. Do not ask the user which colour to use.
+     11. SHEET PARTS TO COPY, NOT INVENT   [2026-11-02 00:33 | design-parity-note] added after the Social links block was first built from memory and did not match
+        Open the reference block's design function and copy its markup before writing yours. What to copy:
+        A list of rows with one field each (links, options): Poll options in openPollDesign. A div.dz-mq-inputs holding one div.dz-mq-row per
+        row: input.dz-input, then button.dz-action with dzArrow('up', 16), dzArrow('dn', 16), and a text Remove button. Add is a text
+        button.dz-action in div.dz-mq-add ("Add option"). Rows with several fields: Marquee Items (div.dz-mq-item, div.dz-mq-head).
+        A grid to pick one thing (icons, logos): the Icon tab, div.dz-icons of button.dz-ico, with dzSearchBar when there are many.
+        Choices: dzChips. Colour: dzSwatches. Sections: dzSec. Notes under a field: div.dz-hint. Sliders: dzSlider.
+        Sticky bar with Move up, Move down and Delete for the selected item: nvBar, used by the nav bar sheet only. Never use nv-btn, nv-row
+        or nv-bar in another block's rows.
+        No inline style= in a sheet, no new class for something a shared class already does, no hand-made delete or close glyph (x).
+        A new class is allowed only when no shared one fits; say which you looked at and why none fit in the session entry, under Important details.
+     12. BEFORE YOU PRESENT: SIDE BY SIDE
+        Put the new sheet next to the nearest reference sheet and compare, part by part: tab names and order, section names, wording
+        (British spelling), every control type, how items are added, removed and moved, hints, the Effects tab. Fix every difference or
+        record why it stays. Then read the SESSION LOG entry back against the code. A pass with no differences found is suspicious: look again.
      ===================================================================== */
 
   /* =====================================================================
@@ -18271,6 +18304,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         Later, update the same line: CONFIRMED DEAD (removed or safe to remove) or IN USE (and where), with the date. Also list every
         suspect under Found in the session entry. Search for them with: grep -n "SUSPECTED DEAD".
         New blocks follow the DESIGN PARITY CHECKLIST. Present the edited file straight away, and keep explanations short.
+        [2026-11-02 00:33 | session-guide] changed: before writing any sheet, open the reference sheet's code (checklist 11); before presenting, compare side by side (checklist 12).
 
      5. END OF A SESSION
         Complete the entry: Work done, Improvements, Fixed, Found, Important details, Removed, Untested, Depends on, Final state, Next.
@@ -18302,6 +18336,49 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         verified-names     invited names only one email can claim, with a verified tick on the published page (worker index.js and this app)
         applock-confirm    asking for the App Lock PIN or password before risky actions, when App Lock is on
         verified-hold      a verified name stays its owner's for 30 days after they unpublish, with three alerts, then is freed (worker index.js and this app)
+        social-links       the Social links block: a row of logos that link to profiles, email or phone
+
+     SESSION 2026-11-02 ??:?? to 2026-11-02 00:09 | topics: social-links, design-parity-note, session-guide | AI: Claude (app)
+       Start state
+         index-170 had no Social links block. Blocks Icon, Button and Marquee were the nearest references. The READ FIRST notes were not read before
+         the first build; they were read afterwards and the build was brought in line with them (stamps with a real WAT time, a stamp on each
+         function, this entry).
+       Work done
+         social-links: a new block type sociallinks. Add button (.cv-add) after Icon, template tpl-blk-sociallinks (three starter logos, no links),
+         CSS .blk-sl-* in the editor stylesheet, wireSocialLinks in wireBlock, applySocialLinks, openSocialLinksDesign (tabs Items,
+         Style, Layout, Effects; undo through hcBeginBlock, hcCommitBlock and hcRevertBlock), a clean-up in _nbCleanContentForExport, an entry in
+         the why map, a line in the block list of the Write guide, and three lines in the DESIGN PARITY CHECKLIST (items 1, 3 and 6), and a colour vote (a custom logo colour counts toward the page accent, like Icon).
+         24 logos (Instagram, Facebook, X, YouTube, TikTok, LinkedIn, GitHub, Pinterest, Snapchat, Threads, WhatsApp, Telegram, Spotify, Twitch,
+         Discord, Reddit, Bluesky, Patreon, SoundCloud, Dribbble, Email, Phone, Website, Link) drawn as simple line glyphs, not the official marks. A typed value becomes a link: email gets
+         mailto, phone gets tel, a bare handle becomes the platform's profile address, anything else gets https.
+         session-guide: a command-style DO THIS FIRST line now sits above the READ FIRST line at the top of this file and of the Worker (index.js);
+         READFIRST.md (kept beside the files) repeats the steps. The Worker's old line names a file (note-builder-freemium-*.html) that is out of date.
+       Fixed
+         Nothing.
+       Found
+         The Phone logo takes a number as typed (spaces removed); a WhatsApp number must be digits only for wa.me, with no plus or spaces.
+         Nothing else.
+         Logo drawings were checked by rendering all 24 in a browser: sizes and centres measured, five redrawn. Judged by eye only; no phone check.
+         Notes improved: checklist items 11 and 12 and a line in the work log guide (see design-parity-note). Cause: the first sheet was written from memory without opening Poll, Marquee or Icon, and nothing made me compare. The notes were also read only after the build.
+         The Items tab first used its own row and chip layout; it now matches Poll and Marquee (rows with up, down and Remove) and the Icon picker (logo grid).
+       Important details
+         Decorative block (own colour, shape and size controls), so no Match my page. Logo colour is inline on each link, so the published page
+         needs no script and no kit. Items are child links (a.blk-sl-it), not a .blk-btn, so checklist item 7 does not apply.
+         The code stamps say 00:09 (the time read when the stamps were put right); the first build came a little earlier that night.
+         Rejected: one data attribute per logo; child links keep the export plain and let a logo be removed without touching the others.
+       Removed
+         Nothing.
+       Untested
+         Not run in a browser or on a phone. Both inline scripts pass node --check, which does not test the editor script. Never seen: opening a
+         note with the block, every option in every tab with undo and redo, duplicate, drag, height handle, a second page, publish, restore the
+         page, publish again, phone width, the three themes. Logo drawings are unchecked by eye.
+       Depends on
+         Nothing in the Worker. No data is collected, so Privacy and Terms are unchanged.
+       Final state
+         The block exists in index-171.html. Settings are data-sl-z (size s, m, l, xl), data-sl-s (solid, outline, soft, plain), data-sl-r (circle,
+         rounded, square, sharp), data-sl-c (empty = brand colours), data-sl-g (gap), data-sl-a (position l, c, r).
+       Next
+         Open a note, add the block, and run item 9 of the checklist. Then look at the logo drawings and decide whether to replace any.
 
      SESSION 2026-11-01 13:24 to 2026-11-01 13:50 | topics: verified-hold, design-parity-note | AI: Claude (app)
          verified-hold, Worker: an owner who unpublishes a page on a verified name keeps the name for 30 days (meta.holdUntil). The nightly purge
@@ -18314,6 +18391,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
          verified-names, themes: the tick on cards and the stories badge now use --al-acc and --al-on (blue Light, light grey Night, pink Pink).
          The Worker's verified band follows the visitor's device dark mode (prefers-color-scheme). New item 10 in the DESIGN PARITY CHECKLIST
          says to follow the theme pattern without asking. READ FIRST comments at the top of this file and of the Worker point to these notes and repeat the essentials.
+         [2026-11-01 18:23 | verified-hold] The Worker was checked in a Node test with a SQLite stand-in (55 checks, including hold, alerts, republish and
+         release). It has not run on Cloudflare, and the app was only syntax-checked.
 
      SESSION 2026-11-01 ??:?? to 2026-11-01 13:23 | topics: verified-names, applock-confirm | AI: Claude (app)
        Start state
@@ -21486,6 +21565,167 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
     dzSheet('Icon design', render, function(k, v) { if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; } if (k === 'op') { blockOpApply(block, v); return; } if (k === 'icBgc' && v === '') block.dataset.icBg = 'none'; else if (k === 'icColor' && v === '') delete block.dataset.icColor; else block.dataset[k] = v; applyIcon(block); }, null, null, stCanBack(block), stBackFn).then(function(res) { var sb = res === ST_BACK; if (res !== true && !sb) { hcRevertBlock(block, before); return; } blockAnimDone(block); hcCommitBlock(block, before); if (sb) stReopen(block); });
   }
 
+  // [2026-11-02 00:09 | social-links] Social links block: see the comment below. Added to wireBlock, the export clean-up (_nbCleanContentForExport) and the add palette.
+  /* ---------- Social links ----------
+     A wrapping row of logo buttons, each a child link (a.blk-sl-it with data-sl-p = the platform and an href). Size, colour and shape are written inline on every item by applySocialLinks, so the exported page keeps them with no script.
+     Block settings: data-sl-z size, data-sl-s style, data-sl-r shape, data-sl-c colour (empty = each brand's own), data-sl-g gap, data-sl-a position. */
+  // [2026-11-02 00:09 | social-links] data table: each platform's name, brand colour, profile address start and logo drawing
+  // [2026-11-02 00:47 | social-links] changed: added Reddit, Bluesky, Patreon, SoundCloud and Dribbble (24 logos, four full rows in the picker)
+  // [2026-11-02 00:50 | social-links] changed: redrew X, Facebook, Threads, GitHub and SoundCloud; every logo is now scaled to the same live area (18 units; 17 for the boxed Instagram and LinkedIn, 19 for wide ones) and centred, with the line weight kept at 1.9
+  var SL_P = {
+    instagram: { n: 'Instagram', c: '#e1306c', b: 'https://instagram.com/', g: '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="0.7" fill="currentColor"/>' },
+    facebook: { n: 'Facebook', c: '#1877f2', b: 'https://facebook.com/', g: '<g transform="translate(-1.235 -0.706) scale(1.059)" stroke-width="1.794"><path d="M16.5 3.5h-2.2a3.8 3.8 0 0 0-3.8 3.8V10H8v3.5h2.5v7h3.5v-7h2.5l.5-3.5h-3V8c0-.7.4-1.2 1.2-1.2h1.3z"/></g>' },
+    x: { n: 'X', c: '#111111', b: 'https://x.com/', g: '<g transform="translate(-2.4 -2.4) scale(1.2)" stroke-width="1.583"><path d="M4.5 4.5h3.5l11.5 15h-3.5z"/><path d="M19 4.5l-5.8 6.3M5 19.5l5.8-6.3"/></g>' },
+    youtube: { n: 'YouTube', c: '#ff0000', b: 'https://youtube.com/@', g: '<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z"/>' },
+    tiktok: { n: 'TikTok', c: '#111111', b: 'https://tiktok.com/@', g: '<g transform="translate(-4.393 -2.143) scale(1.286)" stroke-width="1.478"><path d="M14 4v10.5a3.5 3.5 0 1 1-3.5-3.5M14 4c.3 2.2 1.8 3.8 4.5 4"/></g>' },
+    linkedin: { n: 'LinkedIn', c: '#0a66c2', b: 'https://linkedin.com/in/', g: '<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 10.5V16M8 7.8v.1M11.5 16v-5.5M11.5 13c0-1.5 1-2.5 2.3-2.5s2.2 1 2.2 2.5V16"/>' },
+    github: { n: 'GitHub', c: '#24292f', b: 'https://github.com/', g: '<g transform="translate(-1.444 -2.444) scale(1.111)" stroke-width="1.71"><path d="M12 20.5c-4.800 0-8-2.200-8-6.500 0-1.800.7-3.200 1.700-4.200-.4-1.300-.4-2.700.2-4.300 1.600.1 3 .7 4.300 1.500 1.200-.3 2.600-.3 3.800 0 1.300-.8 2.700-1.400 4.300-1.500.6 1.600.6 3 .2 4.300 1 1 1.700 2.400 1.700 4.200 0 4.300-3.200 6.500-8 6.500z"/><path d="M9.500 17.500c.8.6 1.700.9 2.500.9s1.700-.3 2.500-.9"/></g>' },
+    pinterest: { n: 'Pinterest', c: '#e60023', b: 'https://pinterest.com/', g: '<circle cx="12" cy="12" r="9"/><path d="M10.5 17.5l2-9M9.5 11c0-2 1.5-3 3-3 2 0 3 1.3 3 2.8 0 2-1.3 3.4-3 3.4-.8 0-1.4-.4-1.6-.9"/>' },
+    snapchat: { n: 'Snapchat', c: '#fffc00', b: 'https://snapchat.com/add/', g: '<g transform="translate(-2.4 -1.2) scale(1.2)" stroke-width="1.583"><path d="M12 3.5c-3 0-4.5 2.2-4.5 5v3.2c0 1.5-1.5 2.5-3 2.8 1.2.4 2 .9 2.3 1.7 1 .2 1.7.5 2.2 1.3.8.6 1.8 1 3 1s2.2-.4 3-1c.5-.8 1.2-1.1 2.2-1.3.3-.8 1.1-1.3 2.3-1.7-1.5-.3-3-1.3-3-2.8V8.5c0-2.8-1.5-5-4.5-5z"/></g>' },
+    threads: { n: 'Threads', c: '#111111', b: 'https://threads.net/@', g: '<g transform="translate(-2.657 -3.429) scale(1.286)" stroke-width="1.478"><path d="M17 8.7C16.1 6.3 14.3 5 12 5 8.2 5 5.5 8 5.5 12s2.7 7 6.5 7c3 0 5.3-1.700 5.300-4.200 0-2.300-1.900-3.600-4.500-3.600-2.200 0-3.600 1.100-3.600 2.600 0 1.400 1.200 2.200 2.600 2.200 2.400 0 3.500-1.700 3.500-4.700 0-1.500-.1-2.300-.3-2.800"/></g>' },
+    whatsapp: { n: 'WhatsApp', c: '#25d366', b: 'https://wa.me/', g: '<g transform="translate(-1.177 -0.235) scale(1.059)" stroke-width="1.794"><path d="M4 20l1.200-4A8.500 8.500 0 1 1 8 18.800z"/><path d="M9 8.500c0 3.500 3 6.500 6.500 6.500l.8-1.700-2-1-.9.8c-1-.4-1.800-1.200-2.200-2.200l.8-.9-1-2z"/></g>' },
+    telegram: { n: 'Telegram', c: '#229ed9', b: 'https://t.me/', g: '<g transform="translate(-0.706 0.353) scale(1.059)" stroke-width="1.794"><path d="M20.500 4l-17 6.800 5 1.800 1.700 5.400 2.700-3.300 4.200 3.100z"/><path d="M8.500 12.600L20.500 4"/></g>' },
+    spotify: { n: 'Spotify', c: '#1db954', b: 'https://open.spotify.com/', g: '<circle cx="12" cy="12" r="9"/><path d="M7.500 9.500c3-1 6.500-.8 9.200.8M8 12.500c2.500-.7 5.300-.5 7.600.8M8.500 15.300c2-.5 4.200-.3 6 .7"/>' },
+    twitch: { n: 'Twitch', c: '#9146ff', b: 'https://twitch.tv/', g: '<g transform="translate(-1.091 -0.818) scale(1.091)" stroke-width="1.742"><path d="M4.500 3.500h15v10l-4 4h-3.500l-2.500 2.500v-2.500h-5z"/><path d="M12 8v3.500M16 8v3.500"/></g>' },
+    discord: { n: 'Discord', c: '#5865f2', b: 'https://discord.gg/', g: '<g transform="translate(-2.4 -1.62) scale(1.2)" stroke-width="1.583"><path d="M7 6.500c1.500-.7 3-1 5-1s3.500.3 5 1c1.500 2.500 2.300 5.200 2.500 8.500-1.200 1-2.500 1.700-4 2.200l-1-1.700M7 6.500c-1.500 2.500-2.300 5.200-2.500 8.500 1.200 1 2.500 1.700 4 2.200l1-1.700M8.500 15.500c2.200.8 4.800.8 7 0"/><circle cx="9.500" cy="11.500" r="1"/><circle cx="14.500" cy="11.500" r="1"/></g>' },
+    reddit: { n: 'Reddit', c: '#ff4500', b: 'https://reddit.com/u/', g: '<g transform="translate(-2.4 -1.8) scale(1.2)" stroke-width="1.583"><ellipse cx="12" cy="13.5" rx="7.5" ry="5.5"/><circle cx="9.5" cy="13" r="0.9" fill="currentColor"/><circle cx="14.5" cy="13" r="0.9" fill="currentColor"/><path d="M9.5 16c1.5 1 3.5 1 5 0M12 8l1-4 4 1"/><circle cx="18" cy="5.5" r="1.2"/></g>' },
+    bluesky: { n: 'Bluesky', c: '#1185fe', b: 'https://bsky.app/profile/', g: '<g transform="translate(-2.946 -0.806) scale(1.246)" stroke-width="1.525"><path d="M12 11.5C10.5 8.5 7.5 5.5 4.5 4.5c-.5 3 .5 6 2.5 7-2 .5-3 2-2 3.5 1.5 2 4 1 5.5-1.5.5-.8 1-1.7 1.5-2.5z"/><path d="M12 11.5c1.5-3 4.5-6 7.5-7 .5 3-.5 6-2.5 7 2 .5 3 2 2 3.5-1.5 2-4 1-5.5-1.5-.5-.8-1-1.7-1.5-2.5z"/></g>' },
+    patreon: { n: 'Patreon', c: '#ff424d', b: 'https://patreon.com/', g: '<g transform="translate(-3 -2.4) scale(1.2)" stroke-width="1.583"><circle cx="15" cy="9.5" r="5"/><path d="M5 4.5v15"/></g>' },
+    soundcloud: { n: 'SoundCloud', c: '#ff5500', b: 'https://soundcloud.com/', g: '<g transform="translate(-1.267 -2.807) scale(1.076)" stroke-width="1.765"><path d="M10.5 18.5h7.300a3.200 3.200 0 0 0 .3-6.400A5.300 5.300 0 0 0 10.500 9.800z"/><path d="M3.500 15v3.500M6 13v5.500M8.300 11.500v7"/></g>' },
+    dribbble: { n: 'Dribbble', c: '#ea4c89', b: 'https://dribbble.com/', g: '<circle cx="12" cy="12" r="9"/><path d="M3.5 10c4.5 0 9-1 12-5M7 20c1.5-5 5-8.5 11-9.5M9 3.5c3 4 5 9 5.5 16.5"/>' },
+    email: { n: 'Email', c: '#6b6b66', b: '', g: '<g transform="translate(-0.667 -0.667) scale(1.056)" stroke-width="1.8"><rect x="3" y="5.500" width="18" height="13" rx="2.500"/><path d="M3.500 7.500l8.500 6 8.500-6"/></g>' },
+    phone: { n: 'Phone', c: '#34a853', b: '', g: '<g transform="translate(-1.2 -2.4) scale(1.2)" stroke-width="1.583"><path d="M5 4.500h3.500l1.500 4-2 1.300a11 11 0 0 0 5.200 5.200l1.300-2 4 1.500V18a1.500 1.500 0 0 1-1.500 1.500A14.500 14.500 0 0 1 3.500 6 1.500 1.500 0 0 1 5 4.500z"/></g>' },
+    website: { n: 'Website', c: '#5b5bd6', b: '', g: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.500 2.500 3.500 5.500 3.500 9s-1 6.500-3.500 9c-2.500-2.500-3.500-5.500-3.500-9s1-6.500 3.500-9z"/>' },
+    link: { n: 'Link', c: '#5b5bd6', b: '', g: '<g transform="translate(-1.707 -1.707) scale(1.142)" stroke-width="1.663"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></g>' }
+  };
+  // [2026-11-02 00:09 | social-links] order of the Add a logo chips, and the size, gap and shape tables
+  var SL_ORDER = ['instagram', 'facebook', 'x', 'youtube', 'tiktok', 'linkedin', 'github', 'pinterest', 'snapchat', 'threads', 'whatsapp', 'telegram', 'spotify', 'twitch', 'discord', 'reddit', 'bluesky', 'patreon', 'soundcloud', 'dribbble', 'email', 'phone', 'website', 'link'];
+  var SL_SZ = { s: 36, m: 48, l: 60, xl: 76 };
+  var SL_GAP = { s: 8, m: 14, l: 22 };
+  var SL_SHAPES = [['sharp', 'Sharp'], ['square', 'Square'], ['rounded', 'Rounded'], ['circle', 'Circle']];
+  var SL_RAD = { circle: '50%', rounded: '28%', square: '10%', sharp: '0' };
+  // Typed value -> link. Email and phone get mailto: / tel:; a bare handle (name or @name) becomes that platform's profile address; anything else is a web address.
+  // [2026-11-02 00:09 | social-links] typed value to link: mailto, tel, a handle to a profile address, or a web address
+  function slNormalize(p, raw) {
+    var v = String(raw || '').trim();
+    if (!v) return '';
+    if (p === 'email' && !/^[a-z][a-z0-9+.-]*:/i.test(v)) return 'mailto:' + v;
+    if (p === 'phone' && !/^[a-z][a-z0-9+.-]*:/i.test(v)) return 'tel:' + v.split(' ').join('');
+    if (/^[a-z][a-z0-9+.-]*:/i.test(v)) return v;
+    var def = SL_P[p];
+    if (def && def.b && v.indexOf('.') < 0 && v.indexOf('/') < 0) return def.b + v.replace(/^@/, '');
+    if (v.indexOf('@') > 0 && v.indexOf('/') < 0 && v.indexOf(' ') < 0) return 'mailto:' + v;
+    return 'https://' + v;
+  }
+  // [2026-11-02 00:09 | social-links] picks white or dark logo ink for a solid background
+  function slInk(hex) {
+    if (!/^#[0-9a-f]{6}$/i.test(hex || '')) return '#ffffff';
+    var r = parseInt(hex.substr(1, 2), 16), g = parseInt(hex.substr(3, 2), 16), b = parseInt(hex.substr(5, 2), 16);
+    return (r * 299 + g * 587 + b * 114) / 1000 > 170 ? '#1c1c1a' : '#ffffff';
+  }
+  // [2026-11-02 00:09 | social-links] draws one logo as an inline SVG
+  function slSvg(p, px) {
+    var d = SL_P[p] || SL_P.link;
+    return '<svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d.g + '</svg>';
+  }
+  // [2026-11-02 00:09 | social-links] turns the block's data-sl-* settings into inline styles on every logo; safe to run any number of times
+  function applySocialLinks(block) {
+    var list = block.querySelector('.blk-sl-list'), wrap = block.querySelector('.blk-sl-wrap');
+    if (!list || !wrap) return;
+    var sz = SL_SZ[dzGet(block, 'slZ', 'm')] || 48, st = dzGet(block, 'slS', 'solid'), rad = SL_RAD[dzGet(block, 'slR', 'circle')] || '50%';
+    var col = block.dataset.slC || '', gp = col ? grParse(col) : null, custom = gp ? gp.stops[0] : col;
+    list.style.gap = (SL_GAP[dzGet(block, 'slG', 'm')] || 14) + 'px';
+    list.style.justifyContent = BT_J[dzGet(block, 'slA', 'c')] || 'center';
+    Array.prototype.forEach.call(list.querySelectorAll('.blk-sl-it'), function(a) {
+      var p = a.getAttribute('data-sl-p'); if (!SL_P[p]) { p = 'link'; a.setAttribute('data-sl-p', p); }
+      var base = custom || SL_P[p].c, css = 'width:' + sz + 'px;height:' + sz + 'px;border-radius:' + rad + ';';
+      if (st === 'solid') css += 'background:' + base + ';color:' + slInk(base) + ';border:2px solid transparent;';
+      else if (st === 'outline') css += 'background:transparent;color:' + base + ';border:2px solid ' + base + ';';
+      else if (st === 'soft') css += 'background:' + dzRgba(base, 0.16) + ';color:' + base + ';border:2px solid transparent;';
+      else css += 'background:transparent;color:' + base + ';border:2px solid transparent;';
+      if (st === 'plain') css += 'width:auto;height:auto;border:0;';
+      a.style.cssText = css;
+      a.innerHTML = slSvg(p, st === 'plain' ? Math.round(sz * 0.8) : Math.round(sz * 0.52));
+      a.setAttribute('aria-label', SL_P[p].n);
+      var href = (a.getAttribute('href') || '').trim();
+      if (/^https?:/i.test(href)) { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener noreferrer'); } else { a.removeAttribute('target'); a.removeAttribute('rel'); }
+      a.classList.toggle('blk-sl-empty', !href);
+    });
+  }
+  // [2026-11-02 00:09 | social-links] wires the block: apply, no navigation in the editor, Design button
+  function wireSocialLinks(block) {
+    if (block.dataset.type !== 'sociallinks') return;
+    applySocialLinks(block);
+    var list = block.querySelector('.blk-sl-list');
+    // In the editor a logo never navigates; the visitor's click on the published page is what follows the link.
+    if (list && !list._slWired) { list._slWired = true; list.addEventListener('click', function(e) { if (e.target.closest && e.target.closest('.blk-sl-it')) e.preventDefault(); }); }
+    var btn = block.querySelector('.blk-design');
+    if (btn && !btn._dzWired) { btn._dzWired = true; btn.addEventListener('click', function() { openSocialLinksDesign(block); }); }
+  }
+  // [2026-11-02 00:09 | social-links] design sheet: Items, Style, Layout, Effects; undo as the other blocks
+  // [2026-11-02 00:30 | social-links] changed: link rows, arrows, Remove and the logo grid now use the same pieces as the Poll options and the Icon picker; logos can be moved up and down
+  function openSocialLinksDesign(block) {
+    var before = hcBeginBlock(block);
+    function items() { return Array.prototype.slice.call(block.querySelectorAll('.blk-sl-it')); }
+    function render() {
+      var rows = '', its = items();
+      its.forEach(function(a, i) {
+        var p = a.getAttribute('data-sl-p'), d = SL_P[p] || SL_P.link;
+        var ph = p === 'email' ? 'name@mail.com' : p === 'phone' ? '+1 555 123 4567' : d.b ? d.n + ' username or link' : d.n + ' link';
+        rows += '<div class="dz-mq-row"><span class="dz-ico" aria-hidden="true">' + slSvg(p, 22) + '</span><input type="text" class="dz-input" maxlength="300" data-k="slLink' + i + '" value="' + dzEsc(a.getAttribute('href') || '') + '" placeholder="' + dzEsc(ph) + '" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" aria-label="' + d.n + ' link">' +
+          '<button type="button" class="dz-action" data-k="slUp" data-v="' + i + '" aria-label="Move ' + d.n + ' up">' + dzArrow('up', 16) + '</button>' +
+          '<button type="button" class="dz-action" data-k="slDn" data-v="' + i + '" aria-label="Move ' + d.n + ' down">' + dzArrow('dn', 16) + '</button>' +
+          '<button type="button" class="dz-action" data-k="slDel" data-v="' + i + '" aria-label="Remove ' + d.n + '">Remove</button></div>';
+      });
+      var pick = SL_ORDER.map(function(k) { return '<button type="button" class="dz-ico" data-k="slAdd" data-v="' + k + '" data-sq="' + SL_P[k].n.toLowerCase() + '" aria-label="Add ' + SL_P[k].n + '" title="' + SL_P[k].n + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + SL_P[k].g + '</svg></button>'; }).join('');
+      var h = dzTab('Items', 'Social links') + dzSec('Links', rows ? '<div class="dz-mq-inputs">' + rows + '</div><div class="dz-hint">A logo with no link is left off the published page.</div>' : '<div class="dz-hint">No logos yet. Tap one below to add it.</div>');
+      h += dzSec('Add a logo', '<div class="dz-icons">' + pick + '</div>');
+      h += dzTab('Style', 'Logo style') + dzSec('Style', dzChips('slS', [['solid', 'Solid'], ['outline', 'Outline'], ['soft', 'Soft'], ['plain', 'Plain']], dzGet(block, 'slS', 'solid'), 4));
+      h += dzSec('Colour', dzSwatches('slC', block.dataset.slC || '') + '<div class="dz-hint">None keeps each logo in its own brand colour.</div>');
+      h += dzTab('Layout', 'Logo layout') + dzSec('Size', dzChips('slZ', [['s', 'S'], ['m', 'M'], ['l', 'L'], ['xl', 'XL']], dzGet(block, 'slZ', 'm')));
+      h += dzSec('Shape', dzChips('slR', SL_SHAPES, dzGet(block, 'slR', 'circle'), 4));
+      h += dzSec('Spacing', dzChips('slG', [['s', 'Tight'], ['m', 'Normal'], ['l', 'Roomy']], dzGet(block, 'slG', 'm')));
+      h += dzSec('Position', dzChips('slA', [['l', 'Left'], ['c', 'Centre'], ['r', 'Right']], dzGet(block, 'slA', 'c')));
+      h += dzTab('Effects', 'Logo effects') + dzSec('Opacity', dzSlider('op', blockOpPct(block)));
+      h += dzAnimSecs(block);
+      return h;
+    }
+    dzSheet('Social links design', render, function(k, v) {
+      if (k.indexOf('slLink') === 0) {
+        var a = items()[parseInt(k.slice(6), 10)];
+        if (a) { var href = slNormalize(a.getAttribute('data-sl-p'), v); if (href) a.setAttribute('href', href); else a.removeAttribute('href'); applySocialLinks(block); }
+        return false;
+      }
+      if (k === 'slAdd') {
+        var list = block.querySelector('.blk-sl-list'), n = document.createElement('a');
+        if (!list || !SL_P[v]) return false;
+        n.className = 'blk-sl-it'; n.setAttribute('data-sl-p', v); list.appendChild(n);
+        applySocialLinks(block);
+        return true;
+      }
+      if (k === 'slUp' || k === 'slDn') {
+        var its2 = items(), i2 = parseInt(v, 10), j2 = k === 'slUp' ? i2 - 1 : i2 + 1;
+        if (its2[i2] && its2[j2]) { if (k === 'slUp') its2[j2].parentNode.insertBefore(its2[i2], its2[j2]); else its2[j2].parentNode.insertBefore(its2[j2], its2[i2]); applySocialLinks(block); }
+        return true;
+      }
+      if (k === 'slDel') {
+        var d = items()[parseInt(v, 10)];
+        if (d) d.remove();
+        return true;
+      }
+      if (k === 'anim' || k === 'animS' || k === 'animR') { blockAnimApply(block, k, v); return; }
+      if (k === 'op') { blockOpApply(block, v); return; }
+      if (k === 'slC' && v === '') delete block.dataset.slC; else block.dataset[k] = v;
+      applySocialLinks(block);
+    }, null, null, stCanBack(block), stBackFn).then(function(res) {
+      var sb = res === ST_BACK;
+      if (res !== true && !sb) { hcRevertBlock(block, before); return; }
+      blockAnimDone(block);
+      hcCommitBlock(block, before);
+      if (sb) stReopen(block);
+    });
+  }
+
   /* ---------- Marquee: a row of items that scrolls sideways ----------
      Edit mode shows one still, swipeable set; preview and published pages show it moving. The second set (data-dup) is a copy of the first that makes the loop seamless, rebuilt on every change; a short text-only row also repeats itself (data-rep) so one set fills the screen.
      Every item has the same fields (icon, photo, title, subtitle, name, handle, profile photo, meta); the row's Item design decides which of them show.
@@ -23126,6 +23366,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
     wirePay(block);
     wireToTop(block);
     wireIcon(block);
+    wireSocialLinks(block); // [2026-11-02 00:09 | social-links]
     wireMarquee(block);
     wireSpacer(block);
     wireBlockHeight(block);
@@ -23488,6 +23729,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       else if (t === 'panel') { vote(b.dataset.pnC1, 2); var pr = b.dataset.pnRad; if (pr) rt[pr === 'pill' ? 'p' : pr === 'sm' ? 's' : 'm'] += 1; }
       else if (t === 'icon') vote(b.dataset.icColor, 1);
       else if (t === 'marquee') vote(b.dataset.mqC, 1);
+      // [2026-11-02 00:09 | social-links] a custom logo colour counts as a page colour vote; brand colours (empty) do not
+      else if (t === 'sociallinks') vote(b.dataset.slC, 1);
       else if ((t === 'heading' || t === 'subheading' || t === 'text') && st && st !== 'sans' && st !== 'bold' && st !== 'large') {
         var T = t === 'text' ? tT : hT; T[st] = (T[st] || 0) + 1; if (!fam[t === 'text' ? 't' + st : 'h' + st]) fam[t === 'text' ? 't' + st : 'h' + st] = famOf(b);
       }
@@ -31686,7 +31929,8 @@ function _nbExportBlkCounts(root) {
 function _nbExportDropNote() {
   const d = window._nbExportDrops;
   if (!d) return '';
-  const why = { poll: ['poll', 'needs at least 2 options'], textbox: ['text box', 'needs a field'], pay: ['payment block', 'needs a link or payment setup'], audio: ['voice note', 'no recording'], carousel: ['carousel', 'no pictures'], marquee: ['photo marquee', 'no photos'] };
+  // [2026-11-02 00:09 | social-links] added the sociallinks entry so the publish notice names a left-out block
+  const why = { sociallinks: ['social links block', 'no links added'], poll: ['poll', 'needs at least 2 options'], textbox: ['text box', 'needs a field'], pay: ['payment block', 'needs a link or payment setup'], audio: ['voice note', 'no recording'], carousel: ['carousel', 'no pictures'], marquee: ['photo marquee', 'no photos'] };
   const parts = [];
   Object.keys(d.blocks).forEach(t => {
     const n = d.blocks[t], w = why[t] || [t + ' block', 'nothing to show'];
@@ -31726,6 +31970,11 @@ function _nbCleanContentForExport(html) {
     b.style.overflow = 'hidden';
   });
   // Polls: ship the plain form (the page script draws state and results), never editor preview state. A poll with fewer than two options is dropped.
+  // [2026-11-02 00:09 | social-links] A logo with no link is left out; a block with no links at all is left out whole (counted as dropped, so the publish notice names it).
+  container.querySelectorAll('.blk[data-type="sociallinks"]').forEach(b => {
+    b.querySelectorAll('.blk-sl-it').forEach(a => { if (!(a.getAttribute('href') || '').trim()) a.remove(); else a.classList.remove('blk-sl-empty'); });
+    if (!b.querySelector('.blk-sl-it')) b.remove();
+  });
   container.querySelectorAll('.blk[data-type="poll"]').forEach(b => {
     if (b.querySelectorAll('.blk-pl-o').length < 2 || !/^[a-z0-9_]{6,24}$/.test(b.getAttribute('data-pl-id') || '')) { b.remove(); return; }
     ['data-pl-view', 'data-pl-hasres', 'data-pl-sent', 'aria-busy'].forEach(x => b.removeAttribute(x));
