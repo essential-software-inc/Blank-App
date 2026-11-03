@@ -1438,7 +1438,8 @@ body.night #al-fab-del, body.pink #al-fab-del { background: #d33; border-color: 
 #nb-alert-fabs .al-fab { height: 48px; min-height: 48px; max-height: 48px; padding-top: 0; padding-bottom: 0; line-height: 1; align-self: center; box-sizing: border-box }
 #nb-alert-fabs .al-fab span { line-height: 1; display: block }
 @media (prefers-reduced-motion: reduce) { #nb-alert-fabs, #nb-alert-fabs.on, .al-fab, .alert-card::before, .alert-card::after { transition: none } }
-.guide-card.nb-flash { box-shadow: 0 0 0 2px rgba(80,130,220,.7); transition: box-shadow .4s }
+/* An outline, not box-shadow: every theme sets the card's box-shadow with !important, which hid the old ring. --al-acc keeps Night free of blue. */
+.guide-card.nb-flash { outline: 3px solid color-mix(in srgb, var(--al-acc) 60%, transparent); outline-offset: 1px; transition: outline-color .4s }
 .gc-tags-row {
   display: flex;
   gap: .35rem;
@@ -38517,7 +38518,7 @@ function nbAlertOpen(id) {
     const find = () => {
       const g = document.getElementById('nb-notes-grid');
       const el = g && (own ? g.querySelector('.guide-card[data-note-id="' + CSS.escape(own.id) + '"]') : g.querySelector('.guide-card[data-slug="' + CSS.escape(slug) + '"]'));
-      if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('nb-flash'); setTimeout(() => el.classList.remove('nb-flash'), 1800); return; }
+      if (el) { _nbCatYCancel(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('nb-flash'); setTimeout(() => el.classList.remove('nb-flash'), 1800); return; }
       if (++tries < 12) setTimeout(find, 300);
       else showToast('That note isn\u2019t in the list right now');
     };
@@ -40282,6 +40283,7 @@ function _pubAdSlotMsg(st) {
 // Opens Settings and scrolls to the "Ads & invites" section (it only exists while signed in; otherwise Settings just opens).
 function nbGoSettingsAds() {
   nbGoScreen('settings');
+  _nbCatYCancel(); // the Settings restore nbGoScreen just started would fight the jump below
   const jump = () => { const g = document.getElementById('st-ads-grp'); if (g) g.scrollIntoView({ behavior: 'auto', block: 'start' }); };
   requestAnimationFrame(jump);
   setTimeout(jump, 300); // the publish sheet may still be closing / locking scroll on the first pass
@@ -42256,6 +42258,9 @@ function _nbCatYRestore() {
     set: _nbRsPageSc.set, max: _nbRsPageSc.max
   }, y, (k.charAt(0) !== 'm' && _nbIsFeedCat(_nbActiveCat)) ? 6000 : 2500, [window], release);
 }
+// Ends a running saved-position restore (_nbCatYRestore -> _nbRsSettle), which re-sets the old scroll every frame for up to 2.5 s (6 s on feed lists).
+// For code that scrolls the page itself right after a screen / category switch: a newer run id ends the loop, its release() then no-ops, so drop the hold here.
+function _nbCatYCancel() { _nbCatYRun++; clearTimeout(_nbCatYSafety); window._nbRsHold = false; }
 function selectCat(cat, tab) {
   // The pills' .22s colour fades repaint the whole glass search bar on every frame; a category tap should just switch.
   document.body.classList.add('nb-nav'); setTimeout(() => document.body.classList.remove('nb-nav'), 450);
