@@ -3922,11 +3922,15 @@ body.night #st-ads-card .ad-prog-row.met .ad-prog-bar > i { background: #4aa36a 
 #st-fund .ad-prog-t, #st-space .ad-prog-t { font-size: .85rem }
 #st-fund .ad-prog-s, #st-space .ad-prog-s { color: var(--st-sub) }
 /* [2026-11-02 15:30 | page-space-balance] Page space card in Settings: same rows as the ad view balance. */
-#st-space-bal { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; margin-bottom: .8rem; padding-bottom: .7rem; border-bottom: 1px solid var(--st-line); color: var(--st-fg); font-size: .85rem }
+/* [2026-11-03 08:43 | page-space-balance] changed: the balance row no longer draws a line under itself. The line now belongs to the "Pages using page space" part (#st-space-held:not(:empty)) and to the buy part (#st-space), so a missing part never leaves two lines side by side. */
+#st-space-bal { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; color: var(--st-fg); font-size: .85rem }
 #st-space-bal .ad-prog-s { color: var(--st-sub) }
 /* [2026-11-03 07:53 | page-space-balance] changed: the card has the same padding as the Ads card (it had none, so the text sat against the edges). */
 #st-space-card { padding: .8rem .9rem }
-#st-space-held { color: var(--st-fg); font-size: .8rem; margin-bottom: .2rem }
+#st-space-held { color: var(--st-fg); font-size: .8rem }
+/* [2026-11-03 08:44 | page-space-balance] changed: every line in this card has .8rem above and .8rem below, whichever parts show. The held button and the buy part carry no extra margin of their own. */
+#st-space-held:not(:empty) { margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--st-line) }
+#st-space { margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--st-line) }
 #st-space-held .ad-prog-s { color: var(--st-sub) }
 .st-fund-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .6rem }
 .st-fund-btn { flex: 1 1 40%; min-width: 0; padding: .6rem .5rem; border-radius: 12px; border: 1px solid var(--st-line); background: var(--st-bg); color: var(--st-fg); font: inherit; font-size: .82rem; font-weight: 700; line-height: 1.35; text-align: center; cursor: pointer }
@@ -4754,16 +4758,19 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 #ap-overlay{display:none;position:fixed;inset:0;z-index:9300;background:rgba(20,20,24,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);align-items:flex-end;justify-content:center;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;animation:apFade .18s ease}
 #ap-overlay.open{display:flex}
 #ap-sheet{--px:20px;position:relative;width:100%;max-width:520px;height:min(86vh,700px);display:flex;flex-direction:column;background:#fff;color:#202122;border-radius:18px 18px 0 0;box-shadow:0 20px 50px rgba(20,20,40,.28);animation:apIn .22s ease;text-align:left}
-.ap-head{display:flex;align-items:center;gap:10px;padding:20px var(--px) 13px}
+/* [2026-11-03 08:38 | page-list] changed: no close button in the head (drag down or tap outside to close), so the head takes the drag like the comments sheet. */
+.ap-head{display:flex;align-items:center;gap:10px;padding:20px var(--px) 13px;touch-action:none}
 .ap-tile{flex:none;width:34px;height:34px;border-radius:10px;background:#eef2fc;display:flex;align-items:center;justify-content:center}
 .ap-tile svg{stroke:#3366cc}
 #ap-hdr-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:15.5px;color:#202122;letter-spacing:-.01em}
-#ap-close{margin-left:auto;margin-right:-9px;flex:none;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:#8a8d99;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-#ap-close:hover{background:#f4f5f8}
 .ap-filter{padding:0 var(--px) 11px}
 #ap-field{position:relative}
 .ap-mag{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#8a8d99;pointer-events:none}
-#ap-search-input{width:100%;display:block;height:42px;padding:0 .85rem 0 38px;border:1.5px solid #e2e5ee;border-radius:11px;background:#f8f9fc;color:#202122;font:inherit;font-size:14px;line-height:1.35;outline:none;caret-color:#202122;-webkit-appearance:none;appearance:none;transition:border-color .15s,background .15s}
+/* [2026-11-03 08:38 | page-list] Clear button in the search bar: its icon sits 13px from the right edge, the same as the magnifier from the left. Shown only while something is typed. */
+#ap-clear{display:none;position:absolute;right:0;top:0;width:41px;height:100%;padding:0;border:0;background:transparent;color:#8a8d99;cursor:pointer;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+#ap-field.ap-has-q #ap-clear{display:flex}
+#ap-clear:active{color:#3366cc}
+#ap-search-input{width:100%;display:block;height:42px;padding:0 41px 0 38px;border:1.5px solid #e2e5ee;border-radius:11px;background:#f8f9fc;color:#202122;font:inherit;font-size:14px;line-height:1.35;outline:none;caret-color:#202122;-webkit-appearance:none;appearance:none;transition:border-color .15s,background .15s}
 #ap-search-input::placeholder{color:#8a8d99;opacity:1}
 #ap-search-input:focus{border-color:#3366cc;background:#fff}
 #ap-body{flex:1;min-height:0;overflow-y:auto;padding:3px var(--px) 16px;border-top:1px solid #eef0f6;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
@@ -5841,7 +5848,7 @@ body.pink #ch-pick, body.pink #ch-view { --ch-bg: #fff8fb; --ch-me: #ffd9e6; --c
 /* Chat image picker: the base .img-pick-* rules only exist in the editor canvas stylesheet, so without these the sheet rendered unstyled at the bottom of the page, under the chat */
 #ch-pick.img-pick-overlay{will-change:opacity;position:fixed;inset:0;background:rgba(20,20,18,.45);display:flex;align-items:flex-end;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .15s}
 #ch-pick.img-pick-overlay.img-pick-open{opacity:1;pointer-events:auto}
-#ch-pick .img-pick-box{width:100%;max-width:360px;background:#fff;border-radius:16px 16px 0 0;padding:.8rem 1rem calc(1rem + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);transform:translateY(12px);will-change:transform;backface-visibility:hidden;transition:transform .15s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+#ch-pick .img-pick-box{width:100%;max-width:720px;background:#fff;border-radius:16px 16px 0 0;padding:.8rem 1rem calc(1rem + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);transform:translateY(12px);will-change:transform;backface-visibility:hidden;transition:transform .15s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 #ch-pick.img-pick-overlay.img-pick-open .img-pick-box{transform:translateY(0)}
 #ch-pick .img-pick-title{font-size:.95rem;font-weight:700;color:#202122;margin:0 0 .5rem;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 #ch-pick .img-pick-opt{width:100%;display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;margin-bottom:.5rem;border:1px solid #e5e5e0;border-radius:10px;background:#fafaf8;color:#2c2c29;font-size:.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .12s,background .12s}
@@ -7571,7 +7578,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>For voice messages, the app asks your device for permission to use the microphone, the same as for voice notes. It only records after you press the mic, and it stops after 5 minutes at most. Nothing goes to us until you send the voice message, and you can delete a recording before you send it.</p>
       <p>We don't read team chats as part of running Bluebook, and we don't listen to voice messages or turn them into text. Team chats aren't part of "Using published pages and comments" above, so we don't use them to build or train anything. Team chats are also not end-to-end encrypted. They're stored on our servers so everyone on the team can read them, so please don't send passwords, payment card numbers, ID numbers or other sensitive details in one.</p>
       <h3>Publishing as an ad</h3>
-      <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a full-screen ad before a note they open, whether it's from the stories strip, Subscribed, Liked, Media or Go to note. It isn't just for people who have the page's link, like a regular published page. Everyone sees ads, including people who've bought Pro, but never before their own notes. So that ads don't come too often, the app keeps a small count of the notes you've opened and the time of your last ad. It stays on your device and we never see it. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save a device ID, a random number that each device makes, keeps, and sends whenever it asks for an ad or a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. We also use it to see how long we've known a device, and to make sure one device isn't shown too many ads. We keep a small count for that and wipe it within a day. We use a random one-time code to check that each view is real. The code isn't linked to you or your device. We delete it when it's used, or after about six hours if it never is. When the app asks for an ad, we also briefly count requests from your IP address to stop spam, the same way we do when you publish. See "Analytics" below too. When you unpublish an ad, it stops being shown right away, though someone whose phone already loaded it might still see it once. Any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can only use images from Wikipedia or Wikimedia Commons, and video, audio and social posts added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device. Polls can't be used in ads either, because ads can't collect votes.</p>
+      <p>Want more people to see a page? From the Publish sheet's "Publish as Ad" tab, you can turn a page you've already published into an ad. Other people using the app see it as a full-screen ad before a note they open, whether it's from the stories strip, Subscribed, Liked, Media or Go to note. It isn't just for people who have the page's link, like a regular published page. Everyone sees ads, including people who've bought Pro, but never before their own notes. So that ads don't come too often, the app keeps a small count of the notes you've opened and the time of your last ad. It stays on your device and we never see it. You need to sign in to run an ad. Views are bought as described under "In-app purchases" above, and once the purchase is confirmed, we add those views to your account. We also save how many views an ad has used and its status (running, used up, or taken down). To tell you how many different people an ad reached, we save a device ID, a random number that each device makes, keeps, and sends whenever it asks for an ad or a view is counted, whether or not the viewer is signed in. It isn't linked to a Google account, email address, or anything else that identifies someone. We use it to tell whether a repeat view of an ad came from a device we already counted, and for the activity counts described under "Activity counts" below. We also use it to see how long we've known a device, and to make sure one device isn't shown too many ads. We keep a small count for that and wipe it within a day. We use a random one-time code to check that each view is real. The code isn't linked to you or your device. We delete it when it's used, or after about six hours if it never is. When the app asks for an ad, we also briefly count requests from your IP address to stop spam, the same way we do when you publish. See "Analytics" below too. When you unpublish an ad, it stops being shown right away, though someone whose phone already loaded it might still see it once. Any views it had left go unused. That balance isn't returned to your account. The page itself and its normal link stay as they were, and taking the page down is a separate step from the Publish to Web tab. "External images &amp; embeds" below explains how images, video, audio and social posts inside an ad are loaded. Ads can use images linked from any website, but not images uploaded from your device. Video, audio and social posts have to be added with the editor's own tools (YouTube, Spotify, Instagram, X, or Streamable). Voice notes can't be used in ads, because they're recorded on your device. Polls can't be used in ads either, because ads can't collect votes.</p>
       <h3>Making sure ad views are real (Android)</h3>
       <p>Some people try to fake ad views with scripts. To stop that, the Android app asks Google to confirm that it's the real app, installed from Google Play, on a real phone. When the app needs an ad, it sends Google's answer to our servers, along with a one-time code, the app's name and the same device ID described above. Our servers ask Google if the answer is good, and we don't keep it. If it is, we give the app a pass that lasts about a day, and the app shows that pass each time it asks for an ad. We keep the one-time code for a short time, and the pass (linked to the device ID) for up to about a day. We use them only to limit how often one phone can ask for ads. To help with that, we also briefly count requests for a pass from your IP address, and how many passes each device ID has asked for. We wipe the IP count, and the device count goes after a day. None of this tells us who you are, and it isn't linked to your account.</p>
       <h3>Ad access &amp; invites</h3>
@@ -7588,7 +7595,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <h3>Voice notes</h3>
       <p>When you record a voice note, the app asks your device for permission to use the microphone. It only records after you tap record, and it stops when you tap stop, after 5 minutes, or if you leave the app. The recording is saved inside the note on your device, just like a photo. If you're signed in, it's backed up to your account along with your other notes, and it's deleted if you delete your account. If you publish the note, the recording becomes part of the published page, so anyone with the link can listen. Voice notes can't be used in ads. We don't listen to your recordings or turn them into text. The one exception is a note you publish: its page, recording included, may be used as described under "Using published pages and comments" above. Recordings that only live in your notes or your backup aren't part of that. When you play a voice note, it plays right on your device. Voice messages in a team chat are different: they're sent to our servers when you send them (see "Messages (team chat)" above).</p>
       <h3>External images &amp; embeds</h3>
-      <p>Images you add to a page by URL are loaded straight from their source when the page is built. So are images you add to a team chat by link. Instagram, X, Streamable, YouTube and Spotify embeds load straight from those services. We have nothing to do with these third-party hosts, with one exception: when you paste an Instagram share link or an X (t.co) short link using the editor's own tools, our server follows the link just to find out which post it points to. It doesn't read the page. It also counts requests from your IP address in a short-lived counter. We only need that count briefly. We then delete it, so it's gone within a day, and it isn't linked to your account. A page published as an ad can only use images linked directly from Wikipedia or Wikimedia Commons, and can't contain images uploaded from your device or voice notes. We check this automatically before an ad can go live or be updated.</p>
+      <p>Images you add to a page by URL are loaded straight from their source when the page is built. So are images you add to a team chat by link. Instagram, X, Streamable, YouTube and Spotify embeds load straight from those services. We have nothing to do with these third-party hosts, with one exception: when you paste an Instagram share link or an X (t.co) short link using the editor's own tools, our server follows the link just to find out which post it points to. It doesn't read the page. It also counts requests from your IP address in a short-lived counter. We only need that count briefly. We then delete it, so it's gone within a day, and it isn't linked to your account. A page published as an ad can use images linked from any website. It can't contain images uploaded from your device or voice notes. Because ads are shown to other people, the website that hosts an image in an ad can see when the ad is shown. We check this automatically before an ad can go live or be updated.</p>
       <h3>Linked pages</h3>
       <p>This section is about links inside the app. In preview, tapping a link in a page shows its address in a sheet with a copy option. The app doesn't open or load the linked page, except when the link is the full address of a published note: then it opens that note in the app's story viewer, the same as pasting it in the search box and tapping GO. Nothing is fetched, and we can't see what links a page contains. A published page works a bit differently, depending on how you're viewing it. If someone opens its public address directly, outside the app, they're looking at a plain web page in their own browser, so links inside it are ordinary clickable links that open like any other link on the web. Inside the app, opening a story or a note you found through search shows that same published page in the app's own built-in viewer (see "Stories, subscriptions &amp; likes" below), so you don't leave the app to see it. A link you tap inside that viewer opens in your own browser, which takes you out of the app, unless it's the full address of another published note, which opens in the viewer instead. The app doesn't load the linked page itself, and we have nothing to do with that site, but like any site you open in a browser, it can see your IP address. If the app can't open the link, it copies the address instead.</p>
       <h3>Stories, subscriptions &amp; likes</h3>
@@ -7777,7 +7784,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>A chat doesn't keep everything forever. Each chat keeps its newest 1,500 messages. Images and voice messages stay for as long as their message does, but when an old message gets cleared out, its image or recording goes with it. So don't use the chat to store things. If you want to keep something, put it in the note. When a team ends, because the author unpublishes the page or deletes their account, its chat is deleted too. If you leave a team, or you're removed, you lose the chat, but your messages stay in it. We can't promise every message will arrive or stay available (see "No Promises &amp; Limits on Our Responsibility" below).</p>
       <p>If someone is being unkind in a chat, you can leave the team, or the author can remove them. You can also tell us at the address under Contact. We may remove an editor or a team, or suspend an account, for the same reasons we may remove a page. An account that's suspended, or waiting to be deleted, can't send, react to or delete messages. See the Privacy Policy's "Messages (team chat)" section for what we save about your chat messages.</p>
       <h3>Advertising (Publish as Ad)</h3>
-      <p>You can turn a page you've already published into an ad, and buy a set number of views through Google Play Billing (handled for us by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be allowed as an ad, a page has to follow these rules. It must have no added text or captions beyond blank lines, and keep the required attribution notice in place, unedited, and easy to see at its original size. It can have no more than two images, and they must be linked directly from Wikipedia or Wikimedia Commons (no images uploaded from your device). It can't have voice notes (those are recorded on your device) or polls (ads can't collect votes). A page can also have video, audio, and social-post embeds added with the editor's own tools. YouTube, Spotify, Instagram, X and Streamable are the allowed sources, with one embed per platform at most. Embeds added any other way aren't allowed. Ads still follow the Responsible Use section above. They also can't contain sexual or adult content, or use images, embeds, attribution or branding to pretend to be a person, brand or organisation, or to mislead viewers about who or what the ad is from. We check these rules automatically before an ad can go live or be updated. We may refuse or take down an ad that no longer follows them, or that breaks these terms. An ad and its page are the same thing, so reporting one reports the other.</p>
+      <p>You can turn a page you've already published into an ad, and buy a set number of views through Google Play Billing (handled for us by RevenueCat; see the Privacy Policy's "In-app purchases" section). To be allowed as an ad, a page has to follow these rules. Images must be linked from a website, not uploaded from your device. It can't have voice notes (those are recorded on your device) or polls (ads can't collect votes). A page can also have video, audio, and social-post embeds added with the editor's own tools. YouTube, Spotify, Instagram, X and Streamable are the allowed sources, with one embed per platform at most. Embeds added any other way aren't allowed. Ads still follow the Responsible Use section above. They also can't contain sexual or adult content, or use images, embeds or branding to pretend to be a person, brand or organisation, or to mislead viewers about who or what the ad is from. We check these rules automatically before an ad can go live or be updated. We may refuse or take down an ad that no longer follows them, or that breaks these terms. An ad and its page are the same thing, so reporting one reports the other.</p>
       <p>A running ad is shown to other people using this app, full-screen, before a note they open. It isn't only for people who have its link. Everyone sees ads, including people who've bought Pro, but not before every note, because the app spaces them out. People can skip an ad once a short countdown finishes, or go back at any time. We can't promise an ad will get any particular number of views in a given time, that the ad service will always be available, or any particular result from an ad being shown.</p>
       <p>A <strong>view</strong> is counted as soon as the ad appears on screen, even if the person goes back before the countdown ends. Every view counts: a repeat view from the same person or device still counts and is still taken from your view balance. Views aren't limited to first-time viewers. Bluebook also shows a separate <strong>unique viewers</strong> number next to your ad's view count, just for your information. It's worked out from a device ID made and stored on each device, which tells us whether a device has already been counted for a given ad (and, separately, is used for the activity counts in the Privacy Policy). It isn't linked to a Google account or any other identity, and it's sent whether or not you're signed in. Because it identifies a device rather than a person, someone using two devices counts as two unique viewers, and reinstalling the app or clearing its storage makes that device count as new from then on. The unique viewers number doesn't change your view balance or how views are taken from it.</p>
       <p>If Google Play refunds a view purchase, we take those views back out of your balance. If that leaves your balance below zero, your running ads stop, and you can't start a new ad until your balance covers it again.</p>
@@ -7808,7 +7815,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <p>You can buy a view package for a particular note when you publish it as an ad, or add views to your balance from Settings to put on any of your ads later. Views in your balance aren't assigned to a note until you use them.</p>
       <p>All buying of view packages and page space packs goes through Google Play Billing (RevenueCat handles it for us). Any age or account requirements for buying are set and enforced by Google Play, not by us. By buying a view package or a page space pack, you confirm that Google Play's own terms allow you to make purchases on the account you're using.</p>
       <h3>Third-Party Content</h3>
-      <p>Images, video, and audio you embed by URL are loaded straight from the source you give us. You're responsible for having the right to use anything you embed. The same goes for voice notes you record: they're your responsibility, and you need permission from anyone whose voice is in them. Images in an ad are limited as described above. The required attribution notice is there because third-party logos, trademarks and brand names may show up in an ad's content or images. You're still responsible for having the right to use whatever you include, and the notice doesn't give you any rights by itself.</p>
+      <p>Images, video, and audio you embed by URL are loaded straight from the source you give us. You're responsible for having the right to use anything you embed. The same goes for voice notes you record: they're your responsibility, and you need permission from anyone whose voice is in them. Images in an ad can't be uploaded from your device, as described above. You're still responsible for having the right to use whatever you include, including images you link from other websites.</p>
       <h3>No Promises &amp; Limits on Our Responsibility</h3>
       <p>We work hard to make Bluebook good, but we can't promise it'll be perfect. It's provided "as is" and "as available", which means we don't promise it'll always work, be free of bugs, or never lose anything. Please keep your own backups of notes that matter to you. As far as the law allows, we're not responsible for knock-on losses, like lost notes, lost data, lost profits or lost chances, or for anything other people post, publish, comment or do. Some places don't allow these limits, so they only apply as far as the law lets them, and nothing here limits anything the law says we can't limit.</p>
       <h3>The Fine Print</h3>
@@ -7933,18 +7940,19 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 </div>
 
 <!-- [2026-11-03 04:24 | page-list] Recent pages by the author of the page open in the story viewer; opened by the list button between the arrows under "Report an issue" -->
+<!-- [2026-11-03 08:38 | page-list] changed: no X in the head; the search bar has a clear button; the sheet closes by dragging down (see _nbApDragInit) or tapping outside. -->
 <!-- [2026-11-03 06:43 | page-list] changed: built like the comments sheet (head with tile, title and close; search field; list) with its own fixed look, no theme classes -->
 <div id="ap-overlay" onclick="if(event.target===this)nbAuthorPagesClose()">
   <div id="ap-sheet" role="dialog" aria-modal="true" aria-label="Pages by this author">
     <div class="ap-head">
       <div class="ap-tile"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
       <div id="ap-hdr-title">Recent pages</div>
-      <button id="ap-close" type="button" onclick="nbAuthorPagesClose()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
     </div>
     <div class="ap-filter">
       <div id="ap-field">
         <svg class="ap-mag" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <input id="ap-search-input" type="text" inputmode="search" placeholder="Search pages…" aria-label="Search these pages" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="nbApSearch(this.value)" onkeydown="if(event.key==='Enter'&&!event.isComposing)this.blur()">
+        <button id="ap-clear" type="button" onclick="nbApClear()" aria-label="Clear search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
       </div>
     </div>
     <div id="ap-body" onscroll="_nbApNearEnd()">
@@ -8024,7 +8032,7 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <div id="pub-ad-tab" style="display:none">
         <div id="pub-ad-need-web" class="bkp-panel" style="display:none">
           <p class="bkp-help">Publish this note to the web first. Once it's live, buy a view package and publish it as an ad here. It'll then show automatically as a full-screen ad before other people's notes. Each time your ad appears on someone's screen, one view is used up until the package runs out.</p>
-          <p class="bkp-help">A typical eligible ad is simple: up to two images linked from Wikipedia or Wikimedia Commons, embedded YouTube videos, Spotify players, Instagram posts, X posts, or Streamable videos, plus one short disclaimer.</p>
+          <p class="bkp-help">Any page you have published can run as an ad. Images must be linked from a website, not uploaded from your device.</p>
         </div>
         <div id="pub-ad-need-signin" class="bkp-panel" style="display:none">
           <p class="bkp-help">Sign in to publish or manage ads. Ad view credits are tied to your account.</p>
@@ -8820,18 +8828,41 @@ function nbNavKit(doc, getCtx) {
     }
     return o;
   }
+  // [2026-11-03 08:59 | page-find] changed: matches the text of a whole block, so a phrase that crosses bold text, a link or any other inline tag is found. A match is now a range from one text node to another (n, a to en, eb) with the block's text (s, sa, sb) for the result snippet. Text never joins across a block edge, a line break, an image or a control (a separator stands there).
+  var FIND_INL = { a: 1, abbr: 1, b: 1, bdi: 1, bdo: 1, cite: 1, code: 1, data: 1, del: 1, dfn: 1, em: 1, font: 1, i: 1, ins: 1, kbd: 1, mark: 1, q: 1, s: 1, samp: 1, small: 1, span: 1, strike: 1, strong: 1, sub: 1, sup: 1, time: 1, tt: 1, u: 1, 'var': 1, wbr: 1 };
+  var FIND_BRK = { br: 1, hr: 1, img: 1, svg: 1, canvas: 1, video: 1, audio: 1, iframe: 1, input: 1, select: 1, textarea: 1, button: 1 };
+  function findBox(n, root) { var e = n.parentNode; while (e && e !== root && FIND_INL[e.localName]) e = e.parentNode; return e; }
   function textMatches(root, nq, mc) {
-    var out = [], bl = root.querySelectorAll(':scope > .blk'), i, w, n, v, hay, from, at, c;
+    var out = [], bl = root.querySelectorAll(':scope > .blk'), SEP = String.fromCharCode(1), i, w, n, v, lv, c, k, nodes, starts, lens, parts, hparts, pos, box, brk, hay, joined, from, at, end, si, ei;
+    if (!nq || nq.indexOf(SEP) >= 0) return out;
     for (i = 0; i < bl.length; i++) {
       if (bl[i].getAttribute('data-type') === 'navbar') continue;
-      w = doc.createTreeWalker(bl[i], 4, null);
+      nodes = []; starts = []; lens = []; parts = []; hparts = []; pos = 0; box = null; brk = false;
+      w = doc.createTreeWalker(bl[i], 5, null);
       while ((n = w.nextNode())) {
+        if (n.nodeType === 1) { if (FIND_BRK[n.localName] || (n.matches && n.matches(SKIP))) brk = true; continue; }
         v = n.nodeValue;
-        if (!v || !v.trim()) continue;
+        if (!v) continue;
         c = n.parentNode && n.parentNode.closest ? n.parentNode.closest(SKIP) : null;
-        if (c && bl[i].contains(c)) continue;
-        hay = mc ? v : v.toLowerCase(); from = 0;
-        while ((at = hay.indexOf(nq, from)) >= 0) { out.push({ n: n, a: at, b: at + nq.length }); from = at + Math.max(1, nq.length); }
+        if (c && bl[i].contains(c)) { brk = true; continue; }
+        k = findBox(n, bl[i]);
+        if (nodes.length && (brk || k !== box)) { parts.push(SEP); hparts.push(SEP); pos += 1; }
+        brk = false; box = k;
+        lv = mc ? v : v.toLowerCase();
+        if (lv.length !== v.length) lv = v;
+        nodes.push(n); starts.push(pos); lens.push(v.length);
+        parts.push(v); hparts.push(lv.replace(/\u00a0/g, ' ')); pos += v.length;
+      }
+      if (!nodes.length) continue;
+      joined = parts.join(''); hay = hparts.join(''); from = 0; si = 0;
+      while ((at = hay.indexOf(nq, from)) >= 0) {
+        end = at + nq.length;
+        while (si < nodes.length && starts[si] + lens[si] <= at) si++;
+        if (si >= nodes.length) break;
+        ei = si;
+        while (ei < nodes.length - 1 && starts[ei] + lens[ei] < end) ei++;
+        out.push({ n: nodes[si], a: at - starts[si], b: ei === si ? end - starts[ei] : lens[si], en: nodes[ei], eb: end - starts[ei], s: joined, sa: at, sb: end });
+        from = at + Math.max(1, nq.length);
       }
     }
     return out;
@@ -8852,7 +8883,7 @@ function nbNavKit(doc, getCtx) {
     var ctx = (getCtx && getCtx()) || s._ctx || lastCtx || {}, mc = blk.getAttribute('data-nv-smc') === '1';
     var sc = fndScan(ctx, raw, mc), hits = [], i, m, v, a, b, dots = String.fromCharCode(8230), full = blk.getAttribute('data-nv-srw') === '1', list = blk.getAttribute('data-nv-stl') === '1';
     for (i = 0; list && i < sc.length; i++) {
-      m = sc[i].ms[0]; v = m.n.nodeValue; a = Math.max(0, m.a - (full ? 60 : 24)); b = Math.min(v.length, m.b + (full ? 200 : 44));
+      m = sc[i].ms[0]; v = m.s; a = Math.max(0, m.sa - (full ? 60 : 24)); b = Math.min(v.length, m.sb + (full ? 200 : 44));
       hits.push({ t: (a > 0 ? dots : '') + flat(v.slice(a, b)) + (b < v.length ? dots : ''), s: sc[i].title + ' ' + String.fromCharCode(183) + ' ' + sc[i].ms.length + (sc[i].ms.length === 1 ? ' match' : ' matches'), ic: P_TEXT, pid: sc[i].id, content: true });
     }
     var same = fnd && fnd.q === raw && fnd.mc === mc && fnd.blk === blk;
@@ -8893,7 +8924,7 @@ function nbNavKit(doc, getCtx) {
       if (e.id === f.pid) { if (f.k >= e.ms.length) f.k = e.ms.length - 1; if (f.k >= 0) idx = tot + f.k; }
       if (e.id === sc.cur) {
         for (j = 0; j < e.ms.length && j < 2000; j++) {
-          r = doc.createRange(); r.setStart(e.ms[j].n, e.ms[j].a); r.setEnd(e.ms[j].n, e.ms[j].b);
+          r = doc.createRange(); r.setStart(e.ms[j].n, e.ms[j].a); r.setEnd(e.ms[j].en, e.ms[j].eb);
           all.push(r);
           if (e.id === f.pid && j === f.k) cur = r;
         }
@@ -11135,7 +11166,7 @@ html:not(.nb-repost) .cv-add[data-rp-only]{display:none !important}
 
 .img-pick-overlay{will-change:opacity;position:fixed;inset:0;background:rgba(20,20,18,.45);display:flex;align-items:flex-end;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .15s}
 .img-pick-overlay.img-pick-open{opacity:1;pointer-events:auto}
-.img-pick-box{width:100%;max-width:360px;background:#fff;border-radius:16px 16px 0 0;padding:.8rem 1rem calc(1rem + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);transform:translateY(12px);will-change:transform;backface-visibility:hidden;transition:transform .15s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+.img-pick-box{width:100%;max-width:720px;background:#fff;border-radius:16px 16px 0 0;padding:.8rem 1rem calc(1rem + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);transform:translateY(12px);will-change:transform;backface-visibility:hidden;transition:transform .15s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .img-pick-overlay.img-pick-open .img-pick-box{transform:translateY(0)}
 .img-pick-title{font-size:.95rem;font-weight:700;color:#202122;margin:0 0 .5rem;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .img-pick-opt{width:100%;display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;margin-bottom:.5rem;border:1px solid #e5e5e0;border-radius:10px;background:#fafaf8;color:#2c2c29;font-size:.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .12s,background .12s}
@@ -12638,11 +12669,12 @@ html[data-nb-glass="1"] .blk[data-tb-st="line"] .blk-tb-i{background:transparent
 .blk[data-type="totop"].nb-tt-fixed{position:fixed!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;width:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;transform:none!important;z-index:90!important;display:block;transition:opacity .2s,translate .2s,visibility .2s}
 .blk[data-type="totop"].nb-tt-fixed::after{display:none!important}
 .blk[data-type="totop"].nb-tt-fixed .blk-tt-wrap{padding:0}
-.blk[data-type="totop"].nb-tt-fixed[data-tt-p^="b"]{bottom:calc(var(--tt-g,24px) + var(--tt-y,0px) + env(safe-area-inset-bottom,0px))!important}
+/* [2026-11-03 08:38 | floating-nav] changed: a bottom button never sits lower than --nb-clear. The right and centre ones take it from --nb-clear-r (set by the comments button) and --nb-clear-c (set by the floating arrows bar), so they stay above those instead of covering them. */
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p^="b"]{bottom:max(calc(var(--tt-g,24px) + var(--tt-y,0px) + env(safe-area-inset-bottom,0px)),var(--nb-clear,0px))!important}
 .blk[data-type="totop"].nb-tt-fixed[data-tt-p^="t"]{top:calc(var(--tt-g,24px) + var(--tt-y,0px) + env(safe-area-inset-top,0px))!important}
 .blk[data-type="totop"].nb-tt-fixed[data-tt-p$="l"]{left:calc(var(--tt-g,24px) + env(safe-area-inset-left,0px))!important}
-.blk[data-type="totop"].nb-tt-fixed[data-tt-p$="r"]{right:calc(var(--tt-g,24px) + env(safe-area-inset-right,0px))!important}
-.blk[data-type="totop"].nb-tt-fixed[data-tt-p$="c"]{left:50%!important;transform:translateX(-50%)!important}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p$="r"]{--nb-clear:var(--nb-clear-r,0px);right:calc(var(--tt-g,24px) + env(safe-area-inset-right,0px))!important}
+.blk[data-type="totop"].nb-tt-fixed[data-tt-p$="c"]{--nb-clear:var(--nb-clear-c,0px);left:50%!important;transform:translateX(-50%)!important}
 .blk[data-type="totop"].nb-tt-fixed[data-tt-off]{opacity:0!important;visibility:hidden;pointer-events:none;translate:0 10px}
 @media (prefers-reduced-motion:reduce){.blk[data-type="totop"].nb-tt-fixed{transition:none}}
 /* Scroll to top, editor: the button floats at its chosen corner the moment it is added (default bottom right), clear of the editor's own corner buttons. The published page keeps using .nb-tt-fixed above. */
@@ -15498,7 +15530,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   // classicSettleBlock's recentering — that recentering only makes sense
   // right after a resize, where a block left alone on its row should
   // recenter at its new span. classicSwapBlocks() below always hands this
-  // a deliberately chosen column (the other block's former one), so this
+  // a deliberately chosen column (its own, or the other block's former one in the same row), so this
   // should only move it if it's actually colliding with something it
   // wasn't swapped with (a row-mate neither block being swapped), never
   // just because it ended up alone on the row.
@@ -15519,7 +15551,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   // Trades two blocks' positions outright — dropping a block directly on
   // top of another (see classicSwapHitTest) swaps them instead of the
   // usual "find nearby free space" placement. Each block keeps its own
-  // width/span; only the row/col each currently occupies changes hands.
+  // width/span; only the row (and, within one row, the col) each currently occupies changes hands.
   // classicRowSlot (via classicResolveRowOverlap) is what keeps this safe
   // even when the two blocks being swapped have different spans, or when
   // either one's new row has other, uninvolved row-mates: it's the exact
@@ -15527,13 +15559,19 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   // doesn't fit at the other block's former column just gets nudged to
   // the nearest open run of columns in that row (or bumped to its own new
   // row) rather than left overlapping something.
+  // [2026-11-03 ??:?? | swap-keep-column] changed: a swap between two different rows (a vertical swap) now trades rows only, so each
+  // block keeps its own column and stays where it was horizontally. It used to trade columns as well, which put a centred block
+  // into the other block's column (usually 0) and left it aligned to the left. Two blocks in the same row (a horizontal swap)
+  // still trade columns.
   function classicSwapBlocks(a, other) {
     var aRow = a.dataset.row, aCol = a.dataset.col;
     var otherRow = other.dataset.row, otherCol = other.dataset.col;
     a.dataset.row = otherRow;
-    a.dataset.col = otherCol;
     other.dataset.row = aRow;
-    other.dataset.col = aCol;
+    if (String(aRow) === String(otherRow)) {
+      a.dataset.col = otherCol;
+      other.dataset.col = aCol;
+    }
     reorderClassicDom();
     // Resolve the other block first: it's the one that didn't initiate
     // the drag, so it has first claim on the slot it landed in.
@@ -18585,6 +18623,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         admin-overview-fresh the admin Overview numbers read live instead of from a 60 s cache (worker index.js)
         verified-dialog    tapping any tick opens an "About the tick" box: we can't tell whether a verified author or page is genuine (app, and the page tick through the Worker)
         discoverable-setting the Teams switch "Anyone can find this page": off keeps the page out of Stories, other people's Subscribed feeds and the author's previous/next pages (worker index.js and this app)
+        floating-nav       the reader's Floating page arrows setting (arrows and list as a fading bar at the bottom centre) and keeping the scroll to top button clear of the comments button and that bar (worker index.js and this app)
         page-list          the list button between the chevrons: a Recent pages sheet (search, rows laid out like comments, the comments sheet's fixed look), Back handling, and the Settings switch that hides arrows and list (worker index.js and this app)
         page-nav           the previous / next chevrons under Report an issue on a page opened in the app's viewer (worker index.js and this app)
         verified-names     invited names only one email can claim, with a verified tick on the published page (worker index.js and this app)
@@ -18600,6 +18639,124 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         guide-text         the wording of the Write, Share and About sheets and keeping it in step with the add bar and with what Share mode offers
         plain-words        swapping builder jargon (marquee, footer, chevron) for everyday words in what people read
         legal-find         the Find in page box in the Privacy, Terms, About and Write / Share sheets: marks matches, next and previous, "3 of 12" (app only)
+        ad-loosen          loosening Publish as Ad: any published page can be an ad, the only content rule left is no images uploaded from the device (worker index.js and this app)
+        invite-alert       an alert at sign-in telling an invited email it has been invited to a verified name (worker index.js)
+        swap-keep-column   a vertical drag swap in the editor trades rows only, so each block keeps its column and a centred block stays centred (this app)
+
+     SESSION 2026-11-03 ??:?? | topics: swap-keep-column | AI: Claude (app) | Vertical swap no longer shifts a block to the left
+       Start state
+         Uploaded outputs of the invite-alert session. classicSwapBlocks traded both row and column between the two blocks. The clock tool did not answer, so no time is stamped here.
+       Work done
+         classicSwapBlocks trades rows only when the two blocks are in different rows, so each keeps its own column. Two blocks in one row still trade columns. [2026-11-03 ??:?? | swap-keep-column]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         A centred block swapped with a wider block took that block's column, usually 0, and sat on the left. This is the reported bug. It came from trading columns across rows.
+       Found
+         Nothing else.
+       Important details
+         The existing overlap step (classicResolveRowOverlap) still runs after a swap and nudges a block only if it now collides with a row-mate. Rejected: recentering after the swap, which would move blocks that were placed on purpose.
+       Removed
+         Nothing.
+       Untested
+         Not run in the editor. Both inline scripts of the app pass node --check, but the editor script is a template string, so open a note and drag-swap a centred block with a full-width one, then a block beside another in the same row. Also check undo.
+       Depends on
+         Nothing in the Worker. Privacy, Terms and TECH_NOTES untouched.
+       Final state
+         classicSwapBlocks: different rows swap rows only, the same row swaps columns, then both blocks run classicResolveRowOverlap.
+       Next
+         Check the Untested list, and stamp the time on the swap-keep-column stamps if wanted.
+
+     SESSION 2026-11-03 10:49 to 10:52 | topics: invite-alert | AI: Claude (app) | Alert for an invited email at sign-in
+       Start state
+         Uploaded outputs of the earlier ad-loosen session. An invited email only found out about its verified name when it tried to publish to it and was let in or refused.
+       Work done
+         New alertInvitedNames in the Worker, called by handleGoogleAuth after the invite code step. A verified sign-in email that matches an unclaimed, unexpired invitation gets an alert of kind name_invite naming the address and saying how long the invitation lasts. [2026-11-03 10:50 | invite-alert]
+         TECH_NOTES section Alerts: Invited to a verified name. [2026-11-03 10:50 | invite-alert]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing outside the task.
+       Found
+         There is no email to account lookup, so an invitation made for someone who is already signed in alerts at their next sign-in, not at once. Not changed.
+       Important details
+         One alert per invitation (ref is name plus invitation date). Rejected: alerting on every sign-in, which would repeat. Unverified emails get no alert, since they cannot claim the name until they verify.
+         The app needed no change: alerts show the Worker's message as written, and name_invite is not a tap kind.
+       Removed
+         Nothing.
+       Untested
+         Not run or deployed. The Worker passes node --check. Not seen: the alert in the Alerts list after signing in with an invited email, the sign-in with no invitations, a second sign-in not alerting again.
+       Depends on
+         Deploy the Worker. Privacy, Terms and LEGAL_DEFAULTS untouched (no new data kind). TECH_NOTES updated.
+       Final state
+         handleGoogleAuth ends with alertInvitedNames. Alert kind name_invite, ref slug:invited_at, deduped for ALERT_RETENTION_MS.
+       Next
+         Check the Untested list with a test invitation.
+
+     SESSION 2026-11-03 10:44 to 10:46 | topics: ad-loosen, verified-dialog | AI: Claude (app) | Publish as Ad open to regular pages
+       Start state
+         Uploaded index.html (app) and index.js (Worker). An ad had to carry the attribution line exactly once and no other text or captions, have at most two images, and every image had to be linked from Wikipedia or Wikimedia. The app check (nbAdCheckEligibility) mirrored the Worker check (validateAdEligibility).
+       Work done
+         Any published page can be an ad. The only content rule left is no image uploaded from the device (a src starting with data:). A linked image can come from any website. [2026-11-03 10:44 | ad-loosen]
+         Worker validateAdEligibility and app nbAdCheckEligibility now read only images, voice notes, polls, text boxes (and payment blocks in the app) and embeds. [2026-11-03 10:44 | ad-loosen]
+         Privacy, Terms, the Publish as Ad help line and the Worker's LEGAL_DEFAULTS reworded to match, and a line added that the website hosting an ad's image can see when the ad is shown. TECH_NOTES has a new section, Consumer Terms: Advertising (Publish as Ad). [2026-11-03 10:44 | ad-loosen]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing outside the task.
+       Found
+         The app refuses payment blocks in an ad but the Worker does not check for them. Not changed. The Terms do not mention text boxes or payment blocks as refused. Not changed.
+         The sample page near line 13812 still has the old attribution line as a text block. It is sample content, not a rule, so it was left alone.
+       Important details
+         Kept the refusal of voice notes, polls, text boxes, payment blocks and non-editor embeds because the task named only images uploaded from the device. Rejected: dropping them too, since an ad is shown full screen to other people and must not collect votes, messages or payments.
+         A linked image must still parse as a web address (invalid-image-src). Rejected: removing it, since a src that is not an address cannot load.
+         The effective date of the Privacy Policy and Terms was already 3 November 2026, so it was not changed.
+       Removed
+         Worker: AD_ATTRIBUTION_TEXT, AD_ALLOWED_IMAGE_HOST_SUFFIXES, AD_ALLOWED_IMAGE_HOST_EXACT, isAllowedAdImageHost, AD_MAX_IMAGES, the text block and caption collection in validateAdEligibility, and the reasons missing-attribution, duplicate-attribution, added-text, added-caption, attribution-hidden-or-shrunk, too-many-images and non-wikimedia-image.
+         App: the same constants and reasons, AD_ELIGIBILITY_MESSAGES entries for them, nbAdCopyAttribution and the Copy required attribution text button.
+       Untested
+         Nothing was run on a phone or deployed. Both inline script sets of the app and the Worker pass node --check. Not seen: publishing an ad with a plain page, a linked image from another site and an uploaded image, on a phone.
+       Depends on
+         Deploy the Worker with the app: an old Worker would still refuse these pages. If a Privacy or Terms version was published from the admin Legal editor, people see that one, so publish the same words there. Privacy and Terms in the app and LEGAL_DEFAULTS were diffed after the change and are identical. Ads already running are only re-checked on their next edit.
+         About the tick dialog (nbVerifiedInfo): removed the sentence "Please use your own judgement." and rewrote the body in plain words, three short sentences, no semicolons or brackets. It is on-screen text only, so Privacy, Terms and TECH_NOTES are untouched. [2026-11-03 10:46 | verified-dialog]
+       Final state
+         validateAdEligibility returns ok unless the page has a data: image, an image src that is not an address, a voice note, a poll, a text box, or an embed from outside the five allowed hosts (or two on one platform). The app check adds payment blocks.
+       Next
+         Check the Untested list on a phone.
+
+     SESSION 2026-11-03 08:35 to 08:40 | topics: page-list, page-nav, floating-nav | AI: Claude (app) | Sheets without X, search clear button, drag to close, tick under the arrows, floating arrows, to-top clearance
+       Start state
+         Uploaded index.html (app) and index.js (Worker). Both the comments sheet (Worker COMMENTS_PAGE_JS) and the Recent pages sheet (#ap-sheet) had a close X at the right of the head. The footer row put the tick before the arrows on one line. The scroll to top block pinned itself at the bottom right at its own gap, the comments button at right .9rem, bottom 1.1rem.
+       Work done
+         Comments sheet and Recent pages sheet: head X removed (markup, CSS, the comments click handler). Close is by drag down, tap outside, Back or Escape. [2026-11-03 08:38 | page-list]
+         Recent pages search bar: clear X (#ap-clear) at the right, its icon 13px from the edge like the magnifier at the left, shown only while text is typed; nbApClear empties the box, shows every page and keeps focus. [2026-11-03 08:38 | page-list]
+         Recent pages sheet: drag to close (_nbApDragInit), a copy of the comments sheet's drag (start on the head or the list at the top, quarter of the height or 50px to close, springs back otherwise). Not from the search box or buttons. [2026-11-03 08:38 | page-list]
+         Footer: VERIFIED_TICK is now a column, arrows and list first, tick under them. The tick gets its gap only when the arrows show, so one alone leaves no empty space. [2026-11-03 08:38 | page-nav]
+         Settings > Appearance > Floating page arrows (floatPageNav, off by default, kept on the phone). The app sends float in the nb-nav message; the page's FOOT_SCRIPT moves the arrows into a transparent fixed bar at the bottom centre (bottom 1.1rem, 38px high, so level with the comments button) that fades in on scroll, touch or wheel and out after the same 1.8 s / 5 s timings as the comments button. In that mode the footer keeps only the tick (row hidden if there is none). [2026-11-03 08:38 | floating-nav]
+         Scroll to top at the bottom right or bottom centre never sits lower than --nb-clear. The comments script sets --nb-clear-r (4.2rem) on the page and the floating bar sets --nb-clear-c, so the button rises above them. [2026-11-03 08:38 | floating-nav]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing outside the task.
+       Found
+         The X was at the top right in both sheets, not the top left. Page space pack prices are not in the code: the app shows the store price (RevenueCat priceString) and an earlier entry says "Prices not set". They have to be read in Play Console and RevenueCat.
+         Pages published before this change keep the to-top CSS they were published with, so they only clear the comments button once republished. The footer, comments sheet and floating bar come from the Worker and apply to every page at once.
+       Important details
+         To-top rises above the comments button (always, not only while the button shows) because a fixed height means nothing jumps when the button fades. Rejected: moving it sideways, which would run into the floating bar.
+         The floating bar has no background, as asked, so it takes the footer link colour with a faint shadow. On a busy picture it may be hard to read.
+         The setting is a reader setting kept on the phone, not the author's account switch Hide arrows and list under my pages. That switch still hides them everywhere.
+       Removed
+         #ap-close (button and its two CSS rules), #nb-cm-close (button, CSS rules and its click handler). The nb-cm-close message the app can send to the comments frame stays.
+       Untested
+         Nothing was run on a phone. Both inline scripts of the app pass node --check, the Worker passes node --check, and the generated FOOT_SCRIPT, VERIFIED_TICK and COMMENTS_PAGE_JS were parsed in Node. Not seen: the drag on a real touch screen, the floating bar over a real page, the to-top button above the comments button at 390 px, Light, Night and Pink for the clear X.
+       Depends on
+         Deploy the Worker with the app: the app sends float, and an old Worker ignores it. Privacy, Terms and TECH_NOTES untouched: nothing new is collected or kept.
+       Final state
+         Sheet ids: ap-overlay, ap-sheet, ap-hdr-title, ap-search-input, ap-clear, ap-body, ap-list, ap-status (ap-close is gone). Setting key floatPageNav. Message nb-nav: prev, next, list, off, float. CSS variables --nb-clear-r and --nb-clear-c, used by the to-top block through --nb-clear.
+       Next
+         Check the Untested list on a phone, and read the pack prices in Play Console and RevenueCat.
+
+     [2026-11-03 08:43 | page-space-balance] Added to the 08:35 session: Settings > Page space showed two lines side by side when "Pages using page space" was missing (the balance row's bottom line and the buy part's top line). The balance row's line is gone; the held part draws its own line only when it has the button, so there is always one line between parts. Light, Night and Pink use the same --st-line. Spacing then made even: .8rem above and below every line (the held button's bottom margin and the buy part's .9rem top margin are gone; #st-space lost its st-sep class and has its own line rule). [2026-11-03 08:44 | page-space-balance] Not seen on a phone.
 
      SESSION 2026-11-03 07:22 to 07:56 | topics: page-space-balance, session-guide | AI: Claude (app) | Settings Page space card, its dialogs and wording
        Start state
@@ -29279,7 +29436,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 /* ===================== Settings ===================== */
 (function () {
   const KEY = 'nb_settings_v1';
-  const DEF = { sort: 'default', images: true, stories: true, myStories: 'first', tips: true, startOn: 'library', confirmDelete: true, resetSource: 'saved', syncEvery: 20, reduceMotion: null, glassMode: true, pauseSweep: false, mediaSwipe: true, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false, msgAlways: false };
+  const DEF = { sort: 'default', images: true, stories: true, myStories: 'first', tips: true, startOn: 'library', confirmDelete: true, resetSource: 'saved', syncEvery: 20, reduceMotion: null, glassMode: true, pauseSweep: false, mediaSwipe: true, floatPageNav: false, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false, msgAlways: false };
   let S = null, lastPoll = 0;
   function load() {
     try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
@@ -29347,6 +29504,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'sw', k: 'glassMode', l: 'Glass mode', s: 'Frosted, see-through bars, cards and sheets over a soft colour wash. Off keeps the classic solid look.' },
       { t: 'sw', k: 'pauseSweep', needsGlass: true, l: 'Pause moving background', s: 'Stops the moving background colours where they are. Turn off to continue. Try it if you see glitches, flickering, or parts of the screen missing, or if the app feels slow.', after: () => { try { if (window.nbWashUserPause) window.nbWashUserPause(!!window._nbSt('pauseSweep')); } catch (e) {} } },
       { t: 'sw', k: 'reduceMotion', l: 'Reduce motion', s: 'Fewer animations and transitions. Starts on if your phone has animations turned off.' },
+      // [2026-11-03 08:38 | floating-nav] Reader setting, kept on this phone. Sent to a published page with the arrows message (nb-nav float).
+      { t: 'sw', k: 'floatPageNav', l: 'Floating page arrows', s: 'Show the previous and next arrows and the list button as a see-through bar at the bottom of the page, next to the comments button, instead of under the page. The bar fades away when you stop scrolling.' },
       { t: 'sw', k: 'hideDashes', l: 'Hide Media sidebar icon', s: 'Hide the sidebar icon at the left of the Library screen\u2019s header, next to the title. Tapping the Library title still opens Media.' }]],
     ['Library', [
       { t: 'chips', k: 'sort', l: 'Sort notes', o: [['default', 'Default'], ['edited', 'Recently edited'], ['newest', 'Newest'], ['oldest', 'Oldest'], ['az', 'A\u2013Z']] },
@@ -29549,22 +29708,40 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
     });
     parents.forEach(p => p.normalize());
   }
+  // [2026-11-03 08:54 | legal-find] changed: matches the text of a whole block, so a phrase that crosses bold text or a link is found. Each match can be several <mark> pieces, and s.marks holds one list of pieces per match. Text in different blocks never joins (a separator stands between them), and script and style text is skipped.
   function mark(body, re) {
-    const out = [], nodes = [], w = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null);
-    let n; while ((n = w.nextNode())) nodes.push(n);
+    const nodes = [], w = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null);
+    let n; while ((n = w.nextNode())) { const pe = n.parentNode && n.parentNode.nodeName; if (pe === 'SCRIPT' || pe === 'STYLE') continue; nodes.push(n); }
+    const BLK = 'p,li,h1,h2,h3,h4,h5,h6,div,td,th,tr,section,ul,ol,table,blockquote';
+    let joined = '', lastBlk = null; const starts = [];
     nodes.forEach(t => {
-      const s = t.nodeValue; re.lastIndex = 0;
-      let m, last = 0, frag = null;
-      while ((m = re.exec(s))) {
-        if (!m[0]) { re.lastIndex++; continue; }
-        if (!frag) frag = document.createDocumentFragment();
-        if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index)));
-        const mk = document.createElement('mark'); mk.className = 'lg-mk'; mk.textContent = m[0];
-        frag.appendChild(mk); out.push(mk); last = m.index + m[0].length;
-      }
-      if (frag) { if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last))); t.parentNode.replaceChild(frag, t); }
+      const b = t.parentNode && t.parentNode.closest ? t.parentNode.closest(BLK) : null;
+      if (joined && b !== lastBlk) joined += '\u0001';
+      lastBlk = b; starts.push(joined.length); joined += t.nodeValue;
     });
-    return out;
+    const matches = []; let m; re.lastIndex = 0;
+    while ((m = re.exec(joined))) { if (!m[0]) { re.lastIndex++; continue; } matches.push([m.index, m.index + m[0].length]); }
+    const per = nodes.map(() => []); let ni = 0;
+    matches.forEach((mt, mi) => {
+      while (ni < nodes.length && starts[ni] + nodes[ni].nodeValue.length <= mt[0]) ni++;
+      for (let j = ni; j < nodes.length && starts[j] < mt[1]; j++) {
+        const from = Math.max(mt[0], starts[j]) - starts[j], to = Math.min(mt[1], starts[j] + nodes[j].nodeValue.length) - starts[j];
+        if (to > from) per[j].push({ from, to, mi });
+      }
+    });
+    const out = matches.map(() => []);
+    nodes.forEach((t, j) => {
+      if (!per[j].length) return;
+      const text = t.nodeValue, frag = document.createDocumentFragment(); let last = 0;
+      per[j].forEach(p => {
+        if (p.from > last) frag.appendChild(document.createTextNode(text.slice(last, p.from)));
+        const mk = document.createElement('mark'); mk.className = 'lg-mk'; mk.textContent = text.slice(p.from, p.to);
+        frag.appendChild(mk); out[p.mi].push(mk); last = p.to;
+      });
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      t.parentNode.replaceChild(frag, t);
+    });
+    return out.filter(a => a.length);
   }
   function ui(kind) {
     const c = KINDS[kind], s = st[kind], n = s.marks.length, q = s.q.trim();
@@ -29576,10 +29753,10 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
   function go(kind, i) {
     const s = st[kind], n = s.marks.length, body = $(KINDS[kind].body);
     if (!n || !body) return;
-    if (s.marks[s.cur]) s.marks[s.cur].classList.remove('on');
+    if (s.marks[s.cur]) s.marks[s.cur].forEach(x => x.classList.remove('on'));
     s.cur = ((i % n) + n) % n;
-    const m = s.marks[s.cur]; m.classList.add('on');
-    const b = body.getBoundingClientRect(), r = m.getBoundingClientRect();
+    const ms = s.marks[s.cur]; ms.forEach(x => x.classList.add('on'));
+    const b = body.getBoundingClientRect(), r = ms[0].getBoundingClientRect();
     body.scrollTop += (r.top - b.top) - (body.clientHeight - r.height) / 2;
     ui(kind);
   }
@@ -30234,7 +30411,7 @@ async function _pgSizeBuy(tier, pkg) {
     ctx.info.shortMb = short;
     _nbSpWho(); _nbSp.mb = ctx.info.balanceMb; _nbSp.at = Date.now();
     if (short) { showToast(_nbSpMbText(tier.mb) + ' added, but this page still needs ' + _nbSpMbText(short) + ' more.'); }
-    else { done = true; showToast(_nbSpMbText(tier.mb) + ' added to your page space balance. Tap ' + again + ' again.'); }
+    else { done = true; showToast(_nbSpMbText(tier.mb) + ' added to your page space. Tap ' + again + ' again.'); } // [2026-11-03 08:54 | page-space-balance] changed: no "balance" on screen (WORK LOG GUIDE 4B)
   } catch (e) {
     _nbLog('page size purchase', e);
     showToast('Purchase failed' + _nbFailureReason(e));
@@ -30258,7 +30435,7 @@ function _nbSettingsSpaceMount() {
   const root = document.getElementById('st-root'); if (!root || !nbIsSignedIn()) return;
   const before = Array.from(root.querySelectorAll('.st-grp')).find(x => { const h = x.querySelector('.st-h'); return h && h.textContent === 'Account'; });
   const g = document.createElement('div'); g.className = 'st-grp'; g.id = 'st-space-grp';
-  g.innerHTML = '<div class="st-h">Page space</div><div class="st-card" id="st-space-card"><div id="st-space-bal"></div><div id="st-space-held"></div><div id="st-space" class="st-sep"></div></div>';
+  g.innerHTML = '<div class="st-h">Page space</div><div class="st-card" id="st-space-card"><div id="st-space-bal"></div><div id="st-space-held"></div><div id="st-space"></div></div>';
   if (before) root.insertBefore(g, before); else root.appendChild(g);
   _nbSpacePaint();
   _nbSpaceFetch(false);
@@ -30268,12 +30445,12 @@ function _nbSpacePaint() {
   const balEl = document.getElementById('st-space-bal'), heldEl = document.getElementById('st-space-held'), host = document.getElementById('st-space');
   if (!balEl || !heldEl || !host) return; // Settings isn't showing
   const st = _nbSpWho();
-  balEl.innerHTML = '<span class="ad-prog-s">Page space balance</span><b></b>';
+  balEl.innerHTML = '<span class="ad-prog-s">Page space you have</span><b></b>';
   balEl.lastChild.textContent = st.mb === null ? '—' : _nbSpMbText(st.mb);
   heldEl.innerHTML = '';
   if (st.held && st.held.length) {
     const total = st.held.reduce((n, h) => n + h.mb, 0);
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'st-fund-btn'; b.style.cssText = 'width:100%;flex:none;margin-bottom:.8rem';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'st-fund-btn'; b.style.cssText = 'width:100%;flex:none';
     b.appendChild(document.createTextNode('Pages using page space'));
     const sm = document.createElement('small'); sm.textContent = st.held.length + (st.held.length === 1 ? ' page, ' : ' pages, ') + _nbSpMbText(total); b.appendChild(sm);
     b.onclick = () => nbOpenPageHeld();
@@ -30299,7 +30476,7 @@ async function nbSpaceFund(tier, pkg) {
     if (r.cancelled) return;
     if (!r.confirmed) { showToast('Purchase is still confirming. Your balance will update shortly.'); _nbSp.at = 0; _nbSpaceFetch(true); return; }
     _nbSpWho(); _nbSp.mb = Math.max(0, Math.floor(r.balance)); _nbSp.at = Date.now();
-    showToast(_nbSpMbText(tier.mb) + ' added to your page space balance.');
+    showToast(_nbSpMbText(tier.mb) + ' added to your page space.'); // [2026-11-03 08:54 | page-space-balance] changed: no "balance" on screen
   } catch (e) {
     _nbLog('settings space', e);
     showToast('Purchase failed' + _nbFailureReason(e));
@@ -34776,12 +34953,13 @@ function _nbAskResurfaceStories() {
 // [2026-11-02 23:15 | verified-dialog] Tapping any tick (a card, the stories strip, the viewer header, or the tick under Report an issue on a page) opens this box. It uses the shared confirm dialog in its one-button mode,
 // so it follows Light, Night, Pink and glass mode like every other box. The words are plain on purpose: a tick is not a promise that someone or something is real.
 let _nbVerifiedInfoOpen = false;
+// [2026-11-03 10:46 | verified-dialog] changed: dialog words rewritten in plain words (WORK LOG GUIDE 4B); the line asking people to use their own judgement is gone.
 function nbVerifiedInfo(ev) {
   if (ev) { try { ev.stopPropagation(); ev.preventDefault(); } catch (e) {} } // the tick sits inside tappable cards and strip circles: it must not also open the note
   if (_nbVerifiedInfoOpen) return;
   _nbVerifiedInfoOpen = true;
   document.body.classList.add('nb-tick-dlg');
-  _nbAskConfirm('About the tick', 'We can\u2019t tell whether a verified author or page is genuine. The tick only means we saw the account sign in with the email we invited. It doesn\u2019t mean we know who they are, or that what they say is true or safe. Please use your own judgement.', 'Got it', undefined, undefined, false, true, true)
+  _nbAskConfirm('About the tick', 'A tick can show next to an author or a page. It means the account signed in with the email we invited. We can\u2019t check who is behind it, so it doesn\u2019t mean they are who they say or that what they share is true or safe.', 'Got it', undefined, undefined, false, true, true)
     .then(() => {}, () => {}).then(() => { _nbVerifiedInfoOpen = false; document.body.classList.remove('nb-tick-dlg'); });
 }
 // Generic yes/no on the same shared dialog, so it follows the Light/Night/Pink theme like every other
@@ -36836,7 +37014,7 @@ async function _nbStoryNavSend(src) {
   try {
     const d = await _nbStoryNavLoad(slug);
     if (_nbCurrentStorySlug !== slug || !_nbStoryNavFrameOk(src)) return;
-    src.postMessage(d.off ? { type: 'nb-nav', off: true } : { type: 'nb-nav', prev: !!d.prev, next: !!d.next, list: !!(d.prev || d.next) }, '*'); // [2026-11-03 04:24 | page-list]
+    src.postMessage(d.off ? { type: 'nb-nav', off: true } : { type: 'nb-nav', prev: !!d.prev, next: !!d.next, list: !!(d.prev || d.next), float: !!window._nbSt('floatPageNav') }, '*'); // [2026-11-03 04:24 | page-list] [2026-11-03 08:38 | floating-nav] changed: float is the reader's Floating page arrows setting
   } catch (e) { _nbLog('story nav', e); } // no answer: the chevrons stay hidden
 }
 function _nbStoryNavGo(src, dir) {
@@ -36859,6 +37037,7 @@ function nbAuthorPagesOpen() {
   if (_nbAp.slug !== slug) _nbAp = { slug, pages: [], cursor: null, done: false, loading: false, err: false, q: '', auto: 0, gen: _nbAp.gen + 1, author: '' };
   _nbAp.q = ''; _nbAp.auto = 0;
   const inp = document.getElementById('ap-search-input'); if (inp) inp.value = '';
+  _nbApClearBtn(); _nbApDragInit();
   _nbApTitle();
   document.getElementById('ap-overlay').classList.add('open');
   const body = document.getElementById('ap-body'); if (body) body.scrollTop = 0;
@@ -36867,8 +37046,70 @@ function nbAuthorPagesOpen() {
 }
 function nbAuthorPagesClose() {
   const o = document.getElementById('ap-overlay'); if (!o) return;
-  o.classList.remove('open');
+  o.classList.remove('open'); _nbApDragReset();
   const inp = document.getElementById('ap-search-input'); if (inp) inp.blur();
+}
+// [2026-11-03 08:38 | page-list] The search bar's X: shown while the box has text; a tap empties it, shows every page again and keeps the keyboard up.
+function _nbApClearBtn() { const f = document.getElementById('ap-field'), i = document.getElementById('ap-search-input'); if (f && i) f.classList.toggle('ap-has-q', !!i.value); }
+function nbApClear() { const i = document.getElementById('ap-search-input'); if (!i) return; i.value = ''; nbApSearch(''); i.focus(); }
+// [2026-11-03 08:38 | page-list] Drag down to close, copied from the comments sheet (COMMENTS_PAGE_JS in the Worker): a downward drag that starts on the head or on the list while it is scrolled to the top pulls the sheet and fades the scrim; past a quarter of its height (or 50px) it slides away and closes, otherwise it springs back. Not from the search box.
+let _nbApDragOn = false;
+function _nbApDragReset() { const o = document.getElementById('ap-overlay'), b = document.getElementById('ap-sheet'); if (b) b.style.transform = b.style.transition = ''; if (o) o.style.background = o.style.transition = ''; }
+function _nbApDragInit() {
+  if (_nbApDragOn) return;
+  const ov = document.getElementById('ap-overlay'), box = document.getElementById('ap-sheet'), body = document.getElementById('ap-body');
+  if (!ov || !box || !body) return;
+  _nbApDragOn = true;
+  let dg = null, startY = 0;
+  box.addEventListener('touchstart', e => {
+    dg = null;
+    if (!_nbApIsOpen() || e.touches.length !== 1) return;
+    const t = e.target;
+    if (t.closest && t.closest('input,button')) return;
+    if (body.contains(t) && body.scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    dg = { h: box.offsetHeight, dy: 0, on: false };
+  }, { passive: true });
+  box.addEventListener('touchmove', e => {
+    if (!dg) return;
+    const dy = e.touches[0].clientY - startY;
+    if (!dg.on) {
+      if (dy < -4) { dg = null; return; }
+      if (dy <= 4) return;
+      dg.on = true; box.style.transition = 'none'; ov.style.transition = 'none';
+      const i = document.getElementById('ap-search-input'); if (i && document.activeElement === i) i.blur();
+    }
+    dg.dy = Math.max(0, dy);
+    box.style.transform = 'translateY(' + dg.dy + 'px)';
+    ov.style.background = 'rgba(20,20,24,' + (.5 * Math.max(0, 1 - dg.dy / dg.h)) + ')';
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+  const end = () => {
+    if (!dg) return;
+    const g = dg; dg = null;
+    if (!g.on) return;
+    box.style.transition = 'transform .25s cubic-bezier(.4,0,.2,1)';
+    ov.style.transition = 'background .25s ease';
+    if (g.dy > g.h * .25 || g.dy > 50) {
+      box.style.transform = 'translateY(' + g.h + 'px)';
+      ov.style.background = 'rgba(20,20,24,0)';
+      setTimeout(nbAuthorPagesClose, 250);
+    } else {
+      box.style.transform = 'translateY(0)';
+      ov.style.background = 'rgba(20,20,24,.5)';
+      setTimeout(_nbApDragReset, 260);
+    }
+  };
+  box.addEventListener('touchend', end, { passive: true });
+  box.addEventListener('touchcancel', end, { passive: true });
+  // Keep the page behind from scrolling while the sheet is open, except inside the list when it is long enough to scroll.
+  ov.addEventListener('touchmove', e => {
+    if (dg && dg.on) return;
+    const t = e.target;
+    if (t.closest && t.closest('input')) return;
+    if (body.contains(t) && body.scrollHeight > body.clientHeight) return;
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
 }
 function _nbApTitle() { const t = document.getElementById('ap-hdr-title'); if (t) t.textContent = _nbAp.author ? 'Pages by ' + _nbAp.author : 'Recent pages'; }
 function _nbApMatches(s, q) {
@@ -36911,7 +37152,7 @@ function _nbApNearEnd() {
   if (b.scrollHeight - b.scrollTop - b.clientHeight < 500) _nbApLoad();
 }
 function nbApSearch(v) {
-  _nbAp.q = String(v || '').trim().toLowerCase(); _nbAp.auto = 0;
+  _nbAp.q = String(v || '').trim().toLowerCase(); _nbAp.auto = 0; _nbApClearBtn();
   _nbApRender();
   if (_nbAp.q && !_nbAp.done && !_nbAp.loading && !_nbAp.err) _nbApLoad();
 }
@@ -39947,6 +40188,10 @@ function _pubCopyUrl() {
 }
 
 /* ===================== Publish as Ad ===================== */
+// [2026-11-03 10:44 | ad-loosen] changed: any published page can be an ad now. The only content rule left is no images uploaded
+// from the device (data: URIs); images may be linked from any website. Gone: the attribution notice and its copy button, the no
+// added text or captions rule, the two image cap and the Wikipedia/Wikimedia host list. Voice notes, polls, text boxes, payment
+// blocks and the embed host list still apply.
 // Mirrors the worker's validateAdEligibility (see note-publish-worker's
 // index.js) as closely as a browser DOMParser allows, so the tab can block
 // submission with a specific reason instead of round-tripping to the
@@ -39954,14 +40199,6 @@ function _pubCopyUrl() {
 // every publish/update regardless — this copy is a UX convenience only,
 // never the actual gate, so the two are deliberately kept logically
 // identical rather than "close enough".
-const AD_ATTRIBUTION_TEXT = "All third-party trademarks, service marks, logos, and brand names appearing in advertisements or on this platform are the property of their respective owners.";
-const AD_MAX_IMAGES = 2;
-const AD_ALLOWED_IMAGE_HOST_SUFFIXES = ['.wikimedia.org', '.wikipedia.org'];
-const AD_ALLOWED_IMAGE_HOST_EXACT = new Set(['wikimedia.org', 'wikipedia.org']);
-function _adAllowedImageHost(host) {
-  if (AD_ALLOWED_IMAGE_HOST_EXACT.has(host)) return true;
-  return AD_ALLOWED_IMAGE_HOST_SUFFIXES.some(suffix => host.endsWith(suffix));
-}
 // Mirrors the worker's AD_ALLOWED_EMBED_HOSTS — see that file for why this
 // is an exact host match (the src is always generated by our own parsers,
 // never typed in by hand). Write and Share ads allow the same five hosts.
@@ -39978,46 +40215,16 @@ function nbAdCheckEligibility(html) {
   try { doc = new DOMParser().parseFromString(html, 'text/html'); }
   catch (e) { return { ok: false, reason: 'parse-failed' }; }
   const kind = doc.querySelector('meta[name="nb-kind"][content="share"]') ? 'share' : 'write';
-  const nonBlankBlocks = Array.from(doc.querySelectorAll('.blk[data-type="text"]'))
-    .map(el => (el.textContent || '').replace(/\s+/g, ' ').trim())
-    .filter(t => t.length > 0);
-  const attributionOccurrences = nonBlankBlocks.filter(t => t === AD_ATTRIBUTION_TEXT).length;
-  const strayText = nonBlankBlocks.filter(t => t !== AD_ATTRIBUTION_TEXT);
-  if (attributionOccurrences === 0) return { ok: false, reason: 'missing-attribution' };
-  if (attributionOccurrences > 1) return { ok: false, reason: 'duplicate-attribution' };
-  if (strayText.length > 0) return { ok: false, reason: 'added-text' };
-  // Same for captions on image/video/social blocks: blank lines only.
-  // data-placeholder="true" is now the reliable "never actually edited"
-  // signal (cleared on input, not on blur). The literal-"Caption" match is
-  // kept only as a fallback for notes saved before that fix, where the
-  // attribute could already be stripped despite no real edit.
-  const hasCaptionText = Array.from(doc.querySelectorAll('.blk-caption figcaption'))
-    .some(el => {
-      if (el.getAttribute('data-placeholder') === 'true') return false;
-      const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      return t.length > 0 && t !== 'Caption';
-    });
-  if (hasCaptionText) return { ok: false, reason: 'added-caption' };
-  // Same best-effort hidden/shrunk check the worker does on the raw markup
-  // (no computed-style engine available server-side, so this stays
-  // pattern-based here too rather than trying to be smarter).
-  const attrBlockMatch = html.match(/<[^>]*data-type="text"[^>]*>(?:(?!<\/div>)[\s\S])*?All third-party trademarks[\s\S]*?<\/div>/);
-  if (attrBlockMatch) {
-    const hiddenPattern = /(display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0*)?\s*[;"']|font-size\s*:\s*[0-9](?:px)?\s*[;"'])/i;
-    if (hiddenPattern.test(attrBlockMatch[0])) return { ok: false, reason: 'attribution-hidden-or-shrunk' };
-  }
   const imageSrcs = Array.from(doc.querySelectorAll('.blk-img img')).map(img => img.getAttribute('src') || '');
   if (doc.querySelector('.blk[data-type="audio"]')) return { ok: false, reason: 'device-voice-note' };
   if (doc.querySelector('.blk[data-type="poll"]')) return { ok: false, reason: 'poll-not-allowed' };
   if (doc.querySelector('.blk[data-type="textbox"]')) return { ok: false, reason: 'textbox-not-allowed' };
   if (doc.querySelector('.blk[data-type="pay"]')) return { ok: false, reason: 'pay-not-allowed' };
-  if (imageSrcs.length > AD_MAX_IMAGES) return { ok: false, reason: 'too-many-images' };
+  // No images uploaded from the device (they are stored as data: URIs). A linked image can come from any website.
   for (const src of imageSrcs) {
     if (!src) continue;
     if (/^data:/i.test(src)) return { ok: false, reason: 'device-image' };
-    let host;
-    try { host = new URL(src).hostname.toLowerCase(); } catch (e) { return { ok: false, reason: 'invalid-image-src' }; }
-    if (!_adAllowedImageHost(host)) return { ok: false, reason: 'non-wikimedia-image' };
+    try { new URL(src); } catch (e) { return { ok: false, reason: 'invalid-image-src' }; }
   }
   // Video/social embeds must be one of the hosts our own editor generates —
   // see AD_ALLOWED_EMBED_HOSTS above. Also caps each platform at one embed; each allowed host maps to
@@ -40039,27 +40246,17 @@ function nbAdCheckEligibility(html) {
 const AD_NOT_ELIGIBLE_TOAST = 'Not eligible to run as an ad. Check the requirements above.';
 const AD_CHECK_FAILED_MSG = 'Couldn\u2019t check ad eligibility';
 const AD_ELIGIBILITY_MESSAGES = {
-  'missing-attribution': 'Add a Text block with the trademark-attribution sentence (tap "Copy required attribution text" below, then paste it in), unedited.',
-  'duplicate-attribution': 'The attribution line appears more than once. Keep exactly one.',
-  'added-text': 'Remove any other text blocks. Only the attribution line is allowed.',
-  'added-caption': 'Remove any captions from images, media and posts. Ads can\u2019t have caption text.',
-  'attribution-hidden-or-shrunk': 'The attribution block can\u2019t be hidden or shrunk.',
-  'too-many-images': `Only up to ${AD_MAX_IMAGES} images are allowed.`,
-  'device-image': 'Remove any device-uploaded photo. Only linked Wikipedia/Wikimedia images are allowed.',
+  'device-image': 'Remove any photo uploaded from your device. Images must be linked from a website.',
   'device-voice-note': 'Remove any voice notes. Ads can\u2019t include recordings made on your device.',
   'poll-not-allowed': 'Remove any polls. Ads can\u2019t collect votes.',
   'textbox-not-allowed': 'Remove any text boxes. Ads can\u2019t collect messages.',
   'pay-not-allowed': 'Remove any payment blocks. Ads can\u2019t ask for payments.',
-  'non-wikimedia-image': 'Images must be linked from Wikipedia or Wikimedia Commons.',
   'invalid-image-src': 'One of the images has an invalid source.',
   'invalid-embed-src': 'One of the media/post embeds has an invalid source.',
   'non-allowed-embed': 'Media and posts must be added with the editor\u2019s own tools. Allowed: YouTube, Spotify, Instagram, X, and Streamable.',
   'duplicate-platform-embed': 'Only one embed per platform is allowed. Remove the extra one.',
   'parse-failed': AD_CHECK_FAILED_MSG
 };
-function nbAdCopyAttribution() {
-  nbCopyText(AD_ATTRIBUTION_TEXT).then(ok => showToast(ok ? 'Attribution text copied. Paste it into a new Text block.' : 'Couldn\u2019t copy the attribution text'));
-}
 
 // ---- Earned ad packages ----
 // The worker (AD_TIERS) decides what is unlocked and sends it in GET /ads/mine as `standing`; the app only shows it.
@@ -40581,8 +40778,7 @@ async function _pubRefreshAdTab() {
   if (elig.ok) {
     eligEl.innerHTML = '<p class="bkp-help" style="color:#2f8f4e">Eligible to run as an ad.</p>';
   } else {
-    eligEl.innerHTML = '<p class="bkp-help" style="color:#a83232">' + (AD_ELIGIBILITY_MESSAGES[elig.reason] || elig.reason) + '</p>'
-      + (elig.reason === 'missing-attribution' ? '<button class="ebtn-sec" onclick="nbAdCopyAttribution()">Copy required attribution text</button>' : '');
+    eligEl.innerHTML = '<p class="bkp-help" style="color:#a83232">' + (AD_ELIGIBILITY_MESSAGES[elig.reason] || elig.reason) + '</p>';
     // Ineligible: the "Buy a view package" panel has nothing actionable to
     // offer, so hide it right away rather than leaving a stale copy from a
     // previous open sitting under the reason (and through the offline/fetch
@@ -45371,8 +45567,8 @@ function _nbShortTimeAgo(ts) {
 /* ===================== Editor canvas ends exactly where the app nav begins ===================== */
 // The canvas iframe was sized with a magic number (100dvh - 110px) that assumes a 52px header and a 58px nav. Any difference
 // (taller header, home-indicator inset, a dynamic browser bar) left its bottom edge under the nav or short of it, so a Nav Bar
-// pinned to the bottom was hidden behind the app's nav or floated above it. EDIT MODE ONLY: preview and published/reader keep their sizing. Measure instead: the iframe stops at the nav's top edge,
-// so the pinned bar (with the page manager stacked directly above it) sits right on the app nav.
+// pinned to the bottom was hidden behind the app's nav or floated above it. Measure instead: the iframe stops at the nav's top edge,
+// so the pinned bar (with the page manager stacked directly above it) sits right on the app nav. Edit AND in-editor preview: the app nav stays visible in both, and a canvas running past its top edge shows through the frosted nav as a faded band. Published/reader keep their sizing.
 (function syncEditorFrameHeight() {
   const wrap = document.getElementById('markup-iframe-wrap');
   const ifr = document.getElementById('markup-iframe');
@@ -45384,9 +45580,7 @@ function _nbShortTimeAgo(ts) {
   function apply() {
     raf = 0;
     try {
-      let previewing = false;
-      try { const d = ifr && ifr.contentDocument, pg = d && d.querySelector('.cv-page'); previewing = !!(pg && pg.classList.contains('cv-preview')); } catch (e) {}
-      if (previewing || !scr.classList.contains('active') || document.body.classList.contains('reader-mode')) { wrap.style.removeProperty('--ed-h'); return; }
+      if (!scr.classList.contains('active') || document.body.classList.contains('reader-mode')) { wrap.style.removeProperty('--ed-h'); return; }
       const cs = getComputedStyle(nav);
       if (cs.display === 'none' || cs.visibility === 'hidden') return; // covered (Media) or hidden: keep the last fit
       const top = Math.max(wrap.getBoundingClientRect().top, hdr ? hdr.getBoundingClientRect().bottom : 0);
