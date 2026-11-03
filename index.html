@@ -4755,9 +4755,9 @@ body.night .step-chk.checked{background:#585858;border-color:#585858}
 body.pink .step-chk{border-color:#e8a0bc;background:#fff0f5}
 body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 /* [2026-11-03 06:43 | page-list] "Recent pages" sheet (opened by the list button under a page in the viewer). Same look as the comments sheet, value for value from COMMENTS_PAGE_CSS in the Worker: white sheet, #202122 text, #3366cc accent, 18px top corners, 520px wide, 86vh high, grey #8a8d99 small text. It follows no app theme: Light, Night, Pink and glass all show this one sheet, as the comments sheet does (it lives in the published page and knows no theme). The only part that depends on where it runs is the toast: this sheet only opens inside the app, so its notices use the app toast (showToast). */
-#ap-overlay{display:none;position:fixed;inset:0;z-index:9300;background:rgba(20,20,24,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);align-items:flex-end;justify-content:center;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;animation:apFade .18s ease}
+#ap-overlay{display:none;position:fixed;inset:0;z-index:9300;background:rgba(20,20,24,.5);align-items:flex-end;justify-content:center;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;animation:apFade .18s ease}
 #ap-overlay.open{display:flex}
-#ap-sheet{--px:20px;position:relative;width:100%;max-width:520px;height:min(86vh,700px);display:flex;flex-direction:column;background:#fff;color:#202122;border-radius:18px 18px 0 0;box-shadow:0 20px 50px rgba(20,20,40,.28);animation:apIn .22s ease;text-align:left}
+#ap-sheet{--px:20px;position:relative;will-change:transform;width:100%;max-width:520px;height:min(86vh,700px);display:flex;flex-direction:column;background:#fff;color:#202122;border-radius:18px 18px 0 0;box-shadow:0 20px 50px rgba(20,20,40,.28);animation:apIn .22s ease;text-align:left}
 /* [2026-11-03 08:38 | page-list] changed: no close button in the head (drag down or tap outside to close), so the head takes the drag like the comments sheet. */
 .ap-head{display:flex;align-items:center;gap:10px;padding:20px var(--px) 13px;touch-action:none}
 .ap-tile{flex:none;width:34px;height:34px;border-radius:10px;background:#eef2fc;display:flex;align-items:center;justify-content:center}
@@ -37054,7 +37054,7 @@ function _nbApClearBtn() { const f = document.getElementById('ap-field'), i = do
 function nbApClear() { const i = document.getElementById('ap-search-input'); if (!i) return; i.value = ''; nbApSearch(''); i.focus(); }
 // [2026-11-03 08:38 | page-list] Drag down to close, copied from the comments sheet (COMMENTS_PAGE_JS in the Worker): a downward drag that starts on the head or on the list while it is scrolled to the top pulls the sheet and fades the scrim; past a quarter of its height (or 50px) it slides away and closes, otherwise it springs back. Not from the search box.
 let _nbApDragOn = false;
-function _nbApDragReset() { const o = document.getElementById('ap-overlay'), b = document.getElementById('ap-sheet'); if (b) b.style.transform = b.style.transition = ''; if (o) o.style.background = o.style.transition = o.style.backdropFilter = o.style.webkitBackdropFilter = ''; }
+function _nbApDragReset() { const o = document.getElementById('ap-overlay'), b = document.getElementById('ap-sheet'); if (b) b.style.transform = b.style.transition = ''; if (o) o.style.background = o.style.transition = ''; }
 function _nbApDragInit() {
   if (_nbApDragOn) return;
   const ov = document.getElementById('ap-overlay'), box = document.getElementById('ap-sheet'), body = document.getElementById('ap-body');
@@ -37082,7 +37082,6 @@ function _nbApDragInit() {
     dg.dy = Math.max(0, dy);
     box.style.transform = 'translateY(' + dg.dy + 'px)';
     ov.style.background = 'rgba(20,20,24,' + (.5 * Math.max(0, 1 - dg.dy / dg.h)) + ')';
-    ov.style.backdropFilter = ov.style.webkitBackdropFilter = 'blur(' + (2 * Math.max(0, 1 - dg.dy / dg.h)) + 'px)'; // [2026-11-03 | page-list-close-glitch] the blur fades with the scrim instead of snapping off when the sheet closes
     if (e.cancelable) e.preventDefault();
   }, { passive: false });
   const end = () => {
@@ -37090,16 +37089,14 @@ function _nbApDragInit() {
     const g = dg; dg = null;
     if (!g.on) return;
     box.style.transition = 'transform .25s cubic-bezier(.4,0,.2,1)';
-    ov.style.transition = 'background .25s ease, backdrop-filter .25s ease, -webkit-backdrop-filter .25s ease';
+    ov.style.transition = 'background .25s ease';
     if (g.dy > g.h * .25 || g.dy > 50) {
       box.style.transform = 'translateY(' + (g.h + 60) + 'px)'; // [2026-11-03 | page-list-close-glitch] 60px further than the sheet, so its shadow (0 20px 50px) is off screen too and does not hang at the bottom edge
       ov.style.background = 'rgba(20,20,24,0)';
-      ov.style.backdropFilter = ov.style.webkitBackdropFilter = 'blur(0px)';
       setTimeout(nbAuthorPagesClose, 280);
     } else {
       box.style.transform = 'translateY(0)';
       ov.style.background = 'rgba(20,20,24,.5)';
-      ov.style.backdropFilter = ov.style.webkitBackdropFilter = 'blur(2px)';
       setTimeout(_nbApDragReset, 260);
     }
   };
