@@ -37054,7 +37054,7 @@ function _nbApClearBtn() { const f = document.getElementById('ap-field'), i = do
 function nbApClear() { const i = document.getElementById('ap-search-input'); if (!i) return; i.value = ''; nbApSearch(''); i.focus(); }
 // [2026-11-03 08:38 | page-list] Drag down to close, copied from the comments sheet (COMMENTS_PAGE_JS in the Worker): a downward drag that starts on the head or on the list while it is scrolled to the top pulls the sheet and fades the scrim; past a quarter of its height (or 50px) it slides away and closes, otherwise it springs back. Not from the search box.
 let _nbApDragOn = false;
-function _nbApDragReset() { const o = document.getElementById('ap-overlay'), b = document.getElementById('ap-sheet'); if (b) b.style.transform = b.style.transition = ''; if (o) o.style.background = o.style.transition = ''; }
+function _nbApDragReset() { const o = document.getElementById('ap-overlay'), b = document.getElementById('ap-sheet'); if (b) b.style.transform = b.style.transition = ''; if (o) o.style.background = o.style.transition = o.style.backdropFilter = o.style.webkitBackdropFilter = ''; }
 function _nbApDragInit() {
   if (_nbApDragOn) return;
   const ov = document.getElementById('ap-overlay'), box = document.getElementById('ap-sheet'), body = document.getElementById('ap-body');
@@ -37082,6 +37082,7 @@ function _nbApDragInit() {
     dg.dy = Math.max(0, dy);
     box.style.transform = 'translateY(' + dg.dy + 'px)';
     ov.style.background = 'rgba(20,20,24,' + (.5 * Math.max(0, 1 - dg.dy / dg.h)) + ')';
+    ov.style.backdropFilter = ov.style.webkitBackdropFilter = 'blur(' + (2 * Math.max(0, 1 - dg.dy / dg.h)) + 'px)'; // [2026-11-03 | page-list-close-glitch] the blur fades with the scrim instead of snapping off when the sheet closes
     if (e.cancelable) e.preventDefault();
   }, { passive: false });
   const end = () => {
@@ -37089,14 +37090,16 @@ function _nbApDragInit() {
     const g = dg; dg = null;
     if (!g.on) return;
     box.style.transition = 'transform .25s cubic-bezier(.4,0,.2,1)';
-    ov.style.transition = 'background .25s ease';
+    ov.style.transition = 'background .25s ease, backdrop-filter .25s ease, -webkit-backdrop-filter .25s ease';
     if (g.dy > g.h * .25 || g.dy > 50) {
-      box.style.transform = 'translateY(' + g.h + 'px)';
+      box.style.transform = 'translateY(' + (g.h + 60) + 'px)'; // [2026-11-03 | page-list-close-glitch] 60px further than the sheet, so its shadow (0 20px 50px) is off screen too and does not hang at the bottom edge
       ov.style.background = 'rgba(20,20,24,0)';
-      setTimeout(nbAuthorPagesClose, 250);
+      ov.style.backdropFilter = ov.style.webkitBackdropFilter = 'blur(0px)';
+      setTimeout(nbAuthorPagesClose, 280);
     } else {
       box.style.transform = 'translateY(0)';
       ov.style.background = 'rgba(20,20,24,.5)';
+      ov.style.backdropFilter = ov.style.webkitBackdropFilter = 'blur(2px)';
       setTimeout(_nbApDragReset, 260);
     }
   };
