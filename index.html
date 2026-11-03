@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- [2026-11-02 00:19 | session-guide] AI, DO THIS FIRST: (1) run grep -n "DESIGN PARITY CHECKLIST\|WORK LOG GUIDE\|SESSION LOG" on this file and read those three blocks; (2) get the real time (WAT) before stamping; (3) add a SESSION LOG entry when you finish. (4) before writing a design sheet, open the nearest existing sheet and copy its parts; before presenting, compare side by side (checklist items 11 and 12). The next line has the full note. READFIRST.md (uploaded beside this file) repeats it. [2026-11-03 01:10 | session-guide] Also: the Privacy and Terms here and LEGAL_DEFAULTS in the Worker must stay word for word the same, TECH_NOTES in the Worker (Technical notes) must be kept up to date and checked against the code, and legal wording stays friendly, welcoming, plain UK English, simple enough for a 13 year old (short sentences, everyday words) (WORK LOG GUIDE 4A).[2026-11-03 01:27 | tech-notes] Also: text people read (Privacy, Terms, help, switch notes, alerts, messages) must not reveal how the app works inside (how long a pass lasts, how often it is renewed, table, key or route names, how a hidden page answers). That detail goes in TECH_NOTES in the Worker, and the public text keeps only what a person can decide or act on (WORK LOG GUIDE 4A, item 6). -->
+<!-- [2026-11-02 00:19 | session-guide] AI, DO THIS FIRST: (1) run grep -n "DESIGN PARITY CHECKLIST\|WORK LOG GUIDE\|SESSION LOG" on this file and read those three blocks; (2) get the real time (WAT) before stamping; (3) add a SESSION LOG entry when you finish. (4) before writing a design sheet, open the nearest existing sheet and copy its parts; before presenting, compare side by side (checklist items 11 and 12). The next line has the full note. READFIRST.md (uploaded beside this file) repeats it. [2026-11-03 01:10 | session-guide] Also: the Privacy and Terms here and LEGAL_DEFAULTS in the Worker must stay word for word the same, TECH_NOTES in the Worker (Technical notes) must be kept up to date and checked against the code, and legal wording stays friendly, welcoming, plain UK English, simple enough for a 13 year old (short sentences, everyday words) (WORK LOG GUIDE 4A).[2026-11-03 01:27 | tech-notes] Also: text people read (Privacy, Terms, help, switch notes, alerts, messages) must not reveal how the app works inside (how long a pass lasts, how often it is renewed, table, key or route names, how a hidden page answers). That detail goes in TECH_NOTES in the Worker, and the public text keeps only what a person can decide or act on (WORK LOG GUIDE 4A, item 6).[2026-11-03 07:53 | session-guide] Also: every word shown on screen (labels, descriptions, dialogs, toasts, hints) follows WORK LOG GUIDE 4B: plain words for someone who has never seen the app, every number checked against the real data, each thing said once. -->
 <!-- [2026-11-01 13:50 | session-guide] READ FIRST, before editing any code: search this file for DESIGN PARITY CHECKLIST, WORK LOG GUIDE and SESSION LOG (all in one comment block, about line 18100). Read the checklist and the newest SESSION LOG entries, then work. The Worker (index.js) follows the same notes. Essentials: stamp every block [YYYY-MM-DD HH:MM | topic] in WAT (Africa/Lagos). Add a SESSION LOG entry in the app file when you finish. Make small, targeted edits and work from the newest file. Colours follow the app themes (Light, Night, Pink; Night has no blue): app UI uses var(--al-acc) and var(--al-on); pages the Worker serves use prefers-color-scheme. LEGAL_DEFAULTS in index.js and the Privacy and Terms text in the app must stay word for word the same. -->
 <html lang="en">
 <head>
@@ -3855,6 +3855,8 @@ body.pink #splash-bar-fill {
   text-align: center
 }
 .pub-pkg-btn .pub-pkg-price { font-weight: 400; color: #8a8d99 }
+/* [2026-11-03 07:53 | page-space-balance] price under the size in the Add page space dialog (it sat beside it and the size wrapped). */
+#pgsize-pkgs .pub-pkg-btn small.pub-pkg-price { display: block; margin-top: 2px }
 .pub-pkg-btn.selected { border-color: #3366cc; background: #eef2fc }
 body.night .pub-pkg-btn { border-color: #333537; background: #1c1c1e; color: #e8e8e8 }
 body.night .pub-pkg-btn .pub-pkg-price { color: #9a9a9e }
@@ -3922,8 +3924,8 @@ body.night #st-ads-card .ad-prog-row.met .ad-prog-bar > i { background: #4aa36a 
 /* [2026-11-02 15:30 | page-space-balance] Page space card in Settings: same rows as the ad view balance. */
 #st-space-bal { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; margin-bottom: .8rem; padding-bottom: .7rem; border-bottom: 1px solid var(--st-line); color: var(--st-fg); font-size: .85rem }
 #st-space-bal .ad-prog-s { color: var(--st-sub) }
+/* [2026-11-03 07:53 | page-space-balance] changed: the card has the same padding as the Ads card (it had none, so the text sat against the edges). */
 #st-space-card { padding: .8rem .9rem }
-#st-space-held { overflow-wrap: anywhere }
 #st-space-held { color: var(--st-fg); font-size: .8rem; margin-bottom: .2rem }
 #st-space-held .ad-prog-s { color: var(--st-sub) }
 .st-fund-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .6rem }
@@ -7389,12 +7391,23 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
 
 <div id="pgsize-overlay">
   <div id="pgsize-dialog">
-    <div class="rdlg-title">Add page space</div>
+    <div class="rdlg-title" id="pgsize-title">Add page space</div>
+    <div id="pgsize-buy">
     <div class="rdlg-body" id="pgsize-body"></div>
     <div id="pgsize-pkgs" style="display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 .6rem"></div>
     <div id="pgsize-loading" class="rdlg-body" style="display:none;margin:0 0 1rem;font-size:.8rem;align-items:center;gap:.5rem"><span id="pgsize-loading-txt"></span> <a id="pgsize-retry" style="display:none" onclick="_nbSpDialogRetry()">Retry</a></div>
     <div class="rdlg-btns">
       <button class="rdlg-ok rdlg-ok--blue" id="pgsize-cancel" onclick="closePageSizeDialog()">Not now</button>
+    </div>
+    </div>
+    <!-- [2026-11-03 07:53 | page-space-balance] list of pages using page space, shown instead of #pgsize-buy by _pgHeldMode. -->
+    <div id="pgheld-pane" style="display:none">
+      <div class="rdlg-body" id="pgheld-sub" style="margin:0 0 .7rem"></div>
+      <input id="pgheld-search" type="search" placeholder="Search pages…" aria-label="Search pages" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="_nbHeldRender()" style="width:100%;box-sizing:border-box;padding:.55rem .8rem;margin:0 0 .6rem;font:inherit;font-size:.85rem;color:inherit;outline:none">
+      <div class="rdlg-body" id="pgheld-list" style="max-height:38vh;overflow-y:auto;margin:0 0 .9rem"></div>
+      <div class="rdlg-btns">
+        <button class="rdlg-ok rdlg-ok--blue" onclick="closePageSizeDialog()">Close</button>
+      </div>
     </div>
   </div>
 </div>
@@ -18527,6 +18540,19 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         [2026-11-03 01:10 | session-guide] added: the legal text kept identical, the Technical notes kept current and verified, friendly UK English.
         [2026-11-02 00:33 | session-guide] changed: before writing any sheet, open the reference sheet's code (checklist 11); before presenting, compare side by side (checklist 12).
 
+     4B. WORDS ON SCREEN   [2026-11-03 07:53 | session-guide] added after the page space texts were rewritten many times because they were written from the code's point of view
+        Covers every label, description, dialog line, button, hint and toast. (Privacy, Terms and alerts also follow 4A.)
+        1. Write for someone who has never seen the app, not from how the code works. No code words (held, balance, borrow, tier, ledger, slug,
+           shrink, allocate). Use what the person sees and does: "gets smaller", "unpublish", "you have 3 MB".
+        2. Check every number and option in a sentence against the real data before writing it (pack sizes, caps, prices, limits). A line that is
+           true in the code but makes no sense on screen is a bug. Example: "pick a pack of 4 MB or more" when packs start at 25 MB.
+        3. Explain the whole thing once, in the place the person needs it. Do not repeat the same rule in the card, the dialog and the list.
+        4. Do not tell the person to do what the screen already shows (the packs are right below the text; just say what they need).
+        5. Short sentences. No semicolons and no brackets for asides. British spelling. Keep a number and its unit together (non-breaking space before MB).
+        6. Copy the tone and shape of the nearest existing text of the same kind (the Ads & invites card for a Settings card) before writing.
+        7. Before presenting, read each new line as a stranger would: what is this, what does it do or cost, what happens next. Look at a screenshot
+           when the text is in a dialog, because wrapping and layout can break a sentence. If a line is rejected, rewrite the whole line and run 1 to 6 again.
+
      5. END OF A SESSION
         Complete the entry: Work done, Improvements, Fixed, Found, Important details, Removed, Untested, Depends on, Final state, Next.
         Final state: what the code does now, with the constants and addresses a newcomer needs, in a few lines.
@@ -18574,6 +18600,35 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         guide-text         the wording of the Write, Share and About sheets and keeping it in step with the add bar and with what Share mode offers
         plain-words        swapping builder jargon (marquee, footer, chevron) for everyday words in what people read
         legal-find         the Find in page box in the Privacy, Terms, About and Write / Share sheets: marks matches, next and previous, "3 of 12" (app only)
+
+     SESSION 2026-11-03 07:22 to 07:56 | topics: page-space-balance, session-guide | AI: Claude (app) | Settings Page space card, its dialogs and wording
+       Start state
+         Uploaded note-builder-freemium.html (no newer output file existed) and index.js (Worker, read only). The Settings Page space card had no padding, so its text sat against the card edges. Its only description appeared with the buy section and spoke in code words (held, balance).
+       Work done
+         Card: id st-space-card with the Ads card's padding. Description under Add page space now explains the whole thing once: free size, the cap, buying ahead, what a big page uses while online, and when it comes back. [2026-11-03 07:53 | page-space-balance]
+         Add page space dialog: _pgSizeText rewritten in plain words. When short it says what is missing. The price sits under the size on the pack buttons (#pgsize-pkgs rule). _nbSpMbText joins the number and MB with a non-breaking space. [2026-11-03 07:53 | page-space-balance]
+         Pages using page space: the Settings sentence became a button (3 pages, 22 MB) that opens a list in the same dialog shell (#pgheld-pane inside #pgsize-dialog, switched by _pgHeldMode), with a search field and a scrolling list. The search and the Close button stay put while the list scrolls. [2026-11-03 07:53 | page-space-balance]
+         WORK LOG GUIDE 4B, Words on screen, added with a pointer in the first line of the file. [2026-11-03 07:53 | session-guide]
+       Improvements
+         The dialog's pack buttons were broken (price beside the size, "50 MB" on two lines). Found in a screenshot and fixed.
+       Fixed
+         See Improvements.
+       Found
+         Privacy and Terms still say a page over 5 MB uses 1 MB for every MB over 5 MB. Same meaning as the new text; not changed. The held list is not redrawn if it is open when the balance reloads (it closes with the dialog, so it was left).
+       Important details
+         Same dialog shell reused for the list, not a new overlay: the dialog is named in about fifteen theme and glass selector lists, and a second overlay would have needed every one copied. Rejected: a new #pgheld-overlay.
+         The search field is a plain type search input so the themed input[type=search] rules style it. Focus outline removed to match the other search fields.
+         Wording rejected: "borrow", "balance" in the dialog, "pick a pack of 4 MB or more" (packs start at 25 MB).
+       Removed
+         Nothing from earlier sessions. The held sentence in _nbSpacePaint is gone; its rule #st-space-held stays for the button's spacing.
+       Untested
+         Screenshots were taken headless at 390 px with mocked sign-in, prices and pages (Light, Night, Pink for the card; Light and Night for the list). Not run on a phone: real RevenueCat prices, the list with a long page name in Pink, the keyboard over the search field, Back closing the list.
+       Depends on
+         Nothing in the Worker (GET /page-size/mine already returns the held list). Privacy, Terms and TECH_NOTES untouched.
+       Final state
+         Settings > Page space: balance row, Pages using page space button (only when a page holds space), Add page space with the description and three packs. Dialog ids: pgsize-overlay, pgsize-dialog, pgsize-title, pgsize-buy, pgheld-pane, pgheld-sub, pgheld-search, pgheld-list. Functions: nbOpenPageHeld, _nbHeldRender, _pgHeldMode.
+       Next
+         Check the Untested list on a phone.
 
      SESSION 2026-11-03 06:40 to 06:45 | topics: page-list | AI: Claude (app) | Recent pages sheet restyled like the comments sheet
        Start state
@@ -30087,7 +30142,8 @@ function _nbSpacePacks(cfg) { // cfg: { el(), btnClass, active(), busy(), pick(t
   }
   return { render, failed: () => failed, stop: () => { token++; clearTimeout(retryT); } };
 }
-function _nbSpMbText(n) { return n.toLocaleString() + ' MB'; }
+// [2026-11-03 07:53 | page-space-balance] changed: non-breaking space so a number and MB never split across two lines.
+function _nbSpMbText(n) { return n.toLocaleString() + '\u00a0MB'; }
 // ---- the dialog a too-big publish or save opens ----
 function _nbMb(bytes) { const v = bytes / 1048576; return v >= 10 ? String(Math.round(v)) : v.toFixed(1); }
 const _nbSpDlgPacks = _nbSpacePacks({
@@ -30098,13 +30154,43 @@ const _nbSpDlgPacks = _nbSpacePacks({
   onState: (failed, msg) => { const w = document.getElementById('pgsize-loading'); if (!w) return; document.getElementById('pgsize-loading-txt').textContent = msg; document.getElementById('pgsize-retry').style.display = failed ? '' : 'none'; w.style.display = msg ? 'flex' : 'none'; }
 });
 function _nbSpDialogRetry() { if (_pgSizeCtx) _nbSpDlgPacks.render(false); }
+// [2026-11-03 07:53 | page-space-balance] Settings > Page space > "Pages using page space": the same dialog shell, showing a searchable list instead of the packs.
+function _pgHeldMode(on) {
+  document.getElementById('pgsize-buy').style.display = on ? 'none' : '';
+  document.getElementById('pgheld-pane').style.display = on ? '' : 'none';
+  document.getElementById('pgsize-title').textContent = on ? 'Pages using page space' : 'Add page space';
+}
+function nbOpenPageHeld() {
+  const st = _nbSpWho(); if (!st.held || !st.held.length) return;
+  _pgHeldMode(true);
+  const total = st.held.reduce((n, h) => n + h.mb, 0);
+  document.getElementById('pgheld-sub').textContent = _nbSpMbText(total) + ' in use. A page gives its space back when it gets smaller or you unpublish it.';
+  const q = document.getElementById('pgheld-search'); q.value = '';
+  _nbHeldRender();
+  document.getElementById('pgsize-overlay').classList.add('open');
+  lockScroll();
+}
+function _nbHeldRender() {
+  const list = document.getElementById('pgheld-list'); if (!list) return;
+  const q = (document.getElementById('pgheld-search').value || '').trim().toLowerCase().replace(/^\/?@?/, '');
+  const rows = (_nbSpWho().held || []).filter(h => !q || String(h.slug).toLowerCase().indexOf(q) !== -1);
+  list.innerHTML = '';
+  if (!rows.length) { list.textContent = 'No pages match.'; return; }
+  rows.forEach((h, i) => {
+    const r = document.createElement('div');
+    r.style.cssText = 'display:flex;justify-content:space-between;gap:.6rem;padding:.5rem 0;' + (i ? 'border-top:1px solid rgba(128,128,128,.25)' : '');
+    const a = document.createElement('span'); a.style.cssText = 'min-width:0;overflow-wrap:anywhere'; a.textContent = '/@' + h.slug;
+    const b = document.createElement('b'); b.style.flex = 'none'; b.textContent = _nbSpMbText(h.mb);
+    r.appendChild(a); r.appendChild(b); list.appendChild(r);
+  });
+}
+// [2026-11-03 07:53 | page-space-balance] changed: plain words, names the free size, no semicolon; when short it says what is missing, not what to add.
 function _pgSizeText(info) {
   const need = info.needMb || 0, held = info.heldMb || 0, bal = Math.max(0, info.balanceMb || 0), short = Math.max(0, need - held - bal);
-  let t = 'This note is ' + _nbMb(info.size) + ' MB. A page can be ' + PAGE_SIZE_BASE_MB + ' MB; each MB over that is held from your page space. It needs ' + _nbSpMbText(need) + (held ? ' (it already holds ' + _nbSpMbText(held) + ')' : '') + ', and you have ' + _nbSpMbText(bal) + ' in your page space balance.';
-  if (short) t += ' Add at least ' + _nbSpMbText(short) + '.';
-  return t + ' Page space goes to any page, and is returned to your page space balance when a page gets smaller or is unpublished.';
+  return 'This note is ' + _nbMb(info.size) + ' MB. A page can be ' + PAGE_SIZE_BASE_MB + ' MB for free, so the extra ' + _nbSpMbText(need) + ' comes from your page space while it’s online, and you get it back when the page gets smaller or you unpublish it.' + (held ? ' This page already uses ' + _nbSpMbText(held) + '.' : '') + (short ? ' You have ' + _nbSpMbText(bal) + ' and need ' + _nbSpMbText(short) + ' more.' : ' You have ' + _nbSpMbText(bal) + '.');
 }
 // Called when a publish or save answers 413. True when it dealt with it (offered space, or said exactly what is wrong); false leaves the old generic message to the caller.
+// [2026-11-03 07:53 | page-space-balance] changed: switches the dialog back to its packs view (_pgHeldMode) before opening.
 function _nbPageSizeOffer(info, verb) {
   if (!info || !info.size) return false;
   const mb = _nbMb(info.size), maxMb = Math.round((info.max || NB_PAGE_MAX_BYTES) / 1048576);
@@ -30113,6 +30199,7 @@ function _nbPageSizeOffer(info, verb) {
   if (!info.signedIn) { showToast('This note is ' + mb + ' MB. Sign in to add page space for pages over ' + PAGE_SIZE_BASE_MB + ' MB.'); return true; }
   if (!(info.tiers && info.tiers.length)) return false;
   _pgSizeCtx = { info, verb };
+  _pgHeldMode(false);
   _nbSpWho(); _nbSp.mb = Math.max(0, info.balanceMb || 0); _nbSp.at = Date.now(); // the answer carries the live balance
   document.getElementById('pgsize-body').textContent = _pgSizeText(info);
   document.getElementById('pgsize-overlay').classList.add('open');
@@ -30166,6 +30253,7 @@ const _nbStSpPacks = _nbSpacePacks({
   pick: (t, pkg) => nbSpaceFund(t, pkg), recommend: null,
   onState: (failed, msg) => { const e = document.getElementById('st-space-msg'); if (e) e.textContent = msg; }
 });
+// [2026-11-03 07:53 | page-space-balance] changed: the card gets id st-space-card for its padding.
 function _nbSettingsSpaceMount() {
   const root = document.getElementById('st-root'); if (!root || !nbIsSignedIn()) return;
   const before = Array.from(root.querySelectorAll('.st-grp')).find(x => { const h = x.querySelector('.st-h'); return h && h.textContent === 'Account'; });
@@ -30175,6 +30263,7 @@ function _nbSettingsSpaceMount() {
   _nbSpacePaint();
   _nbSpaceFetch(false);
 }
+// [2026-11-03 07:53 | page-space-balance] changed: pages using page space are one button that opens a list dialog (it was a sentence). The buy text under Add page space is the whole explanation, said once.
 function _nbSpacePaint() {
   const balEl = document.getElementById('st-space-bal'), heldEl = document.getElementById('st-space-held'), host = document.getElementById('st-space');
   if (!balEl || !heldEl || !host) return; // Settings isn't showing
@@ -30183,9 +30272,12 @@ function _nbSpacePaint() {
   balEl.lastChild.textContent = st.mb === null ? '—' : _nbSpMbText(st.mb);
   heldEl.innerHTML = '';
   if (st.held && st.held.length) {
-    const t = document.createElement('div'); t.className = 'ad-prog-s';
-    t.textContent = 'Held by pages that are online: ' + st.held.map(h => '/@' + h.slug + ' ' + _nbSpMbText(h.mb)).join(', ') + '.';
-    heldEl.appendChild(t);
+    const total = st.held.reduce((n, h) => n + h.mb, 0);
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'st-fund-btn'; b.style.cssText = 'width:100%;flex:none;margin-bottom:.8rem';
+    b.appendChild(document.createTextNode('Pages using page space'));
+    const sm = document.createElement('small'); sm.textContent = st.held.length + (st.held.length === 1 ? ' page, ' : ' pages, ') + _nbSpMbText(total); b.appendChild(sm);
+    b.onclick = () => nbOpenPageHeld();
+    heldEl.appendChild(b);
   }
   if (!_nbRcPlugin()) { host.style.display = 'none'; return; } // buying needs the installed app
   host.style.display = '';
