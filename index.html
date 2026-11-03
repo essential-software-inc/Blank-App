@@ -3922,6 +3922,8 @@ body.night #st-ads-card .ad-prog-row.met .ad-prog-bar > i { background: #4aa36a 
 /* [2026-11-02 15:30 | page-space-balance] Page space card in Settings: same rows as the ad view balance. */
 #st-space-bal { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; margin-bottom: .8rem; padding-bottom: .7rem; border-bottom: 1px solid var(--st-line); color: var(--st-fg); font-size: .85rem }
 #st-space-bal .ad-prog-s { color: var(--st-sub) }
+#st-space-card { padding: .8rem .9rem }
+#st-space-held { overflow-wrap: anywhere }
 #st-space-held { color: var(--st-fg); font-size: .8rem; margin-bottom: .2rem }
 #st-space-held .ad-prog-s { color: var(--st-sub) }
 .st-fund-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .6rem }
@@ -30168,7 +30170,7 @@ function _nbSettingsSpaceMount() {
   const root = document.getElementById('st-root'); if (!root || !nbIsSignedIn()) return;
   const before = Array.from(root.querySelectorAll('.st-grp')).find(x => { const h = x.querySelector('.st-h'); return h && h.textContent === 'Account'; });
   const g = document.createElement('div'); g.className = 'st-grp'; g.id = 'st-space-grp';
-  g.innerHTML = '<div class="st-h">Page space</div><div class="st-card"><div id="st-space-bal"></div><div id="st-space-held"></div><div id="st-space" class="st-sep"></div></div>';
+  g.innerHTML = '<div class="st-h">Page space</div><div class="st-card" id="st-space-card"><div id="st-space-bal"></div><div id="st-space-held"></div><div id="st-space" class="st-sep"></div></div>';
   if (before) root.insertBefore(g, before); else root.appendChild(g);
   _nbSpacePaint();
   _nbSpaceFetch(false);
@@ -30182,13 +30184,13 @@ function _nbSpacePaint() {
   heldEl.innerHTML = '';
   if (st.held && st.held.length) {
     const t = document.createElement('div'); t.className = 'ad-prog-s';
-    t.textContent = 'Held by pages that are online: ' + st.held.map(h => '/@' + h.slug + ' ' + _nbSpMbText(h.mb)).join(', ') + '. Page space is returned to your balance when a page gets smaller or is unpublished.';
+    t.textContent = 'Held by pages that are online: ' + st.held.map(h => '/@' + h.slug + ' ' + _nbSpMbText(h.mb)).join(', ') + '.';
     heldEl.appendChild(t);
   }
   if (!_nbRcPlugin()) { host.style.display = 'none'; return; } // buying needs the installed app
   host.style.display = '';
   if (!host.firstChild) {
-    host.innerHTML = '<div class="ad-prog-t">Add page space</div><div class="ad-prog-s">A page can be ' + PAGE_SIZE_BASE_MB + ' MB for free, and up to ' + NB_PAGE_MAX_MB + ' MB with page space. Buy page space now and use it on any page later. It isn’t tied to a note until you publish one that needs it.</div><div class="st-fund-grid"></div><div class="ad-prog-s" id="st-space-msg" style="margin-top:.5rem"></div><div class="ad-prog-s" id="st-space-status" style="margin-top:.2rem"></div>';
+    host.innerHTML = '<div class="ad-prog-t">Add page space</div><div class="ad-prog-s">A page can be ' + PAGE_SIZE_BASE_MB + ' MB for free, and up to ' + NB_PAGE_MAX_MB + ' MB with page space. Buy page space now and use it on any page later. A page over ' + PAGE_SIZE_BASE_MB + ' MB uses the extra from your page space while it’s online. You get it back when the page gets smaller or you unpublish it.</div><div class="st-fund-grid"></div><div class="ad-prog-s" id="st-space-msg" style="margin-top:.5rem"></div><div class="ad-prog-s" id="st-space-status" style="margin-top:.2rem"></div>';
     _nbStSpPacks.render(false);
   }
   const s2 = document.getElementById('st-space-status'); if (s2) s2.textContent = _nbStSpFunding ? _nbSpStatusText : '';
