@@ -4795,6 +4795,8 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 .ap-like svg{transition:transform .12s ease}
 .ap-like:active svg{transform:scale(.85)}
 .ap-like.is-liked svg{fill:#e0245e;stroke:#e0245e}
+/* [2026-11-04 03:36 | author-page-like] Own page's heart: same look as the text it replaced, but a button so the tap never reaches the row. */
+.ap-own{font:inherit;color:inherit;background:none;border:0;padding:.35rem .5rem;margin:-.35rem -.5rem;cursor:default;-webkit-tap-highlight-color:transparent}
 .ap-like:focus-visible{outline:2px solid #3366cc;outline-offset:-2px;border-radius:8px}
 .ap-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem}
 .ap-tag{white-space:nowrap;font-size:10px;font-weight:700;letter-spacing:.03em;color:#3366cc;background:#eef2fc;border-radius:6px;padding:1px 6px}
@@ -18652,6 +18654,22 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         ad-loosen          loosening Publish as Ad: any published page can be an ad, the only content rule left is no images uploaded from the device (worker index.js and this app)
         invite-alert       an alert at sign-in telling an invited email it has been invited to a verified name (worker index.js)
         swap-keep-column   a vertical drag swap in the editor trades rows only, so each block keeps its column and a centred block stays centred (this app)
+
+     SESSION 2026-11-04 03:30 to 03:45 | topics: author-page-like | AI: Claude (app) | Heart tap must never open the page
+       Start state
+         The 02:35 session said the sheet hearts were done. The user reported a tap on the heart still opened the page. Clock: time tool, WAT.
+       Work done
+         Ran the real file in headless Chromium with the network mocked, mouse and touch. On another author's page the heart liked, unliked and did not open the page. On your own pages it did open the page. [2026-11-04 03:36 | author-page-like]
+         Own-page heart is now a button (.ap-own) that stops the tap and says "You can't like your own page" (nbApOwnLike). It was plain text, so the tap fell through to the row. [2026-11-04 03:36 | author-page-like]
+         The row's click now ignores any tap that starts on a heart ([data-lk]), as a second guard. [2026-11-04 03:36 | author-page-like]
+       Fixed
+         Own-page heart opening the page. The 02:35 entry said own pages show plain text; that was the bug.
+       Found
+         Nothing else open.
+       Untested
+         Not run on a phone or against the real Worker.
+       Depends on
+         Nothing.
 
      SESSION 2026-11-04 02:35 to 02:55 | topics: author-page-like | AI: Claude (app) | Like and unlike from the Recent pages sheet
        Start state
@@ -37199,10 +37217,10 @@ function _nbApRowHtml(s, ctx) {
   const liked = !mine && c.liked.has(s.slug);
   const cntTxt = likes === null ? '' : _nbCompactCount(likes);
   const likesHtml = mine
-    ? (likes === null ? '' : `<span class="ap-stat" data-lk data-n="${likes}" aria-label="${_nbApLikeLabel(false, likes, true)}">${_NB_AP_HEART}<span class="ap-n">${cntTxt}</span></span>`)
+    ? (likes === null ? '' : `<button type="button" class="ap-stat ap-own" data-lk data-n="${likes}" aria-label="${_nbApLikeLabel(false, likes, true)}" onclick="event.stopPropagation();nbApOwnLike()">${_NB_AP_HEART}<span class="ap-n">${cntTxt}</span></button>`)
     : `<button type="button" class="ap-stat ap-like${liked ? ' is-liked' : ''}" data-lk data-slug="${esc(s.slug)}" data-n="${likes === null ? '' : likes}" aria-pressed="${liked}" aria-label="${_nbApLikeLabel(liked, likes)}" onclick="event.stopPropagation();nbApLike(this)">${_NB_AP_HEART}<span class="ap-n">${cntTxt}</span></button>`;
   const cmtsHtml = cmts ? `<span class="ap-stat" aria-label="${cmts} ${cmts === 1 ? 'comment' : 'comments'}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>${_nbCompactCount(cmts)}</span>` : '';
-  return `<div class="ap-row" data-slug="${esc(s.slug)}" onclick="${open}" role="button" tabindex="0" onkeydown="if (event.key==='Enter' && event.target===this) { ${open} }">
+  return `<div class="ap-row" data-slug="${esc(s.slug)}" onclick="if(event.target.closest('[data-lk]'))return;${open}" role="button" tabindex="0" onkeydown="if (event.key==='Enter' && event.target===this) { ${open} }">
     <div class="ap-av"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>${img ? `<img src="${esc(img)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ap-has')" onerror="this.remove()">` : ''}</div>
     <div class="ap-main">
       <div class="ap-top"><span class="ap-name">${esc(s.title || 'Untitled note')}</span>${ts ? `<span class="ap-time">${_nbShortTimeAgo(ts)}</span>` : ''}</div>
@@ -37249,6 +37267,8 @@ function _nbApBumpCount(slug, d) {
   row.likes = Math.max(0, row.likes + d);
   _nbApSetLikeCount(slug, row.likes);
 }
+// [2026-11-04 03:36 | author-page-like] Your own page's heart: the Worker refuses a like on your own note, so the tap only says so. It used to be plain text, so a tap fell through to the row and opened the page.
+function nbApOwnLike() { showToast('You can\u2019t like your own page'); }
 function nbApLike(btn) {
   const slug = btn && btn.getAttribute('data-slug'); if (!slug) return;
   const row = _nbAp.pages.find(x => x.slug === slug);
