@@ -18664,6 +18664,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
          The row's click now ignores any tap that starts on a heart ([data-lk]), as a second guard. [2026-11-04 03:36 | author-page-like]
        Fixed
          Own-page heart opening the page. The 02:35 entry said own pages show plain text; that was the bug.
+       Fixed (03:52)
+         Signed out, a row for a page published from this device was treated as your own, so its heart said "You can't like your own page" instead of "Sign in to like". The row now follows the header heart's rule: own only when the signed-in account is the author (plus a locally published slug when signed in). [2026-11-04 03:52 | author-page-like]
        Found
          Nothing else open.
        Untested
@@ -37213,7 +37215,7 @@ function _nbApRowHtml(s, ctx) {
   const cmts = (typeof s.comments === 'number' && isFinite(s.comments)) ? Math.max(0, Math.floor(s.comments)) : 0;
   // [2026-11-04 02:45 | author-page-like] changed: the heart is a button (not on your own pages, which can't be liked), red when this account liked the page; both carry data-lk and data-n so counts and hearts are patched in place
   const c = ctx || _nbApCtx();
-  const mine = c.mine.has(s.slug) || _nbIsOwnAuthor(s.authorSub);
+  const mine = _nbIsOwnAuthor(s.authorSub) || (nbIsSignedIn() && c.mine.has(s.slug)); // [2026-11-04 03:52 | author-page-like] changed: signed out, a page published from this device was treated as yours and the heart said "can't like your own page"; now only the signed-in account decides, like the header heart
   const liked = !mine && c.liked.has(s.slug);
   const cntTxt = likes === null ? '' : _nbCompactCount(likes);
   const likesHtml = mine
