@@ -4790,6 +4790,12 @@ body.pink .step-chk.checked{background:#bd2856;border-color:#bd2856}
 .ap-act{display:flex;align-items:center;gap:.9rem;margin-top:.3rem;flex-wrap:wrap;font-size:12.5px;font-weight:600;color:#8a8d99}
 .ap-stat{display:inline-flex;align-items:baseline;gap:.28rem}
 .ap-stat svg{flex-shrink:0;position:relative;top:.125em;fill:none;stroke:currentColor;stroke-width:2.2}
+/* [2026-11-04 02:45 | author-page-like] Like button in a row: the heart and its count are one tap target, the rest of the row still opens the page. The touch area is bigger through padding with a matching negative margin, so the row looks the same as before. Liked = red #e0245e, the same red as the viewer header heart. This sheet has one fixed look in every theme (Light, Night, Pink, glass), like the comments sheet, so one rule covers them all. */
+.ap-like{font:inherit;color:inherit;background:none;border:0;padding:.35rem .5rem;margin:-.35rem -.5rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ap-like svg{transition:transform .12s ease}
+.ap-like:active svg{transform:scale(.85)}
+.ap-like.is-liked svg{fill:#e0245e;stroke:#e0245e}
+.ap-like:focus-visible{outline:2px solid #3366cc;outline-offset:-2px;border-radius:8px}
 .ap-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem}
 .ap-tag{white-space:nowrap;font-size:10px;font-weight:700;letter-spacing:.03em;color:#3366cc;background:#eef2fc;border-radius:6px;padding:1px 6px}
 #ap-status{text-align:center;color:#8a8d99;font-size:13px;padding:.9rem 0 .4rem}
@@ -18615,6 +18621,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
      SESSION LOG   [search: SESSION LOG]   Newest first. Times are WAT (Africa/Lagos, UTC+1).
 
      TOPICS
+        author-page-like   the heart in each row of the Recent pages sheet (author's pages): likes and unlikes the page like the viewer header heart, red when liked, author alert, counts and the Liked tab follow (this app)
         nav-brand-icon     the Brand icon picker is left out in the text-only brand designs (Broadsheet, Magazine, Boutique), where only an image shows (this app)
         nav-icon-shows     a link or button icon chosen in the navigation bar sheet now shows; Link icons turns on by itself (this app)
         stale-nav-text     removing leftover words about Center action, app tab designs and Show icons from the navigation bar sheet (this app)
@@ -18645,6 +18652,37 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         ad-loosen          loosening Publish as Ad: any published page can be an ad, the only content rule left is no images uploaded from the device (worker index.js and this app)
         invite-alert       an alert at sign-in telling an invited email it has been invited to a verified name (worker index.js)
         swap-keep-column   a vertical drag swap in the editor trades rows only, so each block keeps its column and a centred block stays centred (this app)
+
+     SESSION 2026-11-04 02:35 to 02:55 | topics: author-page-like | AI: Claude (app) | Like and unlike from the Recent pages sheet
+       Start state
+         Uploaded note-builder-freemium.html and index.js (read only). Tapping the heart on a row of the Recent pages sheet opened the page: the heart was a plain span inside a row that opens the page. The clock tool did not answer, so the times use the container clock converted to WAT.
+       Work done
+         Each row's heart and count are now one button (.ap-like). It calls the same routine as the viewer header heart: new _nbToggleLike(slug, authorSub), which nbToggleStoryLike and the new nbApLike both call. [2026-11-04 02:45 | author-page-like]
+         Liked = red #e0245e (heart filled), repainted from the liked list whenever it changes (_nbApPaintLikes, called from _nbSaveLikedSlugs), so a like made anywhere (header, queue, other device) shows in the sheet and the other way round. [2026-11-04 02:45 | author-page-like]
+         Counts: patched in place (_nbApSetLikeCount), moved by one at once on a tap or a queued tap (_nbApBumpCount), and read from the server right after a tap, every 8 seconds while the sheet is open, when it opens and when the app comes back (_nbApPollCounts). On open the liked list is also pulled (_nbReconcileLikes). [2026-11-04 02:45 | author-page-like]
+         Your own pages show the heart and count as plain text (the Worker refuses a like on your own note). Row keyboard Enter opens the page only when the row itself has focus.
+       Improvements
+         Touch area of the heart is bigger (padding with matching negative margin), the row looks the same.
+       Fixed
+         The sheet bug above.
+         The count refresh at the end of a tap in the viewer was always thrown away (the tap's own mutation counter had moved on before the counts came back), so counts waited for the next 8 second tick. It now runs after the tap has settled. [2026-11-04 02:45 | author-page-like]
+         A count refresh asked for while another was in flight was dropped (the one in flight predates the tap and is discarded). Both refreshers now run once more when the first one ends. [2026-11-04 02:45 | author-page-like]
+         A row whose likes figure was missing (older Worker) used to show no heart at all, so it could not be liked. It now shows the button with no number.
+       Found
+         Nothing left open. The Worker needed no change: POST /likes/:slug already writes the author's alert (one per note per 30 minutes) and DELETE /likes/:slug removes the like; counts come from the likes table.
+         Feed cards (.gc-likes) never show a red heart for a liked note, only the count. Left as it is.
+       Important details
+         The sheet has one fixed look in every theme (like the comments sheet), so the red is one rule and there are no Night, Pink or glass variants. Rejected: using the disabled attribute on the row button while a tap is out, because a tap on a disabled button can fall through to the row and open the page; a per-slug busy set (_nbLikeBusy) does the job instead.
+       Removed
+         Nothing.
+       Untested
+         Run in headless Chromium against a mock Worker: like (red, count +1, header heart red, sheet stays open), unlike, a second row, a count change from the server, a tap on the row still opens the page, own page not tappable. Not run on a phone or against the real Worker: the offline queue from a row, a refused like (toast), App Lock, Light, Night, Pink and glass look of the viewer behind the sheet.
+       Depends on
+         Nothing changed in the Worker, Privacy, Terms or TECH_NOTES. Needs POST /likes/counts, GET /likes, POST and DELETE /likes/:slug as they are.
+       Final state
+         Recent pages row: button.ap-like (data-slug, data-n) with span.ap-n for the count. Likes go through _nbToggleLike. Sheet counts refresh through _nbApPollCounts.
+       Next
+         Check the Untested list on a phone.
 
      SESSION 2026-11-04 01:15 | topics: stale-nav-text, nav-icon-shows, nav-brand-icon, floating-nav | AI: Claude (app) | Leftover Center action and app tab wording removed; added icons now show
        Start state
@@ -29570,7 +29608,7 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Change recovery question', show: () => !!(window.nbLock && window.nbLock.enabled()), go: () => window.nbLock.recovery(() => { try { window._nbStRender(); } catch (e) {} }) }]],
     ['Sync & backup', [
       { t: 'chips', k: 'syncEvery', l: 'Auto-sync', s: 'How often Bluebook checks your account for changes. Manual only also skips the automatic backup, so tap Sync now to save your edits.', o: [[20, 'Every 20 sec'], [60, 'Every minute'], [300, 'Every 5 min'], [0, 'Manual only']] },
-      { t: 'link', l: 'Sync now', s: 'Pull and push your notes', go: () => { if (!nbIsSignedIn()) { showToast('Sign in to sync your notes'); return; } nbSyncNow(); } },
+      { t: 'link', l: 'Sync now', s: 'Upload and download your notes', go: () => { if (!nbIsSignedIn()) { showToast('Sign in to sync your notes'); return; } nbSyncNow(); } },
       { t: 'link', l: 'Backup & restore', s: 'Save notes to a file, or restore one', go: () => openBackupSheet() }]],
     ['Account', [
       { t: 'link', l: 'Account', s: () => { const a = nbAccount(); return (a && a.email) ? window._nbMaskEmail(a.email) : 'Not signed in'; }, go: () => nbAccountBtnClick() },
@@ -31727,7 +31765,7 @@ function _nbIsSyncConflict(local, incoming) {
 function _nbMakeConflictCopy(src, acct) {
   const c = Object.assign({}, src, {
     id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-    title: (src.title || 'Untitled') + ' (conflict copy)',
+    title: (src.title || 'Untitled') + ' (extra copy)',
     createdAt: Date.now(), updatedAt: Date.now(),
     publishedSlug: null, publishToken: null, publishedAt: null, lastPublishedAt: null, publishedContentHash: null, showInStories: false, showComments: false, allowComments: true
   });
@@ -31916,7 +31954,7 @@ async function nbSyncPull(showFeedback) {
     const droppedRestored = []; // rebuilt copies replaced by the original note, see _nbRestoreYields
     incoming.forEach(n => {
       // Deleted on another device — don't resurrect it here. Exception: a demo note that also exists
-      // locally still goes through the normal merge below (newer wins, conflict copy, editor prompt), so
+      // locally still goes through the normal merge below (newer wins, extra copy, editor prompt), so
       // a customised copy is never silently overwritten and the two are never duplicated (same id).
       // The demo note's id is the same on every install, so its delete record only says that one device's copy was deleted. A copy
       // published or edited after that delete is another, newer copy, and comes in (see _nbDemoNewerThanDelete).
@@ -32107,7 +32145,7 @@ async function nbSyncPull(showFeedback) {
     _nbSyncEtag = pulledEtag; _nbSyncBaseline = 'have'; // merge finished cleanly: this is now the known server version
     if (sharedHealed) showToast(sharedHealed === 1 ? 'Two notes were linked to the same page. One is unlinked and titled \u201c(copy)\u201d.' : sharedHealed + ' notes were linked to a page another note already uses. They are unlinked and titled \u201c(copy)\u201d.');
     else if (copyCount) showToast('Two published copies of this note existed. Kept both. The second is titled \u201c(copy)\u201d.');
-    else if (conflictCount) showToast(conflictCount === 1 ? 'Edited on two devices. Kept both. The other is a \u201cconflict copy\u201d.' : conflictCount + ' notes were edited on two devices. Kept both. See \u201cconflict copy\u201d.');
+    else if (conflictCount) showToast(conflictCount === 1 ? 'Edited on two devices. Kept both. The other is an \u201cextra copy\u201d.' : conflictCount + ' notes were edited on two devices. Kept both. See \u201cextra copy\u201d.');
     else if (showFeedback) {
       const parts = [];
       if (count) parts.push(count === 1 ? '1 note restored' : count + ' notes restored');
@@ -37074,6 +37112,7 @@ function nbAuthorPagesOpen() {
   const body = document.getElementById('ap-body'); if (body) body.scrollTop = 0;
   _nbApRender();
   if (!_nbAp.pages.length && !_nbAp.done) _nbApLoad();
+  _nbReconcileLikes(); _nbApPollCounts(); // [2026-11-04 02:45 | author-page-like] hearts liked on another device and counts that moved since the list was loaded
 }
 function nbAuthorPagesClose() {
   const o = document.getElementById('ap-overlay'); if (!o) return;
@@ -37147,16 +37186,23 @@ function _nbApMatches(s, q) {
   return String(s.title || '').toLowerCase().includes(q) || _nbSubStoryDesc(s).toLowerCase().includes(q) || _nbSubStoryTags(s).some(tg => String(tg).toLowerCase().includes(q));
 }
 // [2026-11-03 06:43 | page-list] One row of the Recent pages sheet, laid out like a comment row in the comments sheet: round picture (the page's first image, or a page icon), bold title, small time, two lines of text, then likes and comments, then tags. Replaces the Subscribed card, which follows the app theme.
-function _nbApRowHtml(s) {
+function _nbApRowHtml(s, ctx) {
   const open = `nbAuthorPagesPick('${escJs(s.slug)}','${escJs(s.authorSub)}','${escJs(s.title || 'Untitled note')}')`;
   const desc = _nbSubStoryDesc(s), tags = _nbSubStoryTags(s);
   const ts = _nbSubEpoch(s.createdAt != null ? s.createdAt : s.publishedAt);
   const img = Array.isArray(s.images) && typeof s.images[0] === 'string' ? s.images[0] : '';
   const likes = (typeof s.likes === 'number' && isFinite(s.likes)) ? Math.max(0, Math.floor(s.likes)) : null; // absent from an older worker: show nothing rather than a false 0
   const cmts = (typeof s.comments === 'number' && isFinite(s.comments)) ? Math.max(0, Math.floor(s.comments)) : 0;
-  const likesHtml = likes === null ? '' : `<span class="ap-stat" aria-label="${likes} ${likes === 1 ? 'like' : 'likes'}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.3 2.6 4.5 6.3 4.5c2 0 3.6 1 5.7 3.2 2.1-2.2 3.7-3.2 5.7-3.2 3.7 0 5.5 3.8 3.9 7.3C19.5 16.4 12 21 12 21z"/></svg>${_nbCompactCount(likes)}</span>`;
+  // [2026-11-04 02:45 | author-page-like] changed: the heart is a button (not on your own pages, which can't be liked), red when this account liked the page; both carry data-lk and data-n so counts and hearts are patched in place
+  const c = ctx || _nbApCtx();
+  const mine = c.mine.has(s.slug) || _nbIsOwnAuthor(s.authorSub);
+  const liked = !mine && c.liked.has(s.slug);
+  const cntTxt = likes === null ? '' : _nbCompactCount(likes);
+  const likesHtml = mine
+    ? (likes === null ? '' : `<span class="ap-stat" data-lk data-n="${likes}" aria-label="${_nbApLikeLabel(false, likes, true)}">${_NB_AP_HEART}<span class="ap-n">${cntTxt}</span></span>`)
+    : `<button type="button" class="ap-stat ap-like${liked ? ' is-liked' : ''}" data-lk data-slug="${esc(s.slug)}" data-n="${likes === null ? '' : likes}" aria-pressed="${liked}" aria-label="${_nbApLikeLabel(liked, likes)}" onclick="event.stopPropagation();nbApLike(this)">${_NB_AP_HEART}<span class="ap-n">${cntTxt}</span></button>`;
   const cmtsHtml = cmts ? `<span class="ap-stat" aria-label="${cmts} ${cmts === 1 ? 'comment' : 'comments'}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>${_nbCompactCount(cmts)}</span>` : '';
-  return `<div class="ap-row" data-slug="${esc(s.slug)}" onclick="${open}" role="button" tabindex="0" onkeydown="if (event.key==='Enter') { ${open} }">
+  return `<div class="ap-row" data-slug="${esc(s.slug)}" onclick="${open}" role="button" tabindex="0" onkeydown="if (event.key==='Enter' && event.target===this) { ${open} }">
     <div class="ap-av"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>${img ? `<img src="${esc(img)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ap-has')" onerror="this.remove()">` : ''}</div>
     <div class="ap-main">
       <div class="ap-top"><span class="ap-name">${esc(s.title || 'Untitled note')}</span>${ts ? `<span class="ap-time">${_nbShortTimeAgo(ts)}</span>` : ''}</div>
@@ -37166,10 +37212,85 @@ function _nbApRowHtml(s) {
     </div>
   </div>`;
 }
+// [2026-11-04 02:45 | author-page-like] Hearts in the Recent pages sheet. The heart and its count are one button. It runs the same routine as the viewer header heart (_nbToggleLike), so the server call, the author's alert, the Liked tab, the offline queue and the header heart all behave the same. Hearts are repainted from the liked list every time it changes (_nbSaveLikedSlugs); counts are patched in place, from the server every few seconds and right after a tap, never by re-rendering the list.
+const _NB_AP_HEART = '<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.3 2.6 4.5 6.3 4.5c2 0 3.6 1 5.7 3.2 2.1-2.2 3.7-3.2 5.7-3.2 3.7 0 5.5 3.8 3.9 7.3C19.5 16.4 12 21 12 21z"/></svg>';
+function _nbApCtx() { return { mine: _nbMyPublishedSlugs(), liked: nbIsSignedIn() ? _nbLikedSlugs() : new Set() }; }
+function _nbApLikeLabel(on, n, own) {
+  const cnt = typeof n === 'number' ? n + (n === 1 ? ' like' : ' likes') : '';
+  if (own) return cnt;
+  return (on ? 'Liked, tap to unlike' : 'Like') + (cnt ? ', ' + cnt : '');
+}
+// Called from _nbSaveLikedSlugs, so it only reads the page (no sheet state): safe at any time.
+function _nbApPaintLikes() {
+  const list = document.getElementById('ap-list'); if (!list) return;
+  const set = nbIsSignedIn() ? _nbLikedSlugs() : new Set();
+  list.querySelectorAll('.ap-like[data-slug]').forEach(b => {
+    const on = set.has(b.getAttribute('data-slug')), n = b.getAttribute('data-n');
+    b.classList.toggle('is-liked', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.setAttribute('aria-label', _nbApLikeLabel(on, n === null || n === '' ? null : Number(n)));
+  });
+}
+function _nbApSetLikeCount(slug, n) {
+  const list = document.getElementById('ap-list'); if (!list) return;
+  list.querySelectorAll('.ap-row[data-slug]').forEach(r => {
+    if (r.getAttribute('data-slug') !== slug) return;
+    const el = r.querySelector('[data-lk]'); if (!el) return;
+    const t = el.querySelector('.ap-n'), txt = _nbCompactCount(n);
+    if (t && t.textContent !== txt) t.textContent = txt;
+    el.setAttribute('data-n', String(n));
+    el.setAttribute('aria-label', el.classList.contains('ap-like') ? _nbApLikeLabel(el.classList.contains('is-liked'), n) : _nbApLikeLabel(false, n, true));
+  });
+}
+// Moves the shown count by one straight away (a tap that went through, or one queued offline); the next count refresh from the server settles it.
+function _nbApBumpCount(slug, d) {
+  const row = _nbAp.pages.find(x => x.slug === slug);
+  if (!row || typeof row.likes !== 'number') return;
+  row.likes = Math.max(0, row.likes + d);
+  _nbApSetLikeCount(slug, row.likes);
+}
+function nbApLike(btn) {
+  const slug = btn && btn.getAttribute('data-slug'); if (!slug) return;
+  const row = _nbAp.pages.find(x => x.slug === slug);
+  return _nbToggleLike(slug, row ? row.authorSub : '');
+}
+let _nbApPollBusy = false, _nbApPollAgain = false;
+async function _nbApPollCounts() {
+  if (_nbApPollBusy) { _nbApPollAgain = true; return; } // asked again while one is out: run once more when it lands
+  if (!_nbApIsOpen() || !nbIsSignedIn() || document.hidden) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  const st = _nbAp, gen = st.gen, slugs = st.pages.map(x => x.slug).slice(0, 200);
+  if (!slugs.length) return;
+  const seq0 = _nbLikeMutationSeq;
+  _nbApPollBusy = true;
+  try {
+    const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/likes/counts', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + nbSessionToken(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slugs })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (gen !== _nbAp.gen || !_nbApIsOpen()) return;
+    if (seq0 !== _nbLikeMutationSeq || _nbLikeTapsInFlight) return; // these counts predate a tap: that tap refreshes them when it lands
+    const counts = (data && data.counts) || {}, cmap = (data && data.comments) || {};
+    let reflow = false;
+    st.pages.forEach(row => {
+      const n = counts[row.slug];
+      if (typeof n === 'number' && row.likes !== n) { row.likes = n; _nbApSetLikeCount(row.slug, n); }
+      const cn = cmap[row.slug];
+      if (typeof cn === 'number' && (row.comments || 0) !== cn) { row.comments = cn; reflow = true; } // the comments figure only exists in a row once it is above 0, so a change redraws the list
+    });
+    if (reflow) _nbApRender();
+  } catch (e) { _nbLog('author pages counts poll', e); }
+  finally { _nbApPollBusy = false; if (_nbApPollAgain) { _nbApPollAgain = false; setTimeout(_nbApPollCounts, 0); } }
+}
+setInterval(_nbApPollCounts, 8000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) _nbApPollCounts(); });
 function _nbApRender() {
   const list = document.getElementById('ap-list'); if (!list) return;
   const q = _nbAp.q, rows = q ? _nbAp.pages.filter(x => _nbApMatches(x, q)) : _nbAp.pages;
-  try { list.innerHTML = rows.map(x => _nbApRowHtml(x)).join(''); } catch (e) { _nbLog('author pages render', e); list.innerHTML = ''; }
+  try { const ctx = _nbApCtx(); list.innerHTML = rows.map(x => _nbApRowHtml(x, ctx)).join(''); } catch (e) { _nbLog('author pages render', e); list.innerHTML = ''; }
   const st = document.getElementById('ap-status'); if (!st) return;
   if (_nbAp.err) { st.innerHTML = '<button type="button" class="ap-more" onclick="_nbApLoad()">Try again</button>'; }
   else if (_nbAp.loading) st.textContent = q ? 'Searching\u2026' : 'Loading\u2026';
@@ -37301,7 +37422,7 @@ function _nbSaveLikedSlugs(set) {
   const next = JSON.stringify([...set]);
   let changed = true;
   try { changed = localStorage.getItem(key) !== next; localStorage.setItem(key, next); } catch (e) {}
-  if (changed) _nbCountsSoon('liked'); // the Liked tab's count follows a like or unlike, here or reconciled from another device
+  if (changed) { _nbCountsSoon('liked'); _nbApPaintLikes(); } // the Liked tab's count follows a like or unlike, here or reconciled from another device; hearts in the Recent pages sheet follow too [2026-11-04 02:45 | author-page-like]
 }
 function _nbSetLikeBtnState(btn, isLiked) {
   btn.innerHTML = isLiked ? NB_LIKED_ICON : NB_LIKE_ICON;
@@ -37314,8 +37435,10 @@ function _nbSetLikeBtnState(btn, isLiked) {
 // (and right after your own like/unlike or when the app comes back to the foreground), patching the
 // number in place so nothing re-renders, flashes or loses scroll.
 let _nbLikePollBusy = false;
+let _nbLikePollAgain = false; // [2026-11-04 02:45 | author-page-like] asked for while a refresh is out (a tap just landed): run once more when it ends, instead of waiting for the next tick
 async function _nbPollLikeCounts() {
-  if (_nbLikePollBusy || !nbIsSignedIn() || document.hidden || !_nbIsFeedCat(_nbActiveCat) || _nbActiveCat === 'Alerts') return; // alerts have no likes
+  if (_nbLikePollBusy) { _nbLikePollAgain = true; return; }
+  if (!nbIsSignedIn() || document.hidden || !_nbIsFeedCat(_nbActiveCat) || _nbActiveCat === 'Alerts') return; // alerts have no likes
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   const grid = document.getElementById('nb-notes-grid');
   if (!grid) return;
@@ -37359,7 +37482,7 @@ async function _nbPollLikeCounts() {
       span.setAttribute('aria-label', n + (n === 1 ? ' like' : ' likes'));
     });
   } catch (e) { _nbLog('like counts poll', e); }
-  finally { _nbLikePollBusy = false; }
+  finally { _nbLikePollBusy = false; if (_nbLikePollAgain) { _nbLikePollAgain = false; setTimeout(_nbPollLikeCounts, 0); } }
 }
 setInterval(_nbPollLikeCounts, 8000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) _nbPollLikeCounts(); });
@@ -37422,7 +37545,7 @@ async function _nbFlushPending() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   if (!_nbLoadPending().length) return;
   _nbFlushingPending = true;
-  let subChanged = false;
+  let subChanged = false, likeSettled = false;
   try {
     for (const p of _nbLoadPending()) {
       let res;
@@ -37440,7 +37563,7 @@ async function _nbFlushPending() {
       const unchanged = !!cur && cur.t === p.t;
       if (unchanged) _nbDropPending(p.kind, p.id);
       if (p.kind === 'sub') { subChanged = true; _nbSubMutationSeq++; }
-      if (p.kind === 'like') _nbLikeMutationSeq++;
+      if (p.kind === 'like') { _nbLikeMutationSeq++; likeSettled = true; }
       if (res.ok && unchanged) {
         // A newer tap from another device beats this replay; the reply carries the real state.
         let d = null; try { d = await res.json(); } catch (e) {}
@@ -37453,6 +37576,7 @@ async function _nbFlushPending() {
         try { msg = (await res.json()).error || ''; } catch (e) {}
         if (p.kind === 'like') {
           const set = _nbLikedSlugs(); if (p.want) set.delete(p.id); else set.add(p.id); _nbSaveLikedSlugs(set);
+          _nbApBumpCount(p.id, p.want ? -1 : 1); // [2026-11-04 02:45 | author-page-like] the sheet's count takes the refused tap back too
           const b = document.getElementById('story-viewer-like-btn');
           if (b && _nbCurrentStorySlug === p.id) _nbSetLikeBtnState(b, !p.want);
         } else {
@@ -37465,11 +37589,13 @@ async function _nbFlushPending() {
     }
   } finally { _nbFlushingPending = false; }
   if (subChanged) buildCatBar();
+  if (likeSettled) { _nbPollLikeCounts(); _nbApPollCounts(); } // [2026-11-04 02:45 | author-page-like] counts after queued likes have been sent
 }
 function _nbApplyQueuedLike(slug, want) {
   const set = _nbLikedSlugs();
   if (want) set.add(slug); else set.delete(slug);
   _nbSaveLikedSlugs(set);
+  _nbApBumpCount(slug, want ? 1 : -1); // [2026-11-04 02:45 | author-page-like]
   _nbLikeMutationSeq++;
   _nbQueuePending('like', slug, want);
   _nbRefreshCapsule();
@@ -37521,19 +37647,24 @@ async function _nbRefreshLikeState(slug) {
 // Mirrors nbToggleStorySubscribe: the button is disabled while the request is
 // in flight, the heart only changes once the server confirms, and a toast
 // reports the result (or the server's own reason on failure).
-async function nbToggleStoryLike() {
-  const slug = _nbCurrentStorySlug;
+// [2026-11-04 02:45 | author-page-like] changed: one routine for every heart. nbToggleStoryLike (viewer header) and nbApLike (Recent pages sheet) both call _nbToggleLike(slug, authorSub), so a like from the sheet does exactly what the header heart does. Counts are refreshed after the tap has settled (the old refresh inside the try was always thrown away: the tap's own mutation counter had moved on by the time the counts came back).
+const _nbLikeBusy = new Set(); // slugs with a tap in flight; the sheet's buttons are not disabled (a tap on a disabled button could fall through to the row and open the page)
+function nbToggleStoryLike() { return _nbToggleLike(_nbCurrentStorySlug, _nbCurrentStoryAuthorSub); }
+async function _nbToggleLike(slug, authorSub) {
   if (!slug) return;
   if (!nbIsSignedIn()) { showToast('Sign in to like'); return; }
   const acct = nbAccount();
-  if (_nbIsOwnAuthor(_nbCurrentStoryAuthorSub)) return; // own note — button is hidden, but guard anyway
-  const btn = document.getElementById('story-viewer-like-btn');
+  if (_nbIsOwnAuthor(authorSub)) return; // own note — button is hidden, but guard anyway
+  if (_nbLikeBusy.has(slug)) return;
+  const hb = document.getElementById('story-viewer-like-btn');
   const set = _nbLikedSlugs();
   const wasLiked = set.has(slug);
   const method = wasLiked ? 'DELETE' : 'POST';
   if (typeof navigator !== 'undefined' && navigator.onLine === false) { _nbApplyQueuedLike(slug, !wasLiked); return; }
-  btn.disabled = true;
+  _nbLikeBusy.add(slug);
+  if (hb && _nbCurrentStorySlug === slug) hb.disabled = true;
   _nbLikeTapsInFlight++; _nbLikeMutationSeq++;
+  let settled = false;
   try {
     const res = await _nbApiFetch(NB_PUBLISH_API.replace(/\/$/, '') + '/likes/' + encodeURIComponent(slug), {
       method,
@@ -37549,21 +37680,24 @@ async function nbToggleStoryLike() {
     if ((nbAccount() || {}).sub !== acct.sub) return; // account changed mid-flight — nothing here belongs to the new one
     const cur = _nbLikedSlugs(); // re-read: other likes may have changed while this was in flight
     if (nowLiked) cur.add(slug); else cur.delete(slug);
-    _nbSaveLikedSlugs(cur);
+    _nbSaveLikedSlugs(cur); // also repaints the hearts in the Recent pages sheet
     _nbDropPending('like', slug);
     _nbRefreshCapsule();
     if (nowLiked) _nbLikedTabAdd(slug); else _nbLikedTabDrop(slug);
-    if (_nbCurrentStorySlug === slug) _nbSetLikeBtnState(btn, nowLiked);
-    _nbPollLikeCounts();
+    if (hb && _nbCurrentStorySlug === slug) _nbSetLikeBtnState(hb, nowLiked);
+    if (nowLiked !== wasLiked) _nbApBumpCount(slug, nowLiked ? 1 : -1);
+    settled = true;
     showToast(nowLiked === !wasLiked ? (wasLiked ? 'Unliked' : 'Liked') : 'Kept as ' + (nowLiked ? 'liked' : 'unliked') + '. A newer change was already saved.');
   } catch (e) {
     _nbLog('like toggle', e);
     if (_nbIsNetworkError(e)) { _nbApplyQueuedLike(slug, !wasLiked); return; } // connection dropped — queue it
     showToast('Couldn\u2019t ' + (wasLiked ? 'unlike' : 'like') + (e && e.serverMsg ? ': ' + e.serverMsg : _nbFailureReason(e)));
   } finally {
-    btn.disabled = false;
+    _nbLikeBusy.delete(slug);
+    if (hb) hb.disabled = false;
     _nbLikeTapsInFlight--; _nbLikeMutationSeq++;
   }
+  if (settled) { _nbPollLikeCounts(); _nbApPollCounts(); }
 }
 // Bumped whenever a subscribe/unsubscribe on this device succeeds, so a
 // reconcile request that was already in flight (and so predates it) is
@@ -46323,7 +46457,7 @@ function _nbFailureReason(err) {
       if (code === 401 || code === 403) return ': signed out';
       if (code === 404) return ': not found';
       if (code === 408) return ': timed out';
-      if (code === 409) return ': conflict, try again';
+      if (code === 409) return ': changed on another device, try again';
       if (code === 413) return ': too large';
       if (code === 429) return ': too many requests, try again shortly';
       if (code >= 500) return ': server error';
