@@ -18623,6 +18623,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
      SESSION LOG   [search: SESSION LOG]   Newest first. Times are WAT (Africa/Lagos, UTC+1).
 
      TOPICS
+        homepage-tile      the Homepage tile in Settings > About & Support that opens the Worker's welcome page (this app)
         author-page-like   the heart in each row of the Recent pages sheet (author's pages): likes and unlikes the page like the viewer header heart, red when liked, author alert, counts and the Liked tab follow (this app)
         nav-brand-icon     the Brand icon picker is left out in the text-only brand designs (Broadsheet, Magazine, Boutique), where only an image shows (this app)
         nav-icon-shows     a link or button icon chosen in the navigation bar sheet now shows; Link icons turns on by itself (this app)
@@ -18654,6 +18655,212 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         ad-loosen          loosening Publish as Ad: any published page can be an ad, the only content rule left is no images uploaded from the device (worker index.js and this app)
         invite-alert       an alert at sign-in telling an invited email it has been invited to a verified name (worker index.js)
         swap-keep-column   a vertical drag swap in the editor trades rows only, so each block keeps its column and a centred block stays centred (this app)
+         nav-icon-cancel    Link icons goes back to its old setting when the image picker closes without a new image (this app)
+         homepage-moved     the Homepage tile in Settings is now called Visit homepage and sits after Consumer terms (this app)
+         homepage-sub-removed  the Homepage tile in Settings no longer has the line Visit the Bluebook website under it (this app)
+         nav-icon-cancel2   choosing the same image again for a link no longer counts as cancel; Link icons stays on (this app)
+         nav-hint-fix       the image hint no longer says it replaces an icon in designs that have no brand icon slot (this app)
+         admin-verify       Verify an account in admin Tools: an admin gives an account its verified name and tick straight from its author ID, after checking its display name (worker index.js)
+         coc-update         the Admin Code of Conduct covers Verify an account, and its longer lines are shorter (worker index.js)
+
+     SESSION 2026-11-04 19:29 | topics: coc-update | AI: Claude (app) | Admin Code of Conduct: add Verify an account, shorten long lines
+       Start state
+         index-53.js (Worker) and note-builder-freemium-97.html. The Admin Code of Conduct (COC array and cocBuild in the admin page) did not mention Verify an account, and a few lines were long.
+       Work done
+         Worker: the COC array is rewritten. Still five sections, so the five tags at the top still match. [2026-11-04 19:29 | coc-update]
+         Added: a Verify with care line in Take care (check the display name and email in the box first, it gives a tick and locks the display name, never verify a friend, undo with Remove reservation in Lookup). Guard what is private now also names an email and a display name. [2026-11-04 19:29 | coc-update]
+         Shortened: Release, the approved words lines (alerts and Terms or policy changes are now one line), Reserve names, Check before you send, Match the fix, and the child safety lines. The friendly tone is kept. [2026-11-04 19:29 | coc-update]
+       Important details
+         The line Never verify a friend is new wording that follows the rule already used for reserving names. Change it if the team sees it differently.
+         Reserve names and Verify with care are two separate lines on purpose, so each action has its own reminder.
+       Untested
+         index-54.js passes node --check and the COC array runs on its own (5 sections, 22 lines). Open the admin page, tap the book icon and read it through. Check the tag buttons still jump to the right section.
+       Depends on
+         Worker index.js changed (index-54.js). This file only gets the log entry. Deploy index-54.js. Privacy, Terms and LEGAL_DEFAULTS untouched.
+       Final state
+         The Code of Conduct is shorter, covers Verify an account, and keeps the same five sections.
+
+     SESSION 2026-11-04 19:21 | topics: admin-verify | AI: Claude (app) | Verify an account straight from the admin page
+       Start state
+         Uploaded note-builder-freemium-96.html and index-52.js (Worker). Verified names were only made by Invite: the admin holds an address for an email, the person signs in and publishes, and the claim gives the tick. The admin compared the display name with the email by eye in the reserved list.
+       Work done
+         Worker: POST /admin/reserved has a new action verify {aid, slug, note, preview}. It finds the account by author ID and refuses unless it has a display name, a Google verified sign-in email and no verified name yet. The address must be free, a plain reservation, an invitation that ran out, or a live page of that same account. It writes one reserved_slugs row already claimed (email is the account's own email, never ends), gives a live page at that address the tick, clears the verified-profile cache for the account, audits as verify (address and note only) and sends the account an alert. preview:true writes nothing and answers the display name and email. [2026-11-04 19:21 | admin-verify]
+         Admin Tools has a new card, Verify an account (Author ID, Slug or link, Verify). It asks for the preview, shows the display name and email in a confirm, then verifies. [2026-11-04 19:21 | admin-verify]
+         TECH_NOTES has a new section for it. [2026-11-04 19:21 | admin-verify]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing else.
+       Found
+         The newest entries below are stamped 19:40, later than the device clock read for this session (19:21 WAT on 2026-11-04). Left as it is. If the earlier stamps were guessed, check them.
+         Verified names stay one per account here: the action refuses an account that already holds one. Invite can still make a second one. Not changed.
+       Important details
+         Rejected: a new tick column or flag on the account. Every tick, lock and hold already reads reserved_slugs, so the new row copies a claimed invite and nothing else needed changing.
+         Public wording: the Terms say the tick means the account signed in with the email we invited. A verified row holds the account's own verified sign-in email, so that sentence stays true and Privacy, Terms and LEGAL_DEFAULTS are untouched. Checked after normalising tags and spaces: the app and Worker copies are identical (Privacy 66005 characters, Terms 32745).
+         The alert reuses kind name_invite (not a tap kind, not a strike). It says the display name is locked, which the Terms already say.
+         Numbers checked against the code: 30 day hold is SOFT_DELETE_RETENTION_MS, the 60 s cache is the 60000 in holdsVerifiedNameCached. No new figure in public text.
+       Removed
+         Nothing.
+       Untested
+         index-53.js passes node --check. The admin page code was not run. Open admin Tools and try: a wrong ID (error), an account with no display name (refused), a good account (confirm shows its name and email, then verified), the same account again (already verified), the account's own page tick after a reload, then Remove reservation in Lookup (tick goes). Also check the confirm text wraps well on a phone.
+       Depends on
+         Worker index.js changed (index-53.js). This file only gets the log entry. Deploy index-53.js for the Tools card to appear. Privacy, Terms and LEGAL_DEFAULTS untouched.
+       Final state
+         Admin can verify an account from its author ID in one step. The row is the same as a claimed invite, so the tick, display name lock, 30 day hold and Remove reservation work as before.
+       Next
+         Check the Untested list. Say if a second verified address for one account should be allowed.
+
+     SESSION 2026-11-04 19:40 | topics: homepage-moved | AI: Claude (app) | Move the Homepage tile and rename it
+       Start state
+         note-builder-freemium-96.html from the 19:30 session; index-52.js (Worker) not changed.
+       Work done
+         The Homepage row in Settings, About and Support now sits after Consumer terms (before App version) and is called Visit homepage. It still opens the welcome page. [2026-11-04 19:40 | homepage-moved]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing else.
+       Found
+         Nothing.
+       Important details
+         Same file name as before, note-builder-freemium-96.html.
+       Removed
+         The old Homepage row position and name.
+       Untested
+         Inline scripts pass node --check. Not run in a browser: open Settings and check Visit homepage comes right after Consumer terms and opens the welcome page.
+       Depends on
+         Worker index.js unchanged.
+       Final state
+         Visit homepage follows Consumer terms.
+       Next
+         Check the Untested item.
+
+     SESSION 2026-11-04 19:30 | topics: homepage-sub-removed | AI: Claude (app) | Remove the text under the Homepage tile
+       Start state
+         note-builder-freemium-96.html from the 19:20 session; index-52.js (Worker) not changed.
+       Work done
+         Removed the s text Visit the Bluebook website from the Homepage row in Settings, About and Support. The row still opens the welcome page. [2026-11-04 19:30 | homepage-sub-removed]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing else.
+       Found
+         Rows without s draw with no second line (sub() returns empty), so nothing else needed changing.
+       Important details
+         Same file name as before, note-builder-freemium-96.html.
+       Removed
+         The text Visit the Bluebook website.
+       Untested
+         Inline scripts pass node --check. Not run in a browser: open Settings and check the Homepage tile shows only its name.
+       Depends on
+         Worker index.js unchanged.
+       Final state
+         Homepage tile shows its name only.
+       Next
+         Check the Untested item.
+
+     SESSION 2026-11-04 19:20 | topics: nav-icon-cancel2 | AI: Claude (app) | Fix the catch left in nav-icon-cancel
+       Start state
+         Uploaded note-builder-freemium-96.html and index-52.js (Worker, not changed). The 18:52 fix treated choosing the same image again as cancel.
+       Work done
+         The link image picker now tells cancel from picked by imgPicker's own callbacks (cancel callback restores Link icons, done callback keeps it), not by comparing the image source before and after. The unused src0 field was removed. [2026-11-04 19:20 | nav-icon-cancel2]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Choosing the same image again for a link keeps Link icons on.
+       Found
+         imgPicker marks picked on any set of the image source, so the same image counts as picked there.
+       Important details
+         Cancel still restores the old Link icons value, or removes the setting if it had none.
+       Removed
+         pk.src0 and the source comparison.
+       Untested
+         Inline scripts pass node --check. Not run in a browser: cancel the picker on a link with no image (Link icons stays as it was); pick the same image again on a link that has one (icons stay on); pick a new image (icons turn on).
+       Depends on
+         Worker index.js unchanged.
+       Final state
+         Link icons follows whether the picker really picked.
+       Next
+         Check the Untested list.
+
+     SESSION 2026-11-04 18:52 | topics: nav-icon-cancel, nav-hint-fix | AI: Claude (app) | Three small fixes from the review of the last 24 hours
+       Start state
+         Uploaded note-builder-freemium-95.html and index-52.js (Worker, not changed). Review of every change stamped 2026-11-04 found three things to fix; the Worker needed nothing.
+       Work done
+         Choosing an image for a link no longer turns Link icons on up front and leaves it on: the old setting is kept and put back if the picker closes with the same image as before (cancel). Picking a new image still turns icons on. [2026-11-04 18:52 | nav-icon-cancel]
+         The hint The image is shown instead of the icon now shows only where an icon slot exists, so Broadsheet, Magazine and Boutique brand sections no longer show it beside an image only brand. [2026-11-04 18:52 | nav-hint-fix]
+         TECH_NOTES line for Floating page arrows said off by default; it now says on by default, and that phones that already saved their settings keep their own choice. [2026-11-04 18:52 | floating-nav]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         The three items above.
+       Found
+         Not changed, judged fine: a floating bar stays floating if a page gets float false later (only if the setting changes while a page stays loaded); the Recent pages count refresh skips signed out viewers (the counts call needs a token).
+       Important details
+         The cancel test compares the picked image source before and after the picker, so choosing the same image again counts as cancel and restores the old Link icons value. (Replaced in the 19:20 session below.)
+       Removed
+         Nothing.
+       Untested
+         Inline scripts pass node --check. Not run in a browser: cancel the picker on a link with no image (Link icons should stay as it was), pick an image (icons turn on), brand section of Broadsheet with an image (no icon hint).
+       Depends on
+         Worker index.js unchanged. Privacy, Terms and LEGAL_DEFAULTS untouched.
+       Final state
+         Link icons only changes when an image is really picked. Hint text matches what the sheet shows.
+       Next
+         Check the Untested list.
+
+     SESSION 2026-11-04 18:14 to 18:20 | topics: page-space-balance | AI: Claude (app) | Admin page space credit (Worker only)
+       Start state
+         Uploaded note-builder-freemium-94.html (read only, unchanged) and index.js (Worker). Clock: container clock converted to WAT. The 17:52 entry left a page space admin refund undecided. Checked first: ad views are returned once for each ad by refundAdViews (admin takedown with refund, admin release, standalone refund, each with an owner alert) and a store refund takes views back. Page space has the store refund clawback and returns held space on any unpublish, but no admin credit, no owner alert and no button.
+       Work done
+         New POST /admin/space {slug, mb, reason}: handleAdminSpace and creditPageSpace. Adds one ledger row (reason credit) for the page's owner, once for each page address (rc_event_id admin_space:slug is unique, second call answers 409). mb is a whole number from 1 to 100 (SPACE_CREDIT_MAX_MB). Reason required, audited as space_credit, owner alert of kind release (not a strike). [2026-11-04 18:14 | page-space-balance]
+         Admin owner view: Give space button under the Page space section (spaceAct), ledger label Added by us, audit label Page space added, one line added to the section's fine print. [2026-11-04 18:14 | page-space-balance]
+         pageSizeRelease now returns the MB it gave back, and the admin release alert says when space came back. Takedown alert unchanged, its wording marks a strike. [2026-11-04 18:14 | page-space-balance]
+         TECH_NOTES: new section Page space credit (admin). [2026-11-04 18:14 | page-space-balance]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing.
+       Found
+         Admin Page space figure (MB bought) counts purchase and refund rows only, so a credit is not counted as bought. Checked against the query, left as it is.
+         One credit for each page address, the same as the ad refund. A second credit for the same page needs a different design (not done).
+       Important details
+         Kept to the ad refund's shape (one guarded insert, audit, alert). Rejected: a new table, or changing what pages hold.
+       Removed
+         Nothing.
+       Untested
+         node --check passes. Not run against D1 or the admin page on a phone. Check: Give space on an owner with space, 409 on a second try, alert text, ledger row shows Added by us, an admin release of a page holding space shows the new alert line.
+       Depends on
+         Worker only. This app file is unchanged apart from this entry. Privacy, Terms and LEGAL_DEFAULTS untouched and the two copies read the same (compared 66005 and 32745 characters of text, no difference). The policy wording already covers credit or refund, so no text change. TECH_NOTES checked against SPACE_CREDIT_MAX_MB (100, from PAGE_SIZE_TIERS).
+       Final state
+         Admin can give 1 to 100 MB of page space once for each page, with audit and owner alert. Release alert mentions returned space.
+       Next
+         Check the Untested list.
+
+     SESSION 2026-11-04 17:52 | topics: homepage-tile, floating-nav | AI: Claude (app) | Homepage tile in Settings; floating arrows on by default
+       Start state
+         Uploaded note-builder-freemium.html and index.js (Worker, read only, unchanged). Time from the container clock converted to WAT. Plan: touch only the About & Support group and the settings defaults.
+       Work done
+         New Homepage tile in Settings > About & Support, right after About. It opens the Worker's welcome page (NB_PUBLISH_API + '/') through _nbOpenExternalLink. [2026-11-04 17:52 | homepage-tile]
+         Floating page arrows now default to on (DEF.floatPageNav true). [2026-11-04 17:52 | floating-nav]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing.
+       Found
+         A phone that already saved its settings keeps floatPageNav false, because every setting is saved together. Not migrated on purpose, so nobody's choice is overridden.
+         Page space has no admin refund like ads do (refundAdViews, /admin/ad refund). Privacy says we may credit or refund page space we failed to deliver. Space a page holds is already returned on any unpublish, and a store refund takes a pack back. Left for a later session, not changed here.
+       Important details
+         Placed after About because both describe the app. Rejected: a new group, or putting it last next to App version.
+       Removed
+         Nothing.
+       Untested
+         Not run. Open Settings, check the tile shows and opens the welcome page, and check a fresh install shows Floating page arrows on.
+       Depends on
+         Needs GET / on the Worker (WELCOME_HTML). Privacy, Terms, LEGAL_DEFAULTS and TECH_NOTES untouched.
+       Final state
+         About & Support: About, Homepage, tour rows, Privacy policy, Consumer terms, App version. floatPageNav defaults to true.
+       Next
+         Check the Untested list. Decide on a page space admin refund.
 
      SESSION 2026-11-04 03:30 to 03:45 | topics: author-page-like | AI: Claude (app) | Heart tap must never open the page
        Start state
@@ -18817,7 +19024,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
          Recent pages search bar: clear X (#ap-clear) at the right, its icon 13px from the edge like the magnifier at the left, shown only while text is typed; nbApClear empties the box, shows every page and keeps focus. [2026-11-03 08:38 | page-list]
          Recent pages sheet: drag to close (_nbApDragInit), a copy of the comments sheet's drag (start on the head or the list at the top, quarter of the height or 50px to close, springs back otherwise). Not from the search box or buttons. [2026-11-03 08:38 | page-list]
          Footer: VERIFIED_TICK is now a column, arrows and list first, tick under them. The tick gets its gap only when the arrows show, so one alone leaves no empty space. [2026-11-03 08:38 | page-nav]
-         Settings > Appearance > Floating page arrows (floatPageNav, off by default, kept on the phone). The app sends float in the nb-nav message; the page's FOOT_SCRIPT moves the arrows into a transparent fixed bar at the bottom centre (bottom 1.1rem, 38px high, so level with the comments button) that fades in on scroll, touch or wheel and out after the same 1.8 s / 5 s timings as the comments button. In that mode the footer keeps only the tick (row hidden if there is none). [2026-11-03 08:38 | floating-nav]
+         Settings > Appearance > Floating page arrows (floatPageNav, on by default since 2026-11-04 17:52; a phone that saved its settings earlier keeps its own choice; kept on the phone). The app sends float in the nb-nav message; the page's FOOT_SCRIPT moves the arrows into a transparent fixed bar at the bottom centre (bottom 1.1rem, 38px high, so level with the comments button) that fades in on scroll, touch or wheel and out after the same 1.8 s / 5 s timings as the comments button. In that mode the footer keeps only the tick (row hidden if there is none). [2026-11-03 08:38 | floating-nav] [2026-11-04 18:52 | floating-nav] changed: the off by default wording above was stale, now says on by default.
          Scroll to top at the bottom right or bottom centre never sits lower than --nb-clear. The comments script sets --nb-clear-r (4.2rem) on the page and the floating bar sets --nb-clear-c, so the button rises above them. [2026-11-03 08:38 | floating-nav]
        Improvements
          Nothing beyond the task.
@@ -25431,7 +25638,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       return '<div class="dz-mq-slots">' + (noIcon ? '' : '<div class="dz-mq-slotw"><button type="button" class="dz-mq-slot" data-k="nvIcOpen" data-v="' + who + '" aria-label="Choose icon">' + (cur && cur !== 'none' && DZ_ICONS[cur] ? nvSvg(cur) : '<span class="dz-mq-plus">+</span>') + '</button>' + (cur && cur !== 'none' && DZ_ICONS[cur] ? '<button type="button" class="dz-mq-x" data-k="nvIcClr" data-v="' + who + '" aria-label="Remove icon">×</button>' : '') + '<span class="dz-mq-cap">Icon</span></div>') +
         (noImg ? '' : '<div class="dz-mq-slotw"><button type="button" class="dz-mq-slot" data-k="nvImgPick" data-v="' + who + '" aria-label="' + (has ? 'Change image' : 'Add image') + '">' + (src ? '<img src="' + dzEsc(src) + '" alt="">' : '<span class="dz-mq-plus">' + (has ? '✓' : '+') + '</span>') + '</button>' +
         (has ? '<button type="button" class="dz-mq-x" data-k="nvImgDel" data-v="' + who + '" aria-label="Remove image">×</button>' : '') + '<span class="dz-mq-cap">Image</span></div>') + '</div>' +
-        (has ? '<div class="dz-hint">The image is shown instead of the icon.</div>' : '');
+        (has && !noIcon ? '<div class="dz-hint">The image is shown instead of the icon.</div>' : ''); // [2026-11-04 18:52 | nav-hint-fix] no icon slot (brand-as-text designs) means nothing for the image to replace, so no hint
     }
     // Image style + Border for an image used in place of an icon (same wording and order as the Image block's design sheet).
     // Kept on the <img> itself (data-is, data-ibw, data-ibc + inline border) so it survives every re-render and is published as is.
@@ -25759,8 +25966,10 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         if (!hostEl) return false;
         if (!pim) { pim = nvMkImg(); hostEl.appendChild(pim); }
         pim.setAttribute('data-nv-pend', '1');
-        if (v === 'it') block.dataset.nvIcons = '1'; // [2026-11-04 01:17 | nav-icon-shows] same for a picked link image
-        picking = { im: pim, tab: dzCtl.tab(), top: dzCtl.top(), it: selIt, dg: selDg, sub: selSub };
+        // [2026-11-04 01:17 | nav-icon-shows] same for a picked link image. [2026-11-04 18:52 | nav-icon-cancel] changed: the old value is kept, and put back in back() below if the picker closes without a new image
+        var icHad = block.hasAttribute('data-nv-icons'), icOld = block.getAttribute('data-nv-icons');
+        if (v === 'it') block.dataset.nvIcons = '1';
+        picking = { im: pim, tab: dzCtl.tab(), top: dzCtl.top(), it: selIt, dg: selDg, sub: selSub, who: v, icHad: icHad, icOld: icOld };
         closeVariantSheet(true); return false;
       }
       if (k === 'nvSel') { selIt = selIt === String(v) ? '' : String(v); selSub = ''; return; }
@@ -25980,13 +26189,15 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       var pk = picking; picking = null;
       if (!pk || !pk.im.isConnected) return;
       // The photo picker records its own undo step. Picked or not, come back to the nav bar sheet exactly where it was left.
-      function back() {
+      function back(cancelled) {
         pk.im.removeAttribute('data-nv-pend');
+        // [2026-11-04 18:52 | nav-icon-cancel] picker closed with no new image: Link icons goes back to what it was. [2026-11-04 19:20 | nav-icon-cancel2] changed: this now follows the picker's own cancel/done callback, not a comparison of image sources, so choosing the same image again counts as picked and keeps Link icons on
+        if (cancelled === true && pk.who === 'it') { if (pk.icHad) block.setAttribute('data-nv-icons', pk.icOld); else block.removeAttribute('data-nv-icons'); }
         var pkd = pk.dg ? nvDlg(block, pk.dg) : null; if (pkd) nvApplyDlg(pkd);
         applyNavbar(block); nvSync(block);
         openNavbarDesign(block, pk.tab, pk.it, pk.top, pk.dg, pk.sub);
       }
-      imgPicker.open(pk.im, back, back);
+      imgPicker.open(pk.im, function() { back(true); }, function() { back(false); });
     });
   }
 
@@ -29527,7 +29738,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
 /* ===================== Settings ===================== */
 (function () {
   const KEY = 'nb_settings_v1';
-  const DEF = { sort: 'default', images: true, stories: true, myStories: 'first', tips: true, startOn: 'library', confirmDelete: true, resetSource: 'saved', syncEvery: 20, reduceMotion: null, glassMode: true, pauseSweep: false, mediaSwipe: true, floatPageNav: false, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false, msgAlways: false };
+  // [2026-11-03 08:38 | floating-nav] [2026-11-04 17:52 | floating-nav] changed: Floating page arrows is on by default (floatPageNav: true). A phone that already saved the setting keeps its own choice.
+  const DEF = { sort: 'default', images: true, stories: true, myStories: 'first', tips: true, startOn: 'library', confirmDelete: true, resetSource: 'saved', syncEvery: 20, reduceMotion: null, glassMode: true, pauseSweep: false, mediaSwipe: true, floatPageNav: true, hideDashes: false, hideLibCount: false, hideMdCount: false, maskEmail: false, msgAlways: false };
   let S = null, lastPoll = 0;
   function load() {
     try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = Object.assign({}, DEF); }
@@ -29651,6 +29863,8 @@ document.getElementById('dark-btn').addEventListener('click', function (e) { e.p
       { t: 'link', l: 'Exit tour', accent: true, show: () => !!(window._nbTour && window._nbTour.on), go: () => { if (window.nbTourExit) window.nbTourExit(); } },
       { t: 'link', l: 'Privacy policy', go: () => openPrivacy() },
       { t: 'link', l: 'Consumer terms', go: () => openConsumerTerms() },
+      // [2026-11-04 19:40 | homepage-moved] moved from under About to after Consumer terms and renamed Visit homepage (small h). [2026-11-04 19:30 | homepage-sub-removed] the line under the name was removed. [2026-11-04 17:52 | homepage-tile] Opens the Worker's welcome page (GET / on the publish address) in the phone's browser.
+      { t: 'link', l: 'Visit homepage', go: () => _nbOpenExternalLink(NB_PUBLISH_API + '/') },
       { t: 'info', l: 'App version', s: 'v3.2.9' }]]
   ];
   const E = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
