@@ -18666,6 +18666,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
          Own-page heart opening the page. The 02:35 entry said own pages show plain text; that was the bug.
        Fixed (03:52)
          Signed out, a row for a page published from this device was treated as your own, so its heart said "You can't like your own page" instead of "Sign in to like". The row now follows the header heart's rule: own only when the signed-in account is the author (plus a locally published slug when signed in). [2026-11-04 03:52 | author-page-like]
+       Fixed (04:05)
+         Signed in as a different account, a page published from this device was still treated as yours. The row now uses only the header heart's rule (_nbIsOwnAuthor on the row's author); the local published list is no longer used here. [2026-11-04 04:05 | author-page-like]
        Found
          Nothing else open.
        Untested
@@ -37215,7 +37217,7 @@ function _nbApRowHtml(s, ctx) {
   const cmts = (typeof s.comments === 'number' && isFinite(s.comments)) ? Math.max(0, Math.floor(s.comments)) : 0;
   // [2026-11-04 02:45 | author-page-like] changed: the heart is a button (not on your own pages, which can't be liked), red when this account liked the page; both carry data-lk and data-n so counts and hearts are patched in place
   const c = ctx || _nbApCtx();
-  const mine = _nbIsOwnAuthor(s.authorSub) || (nbIsSignedIn() && c.mine.has(s.slug)); // [2026-11-04 03:52 | author-page-like] changed: signed out, a page published from this device was treated as yours and the heart said "can't like your own page"; now only the signed-in account decides, like the header heart
+  const mine = _nbIsOwnAuthor(s.authorSub); // [2026-11-04 04:05 | author-page-like] changed: exactly the header heart's rule (the signed-in account is the author). The extra check on pages published from this device wrongly marked another account's pages as yours.
   const liked = !mine && c.liked.has(s.slug);
   const cntTxt = likes === null ? '' : _nbCompactCount(likes);
   const likesHtml = mine
@@ -37234,7 +37236,7 @@ function _nbApRowHtml(s, ctx) {
 }
 // [2026-11-04 02:45 | author-page-like] Hearts in the Recent pages sheet. The heart and its count are one button. It runs the same routine as the viewer header heart (_nbToggleLike), so the server call, the author's alert, the Liked tab, the offline queue and the header heart all behave the same. Hearts are repainted from the liked list every time it changes (_nbSaveLikedSlugs); counts are patched in place, from the server every few seconds and right after a tap, never by re-rendering the list.
 const _NB_AP_HEART = '<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.3 2.6 4.5 6.3 4.5c2 0 3.6 1 5.7 3.2 2.1-2.2 3.7-3.2 5.7-3.2 3.7 0 5.5 3.8 3.9 7.3C19.5 16.4 12 21 12 21z"/></svg>';
-function _nbApCtx() { return { mine: _nbMyPublishedSlugs(), liked: nbIsSignedIn() ? _nbLikedSlugs() : new Set() }; }
+function _nbApCtx() { return { liked: nbIsSignedIn() ? _nbLikedSlugs() : new Set() }; }
 function _nbApLikeLabel(on, n, own) {
   const cnt = typeof n === 'number' ? n + (n === 1 ? ' like' : ' likes') : '';
   if (own) return cnt;
