@@ -13169,7 +13169,6 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
 .blk[data-nv-d="orb"] .blk-nv-wrap{padding:.65rem .75rem}
 .blk[data-nv-d="orb"] .blk-nv{width:fit-content;max-width:100%;margin:0 auto;gap:2.4rem;min-height:calc(var(--nv-h) - 10px);padding:0 .4rem 0 1.2rem;border-radius:var(--nv-rb,999px);box-shadow:0 14px 34px -14px rgba(16,16,40,.4),0 0 0 1px var(--nv-line)}
 .blk[data-nv-d="orb"] .blk-nv-bg{width:2.5rem;height:2.5rem;margin-left:auto;border:0;border-radius:50%;background:var(--nv-c);color:var(--nv-on)}
-/* app tabs: flat tab bar and center-action bar */
 
 /* islands: brand, links and button float as separate pills over the page */
 .blk[data-nv-d="islands"] .blk-nv-wrap{padding:.6rem .75rem}
@@ -18616,6 +18615,9 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
      SESSION LOG   [search: SESSION LOG]   Newest first. Times are WAT (Africa/Lagos, UTC+1).
 
      TOPICS
+        nav-brand-icon     the Brand icon picker is left out in the text-only brand designs (Broadsheet, Magazine, Boutique), where only an image shows (this app)
+        nav-icon-shows     a link or button icon chosen in the navigation bar sheet now shows; Link icons turns on by itself (this app)
+        stale-nav-text     removing leftover words about Center action, app tab designs and Show icons from the navigation bar sheet (this app)
         tour-voice-clips   the spoken clips in the tour's Garden journal chat and the Lisbon voice message
         custom-domain      moving the publish address to my-site.name and keeping the old workers.dev address working
         design-parity-note the DESIGN PARITY CHECKLIST above and keeping it current
@@ -18643,6 +18645,28 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         ad-loosen          loosening Publish as Ad: any published page can be an ad, the only content rule left is no images uploaded from the device (worker index.js and this app)
         invite-alert       an alert at sign-in telling an invited email it has been invited to a verified name (worker index.js)
         swap-keep-column   a vertical drag swap in the editor trades rows only, so each block keeps its column and a centred block stays centred (this app)
+
+     SESSION 2026-11-04 01:15 | topics: stale-nav-text, nav-icon-shows, nav-brand-icon, floating-nav | AI: Claude (app) | Leftover Center action and app tab wording removed; added icons now show
+       Start state
+         Uploaded webapp.html with the swap-keep-column session on top. The navigation bar sheet still carried words for designs that no longer exist. Plan: touch only that wording and one empty CSS comment.
+       Work done
+         The icon section in actEditor now reads Icon (button) or Icon or image (links). [2026-11-04 01:15 | stale-nav-text]
+         The floating page arrows and list button (reader setting Floating page arrows) now sit in a see-through glass pill: blur, faint edge, tint chosen from the text colour. Worker index.js only (FOOT_SCRIPT floatBar). [2026-11-04 01:25 | floating-nav]
+         In Broadsheet, Magazine and Boutique the Brand section now offers only the image slot, with a one line hint, because the brand icon never shows there. [2026-11-04 01:20 | nav-brand-icon]
+         Choosing an icon (or picking an image) for a link or the button now sets Link icons to Shown, so it appears at once. Turning Link icons to Hidden still hides them. [2026-11-04 01:17 | nav-icon-shows]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         An icon added to a link or the button never showed, because Link icons is Hidden by default and nothing turned it on.
+       Found
+         Searched the whole file for center action, app tab and Show icons. No Center action or app tab design is left, and the Worker has none. The Starters sheet itself held none of this wording; it was in the navigation bar sheet. Correction [2026-11-04 01:17 | nav-icon-shows]: Show icons was the Link icons setting (nvIcons, Style tab), which is real and defaults to Hidden, so an added icon never showed.
+         Asked about similar bugs [2026-11-04 01:19 | nav-icon-shows], fixed below [2026-11-04 01:20 | nav-brand-icon]: the Brand icon picker is offered in every design, but Broadsheet, Magazine and Boutique hide the brand mark unless it is an image (CSS .blk-nv-mark:not([data-img]){display:none}), so a chosen brand icon never shows there. Checked and fine: Search and Menus tabs are hidden for designs that cannot use them (NV_NOSEARCH, NV_NOSUB), the menu icon is not offered for navpop, dialog icons only hide when empty, sub-link icons show. Not read: the other design sheets.
+       Important details
+         The floating bar was bare on purpose in the 2026-11-03 session (no background, as asked then). That is replaced: it now has the glass pill. The footer row of arrows (not floating) is unchanged.
+         actEditor stays: it also edits the navigation bar's own button and its icon. Only its labels changed.
+       Removed
+         The CSS comment app tabs: flat tab bar and center-action bar (no rules followed it).
+         The label text the center button of Center action, and shown in app tab designs, or with Show icons.
 
      SESSION 2026-11-03 ??:?? | topics: swap-keep-column | AI: Claude (app) | Vertical swap no longer shifts a block to the left
        Start state
@@ -24402,6 +24426,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
   var NV_MN = [['', 'Design'], ['inline', 'Drop-down'], ['fullscreen', 'Full screen'], ['panel', 'Right panel'], ['left', 'Left panel'], ['orb', 'Popover'], ['top', 'Top sheet'], ['sheet', 'Bottom sheet'], ['card', 'Centred card']];
   var NV_NOSUB = { editorial: 1, broadsheet: 1 };
   var NV_NOSEARCH = { split: 1 };
+  // [2026-11-04 01:20 | nav-brand-icon] designs that show the brand as text only: an icon never shows there, only an image does
+  var NV_BRANDIMG = { broadsheet: 1, magazine: 1, boutique: 1 };
   // Designs built around search switch it on the first time you pick them. Picking a design never switches search off, and never overrides a choice you made yourself.
   var NV_SEARCH_ON = { market: 1, boutique: 1, slim: 1 };
   var NV_RAD = { s: ['6px', '12px', '10px'], m: ['12px', '20px', '16px'], p: ['999px', '999px', '22px'] };
@@ -25339,9 +25365,10 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       var d = selDg ? nvDlg(block, selDg) : null, ic = d ? d.querySelector('.nb-dlg-ic') : null;
       return { cur: function() { return d ? d.getAttribute('data-dg-ic') || '' : ''; }, set: function(n) { if (d) d.setAttribute('data-dg-ic', n); }, img: function() { return ic ? ic.querySelector('img.blk-nv-img') : null; }, host: function() { return ic; } };
     }
-    function nvSlots(who, noImg) {
+    // [2026-11-04 01:20 | nav-brand-icon] changed: optional noIcon leaves out the icon slot
+    function nvSlots(who, noImg, noIcon) {
       var t = visT(who), cur = t.cur(), im = t.img(), has = !noImg && nvHasImg(im), src = has ? (im.currentSrc || im.getAttribute('src') || '') : '';
-      return '<div class="dz-mq-slots"><div class="dz-mq-slotw"><button type="button" class="dz-mq-slot" data-k="nvIcOpen" data-v="' + who + '" aria-label="Choose icon">' + (cur && cur !== 'none' && DZ_ICONS[cur] ? nvSvg(cur) : '<span class="dz-mq-plus">+</span>') + '</button>' + (cur && cur !== 'none' && DZ_ICONS[cur] ? '<button type="button" class="dz-mq-x" data-k="nvIcClr" data-v="' + who + '" aria-label="Remove icon">×</button>' : '') + '<span class="dz-mq-cap">Icon</span></div>' +
+      return '<div class="dz-mq-slots">' + (noIcon ? '' : '<div class="dz-mq-slotw"><button type="button" class="dz-mq-slot" data-k="nvIcOpen" data-v="' + who + '" aria-label="Choose icon">' + (cur && cur !== 'none' && DZ_ICONS[cur] ? nvSvg(cur) : '<span class="dz-mq-plus">+</span>') + '</button>' + (cur && cur !== 'none' && DZ_ICONS[cur] ? '<button type="button" class="dz-mq-x" data-k="nvIcClr" data-v="' + who + '" aria-label="Remove icon">×</button>' : '') + '<span class="dz-mq-cap">Icon</span></div>') +
         (noImg ? '' : '<div class="dz-mq-slotw"><button type="button" class="dz-mq-slot" data-k="nvImgPick" data-v="' + who + '" aria-label="' + (has ? 'Change image' : 'Add image') + '">' + (src ? '<img src="' + dzEsc(src) + '" alt="">' : '<span class="dz-mq-plus">' + (has ? '✓' : '+') + '</span>') + '</button>' +
         (has ? '<button type="button" class="dz-mq-x" data-k="nvImgDel" data-v="' + who + '" aria-label="Remove image">×</button>' : '') + '<span class="dz-mq-cap">Image</span></div>') + '</div>' +
         (has ? '<div class="dz-hint">The image is shown instead of the icon.</div>' : '');
@@ -25391,7 +25418,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       if (subs.length) h += '<div class="dz-hint" style="margin-top:.5rem">This link opens its dropdown, so it has no action of its own.</div>';
       else h += actFields(el);
       if (selIt === 'ann') return h;
-      h += dzSec(isCta ? 'Icon (the center button of Center action)' : 'Icon or image (shown in app tab designs, or with Show icons)', nvSlots('it', isCta));
+      // [2026-11-04 01:15 | stale-nav-text] changed: icon labels no longer mention Center action, app tab designs or Show icons (none of them exist any more)
+      h += dzSec(isCta ? 'Icon' : 'Icon or image', nvSlots('it', isCta));
       if (!isCta) h += nvImgOpts('it');
       return h;
     }
@@ -25462,7 +25490,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       if (!pv && nvStSub === 'p') pv = nvItems(block).filter(function(x) { return nvSubs(x).length; })[0] || null;
       if (pv && nvSubs(pv).length && !NV_NOSUB[d0]) { pv.setAttribute('data-sub-pv', '1'); block.setAttribute('data-nv-sub', '1'); }
       var items = nvItems(block), cta = nvCta(block), h = dzTab('Items', 'Nav bar items');
-      h += dzSec('Brand', '<input type="text" class="dz-input" data-k="nvBrand" value="' + dzEsc((block.querySelector('.blk-nv-bt') || { textContent: '' }).textContent) + '" maxlength="30"><div style="height:.5rem"></div>' + nvSlots('br')); h += nvImgOpts('br');
+      h += dzSec('Brand', '<input type="text" class="dz-input" data-k="nvBrand" value="' + dzEsc((block.querySelector('.blk-nv-bt') || { textContent: '' }).textContent) + '" maxlength="30"><div style="height:.5rem"></div>' + nvSlots('br', false, NV_BRANDIMG[d0]) + (NV_BRANDIMG[d0] ? '<div class="dz-hint">This design shows the brand as text. Only an image shows beside it.</div>' : '')); h += nvImgOpts('br');
       var annOn = dzGet(block, 'nvAnn', '0') === '1', ann = block.querySelector(':scope > .blk-nv-ann'), ao = selIt === 'ann';
       h += dzSec('Top strip', dzChips('nvAnn', [['0', 'Off'], ['1', 'On']], annOn ? '1' : '0') + (annOn && ann ? '<div style="height:.5rem"></div><div class="nv-row' + (ao ? ' nv-open' : '') + '"><button type="button" class="nv-main" data-k="nvSel" data-v="ann"><span class="nv-t">' + dzEsc(nvLabel(ann)) + '</span><span class="nv-s">' + dzEsc(nvActSummary(ann)) + '</span></button>' + (ao ? '<div class="nv-body">' + actEditor(ann, true) + '</div>' : '') + '</div>' : '') + '<div class="dz-hint">A slim announcement line above the bar.</div>');
       var rows = '';
@@ -25640,7 +25668,8 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
       if (k === 'op') { blockOpApply(block, v); return; }
       if (k === 'nvBrand') { var bt = block.querySelector('.blk-nv-bt'); if (bt) bt.textContent = v; return false; }
       if (k === 'nvIcOpen') { ret = { tab: dzCtl.tab(), top: dzCtl.top() }; dzCtl.nextTop = 0; iconFor = v; return; }
-      if (k === 'nvIcSet') { visT(iconFor).set(v); leaveIcons(); applyNavbar(block); return; }
+      // [2026-11-04 01:17 | nav-icon-shows] choosing an icon for a link or the button turns Link icons on, so the icon shows (it was hidden by default)
+      if (k === 'nvIcSet') { visT(iconFor).set(v); if (iconFor === 'it' && v !== 'none') block.dataset.nvIcons = '1'; leaveIcons(); applyNavbar(block); return; }
       if (k === 'nvIcClr') { visT(v).set('none'); applyNavbar(block); return; }
       var mIm = /^nvI([swc])_(it|br|mn|dg)$/.exec(k);
       if (mIm) {
@@ -25670,6 +25699,7 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
         if (!hostEl) return false;
         if (!pim) { pim = nvMkImg(); hostEl.appendChild(pim); }
         pim.setAttribute('data-nv-pend', '1');
+        if (v === 'it') block.dataset.nvIcons = '1'; // [2026-11-04 01:17 | nav-icon-shows] same for a picked link image
         picking = { im: pim, tab: dzCtl.tab(), top: dzCtl.top(), it: selIt, dg: selDg, sub: selSub };
         closeVariantSheet(true); return false;
       }
