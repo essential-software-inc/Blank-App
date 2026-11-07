@@ -7760,12 +7760,13 @@ body.nb-reduce-motion #einfo-dialog {animation:none}
       <button class="lg-find-btn" id="cterms-find-next" type="button" aria-label="Next match" disabled><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4,8 10,14 16,8"/></svg></button>
     </div>
     <div id="cterms-body">
-      <p><em>Effective 3 November 2026</em></p>
+      <p><em>Effective 7 November 2026</em></p>
       <p>Welcome to <strong>Bluebook</strong>! It&rsquo;s published by Essential Software (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using it, you agree to these terms, which are here to keep the app fair and safe for everyone. We've written them in plain language.</p>
       <h3>Who Can Use Bluebook</h3>
       <p>You need to be at least 13 to use Bluebook, or older if the rules where you live say so. If you're under 18, please read these terms with a parent or guardian and make sure they're OK with you using the app.</p>
       <h3>Responsible Use</h3>
       <p>Please use Bluebook kindly and follow the law. You agree to use it only for things that are legal, and not to create, store, or export content that is illegal, harmful, threatening, abusive, untrue and damaging to someone's reputation, or that breaks someone else's rights. This applies with extra weight to anything you publish (see below).</p>
+      <p>Some things aren't allowed anywhere in Bluebook. Please don't publish, share or send nudity or sexual content, or real photos or videos that show graphic violence. This covers published pages, stories, comments, team chats (including images and voice messages) and profile pictures. If we find something like this, or someone reports it and we agree, we may remove it and suspend the account that posted it.</p>
       <h3>Your Content</h3>
       <p>Pages you build are stored on your device. If you sign in with Google, they're also backed up to our servers so you can restore them on another device. Your "All my notes" switches from Settings are backed up the same way. Without an account, your content lives only on your device: we have no copy and can't recover it if it's lost. Signing in, or keeping your own backups, is how you protect it.</p>
       <h3>Your Account</h3>
@@ -18620,6 +18621,81 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
      ===================================================================== */
 
   /* =====================================================================
+     SESSION 2026-11-07 17:05 | topics: legal-page | AI: Claude (app) | Privacy, Terms and Delete Your Account served by the Worker, so Play does not need a separate site
+       Start state
+         index_1.js (Worker) with the welcome page at GET /, and index.html (the same text on a separate public page). The Play listing needs a Privacy Policy address and an account deletion address.
+       Work done
+         New page GET /legal (HEAD too) in the welcome page's look: blue header, Inter font, light and dark, pill links to the three parts, a blue footer, and a white floating button with Back to top plus a jump to the next part (same white round look and pinch-zoom fix as the welcome page button). [2026-11-07 17:05 | legal-page]
+         The two documents are read from legal_docs (what an admin published) and fall back to LEGAL_DEFAULTS, so the page always shows what the app shows; if the database fails the built-in text is shown. The delete part is fixed text in the Worker (same words as index.html).
+         Welcome page footer now links to Privacy Policy, Consumer Terms and Delete your account. 'legal' added to RESERVED_SLUGS.
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing.
+       Found
+         index.html is no longer needed for Play. It still works as a separate copy, so remember it will not follow an admin Legal editor change.
+       Important details
+         One page with three anchors (#privacy, #terms, #delete-account) rather than three addresses, so only one slug (legal) is reserved. If someone already owns the address legal, that page is now hidden behind this one. The page's inline script is allowed by hash in LEGAL_PAGE_HEADERS; if LEGAL_PAGE_SCRIPT changes the hash must be recomputed.
+       Removed
+         Nothing.
+       Untested
+         Rendered locally on a phone-sized screen in light and dark, CSP hash checked, database-failure fallback checked. Not deployed. After deploying, open my-site.name/legal and the three links from the welcome page, and tap the floating button.
+       Depends on
+         Deploy index_1.js. Play Console: Privacy policy = https://my-site.name/legal#privacy; Account deletion = https://my-site.name/legal#delete-account.
+       Final state
+         my-site.name/legal serves Privacy, Terms and Delete Your Account in the welcome page's look.
+       Next
+         Paste the two addresses in Play Console.
+
+     SESSION 2026-11-07 12:18 | topics: delete-account | AI: Claude (app) | Account deletion page for the Play Data safety form
+       Start state
+         index.html (public Privacy and Terms page). The Privacy text says how to delete an account in the app but there was no web page for it, which Google Play asks for.
+       Work done
+         New part Delete Your Account at the end of index.html, linked from the top (Delete your account): in the app, by email if the app is gone, what happens in the 30 days, what is deleted and what stays. [2026-11-07 12:18 | delete-account]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing.
+       Found
+         Admin can already start and cancel a deletion for an account (Delete account in the audit list), so the by-email route is real.
+       Important details
+         The wording follows the Privacy Policy deletion paragraph (30 days, up to a day longer, sign back in to cancel, chat texts stay without a name, pages kept about 30 days, daily record about 800 days written as about 26 months). [2026-11-07 12:20 | delete-account] changed: cancelling by signing in is said only for an in-app delete; an emailed request (the admin delete suspends the account, and sign-in refuses a suspended account) is cancelled by writing to us, and the admin presses Cancel deletion. Not added to the app or LEGAL_DEFAULTS: it is only on the public page. The Privacy and Terms text is unchanged.
+       Removed
+         Nothing.
+       Untested
+         Not opened in a browser. The by-email step needs someone to read essentialsoftware.support@gmail.com and use the admin delete.
+       Depends on
+         Deploy index.html. Use its address with #delete-account in the Play Console account deletion field.
+       Final state
+         The public page has Privacy, Terms and Delete Your Account.
+       Next
+         Paste the page address in Play Console.
+
+     SESSION 2026-11-07 11:55 | topics: verify-label, terms-fab-top | AI: Claude (app) | Audit label for verify; Back to top on the Terms page button
+       Start state
+         index_1.js (Worker), index.html (public Terms page), index-demo.html. The demo admin matched the Worker's admin page except the verify audit label and the first date in Overview.
+       Work done
+         Worker: ACT_LBL now has verify: Account verified, as in the demo. [2026-11-07 11:55 | verify-label]
+         Public Terms page (index.html): the floating button is one capsule with a small up arrow (shows after scrolling) joined to the jump, and its text is now Terms or Privacy. [2026-11-07 11:55 | terms-fab-top]
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         Nothing.
+       Found
+         The Overview start date differs on purpose: the Worker says 30 Sep 2026, the demo 1 Jan 2025 (its sample data). Left alone.
+       Important details
+         Compared the admin CSS, markup and script of the Worker and the demo: same apart from the title, the prefilled token and the two lines above.
+       Removed
+         Nothing.
+       Untested
+         Not run. Open admin Audit after a verify and check the label. Open the Terms page, scroll, and check the arrow and the Terms or Privacy button.
+       Depends on
+         Deploy the Worker (index_1.js) and the public page (index.html). Privacy, Terms, LEGAL_DEFAULTS and TECH_NOTES untouched.
+       Final state
+         Worker and demo agree on the verify label. The public page button has Back to top.
+       Next
+         Nothing.
+
      SESSION LOG   [search: SESSION LOG]   Newest first. Times are WAT (Africa/Lagos, UTC+1).
 
      TOPICS
@@ -18662,6 +18738,36 @@ img.blk-nv-img[data-is="square"]{border-radius:0}
          nav-hint-fix       the image hint no longer says it replaces an icon in designs that have no brand icon slot (this app)
          admin-verify       Verify an account in admin Tools: an admin gives an account its verified name and tick straight from its author ID, after checking its display name (worker index.js)
          coc-update         the Admin Code of Conduct covers Verify an account, and its longer lines are shorter (worker index.js)
+         content-rule       the Consumer Terms (Responsible Use) say nudity, sexual content and real graphic violence are not allowed; Terms date 7 November 2026 (app, Worker LEGAL_DEFAULTS, public page, demo)
+         verify-label       the admin Audit list shows Account verified for the verify action (worker index.js)
+         terms-fab-top      the floating button on the public Terms page has a small Back to top arrow, and reads just Terms / Privacy (index.html)
+         delete-account     a Delete Your Account part on the public Privacy and Terms page (index.html), the web address for Google Play's Data safety form
+         legal-page         the Worker page GET /legal at my-site.name: Privacy Policy, Consumer Terms and Delete Your Account in the welcome page's look (worker index.js)
+
+     SESSION 2026-11-07 10:33 | topics: content-rule | AI: Claude (app) | Terms: say what is not allowed, so the Play content rating answers are true
+       Start state
+         Newest uploads: webapp.html, index_1.js (Worker), index.html (public Privacy and Terms page) and index-demo.html. App cterms-body and LEGAL_DEFAULTS read the same (32743 characters) before the change. The demo's built-in copy was older (Effective 1 November 2026, shorter) and did not match.
+       Work done
+         One paragraph added at the end of Responsible Use in Terms: no nudity or sexual content, no real photos or videos of graphic violence, covering pages, stories, comments, team chats (images and voice messages) and profile pictures; we may remove it and suspend the account. Terms date now 7 November 2026 (Privacy date unchanged). [2026-11-07 10:33 | content-rule]
+         Same words put in four places: cterms-body here, LEGAL_DEFAULTS in the Worker, the Terms on the public page, and the demo's built-in copy (the whole Privacy and Terms copy in the demo was replaced with the Worker's, so it now matches).
+       Improvements
+         Nothing beyond the task.
+       Fixed
+         The demo's built-in Privacy and Terms were out of date; now the same as the Worker.
+       Found
+         If a version was published from the admin Legal editor, people see that one, so the same paragraph must be published there too.
+       Important details
+         The paragraph sits in Responsible Use because the chat, comments, stories, polls, text boxes and payments sections already point to that section. Rejected: a new section, which would need a pointer from each of those.
+       Removed
+         Nothing.
+       Untested
+         Not run in the app. Open Settings > Consumer terms and check the new paragraph and the date. Publishing from the admin Legal editor was not done.
+       Depends on
+         Deploy the new Worker (index_1.js) and the public page (index.html). Privacy, TECH_NOTES untouched (no technical detail changed). Compared the Terms in the app, the Worker, the public page and the demo after the edit (33151 characters of text, identical), and the Privacy copies too (identical).
+       Final state
+         All four copies of the Terms read the same. Play content rating answers (no nudity, no graphic violence) now match the Terms.
+       Next
+         Publish the same words from the admin Legal editor if a version was published there. Then submit the content rating.
 
      SESSION 2026-11-04 19:29 | topics: coc-update | AI: Claude (app) | Admin Code of Conduct: add Verify an account, shorten long lines
        Start state
